@@ -60,7 +60,7 @@ defmodule ProductiveWorkgroups.MixProject do
       {:telemetry_poller, "~> 1.1"},
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.4"},
-      {:dns_cluster, "~> 0.1.3"},
+      {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.6"},
 
       # Testing
