@@ -33,7 +33,9 @@
       "Bash(wsl --list:*)",
       "Bash(scoop --version:*)",
       "Bash(wsl -d docker-desktop -e sh -c:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git rm:*)",
+      "Bash(git stash:*)"
     ]
   }
 }

@@ -546,9 +546,9 @@ defmodule ProductiveWorkgroupsWeb.CoreComponents do
   """
   def translate_error({msg, opts}) do
     if count = opts[:count] do
-      ProductiveWorkgroupsWeb.Gettext.dngettext("errors", msg, msg, count, opts)
+      Gettext.dngettext(ProductiveWorkgroupsWeb.Gettext, "errors", msg, msg, count, opts)
     else
-      ProductiveWorkgroupsWeb.Gettext.dgettext("errors", msg, opts)
+      Gettext.dgettext(ProductiveWorkgroupsWeb.Gettext, "errors", msg, opts)
     end
   end
 
