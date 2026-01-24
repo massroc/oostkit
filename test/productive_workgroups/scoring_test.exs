@@ -65,7 +65,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert score2.value == -2
     end
 
-    test "submit_score/4 validates balance scale range", %{session: session, participant: participant} do
+    test "submit_score/4 validates balance scale range", %{
+      session: session,
+      participant: participant
+    } do
       # Balance scale Q1 is -5 to 5
       assert {:ok, _} = Scoring.submit_score(session, participant, 0, -5)
       assert {:ok, _} = Scoring.submit_score(session, participant, 0, 5)
@@ -75,7 +78,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert "must be between -5 and 5" in errors_on(changeset).value
     end
 
-    test "submit_score/4 validates maximal scale range", %{session: session, participant: participant} do
+    test "submit_score/4 validates maximal scale range", %{
+      session: session,
+      participant: participant
+    } do
       # Maximal scale Q2 is 0 to 10
       assert {:ok, _} = Scoring.submit_score(session, participant, 1, 0)
       assert {:ok, _} = Scoring.submit_score(session, participant, 1, 10)
@@ -94,7 +100,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert Scoring.get_score(session, participant, 99) == nil
     end
 
-    test "list_scores_for_question/2 returns all scores", %{session: session, participant: participant} do
+    test "list_scores_for_question/2 returns all scores", %{
+      session: session,
+      participant: participant
+    } do
       {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
 
       {:ok, _} = Scoring.submit_score(session, participant, 0, 3)
@@ -104,7 +113,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert length(scores) == 2
     end
 
-    test "reveal_scores/2 marks all scores as revealed", %{session: session, participant: participant} do
+    test "reveal_scores/2 marks all scores as revealed", %{
+      session: session,
+      participant: participant
+    } do
       {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
 
       {:ok, _} = Scoring.submit_score(session, participant, 0, 3)
@@ -116,7 +128,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert Enum.all?(scores, & &1.revealed)
     end
 
-    test "all_scored?/2 checks if all active participants scored", %{session: session, participant: participant} do
+    test "all_scored?/2 checks if all active participants scored", %{
+      session: session,
+      participant: participant
+    } do
       {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
 
       refute Scoring.all_scored?(session, 0)
@@ -166,7 +181,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       %{session: session, participants: [p1, p2, p3]}
     end
 
-    test "calculate_average/2 computes mean score", %{session: session, participants: [p1, p2, p3]} do
+    test "calculate_average/2 computes mean score", %{
+      session: session,
+      participants: [p1, p2, p3]
+    } do
       {:ok, _} = Scoring.submit_score(session, p1, 0, 3)
       {:ok, _} = Scoring.submit_score(session, p2, 0, 0)
       {:ok, _} = Scoring.submit_score(session, p3, 0, -3)
@@ -178,7 +196,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert Scoring.calculate_average(session, 0) == nil
     end
 
-    test "calculate_spread/2 computes min and max", %{session: session, participants: [p1, p2, p3]} do
+    test "calculate_spread/2 computes min and max", %{
+      session: session,
+      participants: [p1, p2, p3]
+    } do
       {:ok, _} = Scoring.submit_score(session, p1, 0, 3)
       {:ok, _} = Scoring.submit_score(session, p2, 0, 0)
       {:ok, _} = Scoring.submit_score(session, p3, 0, -3)
@@ -190,7 +211,10 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert Scoring.calculate_spread(session, 0) == nil
     end
 
-    test "get_score_summary/2 returns comprehensive summary", %{session: session, participants: [p1, p2, p3]} do
+    test "get_score_summary/2 returns comprehensive summary", %{
+      session: session,
+      participants: [p1, p2, p3]
+    } do
       {:ok, _} = Scoring.submit_score(session, p1, 0, 4)
       {:ok, _} = Scoring.submit_score(session, p2, 0, 2)
       {:ok, _} = Scoring.submit_score(session, p3, 0, 0)

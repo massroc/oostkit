@@ -254,7 +254,10 @@ defmodule ProductiveWorkgroups.Sessions do
 
       existing ->
         existing
-        |> Participant.changeset(%{name: name, last_seen_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+        |> Participant.changeset(%{
+          name: name,
+          last_seen_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        })
         |> Repo.update()
     end
   end

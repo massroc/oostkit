@@ -23,7 +23,9 @@ defmodule ProductiveWorkgroupsWeb.FeatureCase do
   end
 
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(ProductiveWorkgroups.Repo, shared: not tags[:async])
+    pid =
+      Ecto.Adapters.SQL.Sandbox.start_owner!(ProductiveWorkgroups.Repo, shared: not tags[:async])
+
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
     metadata = Phoenix.Ecto.SQL.Sandbox.metadata_for(ProductiveWorkgroups.Repo, pid)

@@ -49,7 +49,10 @@ defmodule ProductiveWorkgroups.NotesTest do
 
     test "list_notes_for_question/2 returns notes for a specific question", %{session: session} do
       {:ok, _n1} = Notes.create_note(session, 0, %{content: "Note for Q1", author_name: "Alice"})
-      {:ok, _n2} = Notes.create_note(session, 0, %{content: "Another note for Q1", author_name: "Bob"})
+
+      {:ok, _n2} =
+        Notes.create_note(session, 0, %{content: "Another note for Q1", author_name: "Bob"})
+
       {:ok, _n3} = Notes.create_note(session, 1, %{content: "Note for Q2", author_name: "Carol"})
 
       notes = Notes.list_notes_for_question(session, 0)
@@ -143,7 +146,9 @@ defmodule ProductiveWorkgroups.NotesTest do
       assert "can't be blank" in errors_on(changeset).description
     end
 
-    test "list_actions_for_question/2 returns actions for a specific question", %{session: session} do
+    test "list_actions_for_question/2 returns actions for a specific question", %{
+      session: session
+    } do
       {:ok, _} = Notes.create_action(session, 0, %{description: "Action for Q1"})
       {:ok, _} = Notes.create_action(session, 0, %{description: "Another action for Q1"})
       {:ok, _} = Notes.create_action(session, 1, %{description: "Action for Q2"})

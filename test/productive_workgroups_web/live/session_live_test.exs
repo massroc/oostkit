@@ -162,7 +162,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       assert to == "/session/#{session.code}/join"
     end
 
-    test "renders lobby phase for participants", %{conn: conn, session: session, participant: participant} do
+    test "renders lobby phase for participants", %{
+      conn: conn,
+      session: session,
+      participant: participant
+    } do
       # Set the browser token in the session
       conn =
         conn
@@ -175,7 +179,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       assert html =~ "Alice"
     end
 
-    test "shows participant list in lobby", %{conn: conn, session: session, participant: participant} do
+    test "shows participant list in lobby", %{
+      conn: conn,
+      session: session,
+      participant: participant
+    } do
       # Add another participant
       {:ok, _p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
 

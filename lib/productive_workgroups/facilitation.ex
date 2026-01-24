@@ -16,10 +16,14 @@ defmodule ProductiveWorkgroups.Facilitation do
   ## Suggested Durations (in seconds)
 
   @default_durations %{
-    "intro" => 600,      # 10 minutes
-    "question" => 900,   # 15 minutes per question
-    "summary" => 600,    # 10 minutes
-    "actions" => 1200    # 20 minutes
+    # 10 minutes
+    "intro" => 600,
+    # 15 minutes per question
+    "question" => 900,
+    # 10 minutes
+    "summary" => 600,
+    # 20 minutes
+    "actions" => 1200
   }
 
   ## Timer Management
@@ -155,14 +159,15 @@ defmodule ProductiveWorkgroups.Facilitation do
 
   def suggested_duration("question_" <> _), do: @default_durations["question"]
 
-  def suggested_duration(_), do: 300  # 5 minute default
+  # 5 minute default
+  def suggested_duration(_), do: 300
 
   @doc """
   Returns the total suggested duration for a complete workshop.
   """
   def total_suggested_duration(num_questions) do
     @default_durations["intro"] +
-      (num_questions * @default_durations["question"]) +
+      num_questions * @default_durations["question"] +
       @default_durations["summary"] +
       @default_durations["actions"]
   end

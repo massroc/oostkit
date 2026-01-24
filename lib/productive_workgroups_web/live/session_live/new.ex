@@ -10,7 +10,10 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.New do
   def mount(_params, _session, socket) do
     template = Workshops.get_template_by_slug("six-criteria")
 
-    changeset = session_changeset(%{planned_duration_minutes: template && template.default_duration_minutes})
+    changeset =
+      session_changeset(%{
+        planned_duration_minutes: template && template.default_duration_minutes
+      })
 
     {:ok,
      socket
@@ -58,7 +61,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.New do
       <div class="max-w-md w-full">
         <.link navigate={~p"/"} class="text-gray-400 hover:text-white mb-8 inline-flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to Home
         </.link>

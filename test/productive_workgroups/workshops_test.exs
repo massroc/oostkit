@@ -76,7 +76,10 @@ defmodule ProductiveWorkgroups.WorkshopsTest do
       scale_min: -5,
       scale_max: 5,
       optimal_value: 0,
-      discussion_prompts: ["What aspects give you the most freedom?", "Where do you feel constrained?"],
+      discussion_prompts: [
+        "What aspects give you the most freedom?",
+        "Where do you feel constrained?"
+      ],
       scoring_guidance: "Consider your day-to-day work decisions."
     }
 
@@ -127,9 +130,14 @@ defmodule ProductiveWorkgroups.WorkshopsTest do
     end
 
     test "list_questions/1 returns questions for a template in order", %{template: template} do
-      {:ok, _q2} = Workshops.create_question(template, %{@valid_question_attrs | index: 1, title: "Q2"})
-      {:ok, _q1} = Workshops.create_question(template, %{@valid_question_attrs | index: 0, title: "Q1"})
-      {:ok, _q3} = Workshops.create_question(template, %{@valid_question_attrs | index: 2, title: "Q3"})
+      {:ok, _q2} =
+        Workshops.create_question(template, %{@valid_question_attrs | index: 1, title: "Q2"})
+
+      {:ok, _q1} =
+        Workshops.create_question(template, %{@valid_question_attrs | index: 0, title: "Q1"})
+
+      {:ok, _q3} =
+        Workshops.create_question(template, %{@valid_question_attrs | index: 2, title: "Q3"})
 
       questions = Workshops.list_questions(template)
       assert length(questions) == 3
@@ -149,7 +157,9 @@ defmodule ProductiveWorkgroups.WorkshopsTest do
       assert Workshops.count_questions(template) == 0
 
       {:ok, _} = Workshops.create_question(template, %{@valid_question_attrs | index: 0})
-      {:ok, _} = Workshops.create_question(template, %{@valid_question_attrs | index: 1, title: "Q2"})
+
+      {:ok, _} =
+        Workshops.create_question(template, %{@valid_question_attrs | index: 1, title: "Q2"})
 
       assert Workshops.count_questions(template) == 2
     end

@@ -75,7 +75,9 @@ defmodule ProductiveWorkgroups.SessionsPubSubTest do
       assert received.is_ready == true
     end
 
-    test "update_participant_status broadcasts participant_left when status is dropped", %{session: session} do
+    test "update_participant_status broadcasts participant_left when status is dropped", %{
+      session: session
+    } do
       {:ok, participant} = Sessions.join_session(session, "Charlie", Ecto.UUID.generate())
       Sessions.subscribe(session)
 
@@ -85,7 +87,9 @@ defmodule ProductiveWorkgroups.SessionsPubSubTest do
       assert participant_id == participant.id
     end
 
-    test "update_participant_status broadcasts participant_updated for other statuses", %{session: session} do
+    test "update_participant_status broadcasts participant_updated for other statuses", %{
+      session: session
+    } do
       {:ok, participant} = Sessions.join_session(session, "Diana", Ecto.UUID.generate())
       Sessions.subscribe(session)
 

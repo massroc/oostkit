@@ -86,7 +86,13 @@ defmodule ProductiveWorkgroups.Sessions.Session do
       )
 
     session
-    |> cast(changes, [:state, :started_at, :completed_at, :current_question_index, :last_activity_at])
+    |> cast(changes, [
+      :state,
+      :started_at,
+      :completed_at,
+      :current_question_index,
+      :last_activity_at
+    ])
     |> validate_inclusion(:state, @states)
   end
 

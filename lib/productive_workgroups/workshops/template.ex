@@ -32,7 +32,9 @@ defmodule ProductiveWorkgroups.Workshops.Template do
     |> validate_required(@required_fields)
     |> validate_length(:name, min: 1, max: 255)
     |> validate_length(:slug, min: 1, max: 100)
-    |> validate_format(:slug, ~r/^[a-z0-9-]+$/, message: "must only contain lowercase letters, numbers, and hyphens")
+    |> validate_format(:slug, ~r/^[a-z0-9-]+$/,
+      message: "must only contain lowercase letters, numbers, and hyphens"
+    )
     |> validate_number(:default_duration_minutes, greater_than: 0)
     |> unique_constraint(:slug)
   end

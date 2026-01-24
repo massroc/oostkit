@@ -177,7 +177,11 @@ defmodule ProductiveWorkgroups.Scoring do
         title: question.title,
         scale_type: question.scale_type,
         optimal_value: question.optimal_value,
-        color: if(summary.average, do: traffic_light_color(question.scale_type, summary.average, question.optimal_value), else: nil)
+        color:
+          if(summary.average,
+            do: traffic_light_color(question.scale_type, summary.average, question.optimal_value),
+            else: nil
+          )
       })
     end)
   end

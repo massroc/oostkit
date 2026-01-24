@@ -50,7 +50,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Join do
       <div class="max-w-md w-full">
         <.link navigate={~p"/"} class="text-gray-400 hover:text-white mb-8 inline-flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to Home
         </.link>
@@ -62,7 +67,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Join do
           Session code: <span class="font-mono text-white font-bold">{@session.code}</span>
         </p>
 
-        <form id="join-form" action={~p"/session/#{@session.code}/join"} method="post" class="space-y-6">
+        <form
+          id="join-form"
+          action={~p"/session/#{@session.code}/join"}
+          method="post"
+          class="space-y-6"
+        >
           <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
           <div>
             <label for="participant_name" class="block text-sm font-medium text-gray-300 mb-2">

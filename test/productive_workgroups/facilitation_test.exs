@@ -141,7 +141,8 @@ defmodule ProductiveWorkgroups.FacilitationTest do
 
       {:ok, result} = Facilitation.get_or_create_timer(session, "intro", 600)
       assert result.id == timer.id
-      assert result.duration_seconds == 300  # Original, not 600
+      # Original, not 600
+      assert result.duration_seconds == 300
     end
 
     test "get_or_create_timer/3 creates new timer if not exists", %{session: session} do
@@ -212,11 +213,16 @@ defmodule ProductiveWorkgroups.FacilitationTest do
     end
 
     test "suggested_duration/1 returns default durations in seconds" do
-      assert Facilitation.suggested_duration("intro") == 600  # 10 minutes
-      assert Facilitation.suggested_duration("question_0") == 900  # 15 minutes per question
-      assert Facilitation.suggested_duration("summary") == 600  # 10 minutes
-      assert Facilitation.suggested_duration("actions") == 1200  # 20 minutes
-      assert Facilitation.suggested_duration("unknown") == 300  # 5 minutes default
+      # 10 minutes
+      assert Facilitation.suggested_duration("intro") == 600
+      # 15 minutes per question
+      assert Facilitation.suggested_duration("question_0") == 900
+      # 10 minutes
+      assert Facilitation.suggested_duration("summary") == 600
+      # 20 minutes
+      assert Facilitation.suggested_duration("actions") == 1200
+      # 5 minutes default
+      assert Facilitation.suggested_duration("unknown") == 300
     end
   end
 end

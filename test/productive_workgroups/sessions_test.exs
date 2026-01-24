@@ -251,7 +251,9 @@ defmodule ProductiveWorkgroups.SessionsTest do
       assert Enum.all?(participants, fn p -> p.is_ready == false end)
     end
 
-    test "all_participants_ready?/1 checks if all active participants are ready", %{session: session} do
+    test "all_participants_ready?/1 checks if all active participants are ready", %{
+      session: session
+    } do
       {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
       {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
 

@@ -40,7 +40,14 @@ defmodule ProductiveWorkgroups.Facilitation.Timer do
   @doc false
   def changeset(timer, attrs) do
     timer
-    |> cast(attrs, [:phase, :duration_seconds, :remaining_seconds, :status, :started_at, :paused_at])
+    |> cast(attrs, [
+      :phase,
+      :duration_seconds,
+      :remaining_seconds,
+      :status,
+      :started_at,
+      :paused_at
+    ])
     |> validate_required([:phase, :duration_seconds, :remaining_seconds])
     |> validate_inclusion(:status, @statuses)
     |> validate_number(:duration_seconds, greater_than: 0)
