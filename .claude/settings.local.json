@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:opensystemstheory.org)",
+      "WebFetch(domain:www.desirablefutures.group)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git remote:*)",
+      "Bash(elixir --version:*)",
+      "Bash(mix:*)",
+      "Bash(psql:*)",
+      "Bash(node:*)",
+      "Bash(npm --version)",
+      "Bash(docker:*)",
+      "Bash(flyctl version:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(export PATH=\"$HOME/.fly/bin:$PATH\")",
+      "Bash(flyctl auth login:*)",
+      "Bash(flyctl apps create:*)",
+      "Bash(flyctl postgres create:*)",
+      "Bash(flyctl postgres attach:*)",
+      "Bash(flyctl tokens create:*)",
+      "Bash(flyctl status:*)",
+      "Bash(flyctl secrets list:*)",
+      "Bash(gh run:*)",
+      "Bash(gh run view:*)",
+      "Bash(winget install:*)",
+      "Bash(choco install:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(wsl --list:*)",
+      "Bash(scoop --version:*)",
+      "Bash(wsl -d docker-desktop -e sh -c:*)",
+      "Bash(git fetch:*)"
+    ]
+  }
+}
