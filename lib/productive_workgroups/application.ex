@@ -16,7 +16,8 @@ defmodule ProductiveWorkgroups.Application do
     children = [
       ProductiveWorkgroupsWeb.Telemetry,
       ProductiveWorkgroups.Repo,
-      {DNSCluster, query: Application.get_env(:productive_workgroups, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:productive_workgroups, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ProductiveWorkgroups.PubSub},
       # Presence for tracking participants in sessions
       ProductiveWorkgroupsWeb.Presence,

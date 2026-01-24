@@ -22,7 +22,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Join do
           Join Workshop
         </h1>
         <p class="text-gray-400 text-center">
-          Session code: <span class="font-mono text-white"><%= @session_code %></span>
+          Session code: <span class="font-mono text-white">{@session_code}</span>
         </p>
         <p class="text-gray-400 text-center mt-4">
           Join form coming soon...

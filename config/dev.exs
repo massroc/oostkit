@@ -18,7 +18,8 @@ config :productive_workgroups, ProductiveWorkgroupsWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "dev_secret_key_base_that_is_at_least_64_characters_long_for_development_only",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:productive_workgroups, ~w(--sourcemap=inline --watch)]},
+    esbuild:
+      {Esbuild, :install_and_run, [:productive_workgroups, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:productive_workgroups, ~w(--watch)]}
   ]
 
