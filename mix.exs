@@ -11,6 +11,10 @@ defmodule ProductiveWorkgroups.MixProject do
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_add_apps: [:mix]
+      ],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
