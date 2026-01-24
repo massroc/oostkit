@@ -59,8 +59,13 @@ jobs:
       - name: Check formatting
         run: mix format --check-formatted
 
+      - name: Show versions
+        run: |
+          elixir --version
+          mix deps | head -30
+
       - name: Compile
-        run: mix compile
+        run: mix compile --force --all-warnings
 
       - name: Run Credo
         run: mix credo --strict
