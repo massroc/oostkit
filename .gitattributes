@@ -1,0 +1,27 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Elixir files should always use LF
+*.ex text eol=lf
+*.exs text eol=lf
+*.eex text eol=lf
+*.heex text eol=lf
+*.leex text eol=lf
+
+# Config files
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
+
+# Scripts
+*.sh text eol=lf
+
+# Keep binaries as-is
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
