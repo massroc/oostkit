@@ -5,6 +5,11 @@
   router: "lib/productive_workgroups_web/router.ex",
   exit: "low",
   format: "txt",
-  ignore: [],
+  ignore: [
+    # CSP is handled at the CDN/reverse proxy level (Fly.io)
+    "Config.CSP",
+    # HTTPS is handled by Fly.io (TLS termination at edge)
+    "Config.HTTPS"
+  ],
   ignore_files: []
 ]
