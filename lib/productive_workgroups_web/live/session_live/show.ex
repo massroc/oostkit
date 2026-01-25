@@ -182,11 +182,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   def handle_event("select_score", params, socket) do
     score = params["score"] || params["value"]
 
-    int_value = cond do
-      is_integer(score) -> score
-      is_binary(score) and score != "" -> String.to_integer(score)
-      true -> nil
-    end
+    int_value =
+      cond do
+        is_integer(score) -> score
+        is_binary(score) and score != "" -> String.to_integer(score)
+        true -> nil
+      end
 
     if int_value do
       {:noreply, assign(socket, selected_value: int_value)}
@@ -643,8 +644,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             />
           </div>
         </div>
-
-        <!-- Question card -->
+        
+    <!-- Question card -->
         <div class="bg-gray-800 rounded-lg p-6 mb-6">
           <div class="text-sm text-green-400 mb-2">{@current_question.criterion_name}</div>
           <h1 class="text-2xl font-bold text-white mb-4">{@current_question.title}</h1>
@@ -728,7 +729,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
               end
             ]}
           >
-            <%= if v > 0 do %>+{v}<% else %>{v}<% end %>
+            <%= if v > 0 do %>
+              +{v}
+            <% else %>
+              {v}
+            <% end %>
           </button>
         <% end %>
       </div>
@@ -797,8 +802,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       <!-- Results summary -->
       <div class="bg-gray-800 rounded-lg p-6">
         <h2 class="text-lg font-semibold text-white mb-4">Results</h2>
-
-        <!-- Team average -->
+        
+    <!-- Team average -->
         <div class="text-center mb-6">
           <div class="text-sm text-gray-400 mb-1">Team Average</div>
           <div class={[
@@ -810,11 +815,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
               _ -> "text-gray-400"
             end
           ]}>
-            <%= if @current_question.scale_type == "balance" and @average > 0 do %>+<% end %>{@average}
+            <%= if @current_question.scale_type == "balance" and @average > 0 do %>
+              +
+            <% end %>
+            {@average}
           </div>
         </div>
-
-        <!-- Individual scores -->
+        
+    <!-- Individual scores -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <%= for score <- @all_scores do %>
             <div class={[
@@ -835,15 +843,18 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
                   _ -> "text-gray-400"
                 end
               ]}>
-                <%= if @current_question.scale_type == "balance" and score.value > 0 do %>+<% end %>{score.value}
+                <%= if @current_question.scale_type == "balance" and score.value > 0 do %>
+                  +
+                <% end %>
+                {score.value}
               </div>
               <div class="text-sm text-gray-400 truncate">{score.participant_name}</div>
             </div>
           <% end %>
         </div>
       </div>
-
-      <!-- Discussion prompts -->
+      
+    <!-- Discussion prompts -->
       <%= if length(@current_question.discussion_prompts) > 0 do %>
         <div class="bg-gray-800 rounded-lg p-6">
           <h2 class="text-lg font-semibold text-white mb-4">Discussion Prompts</h2>
@@ -857,8 +868,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </ul>
         </div>
       <% end %>
-
-      <!-- Ready / Next controls -->
+      
+    <!-- Ready / Next controls -->
       <div class="bg-gray-800 rounded-lg p-6">
         <%= if @participant.is_facilitator do %>
           <button
