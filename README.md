@@ -176,6 +176,61 @@ Set via Fly.io secrets:
 └── fly.toml                          # Fly.io configuration
 ```
 
+## Current Build Status
+
+### Completed
+
+- [x] Session creation with shareable code
+- [x] Join session via code (name entry)
+- [x] Waiting room / lobby with participant list
+- [x] Facilitator role and "Start Workshop" button
+- [x] Introduction phase (4 screens with navigation)
+- [x] Real-time participant sync via PubSub
+- [x] Database seeding for Six Criteria template
+- [x] Error handling for missing template
+
+### Outstanding Work
+
+#### Scoring Phase (Priority)
+- [ ] Display current question with explanation and scoring guidance
+- [ ] Scoring input (slider or buttons) for balance scale (-5 to +5)
+- [ ] Scoring input for maximal scale (0 to 10)
+- [ ] Hide individual scores until all participants submit
+- [ ] "Submit" button to lock in score
+- [ ] Score reveal with participant names
+- [ ] Traffic light color coding (green/amber/red)
+- [ ] Team average and spread visualization
+- [ ] Discussion prompts display
+- [ ] Notes capture per question
+- [ ] "Ready" button for all participants to advance
+- [ ] Mid-workshop transition screen (before question 5)
+
+#### Summary Phase
+- [ ] Overview of all 8 questions with scores
+- [ ] Traffic light indicators for each criterion
+- [ ] Pattern highlighting (strengths vs concerns)
+
+#### Actions Phase
+- [ ] Action item creation
+- [ ] Owner assignment per action
+- [ ] Link actions to specific questions (optional)
+
+#### Completed Phase
+- [ ] Final summary with notes and actions
+- [ ] Export options (CSV, PDF) - deferred to Phase 2
+
+#### Timer System
+- [ ] Countdown timer per section
+- [ ] Pacing indicator (on track/behind)
+- [ ] Time exceeded warnings
+- [ ] Pause/resume controls
+
+#### Additional Features
+- [ ] Facilitator Assistance button (contextual help)
+- [ ] Feedback button
+- [ ] Participant dropout handling (greyed out)
+- [ ] Late joiner as observer
+
 ## Documentation
 
 - [REQUIREMENTS.md](REQUIREMENTS.md) - Functional requirements

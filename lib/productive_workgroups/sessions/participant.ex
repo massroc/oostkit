@@ -23,6 +23,7 @@ defmodule ProductiveWorkgroups.Sessions.Participant do
     field :browser_token, Ecto.UUID
     field :status, :string, default: "active"
     field :is_ready, :boolean, default: false
+    field :is_facilitator, :boolean, default: false
     field :joined_at, :utc_datetime
     field :last_seen_at, :utc_datetime
 
@@ -39,7 +40,7 @@ defmodule ProductiveWorkgroups.Sessions.Participant do
   @doc false
   def changeset(participant, attrs) do
     participant
-    |> cast(attrs, [:name, :browser_token, :status, :is_ready, :joined_at, :last_seen_at])
+    |> cast(attrs, [:name, :browser_token, :status, :is_ready, :is_facilitator, :joined_at, :last_seen_at])
     |> validate_required([:name, :browser_token])
     |> validate_length(:name, min: 1, max: 100)
     |> validate_inclusion(:status, @statuses)

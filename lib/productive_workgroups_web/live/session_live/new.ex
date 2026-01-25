@@ -1,57 +1,34 @@
 defmodule ProductiveWorkgroupsWeb.SessionLive.New do
   @moduledoc """
-  LiveView for creating a new workshop session.
+  LiveView for creating a new workshop session as a facilitator.
   """
   use ProductiveWorkgroupsWeb, :live_view
 
-  alias ProductiveWorkgroups.{Workshops, Sessions}
+  alias ProductiveWorkgroups.Workshops
 
   @impl true
   def mount(_params, _session, socket) do
     template = Workshops.get_template_by_slug("six-criteria")
 
-    changeset =
-      session_changeset(%{
-        planned_duration_minutes: template && template.default_duration_minutes
-      })
-
     {:ok,
      socket
      |> assign(page_title: "Create Workshop")
      |> assign(template: template)
-     |> assign(form: to_form(changeset, as: :session))}
+     |> assign(facilitator_name: "")
+     |> assign(duration: "210")
+     |> assign(error: nil)}
   end
 
   @impl true
-  def handle_event("create_session", %{"session" => params}, socket) do
-    template = socket.assigns.template
+  def handle_event("validate", params, socket) do
+    name = params["facilitator_name"] || ""
+    duration = params["duration"] || "210"
 
-    case template do
-      nil ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Workshop template not found. Please contact support.")}
-
-      template ->
-        case Sessions.create_session(template, params) do
-          {:ok, session} ->
-            {:noreply,
-             socket
-             |> push_navigate(to: ~p"/session/#{session.code}/join")}
-
-          {:error, _changeset} ->
-            {:noreply,
-             socket
-             |> put_flash(:error, "Failed to create session. Please try again.")}
-        end
-    end
-  end
-
-  defp session_changeset(attrs) do
-    types = %{planned_duration_minutes: :integer}
-
-    {%{}, types}
-    |> Ecto.Changeset.cast(attrs, Map.keys(types))
+    {:noreply,
+     socket
+     |> assign(facilitator_name: name)
+     |> assign(duration: duration)
+     |> assign(error: nil)}
   end
 
   @impl true
@@ -75,40 +52,62 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.New do
           Create New Workshop
         </h1>
         <p class="text-gray-400 text-center mb-8">
-          Set up your Six Criteria workshop session
+          Set up your Six Criteria workshop and invite your team
         </p>
 
-        <.form for={@form} id="session-form" phx-submit="create_session" class="space-y-6">
+        <form action={~p"/session/create"} method="post" phx-change="validate" class="space-y-6">
+          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+
           <div>
-            <label for="planned_duration_minutes" class="block text-sm font-medium text-gray-300 mb-2">
+            <label for="facilitator_name" class="block text-sm font-medium text-gray-300 mb-2">
+              Your Name (Facilitator)
+            </label>
+            <input
+              type="text"
+              name="facilitator_name"
+              id="facilitator_name"
+              value={@facilitator_name}
+              placeholder="Enter your name"
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              autofocus
+              required
+            />
+          </div>
+
+          <div>
+            <label for="duration" class="block text-sm font-medium text-gray-300 mb-2">
               Planned Duration
             </label>
             <select
-              name="session[planned_duration_minutes]"
-              id="planned_duration_minutes"
+              name="duration"
+              id="duration"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="60">1 hour (Quick session)</option>
-              <option value="120">2 hours (Focused session)</option>
-              <option value="210" selected>3.5 hours (Recommended)</option>
-              <option value="240">4 hours (Half day)</option>
-              <option value="360">6 hours (Full day)</option>
+              <option value="60" selected={@duration == "60"}>1 hour (Quick session)</option>
+              <option value="120" selected={@duration == "120"}>2 hours (Focused session)</option>
+              <option value="210" selected={@duration == "210"}>3.5 hours (Recommended)</option>
+              <option value="240" selected={@duration == "240"}>4 hours (Half day)</option>
+              <option value="360" selected={@duration == "360"}>6 hours (Full day)</option>
             </select>
             <p class="mt-2 text-sm text-gray-500">
               Choose based on your team's experience. First-time teams should allow more time.
             </p>
           </div>
 
+          <%= if @error do %>
+            <p class="text-red-400 text-sm">{@error}</p>
+          <% end %>
+
           <button
             type="submit"
             class="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-lg"
           >
-            Start Workshop
+            Create Workshop
           </button>
-        </.form>
+        </form>
 
         <p class="text-gray-500 text-sm text-center mt-6">
-          After creating, you'll get a link to share with your team.
+          You'll get a code to share with your team so they can join.
         </p>
       </div>
     </div>

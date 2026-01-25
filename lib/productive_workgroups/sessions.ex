@@ -234,13 +234,23 @@ defmodule ProductiveWorkgroups.Sessions do
 
   If a participant with the same browser_token already exists,
   their name is updated and they are returned.
+
+  ## Options
+
+  - `:is_facilitator` - Set to true if this participant is the facilitator
   """
-  def join_session(%Session{} = session, name, browser_token) do
+  def join_session(%Session{} = session, name, browser_token, opts \\ []) do
+    is_facilitator = Keyword.get(opts, :is_facilitator, false)
+
     case get_participant(session, browser_token) do
       nil ->
         result =
           %Participant{}
-          |> Participant.join_changeset(session, %{name: name, browser_token: browser_token})
+          |> Participant.join_changeset(session, %{
+            name: name,
+            browser_token: browser_token,
+            is_facilitator: is_facilitator
+          })
           |> Repo.insert()
 
         case result do
@@ -260,6 +270,15 @@ defmodule ProductiveWorkgroups.Sessions do
         })
         |> Repo.update()
     end
+  end
+
+  @doc """
+  Gets the facilitator of a session.
+  """
+  def get_facilitator(%Session{} = session) do
+    Participant
+    |> where([p], p.session_id == ^session.id and p.is_facilitator == true)
+    |> Repo.one()
   end
 
   @doc """

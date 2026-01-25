@@ -35,31 +35,58 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       {:ok, _view, html} = live(conn, ~p"/session/new")
 
       assert html =~ "Create New Workshop"
-      assert html =~ "Start Workshop"
+      assert html =~ "Create Workshop"
+      assert html =~ "Your Name (Facilitator)"
+      assert html =~ "Planned Duration"
+    end
+  end
+
+  describe "SessionController.create" do
+    setup do
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Controller Create Test",
+          slug: "six-criteria",
+          version: "1.0.0",
+          default_duration_minutes: 210
+        })
+
+      %{template: template}
     end
 
-    test "creates a new session and redirects", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/session/new")
+    test "creates session and joins as facilitator", %{conn: conn} do
+      conn = post(conn, ~p"/session/create", %{facilitator_name: "Facilitator Jane", duration: "120"})
 
-      # Submit the form - this triggers a live redirect to the join page
-      assert {:error, {:live_redirect, %{to: to}}} =
-               view
-               |> form("#session-form", %{})
-               |> render_submit()
+      # Should redirect to the session page
+      assert to = redirected_to(conn)
+      assert to =~ ~r/\/session\/[A-Z0-9]+$/
 
-      # Verify the redirect path matches expected pattern
-      assert to =~ ~r/\/session\/[A-Z0-9]+\/join/
+      # Should have browser token
+      assert get_session(conn, :browser_token)
+
+      # Extract the code and verify participant is facilitator
+      [_, code] = Regex.run(~r/\/session\/([A-Z0-9]+)$/, to)
+      session = Sessions.get_session_by_code(code)
+      participant = Sessions.get_facilitator(session)
+      assert participant.name == "Facilitator Jane"
+      assert participant.is_facilitator == true
     end
 
-    test "creates session with custom duration", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/session/new")
+    test "requires a name to create session", %{conn: conn} do
+      conn = post(conn, ~p"/session/create", %{facilitator_name: "", duration: "210"})
 
-      assert {:error, {:live_redirect, %{to: to}}} =
-               view
-               |> form("#session-form", %{session: %{planned_duration_minutes: 120}})
-               |> render_submit()
+      assert redirected_to(conn) == "/session/new"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "name is required"
+    end
+  end
 
-      assert to =~ ~r/\/session\/[A-Z0-9]+\/join/
+  describe "SessionController.create without template" do
+    test "handles missing template gracefully", %{conn: conn} do
+      # No template setup - simulates missing seeds
+      conn = post(conn, ~p"/session/create", %{facilitator_name: "Test User", duration: "210"})
+
+      assert redirected_to(conn) == "/"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Workshop template not available"
     end
   end
 
@@ -205,6 +232,56 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
         live(conn, ~p"/session/BADCODE")
 
       assert flash["error"] =~ "Session not found"
+    end
+
+    test "shows Start Workshop button for facilitator", %{conn: conn, session: session} do
+      # Create a facilitator
+      facilitator_token = Ecto.UUID.generate()
+      {:ok, _facilitator} = Sessions.join_session(session, "Lead", facilitator_token, is_facilitator: true)
+
+      conn =
+        conn
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, facilitator_token)
+
+      {:ok, _view, html} = live(conn, ~p"/session/#{session.code}")
+
+      assert html =~ "Start Workshop"
+      assert html =~ "Facilitator"
+    end
+
+    test "does not show Start Workshop button for regular participant", %{
+      conn: conn,
+      session: session,
+      participant: participant
+    } do
+      conn =
+        conn
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, participant.browser_token)
+
+      {:ok, _view, html} = live(conn, ~p"/session/#{session.code}")
+
+      refute html =~ "Start Workshop"
+      assert html =~ "Waiting for the facilitator"
+    end
+
+    test "facilitator can start the workshop", %{conn: conn, session: session} do
+      facilitator_token = Ecto.UUID.generate()
+      {:ok, _facilitator} = Sessions.join_session(session, "Lead", facilitator_token, is_facilitator: true)
+
+      conn =
+        conn
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, facilitator_token)
+
+      {:ok, view, _html} = live(conn, ~p"/session/#{session.code}")
+
+      # Click Start Workshop
+      html = render_click(view, "start_workshop")
+
+      # Should transition to intro phase
+      assert html =~ "Welcome to the Six Criteria Workshop"
     end
   end
 end
