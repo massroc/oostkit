@@ -10,7 +10,7 @@ defmodule ProductiveWorkgroups.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader],
+      listeners: if(Mix.env() == :dev, do: [Phoenix.CodeReloader], else: []),
       test_coverage: [tool: ExCoveralls],
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
