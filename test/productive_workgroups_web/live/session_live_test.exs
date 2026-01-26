@@ -406,7 +406,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       # Verify note was deleted
       notes = Notes.list_notes_for_question(ctx.session, 0)
-      assert length(notes) == 0
+      assert notes == []
     end
   end
 

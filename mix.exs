@@ -13,7 +13,7 @@ defmodule ProductiveWorkgroups.MixProject do
       test_coverage: [tool: ExCoveralls],
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
-        plt_add_apps: [:mix]
+        plt_add_apps: [:mix, :ex_unit, :wallaby]
       ],
       preferred_cli_env: [
         coveralls: :test,
