@@ -1,6 +1,6 @@
 # Production Dockerfile for Fly.io deployment
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
-# instead of Alpine to avoid DNS://issues that often plague production.
+# Find eligible builder and runner images on Docker Hub. We use Ubuntu
+# instead of Alpine to avoid DNS issues that often plague production.
 #
 # https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
 # https://hub.docker.com/_/ubuntu?tab=tags
@@ -8,15 +8,15 @@
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bookworm-slim - for the release image
+#   - https://hub.docker.com/_/ubuntu?tab=tags - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
 
 ARG ELIXIR_VERSION=1.18.3
 ARG OTP_VERSION=27.2
-ARG DEBIAN_VERSION=bookworm-20241016-slim
+ARG UBUNTU_VERSION=jammy-20260109
 
-ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
-ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-ubuntu-${UBUNTU_VERSION}"
+ARG RUNNER_IMAGE="ubuntu:${UBUNTU_VERSION}"
 
 FROM ${BUILDER_IMAGE} as builder
 
