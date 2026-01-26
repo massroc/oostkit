@@ -4,6 +4,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   """
   use ProductiveWorkgroupsWeb, :live_view
 
+  alias ProductiveWorkgroups.Notes
   alias ProductiveWorkgroups.Scoring
   alias ProductiveWorkgroups.Sessions
   alias ProductiveWorkgroups.Workshops
@@ -49,6 +50,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
      |> assign(participant: participant)
      |> assign(participants: participants)
      |> assign(intro_step: 1)
+     |> assign(show_mid_transition: false)
+     |> assign(note_input: "")
      |> load_scoring_data(workshop_session, participant)}
   end
 
@@ -109,6 +112,18 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
     if session.state == "scoring" and session.current_question_index == question_index do
       {:noreply, load_scores(socket, session, question_index)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  # Handle note updates from other participants
+  @impl true
+  def handle_info({:note_updated, question_index}, socket) do
+    session = socket.assigns.session
+
+    if session.state == "scoring" and session.current_question_index == question_index do
+      {:noreply, load_notes(socket, session, question_index)}
     else
       {:noreply, socket}
     end
@@ -250,6 +265,75 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     end
   end
 
+  # Note handling events
+  @impl true
+  def handle_event("update_note_input", %{"value" => value}, socket) do
+    {:noreply, assign(socket, note_input: value)}
+  end
+
+  @impl true
+  def handle_event("add_note", _params, socket) do
+    content = String.trim(socket.assigns.note_input)
+
+    if content == "" do
+      {:noreply, socket}
+    else
+      session = socket.assigns.session
+      participant = socket.assigns.participant
+      question_index = session.current_question_index
+
+      attrs = %{content: content, author_name: participant.name}
+
+      case Notes.create_note(session, question_index, attrs) do
+        {:ok, _note} ->
+          broadcast_note_update(session, question_index)
+
+          {:noreply,
+           socket
+           |> assign(note_input: "")
+           |> load_notes(session, question_index)}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to add note")}
+      end
+    end
+  end
+
+  @impl true
+  def handle_event("delete_note", %{"id" => note_id}, socket) do
+    session = socket.assigns.session
+    question_index = session.current_question_index
+
+    note = Enum.find(socket.assigns.question_notes, &(&1.id == note_id))
+
+    if note do
+      case Notes.delete_note(note) do
+        {:ok, _} ->
+          broadcast_note_update(session, question_index)
+          {:noreply, load_notes(socket, session, question_index)}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to delete note")}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp broadcast_note_update(session, question_index) do
+    Phoenix.PubSub.broadcast(
+      ProductiveWorkgroups.PubSub,
+      Sessions.session_topic(session),
+      {:note_updated, question_index}
+    )
+  end
+
+  # Mid-workshop transition event
+  @impl true
+  def handle_event("continue_past_transition", _params, socket) do
+    {:noreply, assign(socket, show_mid_transition: false)}
+  end
+
   @impl true
   def handle_event("next_question", _params, socket) do
     advance_to_next_question(socket, socket.assigns.participant.is_facilitator)
@@ -279,12 +363,17 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   defp do_advance(socket, session, false) do
     participant = socket.assigns.participant
+    current_index = session.current_question_index
+
+    # Show mid-workshop transition when moving from question 4 (index 3) to question 5 (index 4)
+    show_transition = current_index == 3
 
     case Sessions.advance_question(session) do
       {:ok, updated_session} ->
         {:noreply,
          socket
          |> assign(session: updated_session)
+         |> assign(show_mid_transition: show_transition)
          |> load_scoring_data(updated_session, participant)}
 
       {:error, _} ->
@@ -309,6 +398,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(my_score: if(my_score, do: my_score.value, else: nil))
       |> assign(has_submitted: my_score != nil)
       |> load_scores(session, question_index)
+      |> load_notes(session, question_index)
     else
       socket
       |> assign(template: nil)
@@ -320,6 +410,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(scores_revealed: false)
       |> assign(score_count: 0)
       |> assign(active_participant_count: 0)
+      |> assign(question_notes: [])
     end
   end
 
@@ -349,6 +440,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     |> assign(scores_revealed: all_scored)
     |> assign(score_count: length(scores))
     |> assign(active_participant_count: active_count)
+  end
+
+  defp load_notes(socket, session, question_index) do
+    notes = Notes.list_notes_for_question(session, question_index)
+    assign(socket, question_notes: notes)
   end
 
   defp get_score_color(nil, _value), do: :gray
@@ -640,34 +736,83 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   defp render_scoring(assigns) do
     ~H"""
-    <div class="flex flex-col items-center min-h-screen px-4 py-8">
-      <div class="max-w-2xl w-full">
-        <!-- Progress indicator -->
-        <div class="mb-6">
-          <div class="flex justify-between items-center text-sm text-gray-400 mb-2">
-            <span>Question {@session.current_question_index + 1} of 8</span>
-            <span>{@score_count}/{@active_participant_count} submitted</span>
+    <%= if @show_mid_transition do %>
+      {render_mid_transition(assigns)}
+    <% else %>
+      <div class="flex flex-col items-center min-h-screen px-4 py-8">
+        <div class="max-w-2xl w-full">
+          <!-- Progress indicator -->
+          <div class="mb-6">
+            <div class="flex justify-between items-center text-sm text-gray-400 mb-2">
+              <span>Question {@session.current_question_index + 1} of 8</span>
+              <span>{@score_count}/{@active_participant_count} submitted</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+              <div
+                class="bg-green-500 h-2 rounded-full transition-all duration-300"
+                style={"width: #{(@session.current_question_index + 1) / 8 * 100}%"}
+              />
+            </div>
           </div>
-          <div class="w-full bg-gray-700 rounded-full h-2">
-            <div
-              class="bg-green-500 h-2 rounded-full transition-all duration-300"
-              style={"width: #{(@session.current_question_index + 1) / 8 * 100}%"}
-            />
-          </div>
-        </div>
-        
-    <!-- Question card -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <div class="text-sm text-green-400 mb-2">{@current_question.criterion_name}</div>
-          <h1 class="text-2xl font-bold text-white mb-4">{@current_question.title}</h1>
-          <p class="text-gray-300 whitespace-pre-line">{@current_question.explanation}</p>
-        </div>
 
-        <%= if @scores_revealed do %>
-          {render_score_results(assigns)}
-        <% else %>
-          {render_score_input(assigns)}
-        <% end %>
+      <!-- Question card -->
+          <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <div class="text-sm text-green-400 mb-2">{@current_question.criterion_name}</div>
+            <h1 class="text-2xl font-bold text-white mb-4">{@current_question.title}</h1>
+            <p class="text-gray-300 whitespace-pre-line">{@current_question.explanation}</p>
+          </div>
+
+          <%= if @scores_revealed do %>
+            {render_score_results(assigns)}
+          <% else %>
+            {render_score_input(assigns)}
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    """
+  end
+
+  defp render_mid_transition(assigns) do
+    ~H"""
+    <div class="flex flex-col items-center justify-center min-h-screen px-4">
+      <div class="max-w-2xl w-full text-center">
+        <div class="bg-gray-800 rounded-lg p-8">
+          <div class="text-6xl mb-4">🔄</div>
+          <h1 class="text-3xl font-bold text-white mb-6">New Scoring Scale Ahead</h1>
+
+          <div class="text-gray-300 space-y-4 text-lg text-left">
+            <p class="text-center">
+              Great progress! You've completed the first four questions.
+            </p>
+
+            <div class="bg-gray-700 rounded-lg p-6 my-6">
+              <p class="text-white font-semibold mb-3">
+                The next four questions use a different scale:
+              </p>
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-gray-400">0</span>
+                <span class="text-green-400 font-semibold text-xl">→</span>
+                <span class="text-green-400 font-semibold">10</span>
+              </div>
+              <ul class="space-y-2 text-gray-300">
+                <li>• For these, <span class="text-green-400 font-semibold">more is always better</span></li>
+                <li>• <span class="text-green-400 font-semibold">10 is optimal</span></li>
+              </ul>
+            </div>
+
+            <p class="text-gray-400 text-center">
+              These measure aspects of work where you can never have too much.
+            </p>
+          </div>
+
+          <button
+            phx-click="continue_past_transition"
+            class="mt-8 px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-lg"
+          >
+            Continue to Question 5 →
+          </button>
+        </div>
       </div>
     </div>
     """
@@ -875,7 +1020,61 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </ul>
         </div>
       <% end %>
-      
+
+      <!-- Notes capture -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">
+          Discussion Notes
+          <%= if length(@question_notes) > 0 do %>
+            <span class="text-sm font-normal text-gray-400">({length(@question_notes)})</span>
+          <% end %>
+        </h2>
+
+        <!-- Existing notes -->
+        <%= if length(@question_notes) > 0 do %>
+          <ul class="space-y-3 mb-4">
+            <%= for note <- @question_notes do %>
+              <li class="bg-gray-700 rounded-lg p-3">
+                <div class="flex justify-between items-start gap-2">
+                  <p class="text-gray-300 flex-1">{note.content}</p>
+                  <button
+                    type="button"
+                    phx-click="delete_note"
+                    phx-value-id={note.id}
+                    class="text-gray-500 hover:text-red-400 transition-colors text-sm"
+                    title="Delete note"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">— {note.author_name}</p>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+
+        <!-- Add note form -->
+        <form phx-submit="add_note" class="flex gap-2">
+          <input
+            type="text"
+            name="note"
+            value={@note_input}
+            phx-change="update_note_input"
+            placeholder="Capture a key discussion point..."
+            class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+          >
+            Add
+          </button>
+        </form>
+        <p class="text-xs text-gray-500 mt-2">
+          Notes are visible to all participants and saved with the session.
+        </p>
+      </div>
+
     <!-- Ready / Next controls -->
       <div class="bg-gray-800 rounded-lg p-6">
         <%= if @participant.is_facilitator do %>

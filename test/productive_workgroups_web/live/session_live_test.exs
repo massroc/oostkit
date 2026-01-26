@@ -2,7 +2,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
   use ProductiveWorkgroupsWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  alias ProductiveWorkgroups.{Sessions, Workshops}
+  alias ProductiveWorkgroups.{Notes, Scoring, Sessions, Workshops}
 
   describe "SessionLive.New" do
     setup do
@@ -287,6 +287,223 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       # Should transition to intro phase
       assert html =~ "Welcome to the Six Criteria Workshop"
+    end
+  end
+
+  describe "Notes capture in scoring phase" do
+    setup do
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Notes Test",
+          slug: "notes-test",
+          version: "1.0.0",
+          default_duration_minutes: 180
+        })
+
+      # Add a question
+      {:ok, _} =
+        Workshops.create_question(template, %{
+          index: 0,
+          title: "Test Question",
+          criterion_name: "Test Criterion",
+          explanation: "Test explanation",
+          scale_type: "balance",
+          scale_min: -5,
+          scale_max: 5,
+          optimal_value: 0,
+          discussion_prompts: ["What do you think?"]
+        })
+
+      {:ok, session} = Sessions.create_session(template)
+
+      # Create facilitator
+      facilitator_token = Ecto.UUID.generate()
+      {:ok, facilitator} = Sessions.join_session(session, "Facilitator", facilitator_token, is_facilitator: true)
+
+      # Create participant
+      participant_token = Ecto.UUID.generate()
+      {:ok, participant} = Sessions.join_session(session, "Alice", participant_token)
+
+      # Advance session to scoring phase
+      {:ok, session} = Sessions.start_session(session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      %{
+        session: session,
+        template: template,
+        facilitator: facilitator,
+        facilitator_token: facilitator_token,
+        participant: participant,
+        participant_token: participant_token
+      }
+    end
+
+    test "shows notes section when scores are revealed", ctx do
+      # Submit scores for both participants
+      {:ok, _} = Scoring.submit_score(ctx.session, ctx.facilitator, 0, 2)
+      {:ok, _} = Scoring.submit_score(ctx.session, ctx.participant, 0, -1)
+
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      assert html =~ "Discussion Notes"
+      assert html =~ "Capture a key discussion point"
+    end
+
+    test "participants can add notes", ctx do
+      # Submit scores for both participants
+      {:ok, _} = Scoring.submit_score(ctx.session, ctx.facilitator, 0, 2)
+      {:ok, _} = Scoring.submit_score(ctx.session, ctx.participant, 0, -1)
+
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.participant_token)
+
+      {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Type a note
+      view |> element("input[name=note]") |> render_change(%{value: "This is a test note"})
+
+      # Submit the note
+      html = render_submit(view, "add_note", %{})
+
+      assert html =~ "This is a test note"
+      assert html =~ "Alice"
+
+      # Verify note was persisted
+      notes = Notes.list_notes_for_question(ctx.session, 0)
+      assert length(notes) == 1
+      assert hd(notes).content == "This is a test note"
+    end
+
+    test "participants can delete notes", ctx do
+      # Submit scores
+      {:ok, _} = Scoring.submit_score(ctx.session, ctx.facilitator, 0, 2)
+      {:ok, _} = Scoring.submit_score(ctx.session, ctx.participant, 0, -1)
+
+      # Create a note
+      {:ok, note} = Notes.create_note(ctx.session, 0, %{content: "Delete me", author_name: "Alice"})
+
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.participant_token)
+
+      {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Delete the note
+      html = render_click(view, "delete_note", %{"id" => note.id})
+
+      refute html =~ "Delete me"
+
+      # Verify note was deleted
+      notes = Notes.list_notes_for_question(ctx.session, 0)
+      assert length(notes) == 0
+    end
+  end
+
+  describe "Mid-workshop transition" do
+    setup do
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Transition Test",
+          slug: "transition-test",
+          version: "1.0.0",
+          default_duration_minutes: 180
+        })
+
+      # Add questions 0-4 (need at least 5 questions to test transition)
+      for i <- 0..4 do
+        scale_type = if i < 4, do: "balance", else: "maximal"
+        scale_min = if i < 4, do: -5, else: 0
+        scale_max = if i < 4, do: 5, else: 10
+        optimal_value = if i < 4, do: 0, else: nil
+
+        {:ok, _} =
+          Workshops.create_question(template, %{
+            index: i,
+            title: "Question #{i + 1}",
+            criterion_name: "Criterion #{i + 1}",
+            explanation: "Explanation #{i + 1}",
+            scale_type: scale_type,
+            scale_min: scale_min,
+            scale_max: scale_max,
+            optimal_value: optimal_value,
+            discussion_prompts: []
+          })
+      end
+
+      {:ok, session} = Sessions.create_session(template)
+
+      # Create facilitator
+      facilitator_token = Ecto.UUID.generate()
+      {:ok, facilitator} = Sessions.join_session(session, "Facilitator", facilitator_token, is_facilitator: true)
+
+      # Advance to scoring and then to question 4 (index 3)
+      {:ok, session} = Sessions.start_session(session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Advance through questions 1-3
+      {:ok, _} = Scoring.submit_score(session, facilitator, 0, 0)
+      {:ok, session} = Sessions.advance_question(session)
+
+      {:ok, _} = Scoring.submit_score(session, facilitator, 1, 0)
+      {:ok, session} = Sessions.advance_question(session)
+
+      {:ok, _} = Scoring.submit_score(session, facilitator, 2, 0)
+      {:ok, session} = Sessions.advance_question(session)
+
+      # Now at question 4 (index 3) - submitting and advancing should show transition
+      {:ok, _} = Scoring.submit_score(session, facilitator, 3, 0)
+
+      %{
+        session: session,
+        template: template,
+        facilitator: facilitator,
+        facilitator_token: facilitator_token
+      }
+    end
+
+    test "shows mid-workshop transition when advancing from question 4 to 5", ctx do
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Click next question to advance past question 4
+      html = render_click(view, "next_question")
+
+      # Should show the transition screen
+      assert html =~ "New Scoring Scale Ahead"
+      assert html =~ "first four questions"
+      assert html =~ "more is always better"
+      assert html =~ "10 is optimal"
+    end
+
+    test "continue button dismisses transition and shows question 5", ctx do
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Advance to show transition
+      render_click(view, "next_question")
+
+      # Click continue
+      html = render_click(view, "continue_past_transition")
+
+      # Should now show question 5
+      assert html =~ "Question 5"
+      refute html =~ "New Scoring Scale Ahead"
     end
   end
 end

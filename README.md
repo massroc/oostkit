@@ -189,21 +189,21 @@ Set via Fly.io secrets:
 - [x] Database seeding for Six Criteria template
 - [x] Error handling for missing template
 
-### Outstanding Work
+#### Scoring Phase (Complete)
+- [x] Display current question with explanation and scoring guidance
+- [x] Scoring input (buttons) for balance scale (-5 to +5)
+- [x] Scoring input for maximal scale (0 to 10)
+- [x] Hide individual scores until all participants submit
+- [x] "Submit" button to lock in score
+- [x] Score reveal with participant names
+- [x] Traffic light color coding (green/amber/red)
+- [x] Team average visualization
+- [x] Discussion prompts display
+- [x] Notes capture per question (with real-time sync)
+- [x] "Ready" button for all participants to advance
+- [x] Mid-workshop transition screen (before question 5)
 
-#### Scoring Phase (Priority)
-- [ ] Display current question with explanation and scoring guidance
-- [ ] Scoring input (slider or buttons) for balance scale (-5 to +5)
-- [ ] Scoring input for maximal scale (0 to 10)
-- [ ] Hide individual scores until all participants submit
-- [ ] "Submit" button to lock in score
-- [ ] Score reveal with participant names
-- [ ] Traffic light color coding (green/amber/red)
-- [ ] Team average and spread visualization
-- [ ] Discussion prompts display
-- [ ] Notes capture per question
-- [ ] "Ready" button for all participants to advance
-- [ ] Mid-workshop transition screen (before question 5)
+### Outstanding Work
 
 #### Summary Phase
 - [ ] Overview of all 8 questions with scores
