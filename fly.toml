@@ -10,6 +10,7 @@ primary_region = "syd"  # Sydney, Australia
 [env]
   PHX_HOST = "productive-workgroups.fly.dev"
   PORT = "8080"
+  PHX_SERVER = "true"
 
 [http_service]
   internal_port = 8080
