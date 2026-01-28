@@ -10,6 +10,7 @@ defmodule ProductiveWorkgroups.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      releases: releases(),
       test_coverage: [tool: ExCoveralls],
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
@@ -35,6 +36,16 @@ defmodule ProductiveWorkgroups.MixProject do
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  # Release configuration
+  defp releases do
+    [
+      productive_workgroups: [
+        include_executables_for: [:unix],
+        overlays: ["rel/overlays"]
+      ]
+    ]
+  end
 
   # Specifies your project dependencies.
   defp deps do
