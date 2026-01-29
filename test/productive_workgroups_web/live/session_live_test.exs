@@ -340,7 +340,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       }
     end
 
-    test "shows notes section when scores are revealed", ctx do
+    test "shows notes section when toggle button is clicked", ctx do
       # Submit scores for both participants
       {:ok, _} = Scoring.submit_score(ctx.session, ctx.facilitator, 0, 2)
       {:ok, _} = Scoring.submit_score(ctx.session, ctx.participant, 0, -1)
@@ -350,7 +350,15 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
         |> Plug.Test.init_test_session(%{})
         |> put_session(:browser_token, ctx.facilitator_token)
 
-      {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
+      {:ok, view, html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Notes are hidden by default
+      refute html =~ "Discussion Notes"
+      # Toggle button should be visible
+      assert html =~ "Show Discussion Notes"
+
+      # Click toggle to show notes
+      html = view |> element("button", "Show Discussion Notes") |> render_click()
 
       assert html =~ "Discussion Notes"
       assert html =~ "Capture a key discussion point"
@@ -367,6 +375,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
         |> put_session(:browser_token, ctx.participant_token)
 
       {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Toggle notes section visible
+      view |> element("button", "Show Discussion Notes") |> render_click()
 
       # Type a note
       view |> element("input[name=note]") |> render_change(%{value: "This is a test note"})
@@ -398,6 +409,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
         |> put_session(:browser_token, ctx.participant_token)
 
       {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Toggle notes section visible
+      view |> element("button", "Show Discussion Notes") |> render_click()
 
       # Delete the note
       html = render_click(view, "delete_note", %{"id" => note.id})
