@@ -1264,8 +1264,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           <% end %>
         </div>
       </div>
-
-      <!-- Toggle buttons for optional sections -->
+      
+    <!-- Toggle buttons for optional sections -->
       <div class="flex gap-3">
         <%= if length(@current_question.discussion_prompts) > 0 do %>
           <button
@@ -1303,8 +1303,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           <span class="text-sm">{if @show_notes, do: "▲", else: "▼"}</span>
         </button>
       </div>
-
-      <!-- Discussion prompts (collapsible) -->
+      
+    <!-- Discussion prompts (collapsible) -->
       <%= if @show_discussion_prompts and length(@current_question.discussion_prompts) > 0 do %>
         <div class="bg-gray-800 rounded-lg p-6 border border-purple-600/50">
           <h2 class="text-lg font-semibold text-purple-400 mb-4">Facilitator Tips</h2>
@@ -1318,8 +1318,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </ul>
         </div>
       <% end %>
-
-      <!-- Notes capture (collapsible) -->
+      
+    <!-- Notes capture (collapsible) -->
       <%= if @show_notes do %>
         <div class="bg-gray-800 rounded-lg p-6 border border-blue-600/50">
           <h2 class="text-lg font-semibold text-blue-400 mb-4">
@@ -1328,8 +1328,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
               <span class="text-sm font-normal text-gray-400">({length(@question_notes)})</span>
             <% end %>
           </h2>
-
-          <!-- Existing notes -->
+          
+    <!-- Existing notes -->
           <%= if length(@question_notes) > 0 do %>
             <ul class="space-y-3 mb-4">
               <%= for note <- @question_notes do %>
@@ -1351,8 +1351,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
               <% end %>
             </ul>
           <% end %>
-
-          <!-- Add note form -->
+          
+    <!-- Add note form -->
           <form phx-submit="add_note" class="flex gap-2">
             <input
               type="text"
@@ -1374,8 +1374,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </p>
         </div>
       <% end %>
-
-      <!-- Ready / Next controls -->
+      
+    <!-- Ready / Next controls -->
       <div class="bg-gray-800 rounded-lg p-6">
         <%= if @participant.is_facilitator do %>
           <button

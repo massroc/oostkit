@@ -62,7 +62,7 @@ defmodule ProductiveWorkgroupsWeb.HomeLive do
               Start New Workshop
             </.link>
           </div>
-
+          
     <!-- Join Option -->
           <div class="bg-gray-800 rounded-xl p-6 text-left flex flex-col">
             <h2 class="text-xl font-semibold text-white mb-2">Join</h2>
