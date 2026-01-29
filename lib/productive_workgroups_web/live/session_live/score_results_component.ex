@@ -41,8 +41,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
       <!-- Results summary -->
       <div class="bg-gray-800 rounded-lg p-6">
         <h2 class="text-lg font-semibold text-white mb-4">Results</h2>
-
-        <!-- Team average -->
+        
+    <!-- Team average -->
         <div class="text-center mb-6">
           <div class="text-sm text-gray-400 mb-1">Team Average</div>
           <div class={[
@@ -60,8 +60,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
             {@average}
           </div>
         </div>
-
-        <!-- Individual scores -->
+        
+    <!-- Individual scores -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <%= for score <- @all_scores do %>
             <div class={[
@@ -92,8 +92,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
           <% end %>
         </div>
       </div>
-
-      <!-- Toggle buttons for optional sections - events go to parent -->
+      
+    <!-- Toggle buttons for optional sections - events go to parent -->
       <div class="flex gap-3">
         <%= if length(@current_question.discussion_prompts) > 0 do %>
           <button
@@ -129,8 +129,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
           <% end %>
         </button>
       </div>
-
-      <!-- Discussion prompts (collapsible) -->
+      
+    <!-- Discussion prompts (collapsible) -->
       <%= if @show_discussion_prompts and length(@current_question.discussion_prompts) > 0 do %>
         <div class="bg-gray-800 rounded-lg p-6 border border-purple-600/50">
           <h2 class="text-lg font-semibold text-purple-400 mb-4">Facilitator Tips</h2>
@@ -144,8 +144,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
           </ul>
         </div>
       <% end %>
-
-      <!-- Notes capture (collapsible) -->
+      
+    <!-- Notes capture (collapsible) -->
       <%= if @show_notes do %>
         <div class="bg-gray-800 rounded-lg p-6 border border-blue-600/50">
           <h2 class="text-lg font-semibold text-blue-400 mb-4">
@@ -154,8 +154,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
               <span class="text-sm font-normal text-gray-400">({length(@question_notes)})</span>
             <% end %>
           </h2>
-
-          <!-- Existing notes -->
+          
+    <!-- Existing notes -->
           <%= if length(@question_notes) > 0 do %>
             <ul class="space-y-3 mb-4">
               <%= for note <- @question_notes do %>
@@ -177,8 +177,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
               <% end %>
             </ul>
           <% end %>
-
-          <!-- Add note form - events go to parent LiveView for test compatibility -->
+          
+    <!-- Add note form - events go to parent LiveView for test compatibility -->
           <form phx-submit="add_note" class="flex gap-2">
             <input
               type="text"
@@ -201,8 +201,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
           </p>
         </div>
       <% end %>
-
-      <!-- Ready / Next controls -->
+      
+    <!-- Ready / Next controls -->
       <div class="bg-gray-800 rounded-lg p-6">
         <%= if @participant.is_facilitator do %>
           <button

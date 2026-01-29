@@ -1431,16 +1431,16 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             </p>
           <% end %>
         </div>
-
-        <!-- Create Action Form -->
+        
+    <!-- Create Action Form -->
         <.live_component
           module={ActionFormComponent}
           id="action-form"
           session={@session}
           scores_summary={@scores_summary}
         />
-
-        <!-- Existing Actions -->
+        
+    <!-- Existing Actions -->
         <%= if @action_count > 0 do %>
           <div class="space-y-6">
             <!-- General Actions -->
