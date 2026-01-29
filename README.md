@@ -225,6 +225,12 @@ Set via Fly.io secrets:
 - [x] Next steps guidance
 - [ ] Export options (CSV, PDF) - deferred to Phase 2
 
+#### Performance Optimizations (Complete)
+- [x] Input debouncing (300ms) on text fields to reduce server round-trips
+- [x] Optimized score loading to use cached participant data
+- [x] Extracted ScoreResultsComponent for isolated re-renders
+- [x] Extracted ActionFormComponent for local form state management
+
 ### Outstanding Work
 
 #### Timer System

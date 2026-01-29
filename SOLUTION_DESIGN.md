@@ -949,6 +949,40 @@ WorkshopLive (root)
 1. **Stateless where possible** - Components receive assigns, parent manages state
 2. **Slots for flexibility** - Use slots for customizable content areas
 3. **Consistent styling API** - Common props like `class`, `variant`, `size`
+4. **Render isolation** - Extract LiveComponents to limit re-render scope for frequently updated sections
+
+### Extracted LiveComponents
+
+The following LiveComponents have been extracted from the main SessionLive to optimize performance:
+
+#### ScoreResultsComponent
+**File:** `lib/productive_workgroups_web/live/session_live/score_results_component.ex`
+
+**Purpose:** Displays score results, discussion prompts, and notes capture. Isolates re-renders to just this section when scores change.
+
+**Assigns:**
+- `all_scores` - List of participant scores with colors
+- `current_question` - Current question being scored
+- `show_discussion_prompts` - Toggle state for facilitator tips
+- `show_notes` - Toggle state for notes section
+- `question_notes` - Notes for the current question
+- `note_input` - Current note input value
+- `participant` - Current participant
+- `session` - Current session
+
+**Note:** Events (toggle_discussion_prompts, toggle_notes, add_note, delete_note) are handled by the parent LiveView for test compatibility.
+
+#### ActionFormComponent
+**File:** `lib/productive_workgroups_web/live/session_live/action_form_component.ex`
+
+**Purpose:** Manages action creation form with local state. Form input changes don't trigger parent re-renders.
+
+**Local State:**
+- `action_description` - Action description input
+- `action_owner` - Action owner input
+- `action_question` - Selected related question
+
+**Communication:** Notifies parent via `send(self(), :reload_actions)` after successful action creation.
 
 ### Example Components
 
@@ -1045,6 +1079,26 @@ defmodule ProductiveWorkGroupsWeb.Components.ScoreInput do
   end
 end
 ```
+
+### Performance Optimizations
+
+The following optimizations have been implemented to ensure responsive UI:
+
+#### 1. Input Debouncing
+All text input fields use `phx-debounce="300"` to reduce server round-trips during typing:
+- Note input field
+- Action description input
+- Action owner input
+
+This reduces WebSocket messages by ~80-90% during typing.
+
+#### 2. Optimized Data Loading
+The `load_scores/3` function uses participant data from socket assigns rather than querying the database on every score submission. Participant lists are kept in sync via PubSub handlers, eliminating redundant database queries.
+
+#### 3. LiveComponent Extraction
+Frequently updated sections have been extracted into LiveComponents to isolate re-renders:
+- **ScoreResultsComponent** - Score display, discussion prompts, notes (re-renders only when scores change)
+- **ActionFormComponent** - Manages local form state (typing doesn't trigger parent re-renders)
 
 ---
 
@@ -1601,5 +1655,5 @@ end
 
 ---
 
-*Document Version: 1.1*
+*Document Version: 1.2*
 *Last Updated: 2026-01-29*
