@@ -75,8 +75,8 @@ defmodule ProductiveWorkgroupsWeb.CoreComponents do
       <.flash kind={:error} title={gettext("Error!")} flash={@flash} />
       <.flash
         id="client-error"
-        kind={:error}
-        title={gettext("We can't find the internet")}
+        kind={:info}
+        title={gettext("Connection lost")}
         phx-disconnected={show(".phx-client-error #client-error")}
         phx-connected={hide("#client-error")}
         hidden
@@ -87,13 +87,13 @@ defmodule ProductiveWorkgroupsWeb.CoreComponents do
 
       <.flash
         id="server-error"
-        kind={:error}
-        title={gettext("Something went wrong!")}
+        kind={:info}
+        title={gettext("Reconnecting...")}
         phx-disconnected={show(".phx-server-error #server-error")}
         phx-connected={hide("#server-error")}
         hidden
       >
-        {gettext("Hang in there while we get back on track")}
+        {gettext("Please wait while we reconnect")}
         <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
     </div>
