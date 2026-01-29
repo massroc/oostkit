@@ -757,7 +757,22 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   defp render_lobby(assigns) do
     join_url = ProductiveWorkgroupsWeb.Endpoint.url() <> "/session/#{assigns.session.code}/join"
-    assigns = assign(assigns, :join_url, join_url)
+
+    # Count non-observer participants (for checking if observer facilitator can start)
+    non_observer_count =
+      Enum.count(assigns.participants, fn p ->
+        not p.is_observer and p.id != assigns.participant.id
+      end)
+
+    # Facilitator can start if they're participating, or if they're an observer and someone else joined
+    can_start =
+      not assigns.participant.is_observer or non_observer_count > 0
+
+    assigns =
+      assigns
+      |> assign(:join_url, join_url)
+      |> assign(:can_start, can_start)
+      |> assign(:non_observer_count, non_observer_count)
 
     ~H"""
     <div class="flex flex-col items-center justify-center min-h-screen px-4">
@@ -799,6 +814,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
                       Facilitator
                     </span>
                   <% end %>
+                  <%= if p.is_observer do %>
+                    <span class="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded">
+                      Observer
+                    </span>
+                  <% end %>
                 </div>
                 <%= if p.id == @participant.id do %>
                   <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">You</span>
@@ -811,13 +831,26 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         <%= if @participant.is_facilitator do %>
           <button
             phx-click="start_workshop"
-            class="w-full px-6 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-lg mb-4"
+            disabled={not @can_start}
+            class={[
+              "w-full px-6 py-4 font-semibold rounded-lg transition-colors text-lg mb-4",
+              if(@can_start,
+                do: "bg-green-600 hover:bg-green-700 text-white",
+                else: "bg-gray-700 text-gray-500 cursor-not-allowed"
+              )
+            ]}
           >
             Start Workshop
           </button>
-          <p class="text-gray-500 text-sm">
-            Click above when everyone has joined.
-          </p>
+          <%= if @participant.is_observer and not @can_start do %>
+            <p class="text-amber-400 text-sm">
+              As an observer, you need at least one team member to join before starting.
+            </p>
+          <% else %>
+            <p class="text-gray-500 text-sm">
+              Click above when everyone has joined.
+            </p>
+          <% end %>
         <% else %>
           <p class="text-gray-500 text-sm">
             Waiting for the facilitator to start the workshop...
