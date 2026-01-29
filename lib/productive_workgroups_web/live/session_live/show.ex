@@ -51,6 +51,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
      |> assign(participants: participants)
      |> assign(intro_step: 1)
      |> assign(show_mid_transition: false)
+     |> assign(show_discussion_prompts: false)
+     |> assign(show_notes: false)
      |> assign(note_input: "")
      |> assign(action_description: "")
      |> assign(action_owner: "")
@@ -267,6 +269,17 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to mark as ready")}
     end
+  end
+
+  # Toggle visibility events
+  @impl true
+  def handle_event("toggle_discussion_prompts", _params, socket) do
+    {:noreply, assign(socket, show_discussion_prompts: !socket.assigns.show_discussion_prompts)}
+  end
+
+  @impl true
+  def handle_event("toggle_notes", _params, socket) do
+    {:noreply, assign(socket, show_notes: !socket.assigns.show_notes)}
   end
 
   # Note handling events
@@ -590,6 +603,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
       |> assign(my_score: if(my_score, do: my_score.value, else: nil))
       |> assign(has_submitted: my_score != nil)
+      |> assign(show_discussion_prompts: false)
+      |> assign(show_notes: false)
       |> load_scores(session, question_index)
       |> load_notes(session, question_index)
     else
@@ -604,6 +619,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(score_count: 0)
       |> assign(active_participant_count: 0)
       |> assign(question_notes: [])
+      |> assign(show_discussion_prompts: false)
+      |> assign(show_notes: false)
     end
   end
 
@@ -1247,77 +1264,118 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           <% end %>
         </div>
       </div>
-      
-    <!-- Discussion prompts -->
-      <%= if length(@current_question.discussion_prompts) > 0 do %>
-        <div class="bg-gray-800 rounded-lg p-6">
-          <h2 class="text-lg font-semibold text-white mb-4">Discussion Prompts</h2>
+
+      <!-- Toggle buttons for optional sections -->
+      <div class="flex gap-3">
+        <%= if length(@current_question.discussion_prompts) > 0 do %>
+          <button
+            type="button"
+            phx-click="toggle_discussion_prompts"
+            class={[
+              "flex-1 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
+              if(@show_discussion_prompts,
+                do: "bg-purple-600 text-white",
+                else: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              )
+            ]}
+          >
+            <span>{if @show_discussion_prompts, do: "Hide", else: "Show"} Facilitator Tips</span>
+            <span class="text-sm">{if @show_discussion_prompts, do: "▲", else: "▼"}</span>
+          </button>
+        <% end %>
+        <button
+          type="button"
+          phx-click="toggle_notes"
+          class={[
+            "flex-1 px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
+            if(@show_notes,
+              do: "bg-blue-600 text-white",
+              else: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            )
+          ]}
+        >
+          <span>{if @show_notes, do: "Hide", else: "Take"} Notes</span>
+          <%= if length(@question_notes) > 0 do %>
+            <span class="bg-gray-600 text-white text-xs px-2 py-0.5 rounded-full">
+              {length(@question_notes)}
+            </span>
+          <% end %>
+          <span class="text-sm">{if @show_notes, do: "▲", else: "▼"}</span>
+        </button>
+      </div>
+
+      <!-- Discussion prompts (collapsible) -->
+      <%= if @show_discussion_prompts and length(@current_question.discussion_prompts) > 0 do %>
+        <div class="bg-gray-800 rounded-lg p-6 border border-purple-600/50">
+          <h2 class="text-lg font-semibold text-purple-400 mb-4">Facilitator Tips</h2>
           <ul class="space-y-3">
             <%= for prompt <- @current_question.discussion_prompts do %>
               <li class="flex gap-3 text-gray-300">
-                <span class="text-green-400">•</span>
+                <span class="text-purple-400">•</span>
                 <span>{prompt}</span>
               </li>
             <% end %>
           </ul>
         </div>
       <% end %>
-      
-    <!-- Notes capture -->
-      <div class="bg-gray-800 rounded-lg p-6">
-        <h2 class="text-lg font-semibold text-white mb-4">
-          Discussion Notes
-          <%= if length(@question_notes) > 0 do %>
-            <span class="text-sm font-normal text-gray-400">({length(@question_notes)})</span>
-          <% end %>
-        </h2>
-        
-    <!-- Existing notes -->
-        <%= if length(@question_notes) > 0 do %>
-          <ul class="space-y-3 mb-4">
-            <%= for note <- @question_notes do %>
-              <li class="bg-gray-700 rounded-lg p-3">
-                <div class="flex justify-between items-start gap-2">
-                  <p class="text-gray-300 flex-1">{note.content}</p>
-                  <button
-                    type="button"
-                    phx-click="delete_note"
-                    phx-value-id={note.id}
-                    class="text-gray-500 hover:text-red-400 transition-colors text-sm"
-                    title="Delete note"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">— {note.author_name}</p>
-              </li>
+
+      <!-- Notes capture (collapsible) -->
+      <%= if @show_notes do %>
+        <div class="bg-gray-800 rounded-lg p-6 border border-blue-600/50">
+          <h2 class="text-lg font-semibold text-blue-400 mb-4">
+            Discussion Notes
+            <%= if length(@question_notes) > 0 do %>
+              <span class="text-sm font-normal text-gray-400">({length(@question_notes)})</span>
             <% end %>
-          </ul>
-        <% end %>
-        
-    <!-- Add note form -->
-        <form phx-submit="add_note" class="flex gap-2">
-          <input
-            type="text"
-            name="note"
-            value={@note_input}
-            phx-change="update_note_input"
-            placeholder="Capture a key discussion point..."
-            class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
-          />
-          <button
-            type="submit"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-          >
-            Add
-          </button>
-        </form>
-        <p class="text-xs text-gray-500 mt-2">
-          Notes are visible to all participants and saved with the session.
-        </p>
-      </div>
-      
-    <!-- Ready / Next controls -->
+          </h2>
+
+          <!-- Existing notes -->
+          <%= if length(@question_notes) > 0 do %>
+            <ul class="space-y-3 mb-4">
+              <%= for note <- @question_notes do %>
+                <li class="bg-gray-700 rounded-lg p-3">
+                  <div class="flex justify-between items-start gap-2">
+                    <p class="text-gray-300 flex-1">{note.content}</p>
+                    <button
+                      type="button"
+                      phx-click="delete_note"
+                      phx-value-id={note.id}
+                      class="text-gray-500 hover:text-red-400 transition-colors text-sm"
+                      title="Delete note"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">— {note.author_name}</p>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+
+          <!-- Add note form -->
+          <form phx-submit="add_note" class="flex gap-2">
+            <input
+              type="text"
+              name="note"
+              value={@note_input}
+              phx-change="update_note_input"
+              placeholder="Capture a key discussion point..."
+              class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            />
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            >
+              Add
+            </button>
+          </form>
+          <p class="text-xs text-gray-500 mt-2">
+            Notes are visible to all participants and saved with the session.
+          </p>
+        </div>
+      <% end %>
+
+      <!-- Ready / Next controls -->
       <div class="bg-gray-800 rounded-lg p-6">
         <%= if @participant.is_facilitator do %>
           <button

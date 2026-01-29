@@ -198,8 +198,8 @@ Set via Fly.io secrets:
 - [x] Score reveal with participant names
 - [x] Traffic light color coding (green/amber/red)
 - [x] Team average visualization
-- [x] Discussion prompts display
-- [x] Notes capture per question (with real-time sync)
+- [x] Facilitator tips (collapsible, hidden by default)
+- [x] Notes capture per question (collapsible, hidden by default, real-time sync)
 - [x] "Ready" button for all participants to advance
 - [x] Mid-workshop transition screen (before question 5)
 
@@ -207,7 +207,7 @@ Set via Fly.io secrets:
 - [x] Overview of all 8 questions with scores
 - [x] Traffic light indicators for each criterion
 - [x] Pattern highlighting (strengths vs concerns)
-- [x] All notes displayed from scoring phase
+- [x] Notes displayed from scoring phase (only if notes were taken)
 
 #### Actions Phase (Complete)
 - [x] Action item creation

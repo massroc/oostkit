@@ -48,28 +48,28 @@ defmodule ProductiveWorkgroupsWeb.HomeLive do
           A self-guided workshop for exploring the Six Criteria of Productive Work
         </p>
 
-        <div class="grid md:grid-cols-2 gap-6 max-w-xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-6 max-w-xl mx-auto items-stretch">
           <!-- Facilitate Option -->
-          <div class="bg-gray-800 rounded-xl p-6 text-left">
+          <div class="bg-gray-800 rounded-xl p-6 text-left flex flex-col">
             <h2 class="text-xl font-semibold text-white mb-2">Facilitate</h2>
             <p class="text-gray-400 text-sm mb-4">
               Create a new workshop session and lead your team through the Six Criteria.
             </p>
             <.link
               navigate={~p"/session/new"}
-              class="block w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-center"
+              class="block w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-center mt-auto"
             >
               Start New Workshop
             </.link>
           </div>
-          
+
     <!-- Join Option -->
-          <div class="bg-gray-800 rounded-xl p-6 text-left">
+          <div class="bg-gray-800 rounded-xl p-6 text-left flex flex-col">
             <h2 class="text-xl font-semibold text-white mb-2">Join</h2>
             <p class="text-gray-400 text-sm mb-4">
               Enter a session code to join an existing workshop as a participant.
             </p>
-            <form phx-submit="join_session" class="space-y-3">
+            <form phx-submit="join_session" class="space-y-3 mt-auto">
               <input
                 type="text"
                 name="code"
