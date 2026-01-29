@@ -2,7 +2,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 
 app = "productive-workgroups"
-primary_region = "sjc"  # San Jose, US
+primary_region = "syd"  # Sydney, AU (matches database region)
 
 [build]
   dockerfile = "Dockerfile"
@@ -11,6 +11,9 @@ primary_region = "sjc"  # San Jose, US
   PHX_HOST = "productive-workgroups.fly.dev"
   PORT = "8080"
   PHX_SERVER = "true"
+
+[deploy]
+  release_command = "/app/bin/migrate"
 
 [http_service]
   internal_port = 8080
