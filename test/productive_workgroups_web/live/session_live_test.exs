@@ -353,12 +353,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       {:ok, view, html} = live(conn, ~p"/session/#{ctx.session.code}")
 
       # Notes are hidden by default
-      refute html =~ "Discussion Notes"
+      refute html =~ "Capture a key discussion point"
       # Toggle button should be visible
-      assert html =~ "Show Discussion Notes"
+      assert html =~ "Take Notes"
 
       # Click toggle to show notes
-      html = view |> element("button", "Show Discussion Notes") |> render_click()
+      html = view |> element("button", "Take Notes") |> render_click()
 
       assert html =~ "Discussion Notes"
       assert html =~ "Capture a key discussion point"
@@ -377,7 +377,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
 
       # Toggle notes section visible
-      view |> element("button", "Show Discussion Notes") |> render_click()
+      view |> element("button", "Take Notes") |> render_click()
 
       # Type a note
       view |> element("input[name=note]") |> render_change(%{value: "This is a test note"})
@@ -411,7 +411,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       {:ok, view, _html} = live(conn, ~p"/session/#{ctx.session.code}")
 
       # Toggle notes section visible
-      view |> element("button", "Show Discussion Notes") |> render_click()
+      view |> element("button", "Take Notes") |> render_click()
 
       # Delete the note
       html = render_click(view, "delete_note", %{"id" => note.id})
