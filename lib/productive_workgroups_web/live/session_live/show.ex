@@ -1901,6 +1901,44 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </p>
         </div>
         
+    <!-- Score Grid -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+          <h2 class="text-lg font-semibold text-white mb-3">All Scores</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <%= for score <- @scores_summary do %>
+              <div class={[
+                "rounded-lg p-3 text-center border",
+                case score.color do
+                  :green -> "bg-green-900/30 border-green-700"
+                  :amber -> "bg-yellow-900/30 border-yellow-700"
+                  :red -> "bg-red-900/30 border-red-700"
+                  _ -> "bg-gray-700 border-gray-600"
+                end
+              ]}>
+                <div class="text-xs text-gray-400 mb-1">Q{score.question_index + 1}</div>
+                <div class={[
+                  "text-2xl font-bold",
+                  case score.color do
+                    :green -> "text-green-400"
+                    :amber -> "text-yellow-400"
+                    :red -> "text-red-400"
+                    _ -> "text-gray-400"
+                  end
+                ]}>
+                  <%= if score.average do %>
+                    {format_score(score.average, score.scale_type)}
+                  <% else %>
+                    —
+                  <% end %>
+                </div>
+                <div class="text-xs text-gray-400 truncate mt-1" title={score.title}>
+                  {score.title}
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
     <!-- Pattern Highlighting -->
         <%= if length(@strengths) > 0 or length(@concerns) > 0 do %>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -1946,47 +1984,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </div>
         <% end %>
         
-    <!-- Score Grid -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold text-white mb-4">All Scores</h2>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <%= for score <- @scores_summary do %>
-              <div class={[
-                "rounded-lg p-3 text-center border",
-                case score.color do
-                  :green -> "bg-green-900/30 border-green-700"
-                  :amber -> "bg-yellow-900/30 border-yellow-700"
-                  :red -> "bg-red-900/30 border-red-700"
-                  _ -> "bg-gray-700 border-gray-600"
-                end
-              ]}>
-                <div class="text-xs text-gray-400 mb-1">Q{score.question_index + 1}</div>
-                <div class={[
-                  "text-2xl font-bold",
-                  case score.color do
-                    :green -> "text-green-400"
-                    :amber -> "text-yellow-400"
-                    :red -> "text-red-400"
-                    _ -> "text-gray-400"
-                  end
-                ]}>
-                  <%= if score.average do %>
-                    {format_score(score.average, score.scale_type)}
-                  <% else %>
-                    —
-                  <% end %>
-                </div>
-                <div class="text-xs text-gray-400 truncate mt-1" title={score.title}>
-                  {score.title}
-                </div>
-              </div>
-            <% end %>
-          </div>
-        </div>
-        
     <!-- Action Items Section (Editable) -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold text-white mb-4">
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+          <h2 class="text-lg font-semibold text-white mb-3">
             Action Items
             <%= if @action_count > 0 do %>
               <span class="text-sm font-normal text-gray-400">
@@ -2004,13 +2004,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           
     <!-- Existing Actions -->
           <%= if @action_count > 0 do %>
-            <ul class="space-y-3">
+            <ul class="space-y-2">
               <%= for action <- @all_actions do %>
                 {render_action_item(assigns, action)}
               <% end %>
             </ul>
           <% else %>
-            <p class="text-gray-400 text-center py-4">
+            <p class="text-gray-400 text-center py-2">
               No action items yet. Add your first action above.
             </p>
           <% end %>
@@ -2018,8 +2018,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         
     <!-- Notes Summary -->
         <%= if length(@all_notes) > 0 do %>
-          <div class="bg-gray-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-white mb-4">
+          <div class="bg-gray-800 rounded-lg p-4 mb-6">
+            <h2 class="text-lg font-semibold text-white mb-3">
               Discussion Notes ({length(@all_notes)})
             </h2>
             <ul class="space-y-2">
@@ -2035,29 +2035,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             </ul>
           </div>
         <% end %>
-        
-    <!-- Participants -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold text-white mb-4">Participants</h2>
-          <div class="flex flex-wrap gap-2">
-            <%= for p <- @participants do %>
-              <div class="bg-gray-700 rounded-lg px-3 py-2 flex items-center gap-2">
-                <span class="text-white">{p.name}</span>
-                <%= cond do %>
-                  <% p.is_observer -> %>
-                    <span class="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
-                      Observer
-                    </span>
-                  <% p.is_facilitator -> %>
-                    <span class="text-xs bg-purple-600 text-white px-2 py-0.5 rounded">
-                      Facilitator
-                    </span>
-                  <% true -> %>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </div>
         
     <!-- Finish Workshop -->
         <div class="bg-gray-800 rounded-lg p-6">
