@@ -306,7 +306,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_event("update_note_input", %{"value" => value}, socket) do
+  def handle_event("update_note_input", %{"note" => value}, socket) do
     {:noreply, assign(socket, note_input: value)}
   end
 
