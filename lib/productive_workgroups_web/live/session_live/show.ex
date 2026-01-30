@@ -538,8 +538,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
     {:noreply,
      socket
-     |> assign(scores_revealed: false)
-     |> load_scoring_data(session, socket.assigns.participant)}
+     |> load_scoring_data(session, socket.assigns.participant)
+     |> assign(scores_revealed: false)}
   end
 
   defp go_back_to_previous_question_results(socket, session) do
