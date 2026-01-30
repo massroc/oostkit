@@ -360,7 +360,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           {:noreply,
            socket
            |> assign(session: updated_session)
-           |> load_scoring_data(updated_session, participant)}
+           |> load_scoring_data(updated_session, participant)
+           |> start_phase_timer(updated_session)}
 
         {:error, _} ->
           {:noreply, put_flash(socket, :error, "Failed to advance to scoring")}
@@ -555,7 +556,10 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     if participant.is_facilitator do
       case Sessions.complete_session(session) do
         {:ok, updated_session} ->
-          {:noreply, assign(socket, session: updated_session)}
+          {:noreply,
+           socket
+           |> assign(session: updated_session)
+           |> stop_timer()}
 
         {:error, _} ->
           {:noreply, put_flash(socket, :error, "Failed to complete workshop")}
@@ -611,6 +615,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     last_index = length(template.questions) - 1
     Scoring.unreveal_scores(session, last_index)
 
+    # Don't restart timer - timer only moves forward, keeps current countdown
     case Sessions.go_back_to_scoring(session, last_index) do
       {:ok, updated_session} ->
         {:noreply,
@@ -660,6 +665,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   defp go_back_to_previous_question_results(socket, session) do
     Sessions.reset_all_ready(session)
     # Don't unreveal - we want to show the previous question's results
+    # Don't restart timer - timer only moves forward, keeps current countdown
 
     case Sessions.go_back_question(session) do
       {:ok, updated_session} ->
@@ -682,7 +688,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         {:noreply,
          socket
          |> assign(session: updated_session)
-         |> assign(intro_step: 4)}
+         |> assign(intro_step: 4)
+         |> stop_timer()}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to go back")}
@@ -763,7 +770,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         {:noreply,
          socket
          |> assign(session: updated_session)
-         |> load_summary_data(updated_session)}
+         |> load_summary_data(updated_session)
+         |> start_phase_timer(updated_session)}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to advance to summary")}
@@ -783,7 +791,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
          socket
          |> assign(session: updated_session)
          |> assign(show_mid_transition: show_transition)
-         |> load_scoring_data(updated_session, participant)}
+         |> load_scoring_data(updated_session, participant)
+         |> start_phase_timer(updated_session)}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to advance to next question")}

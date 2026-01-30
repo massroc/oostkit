@@ -58,3 +58,9 @@ Thumbs.db
 
 # Docker volumes
 postgres_data/
+
+# Dialyzer PLT cache
+/priv/plts/
+
+# Test screenshots
+/screenshots/
