@@ -176,7 +176,12 @@ defmodule ProductiveWorkgroups.Facilitation do
   Timer phases map to visual display labels:
   - scoring state: "question_0" through "question_7"
   - summary/actions states: "summary_actions" (shared timer)
+  - completed state: nil (timer stops on wrap-up page)
   - other states: nil (no timer)
+
+  Note: The default UI flow now goes directly from "summary" to "completed"
+  (the wrap-up page). The "actions" state handling is kept for backwards
+  compatibility but is no longer used in the standard flow.
   """
   def current_timer_phase(%Session{state: "scoring", current_question_index: index}) do
     "question_#{index}"

@@ -504,6 +504,29 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   @impl true
+  def handle_event("continue_to_wrapup", _params, socket) do
+    session = socket.assigns.session
+    participant = socket.assigns.participant
+
+    if participant.is_facilitator do
+      case Sessions.advance_to_completed(session) do
+        {:ok, updated_session} ->
+          {:noreply,
+           socket
+           |> assign(session: updated_session)
+           |> load_summary_data(updated_session)
+           |> load_actions_data(updated_session)
+           |> stop_timer()}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to advance to wrap-up")}
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("toggle_action", %{"id" => action_id}, socket) do
     session = socket.assigns.session
     action = Enum.find(socket.assigns.all_actions, &(&1.id == action_id))
@@ -550,22 +573,30 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   @impl true
   def handle_event("finish_workshop", _params, socket) do
-    session = socket.assigns.session
     participant = socket.assigns.participant
 
     if participant.is_facilitator do
+      do_finish_workshop(socket)
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp do_finish_workshop(socket) do
+    session = socket.assigns.session
+
+    # Session is already in "completed" state on the wrap-up page - just navigate home
+    if session.state == "completed" do
+      {:noreply, push_navigate(socket, to: "/")}
+    else
+      # Legacy: handle finish from actions state
       case Sessions.complete_session(session) do
-        {:ok, updated_session} ->
-          {:noreply,
-           socket
-           |> assign(session: updated_session)
-           |> stop_timer()}
+        {:ok, _updated_session} ->
+          {:noreply, push_navigate(socket, to: "/")}
 
         {:error, _} ->
           {:noreply, put_flash(socket, :error, "Failed to complete workshop")}
       end
-    else
-      {:noreply, socket}
     end
   end
 
@@ -1585,11 +1616,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-white mb-2">Workshop Summary</h1>
           <p class="text-gray-400">
-            Review and discuss your team's responses, then create action items.
+            Review your team's responses before creating action items.
           </p>
         </div>
         
-    <!-- Participants (moved to TOP) -->
+    <!-- Participants -->
         <div class="bg-gray-800 rounded-lg p-4 mb-6">
           <h2 class="text-sm font-semibold text-gray-400 mb-3">Participants</h2>
           <div class="flex flex-wrap gap-2">
@@ -1611,51 +1642,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             <% end %>
           </div>
         </div>
-        
-    <!-- Pattern Highlighting -->
-        <%= if length(@strengths) > 0 or length(@concerns) > 0 do %>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <!-- Strengths -->
-            <%= if length(@strengths) > 0 do %>
-              <div class="bg-green-900/30 border border-green-700 rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-green-400 mb-3">
-                  Strengths ({length(@strengths)})
-                </h3>
-                <ul class="space-y-2">
-                  <%= for item <- @strengths do %>
-                    <li class="flex items-center gap-2 text-gray-300">
-                      <span class="text-green-400">✓</span>
-                      <span>{item.title}</span>
-                      <span class="text-green-400 font-semibold ml-auto">
-                        {format_score(item.average, item.scale_type)}
-                      </span>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            <% end %>
-            
-    <!-- Concerns -->
-            <%= if length(@concerns) > 0 do %>
-              <div class="bg-red-900/30 border border-red-700 rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-red-400 mb-3">
-                  Areas of Concern ({length(@concerns)})
-                </h3>
-                <ul class="space-y-2">
-                  <%= for item <- @concerns do %>
-                    <li class="flex items-center gap-2 text-gray-300">
-                      <span class="text-red-400">!</span>
-                      <span>{item.title}</span>
-                      <span class="text-red-400 font-semibold ml-auto">
-                        {format_score(item.average, item.scale_type)}
-                      </span>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
         
     <!-- All Questions with Individual Scores and Notes -->
         <div class="space-y-4 mb-6">
@@ -1760,93 +1746,21 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           <% end %>
         </div>
         
-    <!-- Action Items Section -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold text-white mb-4">
-            Action Items
-            <%= if @action_count > 0 do %>
-              <span class="text-sm font-normal text-gray-400">
-                ({@completed_action_count}/{@action_count} completed)
-              </span>
-            <% end %>
-          </h2>
-          
-    <!-- Add Action Form -->
-          <.live_component
-            module={ActionFormComponent}
-            id="action-form"
-            session={@session}
-          />
-          
-    <!-- Existing Actions -->
-          <%= if @action_count > 0 do %>
-            <ul class="space-y-3">
-              <%= for action <- @all_actions do %>
-                <li class={[
-                  "rounded-lg p-3 flex items-start gap-3",
-                  if(action.completed, do: "bg-gray-700/50", else: "bg-gray-700")
-                ]}>
-                  <button
-                    type="button"
-                    phx-click="toggle_action"
-                    phx-value-id={action.id}
-                    class={[
-                      "mt-1 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
-                      if(action.completed,
-                        do: "bg-green-600 border-green-600 text-white",
-                        else: "border-gray-500 hover:border-green-500"
-                      )
-                    ]}
-                  >
-                    <%= if action.completed do %>
-                      <span class="text-xs">✓</span>
-                    <% end %>
-                  </button>
-                  <div class="flex-1">
-                    <p class={[
-                      "text-gray-300",
-                      if(action.completed, do: "line-through text-gray-500")
-                    ]}>
-                      {action.description}
-                    </p>
-                    <%= if action.owner_name && action.owner_name != "" do %>
-                      <p class="text-sm text-gray-500 mt-1">Owner: {action.owner_name}</p>
-                    <% end %>
-                  </div>
-                  <button
-                    type="button"
-                    phx-click="delete_action"
-                    phx-value-id={action.id}
-                    class="text-gray-500 hover:text-red-400 transition-colors text-sm"
-                    title="Delete action"
-                  >
-                    ✕
-                  </button>
-                </li>
-              <% end %>
-            </ul>
-          <% else %>
-            <p class="text-gray-400 text-center py-4">
-              No action items yet. Add your first action above.
-            </p>
-          <% end %>
-        </div>
-        
-    <!-- Finish Workshop Button -->
+    <!-- Continue to Wrap-Up Button -->
         <div class="bg-gray-800 rounded-lg p-6">
           <%= if @participant.is_facilitator do %>
             <button
-              phx-click="finish_workshop"
-              class="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+              phx-click="continue_to_wrapup"
+              class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
             >
-              Finish Workshop
+              Continue to Wrap-Up →
             </button>
             <p class="text-center text-gray-500 text-sm mt-2">
-              Complete the workshop and view the final summary.
+              Proceed to create action items and finish the workshop.
             </p>
           <% else %>
             <div class="text-center text-gray-400">
-              Reviewing summary. Waiting for facilitator to finish workshop...
+              Reviewing summary. Waiting for facilitator to continue...
             </div>
           <% end %>
         </div>
@@ -1978,37 +1892,63 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       <div class="max-w-4xl w-full">
         <!-- Header -->
         <div class="text-center mb-8">
-          <div class="text-6xl mb-4">🎉</div>
-          <h1 class="text-3xl font-bold text-white mb-2">Workshop Complete!</h1>
+          <h1 class="text-3xl font-bold text-white mb-2">Workshop Wrap-Up</h1>
           <p class="text-gray-400">
-            Thank you for participating in the Six Criteria Workshop.
+            Review key findings and create action items.
           </p>
           <p class="text-sm text-gray-500 mt-2">
             Session code: <span class="font-mono text-white">{@session.code}</span>
           </p>
         </div>
         
-    <!-- Results Summary -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold text-white mb-4">Results Overview</h2>
-          
-    <!-- Quick Stats -->
-          <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="text-center">
-              <div class="text-3xl font-bold text-green-400">{length(@strengths)}</div>
-              <div class="text-sm text-gray-400">Strengths</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-yellow-400">{length(@neutral)}</div>
-              <div class="text-sm text-gray-400">Neutral</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-red-400">{length(@concerns)}</div>
-              <div class="text-sm text-gray-400">Concerns</div>
-            </div>
+    <!-- Pattern Highlighting -->
+        <%= if length(@strengths) > 0 or length(@concerns) > 0 do %>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Strengths -->
+            <%= if length(@strengths) > 0 do %>
+              <div class="bg-green-900/30 border border-green-700 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-green-400 mb-3">
+                  Strengths ({length(@strengths)})
+                </h3>
+                <ul class="space-y-2">
+                  <%= for item <- @strengths do %>
+                    <li class="flex items-center gap-2 text-gray-300">
+                      <span class="text-green-400">✓</span>
+                      <span>{item.title}</span>
+                      <span class="text-green-400 font-semibold ml-auto">
+                        {format_score(item.average, item.scale_type)}
+                      </span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+            
+    <!-- Concerns -->
+            <%= if length(@concerns) > 0 do %>
+              <div class="bg-red-900/30 border border-red-700 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-red-400 mb-3">
+                  Areas of Concern ({length(@concerns)})
+                </h3>
+                <ul class="space-y-2">
+                  <%= for item <- @concerns do %>
+                    <li class="flex items-center gap-2 text-gray-300">
+                      <span class="text-red-400">!</span>
+                      <span>{item.title}</span>
+                      <span class="text-red-400 font-semibold ml-auto">
+                        {format_score(item.average, item.scale_type)}
+                      </span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
           </div>
-          
+        <% end %>
+        
     <!-- Score Grid -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+          <h2 class="text-xl font-semibold text-white mb-4">All Scores</h2>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <%= for score <- @scores_summary do %>
               <div class={[
@@ -2044,33 +1984,37 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </div>
         </div>
         
-    <!-- Action Items -->
-        <%= if @action_count > 0 do %>
-          <div class="bg-gray-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-white mb-2">
-              Action Items
-            </h2>
-            <p class="text-sm text-gray-400 mb-4">
-              {@completed_action_count}/{@action_count} completed
-            </p>
-
-            <ul class="space-y-2">
+    <!-- Action Items Section (Editable) -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+          <h2 class="text-xl font-semibold text-white mb-4">
+            Action Items
+            <%= if @action_count > 0 do %>
+              <span class="text-sm font-normal text-gray-400">
+                ({@completed_action_count}/{@action_count} completed)
+              </span>
+            <% end %>
+          </h2>
+          
+    <!-- Add Action Form -->
+          <.live_component
+            module={ActionFormComponent}
+            id="action-form"
+            session={@session}
+          />
+          
+    <!-- Existing Actions -->
+          <%= if @action_count > 0 do %>
+            <ul class="space-y-3">
               <%= for action <- @all_actions do %>
-                <li class="flex items-start gap-2 text-gray-300">
-                  <span class={if action.completed, do: "text-green-400", else: "text-gray-500"}>
-                    {if action.completed, do: "✓", else: "○"}
-                  </span>
-                  <div class={if action.completed, do: "line-through text-gray-500"}>
-                    {action.description}
-                    <%= if action.owner_name && action.owner_name != "" do %>
-                      <span class="text-gray-500 text-sm">— {action.owner_name}</span>
-                    <% end %>
-                  </div>
-                </li>
+                {render_action_item(assigns, action)}
               <% end %>
             </ul>
-          </div>
-        <% end %>
+          <% else %>
+            <p class="text-gray-400 text-center py-4">
+              No action items yet. Add your first action above.
+            </p>
+          <% end %>
+        </div>
         
     <!-- Notes Summary -->
         <%= if length(@all_notes) > 0 do %>
@@ -2115,27 +2059,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </div>
         </div>
         
-    <!-- Next Steps -->
+    <!-- Finish Workshop -->
         <div class="bg-gray-800 rounded-lg p-6">
-          <h2 class="text-xl font-semibold text-white mb-4">Next Steps</h2>
-          <ul class="space-y-3 text-gray-300">
-            <li class="flex gap-3">
-              <span class="text-green-400">1.</span>
-              <span>Review the action items with your team and assign due dates.</span>
-            </li>
-            <li class="flex gap-3">
-              <span class="text-green-400">2.</span>
-              <span>Schedule a follow-up session to check progress on actions.</span>
-            </li>
-            <li class="flex gap-3">
-              <span class="text-green-400">3.</span>
-              <span>
-                Consider running this workshop again in 6 months to a year to track improvements.
-              </span>
-            </li>
-          </ul>
-
-          <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               type="button"
               disabled
@@ -2145,13 +2071,24 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
               <span>Export Results</span>
               <span class="text-xs">(Coming Soon)</span>
             </button>
-            <a
-              href="/"
-              class="inline-block px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors text-center"
-            >
-              Return Home
-            </a>
+            <%= if @participant.is_facilitator do %>
+              <button
+                phx-click="finish_workshop"
+                class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                Finish Workshop
+              </button>
+            <% end %>
           </div>
+          <%= if @participant.is_facilitator do %>
+            <p class="text-center text-gray-500 text-sm mt-3">
+              Finish the workshop and return to the home page.
+            </p>
+          <% else %>
+            <p class="text-center text-gray-400 text-sm mt-3">
+              Waiting for facilitator to finish the workshop...
+            </p>
+          <% end %>
         </div>
       </div>
     </div>

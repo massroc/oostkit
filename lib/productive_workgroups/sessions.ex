@@ -199,6 +199,20 @@ defmodule ProductiveWorkgroups.Sessions do
   end
 
   @doc """
+  Advances from summary directly to completed state (wrap-up page).
+  """
+  def advance_to_completed(%Session{state: "summary"} = session) do
+    result =
+      session
+      |> Session.transition_changeset("completed", %{
+        completed_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      })
+      |> Repo.update()
+
+    broadcast_session_update(result)
+  end
+
+  @doc """
   Completes the session.
   """
   def complete_session(%Session{state: "actions"} = session) do
