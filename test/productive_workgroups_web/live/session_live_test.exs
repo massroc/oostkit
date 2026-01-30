@@ -906,8 +906,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
 
-      # Should be at completed
-      assert html =~ "Workshop Complete"
+      # Should be at wrap-up (completed state)
+      assert html =~ "Workshop Wrap-Up"
 
       # Back button should not be visible
       refute html =~ "go_back"

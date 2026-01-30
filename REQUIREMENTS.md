@@ -134,23 +134,23 @@ For each of the 8 questions:
 6. **Capture notes** - record key discussion points
 7. **Move to next** - when team is ready, proceed to next criterion
 
-### 4. Summary & Reflection
-- Overview of all 6 criteria results
-- Highlight areas of strength and areas needing attention
-- Patterns across the criteria
+### 4. Summary & Review
+- Overview of all 8 questions with individual scores and notes
+- Participants list for reference
+- Review discussion points before creating actions
 
-### 5. Action Planning
-- Prompt team to identify concrete actions/next steps
-- **Structured list format**:
+### 5. Wrap-up & Action Planning
+- Highlight areas of strength (green) and areas needing attention (red)
+- Score grid showing all question averages at a glance
+- **Action items** - prompt team to identify concrete actions/next steps:
   - Add discrete action items
   - Optional owner assignment per action
-  - Optional link to specific question(s)
-- No limit on number of actions, but quality over quantity
+  - No limit on number of actions, but quality over quantity
 - Suggestions on what to focus on available via **Facilitator Assistance** (not shown by default)
-
-### 6. Wrap-up
-- Final summary with notes and actions
-- Export/save options
+- Discussion notes summary
+- Participants list
+- Export option (coming soon)
+- "Finish Workshop" to return to home
 
 ## Time Management
 
@@ -748,6 +748,27 @@ Track anonymized usage patterns to refine the tool:
 - **Comparison** - first-time vs repeat teams
 
 *Note: All analytics would be aggregated and anonymized. Individual session data remains private to the team.*
+
+---
+
+## Outstanding Items (To Be Defined)
+
+The following features require further design decisions:
+
+### Session Results Access
+- **Question:** After completing a workshop, can users return to view results later?
+- **Considerations:**
+  - How long should results persist?
+  - Should there be a unique results URL?
+  - Should participants be able to access results independently, or only via facilitator?
+
+### Session Management
+- **Question:** How should facilitators manage their sessions?
+- **Considerations:**
+  - View list of past sessions
+  - Delete old sessions
+  - Session expiration/cleanup policy
+  - Session status indicators (active, completed, expired)
 
 ---
 

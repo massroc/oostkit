@@ -1142,18 +1142,17 @@ Frequently updated sections have been extracted into LiveComponents to isolate r
             │            │ N = 8
             │            ▼
             │       ┌─────────┐
-            │       │ summary │
+            │       │ summary │  (review scores & notes)
             │       └────┬────┘
-            │            │ all ready
-            │            ▼
-            │       ┌─────────┐
-            │       │ actions │
-            │       └────┬────┘
-            │            │ complete
+            │            │ continue to wrap-up
             │            ▼
             │       ┌───────────┐
-            └───────│ completed │
+            └───────│ completed │  (wrap-up: actions & finish)
                     └───────────┘
+
+Note: The "actions" state still exists in the schema for backwards compatibility
+but the default UI flow now goes directly from "summary" to "completed".
+The "completed" state serves as the wrap-up page where actions are created.
 ```
 
 ### LiveView State Structure
@@ -1666,10 +1665,10 @@ The facilitator timer divides the total session time into 10 equal segments:
 
 **Timer Behavior:**
 - Timer is **facilitator-only** - participants don't see the timer
-- Timer **auto-starts** when entering a timed phase (scoring, summary, actions)
+- Timer **auto-starts** when entering a timed phase (scoring, summary)
 - Timer displays in **top-right corner** with fixed positioning
 - Timer shows **warning state** (red) at 10% remaining time
-- Summary and Actions phases **share one timer** (no restart on transition)
+- Timer **stops** when entering wrap-up (completed) state
 
 **Implementation Details:**
 
@@ -1682,9 +1681,9 @@ end
 # Timer phase mapping
 def current_timer_phase(%Session{state: "scoring", current_question_index: idx}),
   do: "question_#{idx}"
-def current_timer_phase(%Session{state: state}) when state in ["summary", "actions"],
-  do: "summary_actions"
-def current_timer_phase(_), do: nil
+def current_timer_phase(%Session{state: "summary"}),
+  do: "summary"
+def current_timer_phase(_), do: nil  # Timer stops on completed (wrap-up) state
 
 # Warning threshold (10% of segment duration)
 def warning_threshold(%Session{} = session) do
@@ -1707,9 +1706,11 @@ end
 | lobby | No |
 | intro | No |
 | scoring | Yes (phase: Question N) |
-| summary | Yes (phase: Summary + Actions) |
-| actions | Yes (phase: Summary + Actions) |
-| completed | No |
+| summary | Yes (phase: Summary) |
+| completed | No (wrap-up page - actions created here) |
+
+Note: The "actions" state still exists for backwards compatibility but the
+default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
