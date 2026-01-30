@@ -24,20 +24,23 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
       <div class="bg-gray-800 rounded-lg p-6">
         <h2 class="text-lg font-semibold text-white mb-4">Discuss the results as a team</h2>
         
-    <!-- Individual scores -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <!-- Individual scores - 10 horizontal boxes -->
+        <div class="flex flex-wrap gap-2 justify-center">
           <%= for score <- @all_scores do %>
-            <div class={[
-              "rounded-lg p-3 text-center",
-              case score.color do
-                :green -> "bg-green-900/50 border border-green-700"
-                :amber -> "bg-yellow-900/50 border border-yellow-700"
-                :red -> "bg-red-900/50 border border-red-700"
-                _ -> "bg-gray-700"
-              end
-            ]}>
+            <div
+              class={[
+                "rounded-lg p-2 text-center min-w-[4rem] flex-shrink-0",
+                case score.color do
+                  :green -> "bg-green-900/50 border border-green-700"
+                  :amber -> "bg-yellow-900/50 border border-yellow-700"
+                  :red -> "bg-red-900/50 border border-red-700"
+                  _ -> "bg-gray-700"
+                end
+              ]}
+              title={score.participant_name}
+            >
               <div class={[
-                "text-2xl font-bold",
+                "text-xl font-bold",
                 case score.color do
                   :green -> "text-green-400"
                   :amber -> "text-yellow-400"
@@ -50,7 +53,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
                 <% end %>
                 {score.value}
               </div>
-              <div class="text-sm text-gray-400 truncate">{score.participant_name}</div>
+              <div class="text-xs text-gray-400 truncate max-w-[4rem]">{score.participant_name}</div>
             </div>
           <% end %>
         </div>

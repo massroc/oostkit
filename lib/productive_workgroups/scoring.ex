@@ -262,4 +262,73 @@ defmodule ProductiveWorkgroups.Scoring do
       true -> :red
     end
   end
+
+  @doc """
+  Gets all individual scores for a session, organized by question index.
+
+  Returns a map where keys are question indices and values are lists of scores
+  with participant information, ordered by participant's `joined_at` timestamp.
+
+  Each score entry includes:
+  - `:value` - The score value
+  - `:participant_id` - The participant's ID
+  - `:participant_name` - The participant's name
+  - `:color` - The traffic light color for the score
+
+  ## Parameters
+  - `session` - The session to get scores for
+  - `participants` - List of participants (already ordered by joined_at)
+  - `template` - The workshop template with questions
+
+  ## Example
+
+      iex> get_all_individual_scores(session, participants, template)
+      %{
+        0 => [
+          %{value: 3, participant_id: "...", participant_name: "Alice", color: :amber},
+          %{value: -1, participant_id: "...", participant_name: "Bob", color: :green}
+        ],
+        1 => [...]
+      }
+  """
+  def get_all_individual_scores(%Session{} = session, participants, %Template{} = template) do
+    questions = Workshops.list_questions(template)
+
+    # Build order map: participant_id => order_index (for sorting by arrival order)
+    participant_order =
+      participants
+      |> Enum.with_index()
+      |> Map.new(fn {p, idx} -> {p.id, idx} end)
+
+    # Build participant name map for O(1) lookups
+    participant_names = Map.new(participants, &{&1.id, &1.name})
+
+    # Single query to get all scores for this session
+    all_scores =
+      Score
+      |> where([s], s.session_id == ^session.id)
+      |> Repo.all()
+      |> Enum.group_by(& &1.question_index)
+
+    # Build question map for color calculations (used below in the mapping)
+
+    # Process each question
+    Map.new(questions, fn question ->
+      scores = Map.get(all_scores, question.index, [])
+
+      ordered_scores =
+        scores
+        |> Enum.map(fn score ->
+          %{
+            value: score.value,
+            participant_id: score.participant_id,
+            participant_name: Map.get(participant_names, score.participant_id, "Unknown"),
+            color: traffic_light_color(question.scale_type, score.value, question.optimal_value)
+          }
+        end)
+        |> Enum.sort_by(fn s -> Map.get(participant_order, s.participant_id, 999) end)
+
+      {question.index, ordered_scores}
+    end)
+  end
 end

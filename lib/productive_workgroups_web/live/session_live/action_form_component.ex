@@ -19,6 +19,16 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ActionFormComponent do
 
   @impl true
   def update(assigns, socket) do
+    # Use preselected_question if provided and action_question is not set
+    preselected = Map.get(assigns, :preselected_question)
+
+    socket =
+      if preselected != nil and socket.assigns.action_question == nil do
+        assign(socket, action_question: preselected)
+      else
+        socket
+      end
+
     {:ok, assign(socket, session: assigns.session, scores_summary: assigns.scores_summary)}
   end
 
