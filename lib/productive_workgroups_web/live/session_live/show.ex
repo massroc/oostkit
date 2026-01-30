@@ -147,7 +147,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   def handle_info({:action_updated, _action_id}, socket) do
     session = socket.assigns.session
 
-    if session.state in ["actions", "completed"] do
+    if session.state in ["summary", "actions", "completed"] do
       {:noreply, load_actions_data(socket, session)}
     else
       {:noreply, socket}
@@ -189,7 +189,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         |> load_scoring_data(session, socket.assigns.participant)
 
       {true, _, "summary"} ->
-        load_summary_data(socket, session)
+        socket |> load_summary_data(session) |> load_actions_data(session)
 
       {true, _, "actions"} ->
         socket |> load_summary_data(session) |> load_actions_data(session)
@@ -462,6 +462,22 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     else
       {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_event("open_action_modal", %{"question" => question_str}, socket) do
+    question_index =
+      case question_str do
+        "" -> nil
+        q -> String.to_integer(q)
+      end
+
+    {:noreply, assign(socket, action_modal_question: question_index)}
+  end
+
+  @impl true
+  def handle_event("close_action_modal", _params, socket) do
+    {:noreply, assign(socket, action_modal_question: nil)}
   end
 
   # Private helper functions
@@ -758,6 +774,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       scores_summary = Scoring.get_all_scores_summary(session, template)
       all_notes = Notes.list_all_notes(session)
 
+      # Get individual scores grouped by question (ordered by participant joined_at)
+      participants = socket.assigns.participants
+      individual_scores = Scoring.get_all_individual_scores(session, participants, template)
+
+      # Group notes by question_index
+      notes_by_question = Enum.group_by(all_notes, & &1.question_index)
+
       # Single pass grouping instead of triple filtering
       grouped = Enum.group_by(scores_summary, & &1.color)
 
@@ -765,17 +788,23 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(summary_template: template)
       |> assign(scores_summary: scores_summary)
       |> assign(all_notes: all_notes)
+      |> assign(individual_scores: individual_scores)
+      |> assign(notes_by_question: notes_by_question)
       |> assign(strengths: Map.get(grouped, :green, []))
       |> assign(concerns: Map.get(grouped, :red, []))
       |> assign(neutral: Map.get(grouped, :amber, []))
+      |> assign(action_modal_question: nil)
     else
       socket
       |> assign(summary_template: nil)
       |> assign(scores_summary: [])
       |> assign(all_notes: [])
+      |> assign(individual_scores: %{})
+      |> assign(notes_by_question: %{})
       |> assign(strengths: [])
       |> assign(concerns: [])
       |> assign(neutral: [])
+      |> assign(action_modal_question: nil)
     end
   end
 
@@ -791,7 +820,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   defp load_actions_data(socket, session) do
-    if session.state in ["actions", "completed"] do
+    if session.state in ["summary", "actions", "completed"] do
       actions = Notes.list_all_actions(session)
       action_count = length(actions)
       completed_count = Enum.count(actions, & &1.completed)
@@ -1429,19 +1458,49 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   defp render_summary(assigns) do
+    # Group actions by question
+    grouped_actions = Enum.group_by(assigns.all_actions, & &1.question_index)
+
+    assigns =
+      assigns
+      |> Map.put(:grouped_actions, grouped_actions)
+
     ~H"""
     <div class="flex flex-col items-center min-h-screen px-4 py-8">
       <div class="max-w-4xl w-full">
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-white mb-2">Workshop Summary</h1>
           <p class="text-gray-400">
-            Here's an overview of your team's responses across all eight questions.
+            Review and discuss your team's responses, then create action items.
           </p>
+        </div>
+        
+    <!-- Participants (moved to TOP) -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+          <h2 class="text-sm font-semibold text-gray-400 mb-3">Participants</h2>
+          <div class="flex flex-wrap gap-2">
+            <%= for p <- @participants do %>
+              <div class="bg-gray-700 rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm">
+                <span class="text-white">{p.name}</span>
+                <%= cond do %>
+                  <% p.is_observer -> %>
+                    <span class="text-xs bg-gray-600 text-gray-300 px-1.5 py-0.5 rounded">
+                      Observer
+                    </span>
+                  <% p.is_facilitator -> %>
+                    <span class="text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded">
+                      Facilitator
+                    </span>
+                  <% true -> %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
         </div>
         
     <!-- Pattern Highlighting -->
         <%= if length(@strengths) > 0 or length(@concerns) > 0 do %>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <!-- Strengths -->
             <%= if length(@strengths) > 0 do %>
               <div class="bg-green-900/30 border border-green-700 rounded-lg p-4">
@@ -1484,102 +1543,210 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           </div>
         <% end %>
         
-    <!-- All Questions Summary -->
-        <div class="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold text-white mb-4">All Questions</h2>
-          <div class="space-y-4">
-            <%= for score <- @scores_summary do %>
-              <div class={[
-                "rounded-lg p-4 border",
-                case score.color do
-                  :green -> "bg-green-900/20 border-green-700"
-                  :amber -> "bg-yellow-900/20 border-yellow-700"
-                  :red -> "bg-red-900/20 border-red-700"
-                  _ -> "bg-gray-700 border-gray-600"
-                end
-              ]}>
-                <div class="flex items-center justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm text-gray-400">Q{score.question_index + 1}</span>
-                      <h3 class="font-semibold text-white">{score.title}</h3>
-                    </div>
-                    <div class="text-sm text-gray-400 mt-1">
-                      Scale:
-                      <%= if score.scale_type == "balance" do %>
-                        Balance (-5 to +5, optimal at 0)
-                      <% else %>
-                        Maximal (0 to 10, higher is better)
-                      <% end %>
-                    </div>
+    <!-- All Questions with Individual Scores, Notes, and Actions -->
+        <div class="space-y-4 mb-6">
+          <%= for score <- @scores_summary do %>
+            <% question_notes = Map.get(@notes_by_question, score.question_index, []) %>
+            <% question_actions = Map.get(@grouped_actions, score.question_index, []) %>
+            <% question_scores = Map.get(@individual_scores, score.question_index, []) %>
+            <div class={[
+              "rounded-lg p-4 border",
+              case score.color do
+                :green -> "bg-green-900/20 border-green-700"
+                :amber -> "bg-yellow-900/20 border-yellow-700"
+                :red -> "bg-red-900/20 border-red-700"
+                _ -> "bg-gray-700 border-gray-600"
+              end
+            ]}>
+              <!-- Question header -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-400">Q{score.question_index + 1}</span>
+                    <h3 class="font-semibold text-white">{score.title}</h3>
                   </div>
-                  <div class="text-right">
-                    <%= if score.average do %>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <%= if score.scale_type == "balance" do %>
+                      -5 to +5, optimal at 0
+                    <% else %>
+                      0 to 10, higher is better
+                    <% end %>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <%= if score.average do %>
+                    <div class={[
+                      "text-2xl font-bold",
+                      case score.color do
+                        :green -> "text-green-400"
+                        :amber -> "text-yellow-400"
+                        :red -> "text-red-400"
+                        _ -> "text-gray-400"
+                      end
+                    ]}>
+                      {format_score(score.average, score.scale_type)}
+                    </div>
+                    <div class="text-xs text-gray-500">avg</div>
+                  <% else %>
+                    <div class="text-gray-500 text-sm">No scores</div>
+                  <% end %>
+                </div>
+              </div>
+              
+    <!-- Individual Scores - 10 horizontal boxes -->
+              <%= if length(question_scores) > 0 do %>
+                <div class="flex flex-wrap gap-1.5 mb-3">
+                  <%= for s <- question_scores do %>
+                    <div
+                      class={[
+                        "rounded px-2 py-1 text-center min-w-[2.5rem]",
+                        case s.color do
+                          :green -> "bg-green-900/50 border border-green-700"
+                          :amber -> "bg-yellow-900/50 border border-yellow-700"
+                          :red -> "bg-red-900/50 border border-red-700"
+                          _ -> "bg-gray-700"
+                        end
+                      ]}
+                      title={s.participant_name}
+                    >
                       <div class={[
-                        "text-3xl font-bold",
-                        case score.color do
+                        "text-sm font-bold",
+                        case s.color do
                           :green -> "text-green-400"
                           :amber -> "text-yellow-400"
                           :red -> "text-red-400"
                           _ -> "text-gray-400"
                         end
                       ]}>
-                        {format_score(score.average, score.scale_type)}
+                        <%= if score.scale_type == "balance" and s.value > 0 do %>
+                          +{s.value}
+                        <% else %>
+                          {s.value}
+                        <% end %>
                       </div>
-                      <div class="text-sm text-gray-400">
-                        {score.count} responses
-                      </div>
-                    <% else %>
-                      <div class="text-gray-500">No scores</div>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        </div>
-        
-    <!-- Notes Summary -->
-        <%= if length(@all_notes) > 0 do %>
-          <div class="bg-gray-800 rounded-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold text-white mb-4">
-              Discussion Notes ({length(@all_notes)})
-            </h2>
-            <ul class="space-y-3">
-              <%= for note <- @all_notes do %>
-                <li class="bg-gray-700 rounded-lg p-3">
-                  <%= if note.question_index do %>
-                    <div class="text-xs text-gray-500 mb-1">
-                      Question {note.question_index + 1}
                     </div>
                   <% end %>
-                  <p class="text-gray-300">{note.content}</p>
-                  <p class="text-xs text-gray-500 mt-1">— {note.author_name}</p>
-                </li>
+                </div>
               <% end %>
-            </ul>
-          </div>
-        <% end %>
+              
+    <!-- Notes for this question (inline) -->
+              <%= if length(question_notes) > 0 do %>
+                <div class="mt-3 pt-3 border-t border-gray-700/50">
+                  <div class="text-xs text-gray-500 mb-2">Notes</div>
+                  <ul class="space-y-1.5">
+                    <%= for note <- question_notes do %>
+                      <li class="text-sm text-gray-300 bg-gray-700/50 rounded px-2 py-1.5">
+                        {note.content}
+                        <span class="text-xs text-gray-500 ml-1">— {note.author_name}</span>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+              
+    <!-- Actions for this question (inline) -->
+              <%= if length(question_actions) > 0 do %>
+                <div class="mt-3 pt-3 border-t border-gray-700/50">
+                  <div class="text-xs text-gray-500 mb-2">Actions</div>
+                  <ul class="space-y-1.5">
+                    <%= for action <- question_actions do %>
+                      <li class="flex items-start gap-2 text-sm">
+                        <button
+                          type="button"
+                          phx-click="toggle_action"
+                          phx-value-id={action.id}
+                          class={[
+                            "mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0",
+                            if(action.completed,
+                              do: "bg-green-600 border-green-600 text-white",
+                              else: "border-gray-500 hover:border-green-500"
+                            )
+                          ]}
+                        >
+                          <%= if action.completed do %>
+                            <span class="text-xs">✓</span>
+                          <% end %>
+                        </button>
+                        <span class={[
+                          "text-gray-300",
+                          if(action.completed, do: "line-through text-gray-500")
+                        ]}>
+                          {action.description}
+                          <%= if action.owner_name && action.owner_name != "" do %>
+                            <span class="text-xs text-gray-500">— {action.owner_name}</span>
+                          <% end %>
+                        </span>
+                        <button
+                          type="button"
+                          phx-click="delete_action"
+                          phx-value-id={action.id}
+                          class="ml-auto text-gray-500 hover:text-red-400 transition-colors text-xs"
+                          title="Delete action"
+                        >
+                          ✕
+                        </button>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+              
+    <!-- Add Action button -->
+              <div class="mt-3 pt-3 border-t border-gray-700/50">
+                <button
+                  type="button"
+                  phx-click={
+                    JS.push("open_action_modal", value: %{question: score.question_index})
+                    |> ProductiveWorkgroupsWeb.CoreComponents.show_modal("action-modal")
+                  }
+                  class="text-sm text-green-400 hover:text-green-300 transition-colors flex items-center gap-1"
+                >
+                  <span>+</span>
+                  <span>Add Action</span>
+                </button>
+              </div>
+            </div>
+          <% end %>
+        </div>
         
-    <!-- Continue Button -->
+    <!-- Finish Workshop Button -->
         <div class="bg-gray-800 rounded-lg p-6">
           <%= if @participant.is_facilitator do %>
             <button
-              phx-click="continue_to_actions"
-              class="w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+              phx-click="finish_workshop"
+              class="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
             >
-              Continue to Action Items →
+              Finish Workshop
             </button>
             <p class="text-center text-gray-500 text-sm mt-2">
-              Next: Capture action items based on your discussion.
+              Complete the workshop and view the final summary.
             </p>
           <% else %>
             <div class="text-center text-gray-400">
-              Reviewing summary. Waiting for facilitator to continue...
+              Reviewing summary. Waiting for facilitator to finish workshop...
             </div>
           <% end %>
         </div>
       </div>
+      
+    <!-- Action Modal -->
+      <.modal id="action-modal" on_cancel={JS.push("close_action_modal")}>
+        <h2 class="text-xl font-semibold text-white mb-4">Add Action Item</h2>
+        <p class="text-sm text-gray-400 mb-4">
+          <%= if @action_modal_question do %>
+            For Question {@action_modal_question + 1}
+          <% else %>
+            General action
+          <% end %>
+        </p>
+        <.live_component
+          module={ActionFormComponent}
+          id="action-form-modal"
+          session={@session}
+          scores_summary={@scores_summary}
+          preselected_question={@action_modal_question}
+        />
+      </.modal>
     </div>
     """
   end
@@ -1943,20 +2110,25 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             </li>
             <li class="flex gap-3">
               <span class="text-green-400">3.</span>
-              <span>Consider running this workshop again in 3-6 months to track improvements.</span>
+              <span>
+                Consider running this workshop again in 6 months to a year to track improvements.
+              </span>
             </li>
           </ul>
 
-          <div class="mt-6 p-4 bg-gray-700 rounded-lg text-center">
-            <p class="text-gray-400 text-sm">
-              Export options (CSV, PDF) coming soon in Phase 2.
-            </p>
-          </div>
-
-          <div class="mt-6 text-center">
+          <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              type="button"
+              disabled
+              class="px-6 py-3 bg-gray-600 text-gray-400 font-semibold rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+              title="Export functionality coming soon"
+            >
+              <span>Export Results</span>
+              <span class="text-xs">(Coming Soon)</span>
+            </button>
             <a
               href="/"
-              class="inline-block px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors"
+              class="inline-block px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors text-center"
             >
               Return Home
             </a>

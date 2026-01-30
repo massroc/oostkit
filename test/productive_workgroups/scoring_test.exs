@@ -348,4 +348,169 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert Enum.all?(summaries, fn s -> s.count == 1 end)
     end
   end
+
+  describe "get_all_individual_scores/3" do
+    setup do
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Individual Scores Workshop",
+          slug: "test-individual-scores",
+          version: "1.0.0",
+          default_duration_minutes: 180
+        })
+
+      # Create a balance scale question
+      {:ok, _q1} =
+        Workshops.create_question(template, %{
+          index: 0,
+          title: "Q1 Balance",
+          criterion_number: "1",
+          criterion_name: "Autonomy",
+          explanation: "Test",
+          scale_type: "balance",
+          scale_min: -5,
+          scale_max: 5,
+          optimal_value: 0
+        })
+
+      # Create a maximal scale question
+      {:ok, _q2} =
+        Workshops.create_question(template, %{
+          index: 1,
+          title: "Q2 Maximal",
+          criterion_number: "2",
+          criterion_name: "Learning",
+          explanation: "Test",
+          scale_type: "maximal",
+          scale_min: 0,
+          scale_max: 10,
+          optimal_value: nil
+        })
+
+      {:ok, session} = Sessions.create_session(template)
+
+      # Join participants in specific order (Alice first, Bob second, Carol third)
+      {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
+      # Add a small delay to ensure different joined_at timestamps
+      Process.sleep(10)
+      {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
+      Process.sleep(10)
+      {:ok, p3} = Sessions.join_session(session, "Carol", Ecto.UUID.generate())
+
+      # Reload template with questions
+      template = Workshops.get_template_with_questions(template.id)
+
+      %{
+        session: session,
+        participants: [p1, p2, p3],
+        template: template
+      }
+    end
+
+    test "returns scores grouped by question index", %{
+      session: session,
+      participants: [p1, p2, p3],
+      template: template
+    } do
+      # Submit scores for question 0
+      {:ok, _} = Scoring.submit_score(session, p1, 0, 2)
+      {:ok, _} = Scoring.submit_score(session, p2, 0, -1)
+      {:ok, _} = Scoring.submit_score(session, p3, 0, 0)
+
+      # Submit scores for question 1
+      {:ok, _} = Scoring.submit_score(session, p1, 1, 8)
+      {:ok, _} = Scoring.submit_score(session, p2, 1, 5)
+
+      participants = Sessions.list_participants(session)
+      result = Scoring.get_all_individual_scores(session, participants, template)
+
+      # Should have entries for both questions
+      assert Map.has_key?(result, 0)
+      assert Map.has_key?(result, 1)
+
+      # Question 0 should have 3 scores
+      assert length(result[0]) == 3
+      # Question 1 should have 2 scores
+      assert length(result[1]) == 2
+    end
+
+    test "orders scores by participant joined_at", %{
+      session: session,
+      participants: [p1, p2, p3],
+      template: template
+    } do
+      # Submit scores in reverse order (Carol, Bob, Alice)
+      {:ok, _} = Scoring.submit_score(session, p3, 0, 0)
+      {:ok, _} = Scoring.submit_score(session, p2, 0, -1)
+      {:ok, _} = Scoring.submit_score(session, p1, 0, 2)
+
+      participants = Sessions.list_participants(session)
+      result = Scoring.get_all_individual_scores(session, participants, template)
+
+      # Scores should be ordered by joined_at (Alice, Bob, Carol)
+      [first, second, third] = result[0]
+      assert first.participant_name == "Alice"
+      assert second.participant_name == "Bob"
+      assert third.participant_name == "Carol"
+    end
+
+    test "includes correct score values and colors", %{
+      session: session,
+      participants: [p1, p2, _p3],
+      template: template
+    } do
+      # Balance scale: 2 is amber, -1 is green
+      {:ok, _} = Scoring.submit_score(session, p1, 0, 2)
+      {:ok, _} = Scoring.submit_score(session, p2, 0, -1)
+
+      # Maximal scale: 8 is green, 3 is red
+      {:ok, _} = Scoring.submit_score(session, p1, 1, 8)
+      {:ok, _} = Scoring.submit_score(session, p2, 1, 3)
+
+      participants = Sessions.list_participants(session)
+      result = Scoring.get_all_individual_scores(session, participants, template)
+
+      # Check balance scale colors
+      [alice_q0, bob_q0] = result[0]
+      assert alice_q0.value == 2
+      assert alice_q0.color == :amber
+      assert bob_q0.value == -1
+      assert bob_q0.color == :green
+
+      # Check maximal scale colors
+      [alice_q1, bob_q1] = result[1]
+      assert alice_q1.value == 8
+      assert alice_q1.color == :green
+      assert bob_q1.value == 3
+      assert bob_q1.color == :red
+    end
+
+    test "returns empty lists for questions without scores", %{
+      session: session,
+      participants: _participants,
+      template: template
+    } do
+      participants = Sessions.list_participants(session)
+      result = Scoring.get_all_individual_scores(session, participants, template)
+
+      # Both questions should have empty lists
+      assert result[0] == []
+      assert result[1] == []
+    end
+
+    test "includes participant_id in each score entry", %{
+      session: session,
+      participants: [p1, _p2, _p3],
+      template: template
+    } do
+      {:ok, _} = Scoring.submit_score(session, p1, 0, 3)
+
+      participants = Sessions.list_participants(session)
+      result = Scoring.get_all_individual_scores(session, participants, template)
+
+      [score] = result[0]
+      assert score.participant_id == p1.id
+      assert score.participant_name == "Alice"
+    end
+  end
 end
