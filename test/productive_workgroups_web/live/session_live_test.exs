@@ -383,7 +383,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       view |> element("button", "Take Notes") |> render_click()
 
       # Type a note
-      view |> element("input[name=note]") |> render_change(%{value: "This is a test note"})
+      view |> element("input[name=note]") |> render_change(%{note: "This is a test note"})
 
       # Submit the note
       html = render_submit(view, "add_note", %{})
