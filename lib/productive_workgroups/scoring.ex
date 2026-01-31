@@ -280,31 +280,35 @@ defmodule ProductiveWorkgroups.Scoring do
   @doc """
   Calculates the Combined Team Value for a question.
 
-  This score represents how well the team is performing on this criterion,
-  accounting for variance by grading individual scores:
-  - Each person's score is graded: green = 2, amber = 1, red = 0
-  - Grades are summed and divided by number of participants
-  - Result is scaled to 0-10
+  For balance scale (-5 to 5), converts each score to points based on distance from optimal (0):
+  - 0 = 10 points, ±1 = 8 points, ±2 = 6 points, ±3 = 4 points, ±4 = 2 points, ±5 = 0 points
 
-  A score of 10 means everyone had a "good" score.
-  A score of 0 means everyone had a "low" score.
+  For maximal scale (0-10), uses the actual score values directly.
+
+  Returns the average across all participants.
   """
   def calculate_combined_team_value([], _scale_type, _optimal_value), do: nil
 
-  def calculate_combined_team_value(scores, scale_type, optimal_value) do
-    grades =
+  def calculate_combined_team_value(scores, "balance", _optimal_value) do
+    points =
       Enum.map(scores, fn score ->
-        color = traffic_light_color(scale_type, score.value, optimal_value)
-        color_to_grade(color)
+        # 0 = 10pts, ±1 = 8pts, ±2 = 6pts, ±3 = 4pts, ±4 = 2pts, ±5 = 0pts
+        max(0, 10 - abs(score.value) * 2)
       end)
 
-    total_grades = Enum.sum(grades)
-    num_participants = length(grades)
+    Float.round(Enum.sum(points) / length(points), 1)
+  end
 
-    # Scale from 0-2 average to 0-10
-    # Max possible: 2 (everyone green) * 5 = 10
-    # Min possible: 0 (everyone red) * 5 = 0
-    Float.round(total_grades / num_participants * 5, 1)
+  def calculate_combined_team_value(scores, "maximal", _optimal_value) do
+    # For maximal scale, just average the actual values (already 0-10)
+    values = Enum.map(scores, & &1.value)
+    Float.round(Enum.sum(values) / length(values), 1)
+  end
+
+  def calculate_combined_team_value(scores, _scale_type, _optimal_value) do
+    # Default: average the values
+    values = Enum.map(scores, & &1.value)
+    Float.round(Enum.sum(values) / length(values), 1)
   end
 
   @doc """
