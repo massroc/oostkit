@@ -64,6 +64,7 @@
 2. **Configuration-Driven** - Workshop definitions stored as data, enabling future workshop types
 3. **Real-Time First** - Built on Phoenix PubSub for seamless multi-user synchronization
 4. **Progressive Enhancement** - Core functionality works; enhanced features layer on top
+5. **Butcher Paper Principle** - The tool behaves like butcher paper on a wall: visible, permanent within each phase, sequential, shared, and simple. Scores are visible immediately when placed, one person scores at a time, and rows lock permanently once the group moves on.
 
 ---
 
@@ -243,13 +244,14 @@ end
 
 #### 2. Sessions Context
 
-**Purpose:** Manage session lifecycle and participants (the "who" and "when")
+**Purpose:** Manage session lifecycle, participants, and turn-based flow (the "who" and "when")
 
 ```elixir
 defmodule ProductiveWorkGroups.Sessions do
   @moduledoc """
   The Sessions context manages workshop sessions and participants.
-  Handles session creation, joining, state transitions, and participant tracking.
+  Handles session creation, joining, state transitions, participant tracking,
+  and turn-based scoring progression.
   """
 
   # Session management
@@ -265,10 +267,18 @@ defmodule ProductiveWorkGroups.Sessions do
   def mark_participant_inactive(session_id, participant_id)
   def reactivate_participant(session_id, participant_id)
   def get_active_participants(session_id)
+  def get_participants_in_turn_order(session_id)  # By join order
+
+  # Turn-based flow management
+  def get_current_turn_participant(session_id, question_index)
+  def advance_turn(session_id, question_index)  # Move to next participant
+  def skip_turn(session_id, question_index)     # Skip current participant
+  def is_catch_up_phase?(session_id, question_index)  # All present have scored
+  def get_skipped_participants(session_id, question_index)
 
   # State queries
   def all_participants_ready?(session_id)
-  def all_participants_scored?(session_id, question_id)
+  def all_active_participants_scored?(session_id, question_index)
   def get_session_state(session_id)
 end
 ```
@@ -308,28 +318,40 @@ Sessions are fully persisted to the database, allowing teams to pause and resume
 
 #### 3. Scoring Context
 
-**Purpose:** Handle score submission, validation, and aggregation
+**Purpose:** Handle score submission, validation, locking, and aggregation
 
 ```elixir
 defmodule ProductiveWorkGroups.Scoring do
   @moduledoc """
   The Scoring context handles all scoring operations.
-  Validates scores, calculates aggregations, and determines traffic light colors.
+  Validates scores, manages score locking (turn-based and row-based),
+  calculates aggregations, and determines traffic light colors.
+
+  Key concepts:
+  - Scores are visible immediately when placed (no hidden/reveal)
+  - A participant can edit their score until they click "Done" (turn locked)
+  - All scores in a row are permanently locked when the group advances to the next criterion
   """
 
   # Score submission
-  def submit_score(participant_id, question_id, value)
-  def update_score(score_id, new_value)  # Only before reveal
-  def lock_scores(session_id, question_id)
+  def submit_score(participant_id, question_index, value)
+  def update_score(participant_id, question_index, new_value)  # Only while turn is active
+  def lock_participant_turn(participant_id, question_index)     # When "Done" clicked
+  def lock_row(session_id, question_index)                      # When group advances
+
+  # Score state queries
+  def turn_locked?(participant_id, question_index)
+  def row_locked?(session_id, question_index)
+  def can_edit_score?(participant_id, question_index)
 
   # Score retrieval
-  def get_scores(session_id, question_id)
-  def get_participant_scores(participant_id)
+  def get_scores(session_id, question_index)
+  def get_participant_score(participant_id, question_index)
   def get_all_session_scores(session_id)
 
   # Aggregation
-  def calculate_average(session_id, question_id)
-  def calculate_spread(session_id, question_id)
+  def calculate_average(session_id, question_index)
+  def calculate_spread(session_id, question_index)
   def get_score_summary(session_id)
 
   # Traffic light
@@ -339,7 +361,7 @@ end
 ```
 
 **Entities:**
-- `Score` - Individual participant score for a question
+- `Score` - Individual participant score for a question (includes turn_locked and row_locked flags)
 - `ScoreSummary` - Aggregated statistics for a question
 
 #### 4. Facilitation Context
@@ -478,7 +500,8 @@ defmodule ProductiveWorkGroups.Sessions.Session do
     field :code, :string  # 6-character join code
     field :state, Ecto.Enum, values: [:lobby, :intro, :scoring, :summary, :actions, :completed]
     field :current_question, :integer, default: 0
-    field :scores_revealed, :boolean, default: false
+    field :current_turn_index, :integer, default: 0   # Index into turn_order for current scorer
+    field :in_catch_up_phase, :boolean, default: false # True when catching up skipped participants
 
     # Settings (embedded)
     embeds_one :settings, Settings do
@@ -532,7 +555,8 @@ defmodule ProductiveWorkGroups.Scoring.Score do
 
   schema "scores" do
     field :value, :integer
-    field :locked, :boolean, default: false
+    field :turn_locked, :boolean, default: false   # Locked when participant clicks "Done"
+    field :row_locked, :boolean, default: false    # Locked when group advances to next row
     field :submitted_at, :utc_datetime
 
     belongs_to :session, ProductiveWorkGroups.Sessions.Session, type: :binary_id
@@ -807,14 +831,16 @@ defmodule ProductiveWorkGroups.PubSub.Events do
     | :participant_unready
     | :phase_changed
     | :question_changed
-    | :scores_revealed
+    | :row_locked           # All scores in row permanently locked
     | :session_ended
 
-  # Scoring events
+  # Turn-based scoring events
   @type scoring_event ::
-    :score_submitted
-    | :score_updated
-    | :all_scored
+    :score_placed          # Participant placed/updated score (visible immediately)
+    | :turn_completed      # Participant clicked "Done", turn advances
+    | :turn_skipped        # Current participant was skipped
+    | :catch_up_started    # All present participants scored, catch-up phase begins
+    | :catch_up_ended      # Catch-up phase ended
 
   # Notes events
   @type notes_event ::
@@ -1111,7 +1137,7 @@ Frequently updated sections have been extracted into LiveComponents to isolate r
                     ┌─────────┐
                     │  lobby  │
                     └────┬────┘
-                         │ all participants ready
+                         │ facilitator starts
                          ▼
                     ┌─────────┐
             ┌──────►│  intro  │ (skippable)
@@ -1119,41 +1145,77 @@ Frequently updated sections have been extracted into LiveComponents to isolate r
             │            │ complete intro / skip
             │            ▼
             │       ┌─────────┐
-            │       │ scoring │◄───────────┐
-            │       └────┬────┘            │
-            │            │                 │
-            │            ▼                 │
-            │    ┌───────────────┐         │
-            │    │ question N    │         │
-            │    │ ┌───────────┐ │         │
-            │    │ │ awaiting  │ │         │
-            │    │ │  scores   │ │         │
-            │    │ └─────┬─────┘ │         │
-            │    │       │ all   │         │
-            │    │       ▼ scored│         │
-            │    │ ┌───────────┐ │         │
-            │    │ │  reveal   │ │         │
-            │    │ └─────┬─────┘ │         │
-            │    │       │ all   │         │
-            │    │       ▼ ready │         │
-            │    └───────────────┘         │
-            │            │                 │
-            │            │ N < 8 ──────────┘
-            │            │ N = 8
-            │            ▼
-            │       ┌─────────┐
-            │       │ summary │  (review scores & notes)
-            │       └────┬────┘
-            │            │ continue to wrap-up
-            │            ▼
-            │       ┌───────────┐
-            └───────│ completed │  (wrap-up: actions & finish)
-                    └───────────┘
+            │       │ scoring │◄───────────────┐
+            │       └────┬────┘                │
+            │            │                     │
+            │            ▼                     │
+            │    ┌─────────────────────────┐   │
+            │    │     question N (row)    │   │
+            │    │                         │   │
+            │    │  ┌───────────────────┐  │   │
+            │    │  │ turn: participant │  │   │
+            │    │  │      1, 2, 3...   │──┼───┼── "Done" advances turn
+            │    │  └─────────┬─────────┘  │   │
+            │    │            │            │   │
+            │    │            ▼            │   │
+            │    │  ┌───────────────────┐  │   │
+            │    │  │   catch-up phase  │  │   │   (skipped participants
+            │    │  │   (if any skipped)│  │   │    can add scores)
+            │    │  └─────────┬─────────┘  │   │
+            │    │            │            │   │
+            │    │            ▼            │   │
+            │    │  ┌───────────────────┐  │   │
+            │    │  │  all mark ready   │  │   │
+            │    │  └─────────┬─────────┘  │   │
+            │    │            │ row locks  │   │
+            │    └────────────┼────────────┘   │
+            │                 │                │
+            │                 │ N < 8 ─────────┘
+            │                 │ N = 8
+            │                 ▼
+            │            ┌─────────┐
+            │            │ summary │  (review scores & notes)
+            │            └────┬────┘
+            │                 │ continue to wrap-up
+            │                 ▼
+            │            ┌───────────┐
+            └────────────│ completed │  (wrap-up: actions & finish)
+                         └───────────┘
+```
+
+### Turn-Based Scoring Flow (Within Each Question/Row)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Question N Active                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Turn Order: [P1] → [P2] → [P3] → [P4] → ... (by join order)    │
+│               ▲                                                  │
+│               └── current_turn_index                             │
+│                                                                  │
+│  For each participant's turn:                                    │
+│    1. Highlight "Your turn to score"                            │
+│    2. Participant places score (visible immediately)             │
+│    3. Participant can edit score while turn is active            │
+│    4. Participant clicks "Done" → turn_locked = true             │
+│    5. current_turn_index advances to next active participant     │
+│                                                                  │
+│  Catch-up phase (after last active participant):                 │
+│    - Any skipped participants can add their score                │
+│    - They go in turn order if multiple were skipped              │
+│                                                                  │
+│  Row completion:                                                 │
+│    - All participants mark "Ready"                               │
+│    - Row locks permanently (row_locked = true for all scores)    │
+│    - Advance to question N+1                                     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 Note: The "actions" state still exists in the schema for backwards compatibility
 but the default UI flow now goes directly from "summary" to "completed".
 The "completed" state serves as the wrap-up page where actions are created.
-```
 
 ### LiveView State Structure
 
@@ -1176,12 +1238,15 @@ defmodule ProductiveWorkGroupsWeb.WorkshopLive do
      socket
      |> assign(:session, session)
      |> assign(:participant, participant)
-     |> assign(:participants, participants)
+     |> assign(:participants, participants)  # Ordered by join order (turn order)
      |> assign(:current_phase, session.state)
      |> assign(:current_question, current_question)
+     |> assign(:current_turn_participant_id, current_turn_participant_id)
+     |> assign(:is_my_turn, is_my_turn)
+     |> assign(:in_catch_up_phase, false)
      |> assign(:my_score, nil)
-     |> assign(:scores, %{})  # question_id => [scores]
-     |> assign(:scores_revealed, false)
+     |> assign(:my_turn_locked, false)       # Whether I've clicked "Done"
+     |> assign(:all_scores, [])              # All scores for current question (visible immediately)
      |> assign(:time_status, time_status)
      |> assign(:notes, [])
      |> assign(:actions, [])
@@ -1191,14 +1256,27 @@ defmodule ProductiveWorkGroupsWeb.WorkshopLive do
   # State is updated via handle_info callbacks from PubSub
   @impl true
   def handle_info({:participant_joined, participant}, socket) do
-    {:noreply, update(socket, :participants, &[participant | &1])}
+    {:noreply, update(socket, :participants, &(&1 ++ [participant]))}  # Append to preserve order
   end
 
-  def handle_info({:scores_revealed, %{question_id: qid, scores: scores}}, socket) do
+  def handle_info({:score_placed, %{participant_id: pid, value: value}}, socket) do
+    # Score is immediately visible to all - update the scores list
+    {:noreply, update_score_in_list(socket, pid, value)}
+  end
+
+  def handle_info({:turn_completed, %{next_participant_id: next_pid}}, socket) do
     {:noreply,
      socket
-     |> assign(:scores_revealed, true)
-     |> update(:scores, &Map.put(&1, qid, scores))}
+     |> assign(:current_turn_participant_id, next_pid)
+     |> assign(:is_my_turn, next_pid == socket.assigns.participant.id)}
+  end
+
+  def handle_info({:catch_up_started, %{skipped_participant_ids: skipped}}, socket) do
+    {:noreply, assign(socket, :in_catch_up_phase, true)}
+  end
+
+  def handle_info({:row_locked, %{question_index: qidx}}, socket) do
+    {:noreply, mark_row_locked(socket, qidx)}
   end
 
   def handle_info({:timer_tick, time_status}, socket) do
@@ -1714,5 +1792,5 @@ default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
-*Document Version: 1.3*
-*Last Updated: 2026-01-31*
+*Document Version: 2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
+*Last Updated: 2026-02-02*

@@ -3,7 +3,16 @@ defmodule ProductiveWorkgroups.Sessions do
   The Sessions context.
 
   This context manages workshop sessions and their participants.
-  It handles session lifecycle, participant management, and state transitions.
+  It handles session lifecycle, participant management, state transitions,
+  and turn-based scoring flow.
+
+  ## Turn-Based Scoring
+
+  During the scoring phase, participants score one at a time in join order:
+  - Use `get_participants_in_turn_order/1` to get the scoring order
+  - Use `get_current_turn_participant/1` to get whose turn it is
+  - Use `advance_turn/1` when a participant clicks "Done"
+  - Use `skip_turn/1` to skip a participant who is away
   """
 
   import Ecto.Query, warn: false
@@ -94,7 +103,11 @@ defmodule ProductiveWorkgroups.Sessions do
 
   Raises `Ecto.NoResultsError` if the Session does not exist.
   """
-  def get_session!(id), do: Repo.get!(Session, id)
+  def get_session!(id) do
+    Session
+    |> Repo.get!(id)
+    |> Repo.preload([:template, :participants])
+  end
 
   @doc """
   Gets a session by its code.
@@ -150,11 +163,17 @@ defmodule ProductiveWorkgroups.Sessions do
 
   @doc """
   Advances from intro to scoring phase.
+
+  Resets turn tracking for the first question.
   """
   def advance_to_scoring(%Session{state: "intro"} = session) do
     result =
       session
-      |> Session.transition_changeset("scoring", %{current_question_index: 0})
+      |> Session.transition_changeset("scoring", %{
+        current_question_index: 0,
+        current_turn_index: 0,
+        in_catch_up_phase: false
+      })
       |> Repo.update()
 
     broadcast_session_update(result)
@@ -162,12 +181,19 @@ defmodule ProductiveWorkgroups.Sessions do
 
   @doc """
   Advances to the next question within the scoring phase.
+
+  Resets turn tracking for the new question and locks the previous row.
   """
   def advance_question(%Session{state: "scoring"} = session) do
+    # Lock all scores for the current question before advancing
+    ProductiveWorkgroups.Scoring.lock_row(session, session.current_question_index)
+
     result =
       session
       |> Session.transition_changeset("scoring", %{
-        current_question_index: session.current_question_index + 1
+        current_question_index: session.current_question_index + 1,
+        current_turn_index: 0,
+        in_catch_up_phase: false
       })
       |> Repo.update()
 
@@ -319,33 +345,56 @@ defmodule ProductiveWorkgroups.Sessions do
 
     case get_participant(session, browser_token) do
       nil ->
-        result =
-          %Participant{}
-          |> Participant.join_changeset(session, %{
-            name: name,
-            browser_token: browser_token,
-            is_facilitator: is_facilitator,
-            is_observer: is_observer
-          })
-          |> Repo.insert()
-
-        case result do
-          {:ok, participant} ->
-            broadcast(session, {:participant_joined, participant})
-            {:ok, participant}
-
-          error ->
-            error
-        end
+        create_new_participant(session, name, browser_token, is_facilitator, is_observer)
 
       existing ->
-        existing
-        |> Participant.changeset(%{
-          name: name,
-          last_seen_at: DateTime.utc_now() |> DateTime.truncate(:second)
-        })
-        |> Repo.update()
+        update_existing_participant(session, existing, name)
     end
+  end
+
+  defp create_new_participant(session, name, browser_token, is_facilitator, is_observer) do
+    if name_taken?(session, name) do
+      {:error, :name_taken}
+    else
+      result =
+        %Participant{}
+        |> Participant.join_changeset(session, %{
+          name: name,
+          browser_token: browser_token,
+          is_facilitator: is_facilitator,
+          is_observer: is_observer
+        })
+        |> Repo.insert()
+
+      case result do
+        {:ok, participant} ->
+          broadcast(session, {:participant_joined, participant})
+          {:ok, participant}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  defp update_existing_participant(session, existing, name) do
+    if name != existing.name and name_taken?(session, name) do
+      {:error, :name_taken}
+    else
+      existing
+      |> Participant.changeset(%{
+        name: name,
+        last_seen_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      })
+      |> Repo.update()
+    end
+  end
+
+  defp name_taken?(%Session{} = session, name) do
+    Participant
+    |> where([p], p.session_id == ^session.id)
+    |> where([p], fragment("LOWER(?) = LOWER(?)", p.name, ^name))
+    |> Repo.exists?()
   end
 
   @doc """
@@ -474,5 +523,222 @@ defmodule ProductiveWorkgroups.Sessions do
       |> Repo.aggregate(:count)
 
     active_count > 0 and active_count == ready_count
+  end
+
+  ## Turn-Based Scoring
+
+  @doc """
+  Gets participants in turn order (by join time).
+
+  Only returns active, non-observer participants who can score.
+  """
+  def get_participants_in_turn_order(%Session{} = session) do
+    Participant
+    |> where([p], p.session_id == ^session.id)
+    |> where([p], p.status == "active")
+    |> where([p], p.is_observer == false)
+    |> order_by([p], asc: p.joined_at, asc: p.id)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets the participant whose turn it currently is.
+
+  Returns nil if there's no current turn participant (e.g., all have scored).
+  """
+  def get_current_turn_participant(%Session{in_catch_up_phase: true} = session) do
+    get_current_catch_up_participant(session)
+  end
+
+  def get_current_turn_participant(%Session{} = session) do
+    participants = get_participants_in_turn_order(session)
+    Enum.at(participants, session.current_turn_index)
+  end
+
+  @doc """
+  Checks if it's a specific participant's turn to score.
+  """
+  def participants_turn?(%Session{} = session, %Participant{} = participant) do
+    current = get_current_turn_participant(session)
+    current != nil and current.id == participant.id
+  end
+
+  @doc """
+  Advances to the next participant's turn.
+
+  Returns the updated session. If all active participants have scored,
+  enters catch-up phase for any skipped participants.
+  """
+  def advance_turn(%Session{state: "scoring", in_catch_up_phase: true} = session) do
+    advance_catch_up_turn(session)
+  end
+
+  def advance_turn(%Session{state: "scoring"} = session) do
+    participants = get_participants_in_turn_order(session)
+    next_index = session.current_turn_index + 1
+
+    if next_index < length(participants) do
+      # More participants to go in normal order
+      advance_to_next_participant(session, next_index)
+    else
+      # All active participants have had their turn
+      handle_round_complete(session)
+    end
+  end
+
+  defp advance_to_next_participant(session, next_index) do
+    result =
+      session
+      |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
+      |> Repo.update()
+
+    case result do
+      {:ok, updated_session} ->
+        broadcast_turn_advanced(updated_session)
+        {:ok, updated_session}
+
+      error ->
+        error
+    end
+  end
+
+  defp handle_round_complete(session) do
+    skipped = get_skipped_participants(session, session.current_question_index)
+
+    if Enum.empty?(skipped) do
+      # No one skipped - stay in current state, all have scored
+      {:ok, session}
+    else
+      # Enter catch-up phase for skipped participants
+      enter_catch_up_phase(session, skipped)
+    end
+  end
+
+  @doc """
+  Skips the current participant and advances to the next.
+
+  Use when a participant is away or disconnected.
+  """
+  def skip_turn(%Session{state: "scoring"} = session) do
+    advance_turn(session)
+  end
+
+  @doc """
+  Gets participants who were skipped (have no score for the given question).
+  """
+  def get_skipped_participants(%Session{} = session, question_index) do
+    participants = get_participants_in_turn_order(session)
+    scores = ProductiveWorkgroups.Scoring.list_scores_for_question(session, question_index)
+    scored_participant_ids = MapSet.new(Enum.map(scores, & &1.participant_id))
+
+    Enum.filter(participants, fn p ->
+      not MapSet.member?(scored_participant_ids, p.id)
+    end)
+  end
+
+  @doc """
+  Enters catch-up phase for skipped participants.
+
+  During catch-up, skipped participants can add their scores in turn order.
+  """
+  def enter_catch_up_phase(%Session{} = session, skipped_participants) do
+    result =
+      session
+      |> Session.transition_changeset("scoring", %{
+        in_catch_up_phase: true,
+        current_turn_index: 0
+      })
+      |> Repo.update()
+
+    case result do
+      {:ok, updated_session} ->
+        broadcast_catch_up_started(updated_session, skipped_participants)
+        {:ok, updated_session}
+
+      error ->
+        error
+    end
+  end
+
+  @doc """
+  Gets the current participant during catch-up phase.
+
+  Returns the skipped participant whose turn it is to catch up.
+  """
+  def get_current_catch_up_participant(%Session{in_catch_up_phase: true} = session) do
+    skipped = get_skipped_participants(session, session.current_question_index)
+    Enum.at(skipped, session.current_turn_index)
+  end
+
+  def get_current_catch_up_participant(%Session{}), do: nil
+
+  @doc """
+  Advances to the next skipped participant during catch-up phase.
+  """
+  def advance_catch_up_turn(%Session{state: "scoring", in_catch_up_phase: true} = session) do
+    skipped = get_skipped_participants(session, session.current_question_index)
+    next_index = session.current_turn_index + 1
+
+    if next_index >= length(skipped) do
+      # All skipped participants have caught up (or been skipped again)
+      # Exit catch-up phase
+      result =
+        session
+        |> Session.transition_changeset("scoring", %{
+          in_catch_up_phase: false,
+          current_turn_index: 0
+        })
+        |> Repo.update()
+
+      case result do
+        {:ok, updated_session} ->
+          broadcast(updated_session, {:catch_up_ended, %{}})
+          {:ok, updated_session}
+
+        error ->
+          error
+      end
+    else
+      result =
+        session
+        |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
+        |> Repo.update()
+
+      case result do
+        {:ok, updated_session} ->
+          broadcast_turn_advanced(updated_session)
+          {:ok, updated_session}
+
+        error ->
+          error
+      end
+    end
+  end
+
+  # Private helpers for turn-based broadcasting
+
+  defp broadcast_turn_advanced(%Session{} = session) do
+    # get_current_turn_participant already handles catch-up phase
+    current_participant = get_current_turn_participant(session)
+
+    broadcast(
+      session,
+      {:turn_advanced,
+       %{
+         current_turn_index: session.current_turn_index,
+         current_participant_id: current_participant && current_participant.id,
+         in_catch_up_phase: session.in_catch_up_phase
+       }}
+    )
+  end
+
+  defp broadcast_catch_up_started(%Session{} = session, skipped_participants) do
+    broadcast(
+      session,
+      {:catch_up_started,
+       %{
+         skipped_participant_ids: Enum.map(skipped_participants, & &1.id)
+       }}
+    )
   end
 end

@@ -73,6 +73,11 @@ defmodule ProductiveWorkgroupsWeb.SessionController do
         |> put_flash(:error, "Name is required.")
         |> redirect(to: ~p"/session/#{code}/join")
 
+      {:error, :name_taken} ->
+        conn
+        |> put_flash(:error, "That name is already taken. Please choose a different name.")
+        |> redirect(to: ~p"/session/#{code}/join")
+
       {:error, _changeset} ->
         conn
         |> put_flash(:error, "Failed to join session. Please try again.")

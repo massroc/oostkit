@@ -45,7 +45,8 @@
       "Bash(git rebase:*)",
       "Bash(gh repo view:*)",
       "Bash(gh api:*)",
-      "Bash(gh pr checks:*)"
+      "Bash(gh pr checks:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

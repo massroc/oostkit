@@ -249,6 +249,17 @@ defmodule ProductiveWorkgroups.SessionsTest do
       assert p1.id != p2.id
     end
 
+    test "join_session/3 rejects duplicate names", %{session: session} do
+      {:ok, _p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
+      assert {:error, :name_taken} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
+    end
+
+    test "join_session/3 rejects duplicate names case-insensitively", %{session: session} do
+      {:ok, _p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
+      assert {:error, :name_taken} = Sessions.join_session(session, "alice", Ecto.UUID.generate())
+      assert {:error, :name_taken} = Sessions.join_session(session, "ALICE", Ecto.UUID.generate())
+    end
+
     test "get_participant/2 finds participant by browser_token", %{session: session} do
       browser_token = Ecto.UUID.generate()
       {:ok, participant} = Sessions.join_session(session, "Alice", browser_token)
@@ -343,6 +354,91 @@ defmodule ProductiveWorkgroups.SessionsTest do
       codes = for _ <- 1..100, do: Sessions.generate_code()
       unique_codes = Enum.uniq(codes)
       assert length(unique_codes) == 100
+    end
+  end
+
+  describe "turn-based scoring" do
+    setup do
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Test Workshop",
+          slug: "turn-test-#{System.unique_integer()}",
+          version: "1.0.0",
+          default_duration_minutes: 180
+        })
+
+      {:ok, session} = Sessions.create_session(template)
+      {:ok, session} = Sessions.start_session(session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Create participants in specific order
+      {:ok, alice} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
+      # Small delay to ensure different joined_at timestamps
+      Process.sleep(10)
+      {:ok, bob} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
+      Process.sleep(10)
+      {:ok, charlie} = Sessions.join_session(session, "Charlie", Ecto.UUID.generate())
+
+      %{session: session, alice: alice, bob: bob, charlie: charlie}
+    end
+
+    test "get_participants_in_turn_order returns participants by join time", ctx do
+      participants = Sessions.get_participants_in_turn_order(ctx.session)
+
+      assert length(participants) == 3
+      assert Enum.at(participants, 0).id == ctx.alice.id
+      assert Enum.at(participants, 1).id == ctx.bob.id
+      assert Enum.at(participants, 2).id == ctx.charlie.id
+    end
+
+    test "get_current_turn_participant returns first participant initially", ctx do
+      current = Sessions.get_current_turn_participant(ctx.session)
+      assert current.id == ctx.alice.id
+    end
+
+    test "advance_turn moves to next participant", ctx do
+      # Alice is first
+      assert Sessions.get_current_turn_participant(ctx.session).id == ctx.alice.id
+
+      # Advance turn - Bob should be next
+      {:ok, updated_session} = Sessions.advance_turn(ctx.session)
+      assert updated_session.current_turn_index == 1
+      assert Sessions.get_current_turn_participant(updated_session).id == ctx.bob.id
+
+      # Advance again - Charlie should be next
+      {:ok, updated_session} = Sessions.advance_turn(updated_session)
+      assert updated_session.current_turn_index == 2
+      assert Sessions.get_current_turn_participant(updated_session).id == ctx.charlie.id
+    end
+
+    test "advance_turn enters catch-up phase when all have had a turn", ctx do
+      session = ctx.session
+
+      # Advance through all participants without anyone scoring
+      {:ok, session} = Sessions.advance_turn(session)
+      {:ok, session} = Sessions.advance_turn(session)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Should enter catch-up phase since no one scored
+      assert session.in_catch_up_phase == true
+      assert session.current_turn_index == 0
+    end
+
+    test "skip_turn advances to next participant", ctx do
+      {:ok, updated_session} = Sessions.skip_turn(ctx.session)
+      assert updated_session.current_turn_index == 1
+      assert Sessions.get_current_turn_participant(updated_session).id == ctx.bob.id
+    end
+
+    test "participants_turn? returns true only for current turn", ctx do
+      assert Sessions.participants_turn?(ctx.session, ctx.alice) == true
+      assert Sessions.participants_turn?(ctx.session, ctx.bob) == false
+      assert Sessions.participants_turn?(ctx.session, ctx.charlie) == false
+
+      {:ok, updated_session} = Sessions.advance_turn(ctx.session)
+      assert Sessions.participants_turn?(updated_session, ctx.alice) == false
+      assert Sessions.participants_turn?(updated_session, ctx.bob) == true
+      assert Sessions.participants_turn?(updated_session, ctx.charlie) == false
     end
   end
 end

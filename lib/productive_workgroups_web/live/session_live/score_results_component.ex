@@ -22,9 +22,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
     <div class="space-y-6">
       <!-- Results summary -->
       <div class="bg-gray-800 rounded-lg p-6">
-        <h2 class="text-lg font-semibold text-white mb-4">Discuss the results as a team</h2>
-        
-    <!-- Individual scores - 10 horizontal boxes -->
+        <!-- Individual scores - 10 horizontal boxes -->
         <div class="flex flex-wrap gap-2 justify-center">
           <%= for score <- @all_scores do %>
             <div

@@ -813,7 +813,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       # Load the page - should show results page since scores are revealed
       {:ok, view, html} = live(conn, ~p"/session/#{ctx.session.code}")
-      assert html =~ "Discuss the results"
+      assert html =~ "As facilitator, advance when the team is ready"
 
       # Go back from results page to scoring entry
       render_click(view, "go_back")
@@ -1142,6 +1142,224 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       # Timer should show ~10 minutes (600 seconds, formatted as 10:00)
       # Note: there may be slight variations due to timing, so we check for 10: or 9:
       assert html =~ ~r/data-total="600"/
+    end
+  end
+
+  describe "Turn-based scoring PubSub" do
+    setup do
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Turn Test",
+          slug: "turn-pubsub-test-#{System.unique_integer()}",
+          version: "1.0.0",
+          default_duration_minutes: 100
+        })
+
+      # Add one question
+      {:ok, _} =
+        Workshops.create_question(template, %{
+          index: 0,
+          title: "Test Question",
+          criterion_number: "1",
+          criterion_name: "Test",
+          explanation: "Test explanation",
+          scale_type: "balance",
+          scale_min: -5,
+          scale_max: 5,
+          optimal_value: 0,
+          discussion_prompts: []
+        })
+
+      {:ok, session} = Sessions.create_session(template)
+
+      # Create facilitator (joins first - will be first in turn order)
+      facilitator_token = Ecto.UUID.generate()
+
+      {:ok, facilitator} =
+        Sessions.join_session(session, "Alice", facilitator_token, is_facilitator: true)
+
+      # Small delay to ensure different joined_at
+      Process.sleep(10)
+
+      # Create regular participant (joins second - will be second in turn order)
+      participant_token = Ecto.UUID.generate()
+      {:ok, participant} = Sessions.join_session(session, "Bob", participant_token)
+
+      %{
+        session: session,
+        template: template,
+        facilitator: facilitator,
+        facilitator_token: facilitator_token,
+        participant: participant,
+        participant_token: participant_token
+      }
+    end
+
+    test "turn_advanced broadcast updates is_my_turn for next participant", ctx do
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Connect as Bob (the second participant)
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.participant_token)
+
+      {:ok, view, html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Initially Alice is the current turn, so Bob should see waiting message
+      assert html =~ "Waiting for"
+      refute html =~ "Your turn to score"
+
+      # Simulate Alice completing her turn - this updates DB and broadcasts
+      {:ok, _updated_session} = Sessions.advance_turn(session)
+
+      # Re-render and check - Bob should now see "Your turn to score"
+      # because advance_turn broadcasts turn_advanced which the LiveView should receive
+      html = render(view)
+      assert html =~ "Your turn to score"
+    end
+
+    test "complete_turn via LiveView updates next participant's view", ctx do
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, _session} = Sessions.advance_to_scoring(session)
+
+      # Connect as Alice (facilitator, first in turn order)
+      alice_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, alice_view, alice_html} = live(alice_conn, ~p"/session/#{ctx.session.code}")
+
+      # Alice should see "Your turn to score"
+      assert alice_html =~ "Your turn to score"
+
+      # Connect as Bob (second participant)
+      bob_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.participant_token)
+
+      {:ok, bob_view, bob_html} = live(bob_conn, ~p"/session/#{ctx.session.code}")
+
+      # Bob should initially see waiting message
+      assert bob_html =~ "Waiting for"
+      refute bob_html =~ "Your turn to score"
+
+      # Alice selects a score and places it
+      alice_view
+      |> element("button[phx-click='select_score'][phx-value-score='0']")
+      |> render_click()
+
+      alice_view |> element("button[phx-click='submit_score']") |> render_click()
+
+      # Alice clicks "Done" to complete her turn
+      alice_view |> element("button[phx-click='complete_turn']") |> render_click()
+
+      # Bob should now see "Your turn to score" after receiving the broadcast
+      bob_html = render(bob_view)
+      assert bob_html =~ "Your turn to score"
+      refute bob_html =~ "Waiting for"
+    end
+
+    test "current_turn_participant_id updates correctly after complete_turn", ctx do
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, _session} = Sessions.advance_to_scoring(session)
+
+      # Verify initial turn order
+      participants = Sessions.get_participants_in_turn_order(ctx.session)
+      assert length(participants) == 2
+      assert hd(participants).name == "Alice"
+      assert Enum.at(participants, 1).name == "Bob"
+
+      # Connect as Bob (second participant)
+      bob_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.participant_token)
+
+      {:ok, bob_view, _bob_html} = live(bob_conn, ~p"/session/#{ctx.session.code}")
+
+      # Verify Bob's participant is correct
+      assert ctx.participant.name == "Bob"
+      refute ctx.participant.is_observer
+
+      # Connect as Alice and complete her turn
+      alice_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, alice_view, _} = live(alice_conn, ~p"/session/#{ctx.session.code}")
+
+      alice_view
+      |> element("button[phx-click='select_score'][phx-value-score='0']")
+      |> render_click()
+
+      alice_view |> element("button[phx-click='submit_score']") |> render_click()
+      alice_view |> element("button[phx-click='complete_turn']") |> render_click()
+
+      # Verify the session is updated in the database
+      updated_session = Sessions.get_session!(ctx.session.id)
+      assert updated_session.current_turn_index == 1
+
+      # Verify current turn participant is Bob
+      current_turn = Sessions.get_current_turn_participant(updated_session)
+      assert current_turn.id == ctx.participant.id
+      assert current_turn.name == "Bob"
+
+      # Bob's view should show "Your turn to score"
+      bob_html = render(bob_view)
+      assert bob_html =~ "Your turn to score"
+    end
+
+    test "skip_turn via LiveView also updates next participant's view", ctx do
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # First, Alice completes her turn so Bob is the current turn
+      alice_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, alice_view, _} = live(alice_conn, ~p"/session/#{ctx.session.code}")
+
+      # Alice scores and completes her turn
+      alice_view
+      |> element("button[phx-click='select_score'][phx-value-score='0']")
+      |> render_click()
+
+      alice_view |> element("button[phx-click='submit_score']") |> render_click()
+      alice_view |> element("button[phx-click='complete_turn']") |> render_click()
+
+      # Now it's Bob's turn
+      # Add a third participant Charlie to verify skip works
+      charlie_token = Ecto.UUID.generate()
+      {:ok, _charlie} = Sessions.join_session(session, "Charlie", charlie_token)
+
+      # Connect as Charlie (third participant)
+      charlie_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, charlie_token)
+
+      {:ok, charlie_view, charlie_html} = live(charlie_conn, ~p"/session/#{ctx.session.code}")
+
+      # Charlie should see "Waiting for Bob to score"
+      assert charlie_html =~ "Waiting for"
+      assert charlie_html =~ "Bob"
+      refute charlie_html =~ "Your turn to score"
+
+      # Re-render Alice's view and skip Bob
+      _alice_html = render(alice_view)
+      alice_view |> element("button[phx-click='skip_turn']") |> render_click()
+
+      # Charlie should now see "Your turn to score" after receiving the broadcast
+      charlie_html = render(charlie_view)
+      assert charlie_html =~ "Your turn to score"
+      refute charlie_html =~ "Waiting for"
     end
   end
 end
