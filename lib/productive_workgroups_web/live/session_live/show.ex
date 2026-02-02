@@ -5,7 +5,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   use ProductiveWorkgroupsWeb, :live_view
 
   alias ProductiveWorkgroups.Export
-  alias ProductiveWorkgroups.Facilitation
   alias ProductiveWorkgroups.Notes
   alias ProductiveWorkgroups.Scoring
   alias ProductiveWorkgroups.Sessions
@@ -16,13 +15,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   alias ProductiveWorkgroupsWeb.SessionLive.Components.LobbyComponent
   alias ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent
   alias ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent
+  alias ProductiveWorkgroupsWeb.SessionLive.TimerHandler
+  alias ProductiveWorkgroupsWeb.SessionLive.TurnTimeoutHandler
 
+  import ProductiveWorkgroupsWeb.SessionLive.OperationHelpers
   import ProductiveWorkgroupsWeb.SessionLive.ScoreHelpers
 
   require Logger
-
-  # Timer tick interval in milliseconds
-  @timer_tick_interval 1000
 
   @impl true
   def mount(%{"code" => code}, session, socket) do
@@ -71,69 +70,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
      |> assign(note_input: "")
      |> assign(show_export_modal: false)
      |> assign(export_content: "all")
-     |> init_timer_assigns()
+     |> TimerHandler.init_timer_assigns()
+     |> TurnTimeoutHandler.init_timeout_assigns()
      |> load_scoring_data(workshop_session, participant)
      |> load_summary_data(workshop_session)
      |> load_actions_data(workshop_session)
-     |> maybe_start_timer()}
-  end
-
-  # Timer management helpers
-
-  defp init_timer_assigns(socket) do
-    socket
-    |> assign(timer_enabled: false)
-    |> assign(segment_duration: nil)
-    |> assign(timer_remaining: nil)
-    |> assign(timer_phase: nil)
-    |> assign(timer_phase_name: nil)
-    |> assign(timer_ref: nil)
-    |> assign(timer_warning_threshold: nil)
-  end
-
-  defp maybe_start_timer(socket) do
-    session = socket.assigns.session
-    participant = socket.assigns.participant
-
-    if participant.is_facilitator and Facilitation.timer_enabled?(session) do
-      start_phase_timer(socket, session)
-    else
-      socket
-    end
-  end
-
-  defp start_phase_timer(socket, session) do
-    # Cancel any existing timer
-    socket = cancel_timer(socket)
-
-    segment_duration = Facilitation.calculate_segment_duration(session)
-    timer_phase = Facilitation.current_timer_phase(session)
-    warning_threshold = Facilitation.warning_threshold(session)
-
-    if segment_duration && timer_phase do
-      # Schedule the first tick
-      timer_ref = Process.send_after(self(), :timer_tick, @timer_tick_interval)
-
-      socket
-      |> assign(timer_enabled: true)
-      |> assign(segment_duration: segment_duration)
-      |> assign(timer_remaining: segment_duration)
-      |> assign(timer_phase: timer_phase)
-      |> assign(timer_phase_name: Facilitation.phase_name(timer_phase))
-      |> assign(timer_ref: timer_ref)
-      |> assign(timer_warning_threshold: warning_threshold)
-    else
-      socket
-      |> assign(timer_enabled: false)
-    end
-  end
-
-  defp cancel_timer(socket) do
-    if socket.assigns[:timer_ref] do
-      Process.cancel_timer(socket.assigns.timer_ref)
-    end
-
-    assign(socket, timer_ref: nil)
+     |> TimerHandler.maybe_start_timer()
+     |> TurnTimeoutHandler.start_turn_timeout()}
   end
 
   @impl true
@@ -293,16 +236,29 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   # Handle timer tick for facilitator timer countdown
   @impl true
   def handle_info(:timer_tick, socket) do
-    if socket.assigns.timer_enabled and socket.assigns.timer_remaining > 0 do
-      new_remaining = socket.assigns.timer_remaining - 1
-      timer_ref = Process.send_after(self(), :timer_tick, @timer_tick_interval)
+    TimerHandler.handle_timer_tick(socket)
+  end
 
-      {:noreply,
-       socket
-       |> assign(timer_remaining: new_remaining)
-       |> assign(timer_ref: timer_ref)}
-    else
-      {:noreply, assign(socket, timer_ref: nil)}
+  # Handle turn timeout tick for auto-skipping inactive participants
+  @impl true
+  def handle_info(:turn_timeout_tick, socket) do
+    case TurnTimeoutHandler.handle_timeout_tick(socket) do
+      {:continue, socket} ->
+        {:noreply, socket}
+
+      {:auto_skipped, updated_session, socket} ->
+        participant = socket.assigns.participant
+
+        socket =
+          socket
+          |> assign(session: updated_session)
+          |> load_scoring_data(updated_session, participant)
+          |> TurnTimeoutHandler.start_turn_timeout()
+
+        {:noreply, socket}
+
+      {:noreply, socket} ->
+        {:noreply, socket}
     end
   end
 
@@ -322,7 +278,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       {true, _, "scoring"} ->
         socket
         |> load_scoring_data(session, socket.assigns.participant)
-        |> maybe_restart_timer_on_transition(old_session, session)
+        |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
+        |> TurnTimeoutHandler.maybe_restart_on_turn_change(old_session, session)
 
       {_, true, "scoring"} ->
         # Load scoring data first to ensure template is available
@@ -334,57 +291,39 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
         socket
         |> assign(show_mid_transition: show_transition)
-        |> maybe_restart_timer_on_transition(old_session, session)
+        |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
+        |> TurnTimeoutHandler.maybe_restart_on_turn_change(old_session, session)
 
       {false, false, "scoring"} when turn_changed or catch_up_changed ->
         # Turn changed within the same question - reload scoring data
         socket
         |> load_scoring_data(session, socket.assigns.participant)
+        |> TurnTimeoutHandler.maybe_restart_on_turn_change(old_session, session)
 
       {true, _, "summary"} ->
         socket
         |> load_summary_data(session)
         |> load_actions_data(session)
-        |> maybe_restart_timer_on_transition(old_session, session)
+        |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
+        |> TurnTimeoutHandler.cancel_turn_timeout()
 
       {true, _, "actions"} ->
         # Don't restart timer when transitioning from summary to actions - shared timer
-        socket |> load_summary_data(session) |> load_actions_data(session)
+        socket
+        |> load_summary_data(session)
+        |> load_actions_data(session)
+        |> TurnTimeoutHandler.cancel_turn_timeout()
 
       {true, _, "completed"} ->
         socket
         |> load_summary_data(session)
         |> load_actions_data(session)
-        |> stop_timer()
+        |> TimerHandler.stop_timer()
+        |> TurnTimeoutHandler.cancel_turn_timeout()
 
       _ ->
         socket
     end
-  end
-
-  defp maybe_restart_timer_on_transition(socket, old_session, session) do
-    participant = socket.assigns.participant
-
-    if participant.is_facilitator do
-      old_phase = Facilitation.current_timer_phase(old_session)
-      new_phase = Facilitation.current_timer_phase(session)
-
-      # Only restart if the phase actually changed
-      # (summary→actions keeps the same "summary_actions" phase, so no restart)
-      if old_phase != new_phase and Facilitation.timer_enabled?(session) do
-        start_phase_timer(socket, session)
-      else
-        socket
-      end
-    else
-      socket
-    end
-  end
-
-  defp stop_timer(socket) do
-    socket
-    |> cancel_timer()
-    |> assign(timer_enabled: false)
   end
 
   @impl true
@@ -393,14 +332,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     participant = socket.assigns.participant
 
     if participant.is_facilitator do
-      case Sessions.start_session(session) do
-        {:ok, updated_session} ->
-          {:noreply, assign(socket, session: updated_session)}
-
-        {:error, reason} ->
-          Logger.error("Failed to start workshop: #{inspect(reason)}")
-          {:noreply, put_flash(socket, :error, "Failed to start workshop")}
-      end
+      handle_operation(
+        socket,
+        Sessions.start_session(session),
+        "Failed to start workshop",
+        &assign(&1, session: &2)
+      )
     else
       {:noreply, socket}
     end
@@ -429,17 +366,17 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     participant = socket.assigns.participant
 
     if participant.is_facilitator do
-      case Sessions.advance_to_scoring(session) do
-        {:ok, updated_session} ->
-          {:noreply,
-           socket
-           |> assign(session: updated_session)
-           |> load_scoring_data(updated_session, participant)
-           |> start_phase_timer(updated_session)}
-
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Failed to advance to scoring")}
-      end
+      handle_operation(
+        socket,
+        Sessions.advance_to_scoring(session),
+        "Failed to advance to scoring",
+        fn socket, updated_session ->
+          socket
+          |> assign(session: updated_session)
+          |> load_scoring_data(updated_session, participant)
+          |> TimerHandler.start_phase_timer(updated_session)
+        end
+      )
     else
       {:noreply, socket}
     end
@@ -485,7 +422,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
              socket
              |> assign(session: updated_session)
              |> assign(my_turn_locked: true)
-             |> load_scoring_data(updated_session, participant)}
+             |> load_scoring_data(updated_session, participant)
+             |> TurnTimeoutHandler.maybe_restart_on_turn_change(session, updated_session)}
 
           {:error, reason} ->
             Logger.error("Failed to advance turn: #{inspect(reason)}")
@@ -503,30 +441,29 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     session = socket.assigns.session
     participant = socket.assigns.participant
 
-    case Sessions.skip_turn(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> load_scoring_data(updated_session, participant)}
-
-      {:error, reason} ->
-        Logger.error("Failed to skip turn: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Failed to skip turn")}
-    end
+    handle_operation(
+      socket,
+      Sessions.skip_turn(session),
+      "Failed to skip turn",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> load_scoring_data(updated_session, participant)
+        |> TurnTimeoutHandler.maybe_restart_on_turn_change(session, updated_session)
+      end
+    )
   end
 
   @impl true
   def handle_event("mark_ready", _params, socket) do
     participant = socket.assigns.participant
 
-    case Sessions.set_participant_ready(participant, true) do
-      {:ok, updated_participant} ->
-        {:noreply, assign(socket, participant: updated_participant)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to mark as ready")}
-    end
+    handle_operation(
+      socket,
+      Sessions.set_participant_ready(participant, true),
+      "Failed to mark as ready",
+      &assign(&1, participant: &2)
+    )
   end
 
   # Note handlers - kept for backward compatibility with tests
@@ -610,16 +547,16 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     participant = socket.assigns.participant
 
     if participant.is_facilitator do
-      case Sessions.advance_to_actions(session) do
-        {:ok, updated_session} ->
-          {:noreply,
-           socket
-           |> assign(session: updated_session)
-           |> load_actions_data(updated_session)}
-
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Failed to advance to actions")}
-      end
+      handle_operation(
+        socket,
+        Sessions.advance_to_actions(session),
+        "Failed to advance to actions",
+        fn socket, updated_session ->
+          socket
+          |> assign(session: updated_session)
+          |> load_actions_data(updated_session)
+        end
+      )
     else
       {:noreply, socket}
     end
@@ -631,18 +568,18 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     participant = socket.assigns.participant
 
     if participant.is_facilitator do
-      case Sessions.advance_to_completed(session) do
-        {:ok, updated_session} ->
-          {:noreply,
-           socket
-           |> assign(session: updated_session)
-           |> load_summary_data(updated_session)
-           |> load_actions_data(updated_session)
-           |> stop_timer()}
-
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Failed to advance to wrap-up")}
-      end
+      handle_operation(
+        socket,
+        Sessions.advance_to_completed(session),
+        "Failed to advance to wrap-up",
+        fn socket, updated_session ->
+          socket
+          |> assign(session: updated_session)
+          |> load_summary_data(updated_session)
+          |> load_actions_data(updated_session)
+          |> TimerHandler.stop_timer()
+        end
+      )
     else
       {:noreply, socket}
     end
@@ -780,48 +717,48 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     Scoring.unreveal_scores(session, last_index)
 
     # Don't restart timer - timer only moves forward, keeps current countdown
-    case Sessions.go_back_to_scoring(session, last_index) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> load_scoring_data(updated_session, socket.assigns.participant)
-         |> assign(scores_revealed: false)
-         |> assign(has_submitted: false)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to go back")}
-    end
+    handle_operation(
+      socket,
+      Sessions.go_back_to_scoring(session, last_index),
+      "Failed to go back",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> load_scoring_data(updated_session, socket.assigns.participant)
+        |> assign(scores_revealed: false)
+        |> assign(has_submitted: false)
+      end
+    )
   end
 
   defp do_go_back_from_state(socket, session, "actions") do
     Sessions.reset_all_ready(session)
 
-    case Sessions.go_back_to_summary(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> load_summary_data(updated_session)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to go back")}
-    end
+    handle_operation(
+      socket,
+      Sessions.go_back_to_summary(session),
+      "Failed to go back",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> load_summary_data(updated_session)
+      end
+    )
   end
 
   defp do_go_back_from_state(socket, session, "completed") do
     Sessions.reset_all_ready(session)
 
-    case Sessions.go_back_to_summary(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> load_summary_data(updated_session)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to go back")}
-    end
+    handle_operation(
+      socket,
+      Sessions.go_back_to_summary(session),
+      "Failed to go back",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> load_summary_data(updated_session)
+      end
+    )
   end
 
   defp do_go_back_from_state(socket, _session, _state) do
@@ -846,33 +783,33 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     # Don't unreveal - we want to show the previous question's results
     # Don't restart timer - timer only moves forward, keeps current countdown
 
-    case Sessions.go_back_question(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> assign(show_mid_transition: false)
-         |> load_scoring_data(updated_session, socket.assigns.participant)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to go back")}
-    end
+    handle_operation(
+      socket,
+      Sessions.go_back_question(session),
+      "Failed to go back",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> assign(show_mid_transition: false)
+        |> load_scoring_data(updated_session, socket.assigns.participant)
+      end
+    )
   end
 
   defp go_back_to_intro(socket, session) do
     Sessions.reset_all_ready(session)
 
-    case Sessions.go_back_to_intro(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> assign(intro_step: 4)
-         |> stop_timer()}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to go back")}
-    end
+    handle_operation(
+      socket,
+      Sessions.go_back_to_intro(session),
+      "Failed to go back",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> assign(intro_step: 4)
+        |> TimerHandler.stop_timer()
+      end
+    )
   end
 
   defp do_submit_score(socket, nil) do
@@ -930,17 +867,17 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   defp do_advance(socket, session, true) do
-    case Sessions.advance_to_summary(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> load_summary_data(updated_session)
-         |> start_phase_timer(updated_session)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to advance to summary")}
-    end
+    handle_operation(
+      socket,
+      Sessions.advance_to_summary(session),
+      "Failed to advance to summary",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> load_summary_data(updated_session)
+        |> TimerHandler.start_phase_timer(updated_session)
+      end
+    )
   end
 
   defp do_advance(socket, session, false) do
@@ -951,18 +888,18 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     # Show mid-workshop transition when scale type changes (e.g., balance -> maximal)
     show_transition = scale_type_changes_at?(template, current_index)
 
-    case Sessions.advance_question(session) do
-      {:ok, updated_session} ->
-        {:noreply,
-         socket
-         |> assign(session: updated_session)
-         |> assign(show_mid_transition: show_transition)
-         |> load_scoring_data(updated_session, participant)
-         |> start_phase_timer(updated_session)}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to advance to next question")}
-    end
+    handle_operation(
+      socket,
+      Sessions.advance_question(session),
+      "Failed to advance to next question",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> assign(show_mid_transition: show_transition)
+        |> load_scoring_data(updated_session, participant)
+        |> TimerHandler.start_phase_timer(updated_session)
+      end
+    )
   end
 
   # Scoring data helpers
