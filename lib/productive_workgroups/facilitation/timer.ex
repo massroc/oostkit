@@ -16,6 +16,7 @@ defmodule ProductiveWorkgroups.Facilitation.Timer do
   import Ecto.Changeset
 
   alias ProductiveWorkgroups.Sessions.Session
+  alias ProductiveWorkgroups.Timestamps
 
   @statuses ~w(stopped running paused exceeded)
 
@@ -72,7 +73,7 @@ defmodule ProductiveWorkgroups.Facilitation.Timer do
     |> cast(
       %{
         status: "running",
-        started_at: DateTime.utc_now() |> DateTime.truncate(:second),
+        started_at: Timestamps.now(),
         paused_at: nil
       },
       [:status, :started_at, :paused_at]
@@ -88,7 +89,7 @@ defmodule ProductiveWorkgroups.Facilitation.Timer do
       %{
         status: "paused",
         remaining_seconds: remaining_seconds,
-        paused_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        paused_at: Timestamps.now()
       },
       [:status, :remaining_seconds, :paused_at]
     )

@@ -44,7 +44,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   defp mount_with_session(socket, workshop_session, browser_token, code) do
-    participant = Sessions.get_participant_by_token(workshop_session, browser_token)
+    participant = Sessions.get_participant(workshop_session, browser_token)
     mount_with_participant(socket, workshop_session, participant, code)
   end
 
@@ -904,69 +904,73 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   # Scoring data helpers
 
-  defp load_scoring_data(socket, session, participant) do
-    if session.state == "scoring" do
-      # Reuse cached template to avoid repeated database queries
-      template = get_or_load_template(socket, session.template_id)
-      question_index = session.current_question_index
-      question = Enum.find(template.questions, &(&1.index == question_index))
+  defp load_scoring_data(socket, %{state: "scoring"} = session, participant) do
+    # Reuse cached template to avoid repeated database queries
+    template = get_or_load_template(socket, session.template_id)
+    question_index = session.current_question_index
+    question = Enum.find(template.questions, &(&1.index == question_index))
 
-      my_score = Scoring.get_score(session, participant, question_index)
-      my_turn_locked = my_score != nil and my_score.turn_locked
+    my_score = Scoring.get_score(session, participant, question_index)
+    my_turn_locked = my_score != nil and my_score.turn_locked
 
-      # Turn-based scoring state
-      current_turn_participant = Sessions.get_current_turn_participant(session)
+    # Turn-based scoring state
+    current_turn_participant = Sessions.get_current_turn_participant(session)
 
-      is_my_turn =
-        current_turn_participant != nil and current_turn_participant.id == participant.id
+    is_my_turn =
+      current_turn_participant != nil and current_turn_participant.id == participant.id
 
-      # Check if current turn participant has already submitted (for skip button visibility)
-      current_turn_has_score =
-        if current_turn_participant do
-          Scoring.get_score(session, current_turn_participant, question_index) != nil
-        else
-          false
-        end
+    # Check if current turn participant has already submitted (for skip button visibility)
+    current_turn_has_score =
+      if current_turn_participant do
+        Scoring.get_score(session, current_turn_participant, question_index) != nil
+      else
+        false
+      end
 
-      socket
-      |> assign(template: template)
-      |> assign(total_questions: length(template.questions))
-      |> assign(current_question: question)
-      |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
-      |> assign(my_score: if(my_score, do: my_score.value, else: nil))
-      |> assign(has_submitted: my_score != nil)
-      |> assign(my_turn_locked: my_turn_locked)
-      |> assign(is_my_turn: is_my_turn and not participant.is_observer)
-      |> assign(
-        current_turn_participant_id: current_turn_participant && current_turn_participant.id
-      )
-      |> assign(current_turn_has_score: current_turn_has_score)
-      |> assign(in_catch_up_phase: session.in_catch_up_phase)
-      |> assign(show_facilitator_tips: false)
-      |> assign(show_notes: false)
-      |> load_scores(session, question_index)
-      |> load_notes(session, question_index)
-    else
-      socket
-      |> assign(template: nil)
-      |> assign(total_questions: 0)
-      |> assign(current_question: nil)
-      |> assign(selected_value: nil)
-      |> assign(my_score: nil)
-      |> assign(has_submitted: false)
-      |> assign(my_turn_locked: false)
-      |> assign(is_my_turn: false)
-      |> assign(current_turn_participant_id: nil)
-      |> assign(current_turn_has_score: false)
-      |> assign(in_catch_up_phase: false)
-      |> assign(all_scores: [])
-      |> assign(scores_revealed: false)
-      |> assign(score_count: 0)
-      |> assign(active_participant_count: 0)
-      |> assign(question_notes: [])
-      |> assign(show_facilitator_tips: false)
-      |> assign(show_notes: false)
-    end
+    socket
+    |> assign(template: template)
+    |> assign(total_questions: length(template.questions))
+    |> assign(current_question: question)
+    |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
+    |> assign(my_score: if(my_score, do: my_score.value, else: nil))
+    |> assign(has_submitted: my_score != nil)
+    |> assign(my_turn_locked: my_turn_locked)
+    |> assign(is_my_turn: is_my_turn and not participant.is_observer)
+    |> assign(
+      current_turn_participant_id: current_turn_participant && current_turn_participant.id
+    )
+    |> assign(current_turn_has_score: current_turn_has_score)
+    |> assign(in_catch_up_phase: session.in_catch_up_phase)
+    |> assign(show_facilitator_tips: false)
+    |> assign(show_notes: false)
+    |> load_scores(session, question_index)
+    |> load_notes(session, question_index)
+  end
+
+  defp load_scoring_data(socket, _session, _participant) do
+    reset_scoring_assigns(socket)
+  end
+
+  defp reset_scoring_assigns(socket) do
+    socket
+    |> assign(template: nil)
+    |> assign(total_questions: 0)
+    |> assign(current_question: nil)
+    |> assign(selected_value: nil)
+    |> assign(my_score: nil)
+    |> assign(has_submitted: false)
+    |> assign(my_turn_locked: false)
+    |> assign(is_my_turn: false)
+    |> assign(current_turn_participant_id: nil)
+    |> assign(current_turn_has_score: false)
+    |> assign(in_catch_up_phase: false)
+    |> assign(all_scores: [])
+    |> assign(scores_revealed: false)
+    |> assign(score_count: 0)
+    |> assign(active_participant_count: 0)
+    |> assign(question_notes: [])
+    |> assign(show_facilitator_tips: false)
+    |> assign(show_notes: false)
   end
 
   defp load_scores(socket, session, question_index) do

@@ -108,49 +108,21 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
                   <div class={[
                     "rounded p-2 text-center min-w-[60px] transition-all",
                     case s.state do
-                      :scored ->
-                        case s.color do
-                          :green -> "bg-green-900/50 border border-green-700"
-                          :amber -> "bg-yellow-900/50 border border-yellow-700"
-                          :red -> "bg-red-900/50 border border-red-700"
-                          _ -> "bg-gray-700 border border-gray-600"
-                        end
-
-                      :current ->
-                        "bg-blue-900/30 border-2 border-blue-500 animate-pulse"
-
-                      :skipped ->
-                        "bg-gray-800 border border-gray-600"
-
-                      :pending ->
-                        "bg-gray-800/50 border border-gray-700"
-
-                      _ ->
-                        "bg-gray-700 border border-gray-600"
+                      :scored -> bg_color_class(s.color)
+                      :current -> "bg-blue-900/30 border-2 border-blue-500 animate-pulse"
+                      :skipped -> "bg-gray-800 border border-gray-600"
+                      :pending -> "bg-gray-800/50 border border-gray-700"
+                      _ -> "bg-gray-700 border border-gray-600"
                     end
                   ]}>
                     <div class={[
                       "text-lg font-bold",
                       case s.state do
-                        :scored ->
-                          case s.color do
-                            :green -> "text-green-400"
-                            :amber -> "text-yellow-400"
-                            :red -> "text-red-400"
-                            _ -> "text-gray-400"
-                          end
-
-                        :current ->
-                          "text-blue-400"
-
-                        :skipped ->
-                          "text-gray-500"
-
-                        :pending ->
-                          "text-gray-600"
-
-                        _ ->
-                          "text-gray-400"
+                        :scored -> text_color_class(s.color)
+                        :current -> "text-blue-400"
+                        :skipped -> "text-gray-500"
+                        :pending -> "text-gray-600"
+                        _ -> "text-gray-400"
                       end
                     ]}>
                       <%= case s.state do %>

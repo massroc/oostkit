@@ -8,6 +8,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
   """
   use ProductiveWorkgroupsWeb, :live_component
 
+  import ProductiveWorkgroupsWeb.SessionLive.ScoreHelpers,
+    only: [text_color_class: 1, bg_color_class: 1]
+
   @impl true
   def update(assigns, socket) do
     {:ok, assign(socket, assigns)}
@@ -28,24 +31,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
             <div
               class={[
                 "rounded-lg p-2 text-center min-w-[4rem] flex-shrink-0",
-                case score.color do
-                  :green -> "bg-green-900/50 border border-green-700"
-                  :amber -> "bg-yellow-900/50 border border-yellow-700"
-                  :red -> "bg-red-900/50 border border-red-700"
-                  _ -> "bg-gray-700"
-                end
+                bg_color_class(score.color)
               ]}
               title={score.participant_name}
             >
-              <div class={[
-                "text-xl font-bold",
-                case score.color do
-                  :green -> "text-green-400"
-                  :amber -> "text-yellow-400"
-                  :red -> "text-red-400"
-                  _ -> "text-gray-400"
-                end
-              ]}>
+              <div class={["text-xl font-bold", text_color_class(score.color)]}>
                 <%= if @current_question.scale_type == "balance" and score.value > 0 do %>
                   +
                 <% end %>

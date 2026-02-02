@@ -15,6 +15,7 @@ defmodule ProductiveWorkgroups.Sessions.Participant do
   import Ecto.Changeset
 
   alias ProductiveWorkgroups.Sessions.Session
+  alias ProductiveWorkgroups.Timestamps
 
   @statuses ~w(active inactive dropped)
 
@@ -61,7 +62,7 @@ defmodule ProductiveWorkgroups.Sessions.Participant do
   Changeset for joining a session.
   """
   def join_changeset(participant, session, attrs) do
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    now = Timestamps.now()
 
     participant
     |> changeset(Map.merge(attrs, %{joined_at: now, last_seen_at: now}))
@@ -73,7 +74,7 @@ defmodule ProductiveWorkgroups.Sessions.Participant do
   """
   def status_changeset(participant, status) do
     participant
-    |> cast(%{status: status, last_seen_at: DateTime.utc_now() |> DateTime.truncate(:second)}, [
+    |> cast(%{status: status, last_seen_at: Timestamps.now()}, [
       :status,
       :last_seen_at
     ])
