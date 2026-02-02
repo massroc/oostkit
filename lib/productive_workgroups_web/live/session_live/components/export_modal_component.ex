@@ -26,7 +26,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
               stroke-width="2"
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
             />
-          </svg> <span>Export Results</span>
+          </svg>
+          <span>Export Results</span>
         </button>
       </div>
       <!-- Export Modal -->
@@ -38,7 +39,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
           <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-semibold text-white">Export Workshop Data</h3>
-              
+
               <button
                 type="button"
                 phx-click="close_export_modal"
@@ -54,9 +55,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
                 </svg>
               </button>
             </div>
-            
+
             <p class="text-gray-400 text-sm mb-6">Select what to include in the export.</p>
-            
+
             <div class="space-y-3 mb-6">
               <label class={[
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
@@ -76,7 +77,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
                 />
                 <div>
                   <div class="text-white font-medium">Everything</div>
-                  
+
                   <div class="text-gray-400 text-sm">Results, notes, and action items</div>
                 </div>
               </label>
@@ -98,7 +99,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
                 />
                 <div>
                   <div class="text-white font-medium">Results Only</div>
-                  
+
                   <div class="text-gray-400 text-sm">Scores, participants, and notes</div>
                 </div>
               </label>
@@ -133,7 +134,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
                   }>
                     Actions Only
                   </div>
-                  
+
                   <div class="text-gray-400 text-sm">
                     <%= if @action_count == 0 do %>
                       No action items recorded
@@ -144,7 +145,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent do
                 </div>
               </label>
             </div>
-            
+
             <div class="grid grid-cols-2 gap-3">
               <button
                 type="button"

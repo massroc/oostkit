@@ -14,6 +14,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
   attr :participant, :map, required: true
   attr :participants, :list, required: true
   attr :current_question, :map, required: true
+  attr :total_questions, :integer, required: true
   attr :all_scores, :list, required: true
   attr :selected_value, :any, required: true
   attr :my_score, :any, required: true
@@ -42,34 +43,34 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
           <!-- Progress indicator -->
           <div class="mb-6">
             <div class="flex justify-between items-center text-sm text-gray-400 mb-2">
-              <span>Question {@session.current_question_index + 1} of 8</span>
+              <span>Question {@session.current_question_index + 1} of {@total_questions}</span>
               <span>{@score_count}/{@active_participant_count} submitted</span>
             </div>
-            
+
             <div class="w-full bg-gray-700 rounded-full h-2">
               <div
                 class="bg-green-500 h-2 rounded-full transition-all duration-300"
-                style={"width: #{(@session.current_question_index + 1) / 8 * 100}%"}
+                style={"width: #{(@session.current_question_index + 1) / @total_questions * 100}%"}
               />
             </div>
           </div>
           <!-- Question card -->
           <div class="bg-gray-800 rounded-lg p-6 mb-6">
             <div class="text-sm text-green-400 mb-2">{@current_question.criterion_name}</div>
-            
+
             <h1 class="text-2xl font-bold text-white mb-4">{@current_question.title}</h1>
-            
+
             <p class="text-gray-300 whitespace-pre-line">
               {format_description(@current_question.explanation)}
             </p>
-            
+
             <%= if length(@current_question.discussion_prompts) > 0 do %>
               <%= if @show_facilitator_tips do %>
                 <!-- Expanded tips section -->
                 <div class="mt-4 pt-4 border-t border-gray-700">
                   <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-semibold text-purple-400">Facilitator Tips</h3>
-                    
+
                     <button
                       type="button"
                       phx-click="toggle_facilitator_tips"
@@ -78,7 +79,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
                       Hide tips
                     </button>
                   </div>
-                  
+
                   <ul class="space-y-2">
                     <%= for prompt <- @current_question.discussion_prompts do %>
                       <li class="flex gap-2 text-gray-300 text-sm">
@@ -169,7 +170,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
                           —
                       <% end %>
                     </div>
-                    
+
                     <div
                       class={[
                         "text-xs truncate",
@@ -193,13 +194,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
               <% end %>
             </div>
           <% end %>
-          
+
           <%= if @scores_revealed do %>
             <.live_component
               module={ScoreResultsComponent}
               id="score-results"
               all_scores={@all_scores}
               current_question={@current_question}
+              total_questions={@total_questions}
               show_notes={@show_notes}
               question_notes={@question_notes}
               note_input={@note_input}
@@ -222,14 +224,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
                     disabled
                     class="flex-1 px-6 py-3 bg-gray-600 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
                   >
-                    <%= if @session.current_question_index + 1 >= 8 do %>
+                    <%= if @session.current_question_index + 1 >= @total_questions do %>
                       Continue to Summary →
                     <% else %>
                       Next Question →
                     <% end %>
                   </button>
                 </div>
-                
+
                 <p class="text-center text-gray-500 text-sm mt-2">
                   Waiting for all scores to be submitted...
                 </p>
@@ -248,37 +250,37 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
       <div class="max-w-2xl w-full text-center">
         <div class="bg-gray-800 rounded-lg p-8">
           <div class="text-6xl mb-4">🔄</div>
-          
+
           <h1 class="text-3xl font-bold text-white mb-6">New Scoring Scale Ahead</h1>
-          
+
           <div class="text-gray-300 space-y-4 text-lg text-left">
             <p class="text-center">Great progress! You've completed the first four questions.</p>
-            
+
             <div class="bg-gray-700 rounded-lg p-6 my-6">
               <p class="text-white font-semibold mb-3">
                 The next four questions use a different scale:
               </p>
-              
+
               <div class="flex justify-between items-center mb-4">
                 <span class="text-gray-400">0</span>
                 <span class="text-green-400 font-semibold text-xl">→</span>
                 <span class="text-green-400 font-semibold">10</span>
               </div>
-              
+
               <ul class="space-y-2 text-gray-300">
                 <li>
                   • For these, <span class="text-green-400 font-semibold">more is always better</span>
                 </li>
-                
+
                 <li>• <span class="text-green-400 font-semibold">10 is optimal</span></li>
               </ul>
             </div>
-            
+
             <p class="text-gray-400 text-center">
               These measure aspects of work where you can never have too much.
             </p>
           </div>
-          
+
           <button
             phx-click="continue_past_transition"
             class="mt-8 px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-lg"
@@ -309,9 +311,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
       <%= if @participant.is_observer do %>
         <div class="text-center">
           <div class="text-purple-400 text-lg font-semibold mb-2">Observer Mode</div>
-          
+
           <p class="text-gray-400">You are observing this session.</p>
-          
+
           <%= if @current_turn_name do %>
             <p class="text-gray-500 mt-2">
               <span class="text-white">{@current_turn_name}</span> is scoring
@@ -323,18 +325,18 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
           <!-- It's this participant's turn -->
           <div class="text-center mb-4">
             <div class="text-green-400 text-lg font-semibold">Your turn to score</div>
-            
+
             <%= if @in_catch_up_phase do %>
               <p class="text-gray-400 text-sm mt-1">Catch-up phase - add your score now</p>
             <% end %>
           </div>
-          
+
           <%= if @current_question.scale_type == "balance" do %>
             {render_balance_scale(assigns)}
           <% else %>
             {render_maximal_scale(assigns)}
           <% end %>
-          
+
           <div class="flex gap-3 mt-6">
             <button
               phx-click="submit_score"
@@ -367,7 +369,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
               Done →
             </button>
           </div>
-          
+
           <%= if @has_submitted do %>
             <p class="text-center text-gray-400 text-sm mt-2">
               Discuss this score, then click "Done" when ready
@@ -412,7 +414,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
       <div class="flex justify-between text-sm text-gray-400">
         <span>Too little</span> <span>Just right</span> <span>Too much</span>
       </div>
-      
+
       <div class="flex gap-1">
         <%= for v <- -5..5 do %>
           <button
@@ -436,7 +438,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
           </button>
         <% end %>
       </div>
-      
+
       <div class="flex justify-between text-xs text-gray-500">
         <span>-5</span> <span class="text-green-400">0 = optimal</span> <span>+5</span>
       </div>
@@ -448,7 +450,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
     ~H"""
     <div class="space-y-4">
       <div class="flex justify-between text-sm text-gray-400"><span>Low</span> <span>High</span></div>
-      
+
       <div class="flex gap-1">
         <%= for v <- 0..10 do %>
           <button
@@ -468,7 +470,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
           </button>
         <% end %>
       </div>
-      
+
       <div class="flex justify-between text-xs text-gray-500">
         <span>0</span> <span class="text-green-400">10 = best</span>
       </div>

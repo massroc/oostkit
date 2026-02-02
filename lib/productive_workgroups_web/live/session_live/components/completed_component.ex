@@ -26,9 +26,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
         <!-- Header -->
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-white mb-2">Workshop Wrap-Up</h1>
-          
+
           <p class="text-gray-400">Review key findings and create action items.</p>
-          
+
           <p class="text-sm text-gray-500 mt-2">
             Session code: <span class="font-mono text-white">{@session.code}</span>
           </p>
@@ -36,7 +36,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
         <!-- Score Grid -->
         <div class="bg-gray-800 rounded-lg p-4 mb-6">
           <h2 class="text-lg font-semibold text-white mb-3">All Scores</h2>
-          
+
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <%= for score <- @scores_summary do %>
               <div class={[
@@ -49,7 +49,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
                 end
               ]}>
                 <div class="text-xs text-gray-400 mb-1">Q{score.question_index + 1}</div>
-                
+
                 <div class={[
                   "text-2xl font-bold",
                   case score.color do
@@ -65,14 +65,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
                     —
                   <% end %>
                 </div>
-                
+
                 <div class="text-xs text-gray-400 truncate mt-1" title={score.title}>
                   {score.title}
                 </div>
               </div>
             <% end %>
           </div>
-          
+
           <div class="flex items-center justify-center gap-1 text-xs text-gray-500 mt-2">
             <span>Combined Team Values</span>
             <span
@@ -99,7 +99,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
                 <h3 class="text-lg font-semibold text-green-400 mb-3">
                   Strengths ({length(@strengths)})
                 </h3>
-                
+
                 <ul class="space-y-2">
                   <%= for item <- @strengths do %>
                     <li class="flex items-center gap-2 text-gray-300">
@@ -118,7 +118,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
                 <h3 class="text-lg font-semibold text-red-400 mb-3">
                   Areas of Concern ({length(@concerns)})
                 </h3>
-                
+
                 <ul class="space-y-2">
                   <%= for item <- @concerns do %>
                     <li class="flex items-center gap-2 text-gray-300">
@@ -178,7 +178,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
                 Finish Workshop
               </button>
             </div>
-            
+
             <p class="text-center text-gray-500 text-sm mt-2">
               Finish the workshop and return to the home page.
             </p>
@@ -198,12 +198,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
     <li class="rounded-lg p-3 flex items-start gap-3 bg-gray-700">
       <div class="flex-1">
         <p class="text-gray-300">{@action.description}</p>
-        
+
         <%= if @action.owner_name && @action.owner_name != "" do %>
           <p class="text-sm text-gray-500 mt-1">Owner: {@action.owner_name}</p>
         <% end %>
       </div>
-      
+
       <button
         type="button"
         phx-click="delete_action"

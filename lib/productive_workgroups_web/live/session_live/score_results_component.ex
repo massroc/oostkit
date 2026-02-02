@@ -144,7 +144,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
               phx-click="next_question"
               class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
             >
-              <%= if @session.current_question_index + 1 >= 8 do %>
+              <%= if @session.current_question_index + 1 >= @total_questions do %>
                 Continue to Summary →
               <% else %>
                 Next Question →

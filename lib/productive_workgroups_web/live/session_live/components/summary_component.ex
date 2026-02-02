@@ -19,13 +19,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
       <div class="max-w-4xl w-full">
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-white mb-2">Workshop Summary</h1>
-          
+
           <p class="text-gray-400">Review your team's responses before creating action items.</p>
         </div>
         <!-- Participants -->
         <div class="bg-gray-800 rounded-lg p-4 mb-6">
           <h2 class="text-sm font-semibold text-gray-400 mb-3">Participants</h2>
-          
+
           <div class="flex flex-wrap gap-2">
             <%= for p <- @participants do %>
               <div class="bg-gray-700 rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm">
@@ -66,7 +66,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
                     <span class="text-sm text-gray-400">Q{score.question_index + 1}</span>
                     <h3 class="font-semibold text-white">{score.title}</h3>
                   </div>
-                  
+
                   <div class="text-xs text-gray-500 mt-1">
                     <%= if score.scale_type == "balance" do %>
                       -5 to +5, optimal at 0
@@ -75,7 +75,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
                     <% end %>
                   </div>
                 </div>
-                
+
                 <div class="text-right">
                   <%= if score.combined_team_value do %>
                     <div class={[
@@ -89,7 +89,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
                     ]}>
                       {round(score.combined_team_value)}/10
                     </div>
-                    
+
                     <div class="flex items-center justify-end gap-1 text-xs text-gray-500">
                       <span>team</span>
                       <span
@@ -139,7 +139,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
                           {s.value}
                         <% end %>
                       </div>
-                      
+
                       <div class="text-xs text-gray-400 truncate" title={s.participant_name}>
                         {s.participant_name}
                       </div>
@@ -151,7 +151,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
               <%= if length(question_notes) > 0 do %>
                 <div class="mt-3 pt-3 border-t border-gray-700/50">
                   <div class="text-xs text-gray-500 mb-2">Notes</div>
-                  
+
                   <ul class="space-y-1.5">
                     <%= for note <- question_notes do %>
                       <li class="text-sm text-gray-300 bg-gray-700/50 rounded px-2 py-1.5">
@@ -182,7 +182,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
                 Continue to Wrap-Up →
               </button>
             </div>
-            
+
             <p class="text-center text-gray-500 text-sm mt-2">
               Proceed to create action items and finish the workshop.
             </p>

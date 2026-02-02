@@ -19,7 +19,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ActionsComponent do
       <div class="max-w-3xl w-full">
         <div class="text-center mb-8">
           <h1 class="text-3xl font-bold text-white mb-2">Action Items</h1>
-          
+
           <p class="text-gray-400">Capture commitments and next steps from your discussion.</p>
         </div>
         <!-- Create Action Form -->
@@ -72,12 +72,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ActionsComponent do
     <li class="rounded-lg p-3 flex items-start gap-3 bg-gray-700">
       <div class="flex-1">
         <p class="text-gray-300">{@action.description}</p>
-        
+
         <%= if @action.owner_name && @action.owner_name != "" do %>
           <p class="text-sm text-gray-500 mt-1">Owner: {@action.owner_name}</p>
         <% end %>
       </div>
-      
+
       <button
         type="button"
         phx-click="delete_action"

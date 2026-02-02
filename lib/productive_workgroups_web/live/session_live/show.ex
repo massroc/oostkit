@@ -19,6 +19,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   import ProductiveWorkgroupsWeb.SessionLive.ScoreHelpers
 
+  require Logger
+
+  # Timer tick interval in milliseconds
+  @timer_tick_interval 1000
+
   @impl true
   def mount(%{"code" => code}, session, socket) do
     browser_token = session["browser_token"]
@@ -107,7 +112,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
     if segment_duration && timer_phase do
       # Schedule the first tick
-      timer_ref = Process.send_after(self(), :timer_tick, 1000)
+      timer_ref = Process.send_after(self(), :timer_tick, @timer_tick_interval)
 
       socket
       |> assign(timer_enabled: true)
@@ -290,7 +295,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   def handle_info(:timer_tick, socket) do
     if socket.assigns.timer_enabled and socket.assigns.timer_remaining > 0 do
       new_remaining = socket.assigns.timer_remaining - 1
-      timer_ref = Process.send_after(self(), :timer_tick, 1000)
+      timer_ref = Process.send_after(self(), :timer_tick, @timer_tick_interval)
 
       {:noreply,
        socket
@@ -320,12 +325,15 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         |> maybe_restart_timer_on_transition(old_session, session)
 
       {_, true, "scoring"} ->
-        # Show mid-workshop transition when moving from question 4 (index 3) to question 5 (index 4)
-        show_transition = old_session.current_question_index == 3
+        # Load scoring data first to ensure template is available
+        socket = load_scoring_data(socket, session, socket.assigns.participant)
+        template = socket.assigns.template
+
+        # Show mid-workshop transition when scale type changes (e.g., balance -> maximal)
+        show_transition = scale_type_changes_at?(template, old_session.current_question_index)
 
         socket
         |> assign(show_mid_transition: show_transition)
-        |> load_scoring_data(session, socket.assigns.participant)
         |> maybe_restart_timer_on_transition(old_session, session)
 
       {false, false, "scoring"} when turn_changed or catch_up_changed ->
@@ -389,7 +397,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         {:ok, updated_session} ->
           {:noreply, assign(socket, session: updated_session)}
 
-        {:error, _} ->
+        {:error, reason} ->
+          Logger.error("Failed to start workshop: #{inspect(reason)}")
           {:noreply, put_flash(socket, :error, "Failed to start workshop")}
       end
     else
@@ -478,7 +487,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
              |> assign(my_turn_locked: true)
              |> load_scoring_data(updated_session, participant)}
 
-          {:error, _} ->
+          {:error, reason} ->
+            Logger.error("Failed to advance turn: #{inspect(reason)}")
             {:noreply, put_flash(socket, :error, "Failed to advance turn")}
         end
 
@@ -500,7 +510,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
          |> assign(session: updated_session)
          |> load_scoring_data(updated_session, participant)}
 
-      {:error, _} ->
+      {:error, reason} ->
+        Logger.error("Failed to skip turn: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Failed to skip turn")}
     end
   end
@@ -549,7 +560,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
       case Notes.create_note(session, question_index, attrs) do
         {:ok, _note} ->
-          broadcast_note_update(session, question_index)
+          broadcast(session, {:note_updated, question_index})
 
           {:noreply,
            socket
@@ -572,7 +583,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     if note do
       case Notes.delete_note(note) do
         {:ok, _} ->
-          broadcast_note_update(session, question_index)
+          broadcast(session, {:note_updated, question_index})
           {:noreply, load_notes(socket, session, question_index)}
 
         {:error, _} ->
@@ -645,7 +656,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     if action do
       case Notes.delete_action(action) do
         {:ok, _} ->
-          broadcast_action_update(session, action_id)
+          broadcast(session, {:action_updated, action_id})
           {:noreply, load_actions_data(socket, session)}
 
         {:error, _} ->
@@ -876,7 +887,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     case Scoring.submit_score(session, participant, question_index, selected_value) do
       {:ok, _score} ->
         maybe_reveal_scores(session, question_index)
-        broadcast_score_update(session, participant.id, question_index)
+        broadcast(session, {:score_submitted, participant.id, question_index})
 
         {:noreply,
          socket
@@ -884,7 +895,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
          |> assign(has_submitted: true)
          |> load_scores(session, question_index)}
 
-      {:error, _} ->
+      {:error, reason} ->
+        Logger.error("Failed to submit score: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Failed to submit score")}
     end
   end
@@ -895,27 +907,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     end
   end
 
-  defp broadcast_score_update(session, participant_id, question_index) do
+  # Unified broadcast helper - uses Sessions context for topic generation
+  defp broadcast(session, event) do
     Phoenix.PubSub.broadcast(
       ProductiveWorkgroups.PubSub,
       Sessions.session_topic(session),
-      {:score_submitted, participant_id, question_index}
-    )
-  end
-
-  defp broadcast_note_update(session, question_index) do
-    Phoenix.PubSub.broadcast(
-      ProductiveWorkgroups.PubSub,
-      Sessions.session_topic(session),
-      {:note_updated, question_index}
-    )
-  end
-
-  defp broadcast_action_update(session, action_id) do
-    Phoenix.PubSub.broadcast(
-      ProductiveWorkgroups.PubSub,
-      Sessions.session_topic(session),
-      {:action_updated, action_id}
+      event
     )
   end
 
@@ -949,9 +946,10 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   defp do_advance(socket, session, false) do
     participant = socket.assigns.participant
     current_index = session.current_question_index
+    template = get_or_load_template(socket, session.template_id)
 
-    # Show mid-workshop transition when moving from question 4 (index 3) to question 5 (index 4)
-    show_transition = current_index == 3
+    # Show mid-workshop transition when scale type changes (e.g., balance -> maximal)
+    show_transition = scale_type_changes_at?(template, current_index)
 
     case Sessions.advance_question(session) do
       {:ok, updated_session} ->
@@ -995,6 +993,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
       socket
       |> assign(template: template)
+      |> assign(total_questions: length(template.questions))
       |> assign(current_question: question)
       |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
       |> assign(my_score: if(my_score, do: my_score.value, else: nil))
@@ -1013,6 +1012,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     else
       socket
       |> assign(template: nil)
+      |> assign(total_questions: 0)
       |> assign(current_question: nil)
       |> assign(selected_value: nil)
       |> assign(my_score: nil)
@@ -1195,6 +1195,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             participant={@participant}
             participants={@participants}
             current_question={@current_question}
+            total_questions={@total_questions}
             all_scores={@all_scores}
             selected_value={@selected_value}
             my_score={@my_score}
@@ -1263,5 +1264,20 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       />
     <% end %>
     """
+  end
+
+  # Check if advancing from current_index would cross a scale type boundary
+  # (e.g., from "balance" to "maximal" questions)
+  defp scale_type_changes_at?(template, current_index) do
+    current_question = Enum.find(template.questions, &(&1.index == current_index))
+    next_question = Enum.find(template.questions, &(&1.index == current_index + 1))
+
+    case {current_question, next_question} do
+      {%{scale_type: current_type}, %{scale_type: next_type}} when current_type != next_type ->
+        true
+
+      _ ->
+        false
+    end
   end
 end

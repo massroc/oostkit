@@ -19,9 +19,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.LobbyComponent do
     <div class="flex flex-col items-center justify-center min-h-screen px-4">
       <div class="max-w-lg w-full text-center">
         <h1 class="text-3xl font-bold text-white mb-2">Waiting Room</h1>
-        
+
         <p class="text-gray-400 mb-4">Share this link with your team:</p>
-        
+
         <div class="bg-gray-800 rounded-lg p-4 mb-8">
           <div class="flex items-center gap-2">
             <input
@@ -40,12 +40,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.LobbyComponent do
             </button>
           </div>
         </div>
-        
+
         <div class="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 class="text-lg font-semibold text-white mb-4">
             Participants ({length(@participants)})
           </h2>
-          
+
           <ul class="space-y-2">
             <%= for p <- @participants do %>
               <li class="flex items-center justify-between bg-gray-700 rounded-lg px-4 py-3">
@@ -63,7 +63,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.LobbyComponent do
                     <% true -> %>
                   <% end %>
                 </div>
-                
+
                 <%= if p.id == @participant.id do %>
                   <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded">You</span>
                 <% end %>
@@ -71,7 +71,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.LobbyComponent do
             <% end %>
           </ul>
         </div>
-        
+
         <%= if @participant.is_facilitator do %>
           <button
             phx-click="start_workshop"
