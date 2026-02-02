@@ -3,8 +3,16 @@ defmodule ProductiveWorkgroups.Scoring.Score do
   Schema for participant scores.
 
   A score represents a single participant's response to a question
-  in a workshop session. Scores remain hidden until all participants
-  have submitted, then are revealed simultaneously.
+  in a workshop session. Scores are visible immediately when placed
+  (butcher paper model) and lock progressively.
+
+  ## Locking Behavior
+
+  - `turn_locked` - Set to true when participant clicks "Done" for their turn.
+                    Score cannot be edited after this point.
+  - `row_locked` - Set to true when the group advances to the next question.
+                   All scores for a question are permanently locked.
+  - `revealed` - Legacy field, kept for backwards compatibility.
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -16,6 +24,8 @@ defmodule ProductiveWorkgroups.Scoring.Score do
     field :value, :integer
     field :submitted_at, :utc_datetime
     field :revealed, :boolean, default: false
+    field :turn_locked, :boolean, default: false
+    field :row_locked, :boolean, default: false
 
     belongs_to :session, Session
     belongs_to :participant, Participant
@@ -26,7 +36,7 @@ defmodule ProductiveWorkgroups.Scoring.Score do
   @doc false
   def changeset(score, attrs) do
     score
-    |> cast(attrs, [:question_index, :value, :submitted_at, :revealed])
+    |> cast(attrs, [:question_index, :value, :submitted_at, :revealed, :turn_locked, :row_locked])
     |> validate_required([:question_index, :value, :submitted_at])
     |> validate_number(:question_index, greater_than_or_equal_to: 0)
     |> unique_constraint([:participant_id, :question_index])
@@ -62,5 +72,32 @@ defmodule ProductiveWorkgroups.Scoring.Score do
         [value: "must be between #{scale_min} and #{scale_max}"]
       end
     end)
+  end
+
+  @doc """
+  Returns true if the score can still be edited.
+
+  A score can be edited if:
+  - turn_locked is false (participant hasn't clicked "Done")
+  - row_locked is false (group hasn't advanced to next question)
+  """
+  def editable?(%__MODULE__{turn_locked: true}), do: false
+  def editable?(%__MODULE__{row_locked: true}), do: false
+  def editable?(%__MODULE__{}), do: true
+
+  @doc """
+  Changeset for locking a participant's turn.
+  """
+  def lock_turn_changeset(score) do
+    score
+    |> change(%{turn_locked: true})
+  end
+
+  @doc """
+  Changeset for locking an entire row.
+  """
+  def lock_row_changeset(score) do
+    score
+    |> change(%{row_locked: true})
   end
 end

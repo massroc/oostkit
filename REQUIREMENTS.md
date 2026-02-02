@@ -70,7 +70,7 @@ This tool may serve as a foundation for other facilitated team events (e.g., tea
 | Real-time participant sync | Any collaborative activity |
 | Waiting room / lobby | Any group event |
 | Timed sections with countdown | Any structured workshop |
-| Hidden-then-reveal voting | Retrospectives, planning poker, polls |
+| Turn-based sequential input | Round-robin exercises, facilitated discussions |
 | Discussion prompts (contextual) | Any facilitated discussion |
 | Notes capture per section | Any workshop |
 | Action planning with owners | Any team session |
@@ -113,10 +113,19 @@ This tool may serve as a foundation for other facilitated team events (e.g., tea
 
 ## Workshop Flow
 
+### Design Philosophy: The Butcher Paper Principle
+
+The tool behaves like butcher paper on a wall: **visible, permanent within each phase, sequential, shared, and simple**.
+
+- One person at a time goes up to place their score, visibly
+- The group discusses while seeing what's been placed
+- The conversation happens *during* scoring, not after a reveal
+- The tool creates conditions for discussion; it doesn't make people discuss
+
 ### 1. Session Setup
-- Creator starts a new session
+- Facilitator starts a new session and sends links to participants
 - Shareable link generated for team members to join
-- Waiting room shows who has joined
+- Waiting room shows who has joined (join order determines scoring order)
 
 ### 2. Introduction Phase
 - **Guided overview** of the Six Criteria framework
@@ -124,15 +133,31 @@ This tool may serve as a foundation for other facilitated team events (e.g., tea
 - What to expect from the process
 - "Ready to begin" confirmation from participants
 
-### 3. Scoring Phase (repeated for each question)
-For each of the 8 questions:
+### 3. Scoring Phase (repeated for each criterion)
+
+**Turn-Based Sequential Scoring:**
+
+For each of the 8 questions (one row at a time):
+
 1. **Present the criterion** - explanation, what it means, scoring guidance
-2. **Individual scoring** - all team members enter their score independently
-3. **Scores remain hidden** until everyone has submitted
-4. **Reveal** - show all scores with team average and spread
-5. **Discussion prompts** - suggested questions to explore
-6. **Capture notes** - record key discussion points
-7. **Move to next** - when team is ready, proceed to next criterion
+2. **Sequential scoring** - participants score one at a time, in join order:
+   - Current participant is highlighted (it's their turn)
+   - They place their score (visible immediately to all)
+   - They can edit their score while it's still their turn
+   - They click "Done" to pass the turn to the next participant
+   - Discussion happens naturally while scores are placed
+3. **Catch-up for skipped participants** - after all present participants have scored:
+   - Anyone who was skipped (disconnected, stepped away) can add their score
+   - If multiple were skipped, they score in turn order
+4. **Capture notes** - record key discussion points (optional)
+5. **Ready to advance** - all participants mark "Ready" to move to the next criterion
+6. **Row locks permanently** - once the group advances, scores for that row cannot be changed
+
+**Key Differences from Traditional Planning Poker:**
+- No hidden scores - everything is visible immediately
+- No "reveal" moment - discussion happens during scoring, not after
+- Sequential rather than simultaneous
+- Scores lock per row, not per question reveal
 
 ### 4. Summary & Review
 - Overview of all 8 questions with individual scores and notes
@@ -260,8 +285,11 @@ Scores reflect the *system and environment*, not individual failings. Low scores
   - **Observer** - watches the session without entering scores; useful when facilitating for another team
 
 ### Participation
-- System automatically reveals scores when all *non-observer* participants have submitted
-- **Advancing to next question**: Facilitator controls when to move forward
+- Participants score one at a time in join order (column order on the grid)
+- Scores are visible immediately when placed - no hidden state
+- **Turn progression**: Current participant places score, then clicks "Done" to pass turn
+- **Advancing to next criterion**: All participants mark "Ready" to move forward
+- **Facilitator role during scoring**: Facilitator starts the session but does not control pace during scoring. Anyone can move the session forward if it stalls (but this is a fallback, not normal flow)
 - **Typical team size**: 6-12 participants (optimize UI for this range)
 
 ### Handling Dropouts
@@ -369,9 +397,12 @@ Prompts should be observational and open-ended:
 ## Results Visualization
 
 ### During Workshop (per question)
-- **Simple number display** - each participant's score with their name (like butcher's paper)
-- **Team average** indicator
-- **Visual spread** - simple indicator showing if team is aligned or dispersed
+- **Grid display** - criteria as rows, participants as columns (like butcher paper on a wall)
+- **Active row highlighted** - the current criterion being scored is visually distinct
+- **Scores appear immediately** when placed - visible to all participants
+- **Current turn indicator** - shows whose turn it is to score
+- **Team average** indicator (updates as scores are placed)
+- **Completed rows** - visible as a permanent record, locked once group advances
 
 ### Traffic Light Color Coding
 
@@ -431,15 +462,18 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 - [ ] Session creation with shareable link
 - [ ] Time allocation setup at session creation
 - [ ] Join session via link (name entry only, no account)
-- [ ] Waiting room showing participants
+- [ ] Waiting room showing participants (join order determines scoring order)
 - [ ] Introduction/overview screen
-- [ ] Scoring interface for all 8 questions
-- [ ] Section timers with countdown and warnings
-- [ ] Hidden scores until all submit
-- [ ] Score reveal with basic visualization
+- [ ] Turn-based sequential scoring interface for all 8 questions
+- [ ] Section timers with countdown and warnings (facilitator-only)
+- [ ] Immediate score visibility (no hidden state)
+- [ ] Turn progression with "Done" button
+- [ ] Score editing until turn passes
+- [ ] Row locking when group advances
+- [ ] Catch-up opportunity for skipped participants
 - [ ] Discussion prompts per criterion
 - [ ] Basic notes capture per criterion
-- [ ] "Ready" confirmation to advance
+- [ ] "Ready" confirmation from all to advance rows
 - [ ] Summary view at end
 - [ ] Action planning capture
 - [ ] Real-time sync via Phoenix LiveView
@@ -480,10 +514,10 @@ The introduction is presented before scoring begins. **Skippable** for experienc
 > You'll work through 8 questions covering 6 criteria together as a team.
 >
 > For each question:
-> 1. Everyone scores independently (your score stays hidden)
-> 2. Once everyone has submitted, all scores are revealed
-> 3. You discuss what you see - especially any differences
-> 4. When ready, you move to the next question
+> 1. One person at a time places their score (like writing on butcher paper)
+> 2. Scores are visible immediately - the conversation happens as you go
+> 3. When it's your turn, place your score and click "Done" to pass to the next person
+> 4. When everyone has scored, mark "Ready" to move to the next question
 >
 > The goal isn't to "fix" scores - it's to **surface and understand** different experiences within your team.
 
@@ -608,6 +642,149 @@ The following explanations will be shown to participants when scoring each quest
 
 ---
 
+## UI/UX Design Guidelines
+
+The tool should look professional, feel intuitive, and support the butcher paper principle. These guidelines ensure a consistent, high-quality user experience.
+
+### Core Principles
+
+**1. Content First, Chrome Last**
+- The scoring grid is the star of the show - it should dominate the screen
+- UI elements (buttons, navigation, controls) should be minimal and unobtrusive
+- Avoid competing elements fighting for attention
+- The accumulating scores *are* the interface
+
+**2. Consistent Spatial Layout**
+- Primary actions (Next, Done, Submit) always appear in the same location
+- Never move buttons between screens - users build muscle memory
+- Bottom-right corner for primary forward actions (standard convention)
+- Top-right for secondary controls (timer, settings, help)
+
+**3. Clear Visual Hierarchy**
+- Use size, weight, and color to indicate importance
+- Most important element largest and most prominent
+- Secondary information smaller and more subdued
+- Disabled/inactive states clearly differentiated
+
+**4. Progressive Disclosure**
+- Show only what's needed at each moment
+- Hide advanced options behind expandable sections
+- Don't overwhelm new users; let them discover depth
+
+### Layout Guidelines
+
+**Grid as Primary Element (Phase 2)**
+- The scoring grid should occupy 60-70% of screen real estate
+- Scores are the visual record - make them large and legible
+- Participant names clearly associated with their column
+- Active row visually distinct from completed/upcoming rows
+
+**Consistent Button Placement**
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [Logo/Session Code]              [Timer] [Notes] [Help] [?] │  <- Header (fixed)
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│                                                             │
+│                   Main Content Area                         │
+│                   (Grid / Question / Scores)                │
+│                                                             │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│ [Secondary Action]                       [Primary Action →] │  <- Footer (fixed)
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Button Hierarchy**
+| Type | Style | Position | Example |
+|------|-------|----------|---------|
+| Primary | Filled, accent color | Bottom-right | "Done", "Next", "Ready" |
+| Secondary | Outlined or subtle | Bottom-left | "Go Back", "Skip" |
+| Tertiary | Text only or icon | Header | "Notes", "Help" |
+| Destructive | Red, requires confirmation | Context-dependent | "Delete" |
+
+### Interaction Patterns
+
+**Feedback & States**
+- Every action should have immediate visual feedback
+- Loading states for async operations (avoid spinners where possible)
+- Success/error states clearly communicated
+- Hover and focus states for all interactive elements
+
+**Transitions**
+- Use subtle animations (200-300ms) for state changes
+- Avoid jarring jumps - smooth transitions between phases
+- Animate elements entering/leaving the DOM
+- Never animate in a way that delays user action
+
+**Touch & Click Targets**
+- Minimum 44x44px touch targets (WCAG recommendation)
+- Adequate spacing between clickable elements
+- Entire row/card clickable where appropriate (not just small text)
+
+### Turn-Based Scoring Specific UX
+
+**Current Turn Indicator**
+- Clearly highlight whose turn it is
+- Use color, animation, or prominent placement
+- "Your turn" messaging should be unmissable
+
+**Score Input**
+- Large, easy-to-tap score buttons or slider
+- Current selection clearly highlighted
+- Ability to change selection before confirming
+
+**Done Button**
+- Only appears for current turn participant
+- Prominent but not accidentally tappable
+- Clear label: "Done" or "Pass Turn"
+
+**Ready State**
+- Visual indication of who has marked ready
+- Clear progress toward all-ready state
+- Disable advance until all ready (unless override available)
+
+### Responsive Design
+
+**Breakpoints**
+| Size | Target | Considerations |
+|------|--------|----------------|
+| Mobile (< 640px) | Phones | Single column, larger touch targets |
+| Tablet (640-1024px) | iPads, small laptops | Comfortable grid view |
+| Desktop (> 1024px) | Primary use case | Full grid, all features visible |
+
+**Mobile Considerations**
+- Grid may need horizontal scroll or condensed view
+- Score input should be thumb-friendly
+- Consider landscape mode for better grid visibility
+
+### Error Prevention & Recovery
+
+**Prevent Errors**
+- Disable invalid actions rather than allowing then rejecting
+- Confirm destructive actions (delete, skip, leave session)
+- Auto-save where possible (scores saved immediately)
+
+**Recover from Errors**
+- Clear error messages explaining what went wrong
+- Actionable guidance on how to fix
+- Easy path back to a valid state
+- Never lose user work due to errors
+
+### Performance Perception
+
+**Optimistic Updates**
+- Update UI immediately on user action
+- Sync to server in background
+- Handle conflicts gracefully
+
+**Loading States**
+- Skeleton screens preferred over spinners
+- Progressive loading (show content as it arrives)
+- Never block the entire UI for loading
+
+---
+
 ## Visual Design
 
 ### Brand Alignment
@@ -689,18 +866,20 @@ The traffic light visualization needs to work within the dark theme:
 - Can see scores and discussion but cannot participate
 - May be useful for managers or stakeholders observing
 
-**Slow participant (others waiting):**
-- **Subtle indicator** shows who hasn't submitted yet
-- No automatic nudges or prompts
-- Team manages this socially
+**Current participant is slow/away:**
+- **Subtle indicator** shows whose turn it is
+- Any participant (including facilitator) can skip to the next person if the current person is unavailable
+- Skipped participants get a catch-up opportunity after the last person scores
+- Team manages pacing socially
 
 **Solo participant (everyone else dropped):**
 - **Prompt with options**: pause session and wait for others, or continue alone
 - Continuing alone has limited value but is allowed
 
 **Participant wants to change score:**
-- **Allowed until reveal** - can modify score before all participants have submitted
-- Once scores are revealed, they are locked
+- **Allowed during their turn** - can modify score before clicking "Done"
+- Once "Done" is clicked, their score is locked for that turn
+- Once the group advances to the next criterion, all scores in that row are permanently locked
 
 ### Session Edge Cases
 
@@ -806,5 +985,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 1.2 - Updated timer to 10-segment facilitator-only approach*
-*Last Updated: 2026-01-31*
+*Document Version: 2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
+*Last Updated: 2026-02-02*

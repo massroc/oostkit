@@ -4,6 +4,13 @@ defmodule ProductiveWorkgroups.Scoring do
 
   This context manages score submission, validation, aggregation,
   and traffic light color determination for workshop questions.
+
+  ## Turn-Based Scoring
+
+  Scores are now visible immediately when placed (butcher paper model).
+  They lock progressively:
+  - `turn_locked` - When participant clicks "Done" for their turn
+  - `row_locked` - When the group advances to the next question
   """
 
   import Ecto.Query, warn: false
@@ -20,6 +27,9 @@ defmodule ProductiveWorkgroups.Scoring do
   Submits or updates a participant's score for a question.
 
   Validates the score value against the question's scale range.
+  Returns `{:error, :score_locked}` if the score is already locked.
+
+  In turn-based scoring, scores are visible immediately when placed.
   """
   def submit_score(%Session{} = session, %Participant{} = participant, question_index, value) do
     session = Repo.preload(session, :template)
@@ -39,10 +49,14 @@ defmodule ProductiveWorkgroups.Scoring do
         |> Repo.insert()
 
       existing ->
-        existing
-        |> Score.update_changeset(attrs)
-        |> Score.validate_value_range(question.scale_min, question.scale_max)
-        |> Repo.update()
+        if Score.editable?(existing) do
+          existing
+          |> Score.update_changeset(attrs)
+          |> Score.validate_value_range(question.scale_min, question.scale_max)
+          |> Repo.update()
+        else
+          {:error, :score_locked}
+        end
     end
   end
 
@@ -90,6 +104,7 @@ defmodule ProductiveWorkgroups.Scoring do
   Marks all scores for a question as unrevealed.
 
   Used when going back to a previous question to allow participants to change their scores.
+  Note: In turn-based scoring, this is largely deprecated in favor of locking.
   """
   def unreveal_scores(%Session{} = session, question_index) do
     Score
@@ -97,6 +112,65 @@ defmodule ProductiveWorkgroups.Scoring do
     |> Repo.update_all(set: [revealed: false])
 
     :ok
+  end
+
+  ## Turn-Based Score Locking
+
+  @doc """
+  Locks a participant's turn for a question.
+
+  Called when a participant clicks "Done" - they can no longer edit their score
+  for this question, but the row is not yet permanently locked.
+  """
+  def lock_participant_turn(%Session{} = session, %Participant{} = participant, question_index) do
+    case get_score(session, participant, question_index) do
+      nil ->
+        {:error, :no_score}
+
+      score ->
+        score
+        |> Score.lock_turn_changeset()
+        |> Repo.update()
+    end
+  end
+
+  @doc """
+  Locks all scores for a question (row) permanently.
+
+  Called when the group advances to the next question. After this,
+  scores for this question can never be edited.
+  """
+  def lock_row(%Session{} = session, question_index) do
+    Score
+    |> where([s], s.session_id == ^session.id and s.question_index == ^question_index)
+    |> Repo.update_all(set: [row_locked: true, turn_locked: true])
+
+    :ok
+  end
+
+  @doc """
+  Checks if a score can be edited.
+
+  A score can be edited if:
+  - It exists
+  - turn_locked is false
+  - row_locked is false
+  """
+  def can_edit_score?(%Session{} = session, %Participant{} = participant, question_index) do
+    case get_score(session, participant, question_index) do
+      nil -> false
+      score -> Score.editable?(score)
+    end
+  end
+
+  @doc """
+  Checks if a row (question) is locked.
+  """
+  def row_locked?(%Session{} = session, question_index) do
+    Score
+    |> where([s], s.session_id == ^session.id and s.question_index == ^question_index)
+    |> where([s], s.row_locked == true)
+    |> Repo.exists?()
   end
 
   @doc """

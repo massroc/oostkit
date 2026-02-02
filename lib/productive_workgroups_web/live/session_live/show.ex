@@ -167,7 +167,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
 
   @impl true
   def handle_info({:session_started, session}, socket) do
-    {:noreply, assign(socket, session: session)}
+    old_session = socket.assigns.session
+
+    socket =
+      socket
+      |> assign(session: session)
+      |> handle_state_transition(old_session, session)
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -230,6 +237,48 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     {:noreply, load_actions_data(socket, socket.assigns.session)}
   end
 
+  # Handle turn advancement in turn-based scoring
+  @impl true
+  def handle_info({:turn_advanced, _payload}, socket) do
+    # Always reload the session and full scoring data when turn changes
+    updated_session = Sessions.get_session!(socket.assigns.session.id)
+    participant = socket.assigns.participant
+
+    # Reload full scoring data to ensure all assigns are correct
+    {:noreply,
+     socket
+     |> assign(session: updated_session)
+     |> load_scoring_data(updated_session, participant)}
+  end
+
+  # Handle catch-up phase start
+  @impl true
+  def handle_info({:catch_up_started, payload}, socket) do
+    participant = socket.assigns.participant
+    is_my_turn = participant.id in payload.skipped_participant_ids and not participant.is_observer
+
+    {:noreply,
+     socket
+     |> assign(in_catch_up_phase: true)
+     |> assign(is_my_turn: is_my_turn)}
+  end
+
+  # Handle catch-up phase end
+  @impl true
+  def handle_info({:catch_up_ended, _payload}, socket) do
+    {:noreply,
+     socket
+     |> assign(in_catch_up_phase: false)
+     |> assign(is_my_turn: false)}
+  end
+
+  # Handle row lock (when group advances to next question)
+  @impl true
+  def handle_info({:row_locked, _payload}, socket) do
+    session = socket.assigns.session
+    {:noreply, load_scores(socket, session, session.current_question_index)}
+  end
+
   # Handle timer tick for facilitator timer countdown
   @impl true
   def handle_info(:timer_tick, socket) do
@@ -255,6 +304,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   defp handle_state_transition(socket, old_session, session) do
     state_changed = old_session.state != session.state
     question_changed = old_session.current_question_index != session.current_question_index
+    turn_changed = old_session.current_turn_index != session.current_turn_index
+    catch_up_changed = old_session.in_catch_up_phase != session.in_catch_up_phase
 
     case {state_changed, question_changed, session.state} do
       {true, _, "scoring"} ->
@@ -270,6 +321,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
         |> assign(show_mid_transition: show_transition)
         |> load_scoring_data(session, socket.assigns.participant)
         |> maybe_restart_timer_on_transition(old_session, session)
+
+      {false, false, "scoring"} when turn_changed or catch_up_changed ->
+        # Turn changed within the same question - reload scoring data
+        socket
+        |> load_scoring_data(session, socket.assigns.participant)
 
       {true, _, "summary"} ->
         socket
@@ -395,6 +451,52 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   @impl true
   def handle_event("submit_score", _params, socket) do
     do_submit_score(socket, socket.assigns.selected_value)
+  end
+
+  # Turn-based scoring: complete the current participant's turn
+  @impl true
+  def handle_event("complete_turn", _params, socket) do
+    session = socket.assigns.session
+    participant = socket.assigns.participant
+    question_index = session.current_question_index
+
+    # Lock the participant's turn
+    case Scoring.lock_participant_turn(session, participant, question_index) do
+      {:ok, _score} ->
+        # Advance to the next participant's turn
+        case Sessions.advance_turn(session) do
+          {:ok, updated_session} ->
+            {:noreply,
+             socket
+             |> assign(session: updated_session)
+             |> assign(my_turn_locked: true)
+             |> load_scoring_data(updated_session, participant)}
+
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, "Failed to advance turn")}
+        end
+
+      {:error, :no_score} ->
+        {:noreply, put_flash(socket, :error, "Please place a score first")}
+    end
+  end
+
+  # Turn-based scoring: skip the current participant
+  @impl true
+  def handle_event("skip_turn", _params, socket) do
+    session = socket.assigns.session
+    participant = socket.assigns.participant
+
+    case Sessions.skip_turn(session) do
+      {:ok, updated_session} ->
+        {:noreply,
+         socket
+         |> assign(session: updated_session)
+         |> load_scoring_data(updated_session, participant)}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to skip turn")}
+    end
   end
 
   @impl true
@@ -869,6 +971,21 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       question = Enum.find(template.questions, &(&1.index == question_index))
 
       my_score = Scoring.get_score(session, participant, question_index)
+      my_turn_locked = my_score != nil and my_score.turn_locked
+
+      # Turn-based scoring state
+      current_turn_participant = Sessions.get_current_turn_participant(session)
+
+      is_my_turn =
+        current_turn_participant != nil and current_turn_participant.id == participant.id
+
+      # Check if current turn participant has already submitted (for skip button visibility)
+      current_turn_has_score =
+        if current_turn_participant do
+          Scoring.get_score(session, current_turn_participant, question_index) != nil
+        else
+          false
+        end
 
       socket
       |> assign(template: template)
@@ -876,6 +993,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
       |> assign(my_score: if(my_score, do: my_score.value, else: nil))
       |> assign(has_submitted: my_score != nil)
+      |> assign(my_turn_locked: my_turn_locked)
+      |> assign(is_my_turn: is_my_turn and not participant.is_observer)
+      |> assign(
+        current_turn_participant_id: current_turn_participant && current_turn_participant.id
+      )
+      |> assign(current_turn_has_score: current_turn_has_score)
+      |> assign(in_catch_up_phase: session.in_catch_up_phase)
       |> assign(show_facilitator_tips: false)
       |> assign(show_notes: false)
       |> load_scores(session, question_index)
@@ -887,6 +1011,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       |> assign(selected_value: nil)
       |> assign(my_score: nil)
       |> assign(has_submitted: false)
+      |> assign(my_turn_locked: false)
+      |> assign(is_my_turn: false)
+      |> assign(current_turn_participant_id: nil)
+      |> assign(current_turn_has_score: false)
+      |> assign(in_catch_up_phase: false)
       |> assign(all_scores: [])
       |> assign(scores_revealed: false)
       |> assign(score_count: 0)
@@ -901,33 +1030,71 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
     scores = Scoring.list_scores_for_question(session, question_index)
     all_scored = Scoring.all_scored?(session, question_index)
 
-    # Use participants from socket assigns - kept in sync via PubSub handlers
-    participants = socket.assigns.participants
+    # Get participants in turn order (active, non-observers)
+    participants_in_turn_order = Sessions.get_participants_in_turn_order(session)
+    active_count = length(participants_in_turn_order)
 
-    active_count =
-      Enum.count(participants, fn p -> p.status == "active" and not p.is_observer end)
+    # Build score map for O(1) lookups: participant_id => score
+    score_map = Map.new(scores, &{&1.participant_id, &1})
 
-    # Build participant map for O(1) lookups instead of O(n) Enum.find
-    participant_map = Map.new(participants, &{&1.id, &1})
+    # Current turn index for determining pending vs skipped
+    current_turn_index = session.current_turn_index
+    in_catch_up = session.in_catch_up_phase
 
-    # Get scores with participant names
-    scores_with_names =
-      Enum.map(scores, fn score ->
-        participant = Map.get(participant_map, score.participant_id)
+    # Build full participant grid showing all participants with their states
+    participant_scores =
+      participants_in_turn_order
+      |> Enum.with_index()
+      |> Enum.map(fn {participant, idx} ->
+        score = Map.get(score_map, participant.id)
+
+        # Determine the state of this participant's score box
+        {value, state, color} =
+          cond do
+            # Has a score
+            score != nil ->
+              {score.value, :scored,
+               get_score_color(socket.assigns[:current_question], score.value)}
+
+            # In catch-up phase - anyone without a score was skipped
+            in_catch_up ->
+              {nil, :skipped, nil}
+
+            # Turn hasn't reached them yet
+            idx > current_turn_index ->
+              {nil, :pending, nil}
+
+            # Turn has passed them (they were skipped)
+            idx < current_turn_index ->
+              {nil, :skipped, nil}
+
+            # It's their turn right now
+            true ->
+              {nil, :current, nil}
+          end
 
         %{
-          value: score.value,
-          participant_name: if(participant, do: participant.name, else: "Unknown"),
-          participant_id: score.participant_id,
-          color: get_score_color(socket.assigns[:current_question], score.value)
+          value: value,
+          state: state,
+          participant_name: participant.name,
+          participant_id: participant.id,
+          color: color,
+          is_current_turn: idx == current_turn_index and not in_catch_up
         }
       end)
 
+    # Check if current turn participant has submitted a score (for messaging)
+    current_turn_participant = Enum.at(participants_in_turn_order, current_turn_index)
+
+    current_turn_has_score =
+      current_turn_participant != nil and Map.has_key?(score_map, current_turn_participant.id)
+
     socket
-    |> assign(all_scores: scores_with_names)
+    |> assign(all_scores: participant_scores)
     |> assign(scores_revealed: all_scored)
     |> assign(score_count: length(scores))
     |> assign(active_participant_count: active_count)
+    |> assign(current_turn_has_score: current_turn_has_score)
   end
 
   defp load_notes(socket, session, question_index) do
@@ -1347,7 +1514,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
           <div class="bg-gray-800 rounded-lg p-6 mb-6">
             <div class="text-sm text-green-400 mb-2">{@current_question.criterion_name}</div>
             <h1 class="text-2xl font-bold text-white mb-4">{@current_question.title}</h1>
-            <p class="text-gray-300 whitespace-pre-line">{@current_question.explanation}</p>
+            <p class="text-gray-300 whitespace-pre-line">
+              {format_description(@current_question.explanation)}
+            </p>
 
             <%= if length(@current_question.discussion_prompts) > 0 do %>
               <%= if @show_facilitator_tips do %>
@@ -1385,6 +1554,101 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
               <% end %>
             <% end %>
           </div>
+          
+    <!-- Score grid showing all participants (butcher paper model) - only during scoring, not after reveal -->
+          <%= if length(@all_scores) > 0 and not @scores_revealed do %>
+            <div class="bg-gray-800 rounded-lg p-4 mb-4">
+              <div class="flex flex-wrap gap-2 justify-center">
+                <%= for s <- @all_scores do %>
+                  <div class={[
+                    "rounded p-2 text-center min-w-[60px] transition-all",
+                    case s.state do
+                      :scored ->
+                        case s.color do
+                          :green -> "bg-green-900/50 border border-green-700"
+                          :amber -> "bg-yellow-900/50 border border-yellow-700"
+                          :red -> "bg-red-900/50 border border-red-700"
+                          _ -> "bg-gray-700 border border-gray-600"
+                        end
+
+                      :current ->
+                        "bg-blue-900/30 border-2 border-blue-500 animate-pulse"
+
+                      :skipped ->
+                        "bg-gray-800 border border-gray-600"
+
+                      :pending ->
+                        "bg-gray-800/50 border border-gray-700"
+
+                      _ ->
+                        "bg-gray-700 border border-gray-600"
+                    end
+                  ]}>
+                    <div class={[
+                      "text-lg font-bold",
+                      case s.state do
+                        :scored ->
+                          case s.color do
+                            :green -> "text-green-400"
+                            :amber -> "text-yellow-400"
+                            :red -> "text-red-400"
+                            _ -> "text-gray-400"
+                          end
+
+                        :current ->
+                          "text-blue-400"
+
+                        :skipped ->
+                          "text-gray-500"
+
+                        :pending ->
+                          "text-gray-600"
+
+                        _ ->
+                          "text-gray-400"
+                      end
+                    ]}>
+                      <%= case s.state do %>
+                        <% :scored -> %>
+                          <%= if @current_question.scale_type == "balance" and s.value > 0 do %>
+                            +{s.value}
+                          <% else %>
+                            {s.value}
+                          <% end %>
+                        <% :current -> %>
+                          ...
+                        <% :skipped -> %>
+                          ?
+                        <% :pending -> %>
+                          —
+                        <% _ -> %>
+                          —
+                      <% end %>
+                    </div>
+                    <div
+                      class={[
+                        "text-xs truncate",
+                        if(s.state == :scored, do: "text-gray-400", else: "text-gray-500")
+                      ]}
+                      title={s.participant_name}
+                    >
+                      {s.participant_name}
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              
+    <!-- Discussion prompt when all scores are in -->
+              <%= if @scores_revealed do %>
+                <div class="mt-4 pt-4 border-t border-gray-700 text-center">
+                  <p class="text-gray-300">
+                    All scores are in. <span class="text-white font-semibold">Discuss as a team</span>
+                    — look for variance across the group.
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
 
           <%= if @scores_revealed do %>
             <.live_component
@@ -1482,54 +1746,112 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   defp render_score_input(assigns) do
+    # Find current turn participant name for display
+    current_turn_name =
+      if assigns.current_turn_participant_id do
+        Enum.find_value(assigns.participants, "Unknown", fn p ->
+          if p.id == assigns.current_turn_participant_id, do: p.name
+        end)
+      else
+        nil
+      end
+
+    assigns = assign(assigns, :current_turn_name, current_turn_name)
+
     ~H"""
     <div class="bg-gray-800 rounded-lg p-6 mb-6">
       <%= if @participant.is_observer do %>
         <div class="text-center">
           <div class="text-purple-400 text-lg font-semibold mb-2">Observer Mode</div>
           <p class="text-gray-400">
-            You are observing this session. Waiting for team members to submit their scores...
+            You are observing this session.
           </p>
-          <div class="mt-4 inline-flex items-center gap-2 text-gray-500">
-            <div class="animate-pulse w-2 h-2 bg-purple-500 rounded-full" />
-            {@score_count}/{@active_participant_count} scores submitted
-          </div>
+          <%= if @current_turn_name do %>
+            <p class="text-gray-500 mt-2">
+              <span class="text-white">{@current_turn_name}</span> is scoring
+            </p>
+          <% end %>
         </div>
       <% else %>
-        <h2 class="text-lg font-semibold text-white mb-4">
-          <%= if @has_submitted do %>
-            Score Submitted - Waiting for others...
+        <%= if @is_my_turn and not @my_turn_locked do %>
+          <!-- It's this participant's turn -->
+          <div class="text-center mb-4">
+            <div class="text-green-400 text-lg font-semibold">Your turn to score</div>
+            <%= if @in_catch_up_phase do %>
+              <p class="text-gray-400 text-sm mt-1">Catch-up phase - add your score now</p>
+            <% end %>
+          </div>
+
+          <%= if @current_question.scale_type == "balance" do %>
+            {render_balance_scale(assigns)}
           <% else %>
-            Select Your Score
+            {render_maximal_scale(assigns)}
           <% end %>
-        </h2>
 
-        <%= if @current_question.scale_type == "balance" do %>
-          {render_balance_scale(assigns)}
+          <div class="flex gap-3 mt-6">
+            <button
+              phx-click="submit_score"
+              disabled={@selected_value == nil}
+              class={[
+                "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
+                if(@selected_value != nil and not @has_submitted,
+                  do: "bg-blue-600 hover:bg-blue-700 text-white",
+                  else: "bg-gray-600 text-gray-400 cursor-not-allowed"
+                )
+              ]}
+            >
+              <%= if @has_submitted do %>
+                Score Placed
+              <% else %>
+                Place Score
+              <% end %>
+            </button>
+            <button
+              phx-click="complete_turn"
+              disabled={not @has_submitted}
+              class={[
+                "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
+                if(@has_submitted,
+                  do: "bg-green-600 hover:bg-green-700 text-white",
+                  else: "bg-gray-600 text-gray-400 cursor-not-allowed"
+                )
+              ]}
+            >
+              Done →
+            </button>
+          </div>
+          <%= if @has_submitted do %>
+            <p class="text-center text-gray-400 text-sm mt-2">
+              Discuss this score, then click "Done" when ready
+            </p>
+          <% end %>
         <% else %>
-          {render_maximal_scale(assigns)}
-        <% end %>
-
-        <%= if not @has_submitted do %>
-          <button
-            phx-click="submit_score"
-            disabled={@selected_value == nil}
-            class={[
-              "w-full mt-6 px-6 py-3 font-semibold rounded-lg transition-colors",
-              if(@selected_value != nil,
-                do: "bg-green-600 hover:bg-green-700 text-white",
-                else: "bg-gray-600 text-gray-400 cursor-not-allowed"
-              )
-            ]}
-          >
-            Submit Score
-          </button>
-        <% else %>
-          <div class="mt-6 text-center">
-            <div class="inline-flex items-center gap-2 text-gray-400">
-              <div class="animate-pulse w-2 h-2 bg-green-500 rounded-full" />
-              Waiting for {@active_participant_count - @score_count} more participant(s)...
-            </div>
+          <!-- Not this participant's turn, or they've completed their turn -->
+          <div class="text-center">
+            <%= if @current_turn_name do %>
+              <p class="text-gray-400">
+                <%= if @current_turn_has_score do %>
+                  Discuss <span class="text-white">{@current_turn_name}</span>'s score
+                <% else %>
+                  Waiting for <span class="text-white">{@current_turn_name}</span> to score
+                <% end %>
+              </p>
+              
+    <!-- Skip button - facilitator only, only when current turn hasn't placed a score -->
+              <%= if @participant.is_facilitator and not @current_turn_has_score do %>
+                <div class="mt-4">
+                  <button
+                    phx-click="skip_turn"
+                    class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    Skip {String.split(@current_turn_name) |> List.first()}'s turn
+                  </button>
+                </div>
+              <% end %>
+            <% else %>
+              <!-- No current turn - all done or between turns -->
+              <p class="text-gray-400">Waiting for next turn...</p>
+            <% end %>
           </div>
         <% end %>
       <% end %>
@@ -2209,5 +2531,19 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
       </div>
     </div>
     """
+  end
+
+  # Format text by converting single newlines to spaces while preserving paragraph breaks
+  defp format_description(nil), do: ""
+
+  defp format_description(text) do
+    text
+    |> String.trim()
+    |> String.split(~r/\n\n+/)
+    |> Enum.map_join("\n\n", fn paragraph ->
+      paragraph
+      |> String.replace(~r/\s*\n\s*/, " ")
+      |> String.trim()
+    end)
   end
 end

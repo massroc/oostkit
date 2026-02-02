@@ -419,13 +419,13 @@ defmodule ProductiveWorkgroups.ScoringTest do
       session: session,
       template: template
     } do
-      # Create multiple participants with varying scores
-      {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
-      {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-      {:ok, p3} = Sessions.join_session(session, "Charlie", Ecto.UUID.generate())
+      # Create multiple participants with varying scores (use different names from setup's Alice)
+      {:ok, p1} = Sessions.join_session(session, "Dave", Ecto.UUID.generate())
+      {:ok, p2} = Sessions.join_session(session, "Eve", Ecto.UUID.generate())
+      {:ok, p3} = Sessions.join_session(session, "Frank", Ecto.UUID.generate())
 
       # Submit scores for first balance question (optimal at 0)
-      # Alice: 0 -> 10pts, Bob: 2 -> 6pts, Charlie: 5 -> 0pts
+      # Dave: 0 -> 10pts, Eve: 2 -> 6pts, Frank: 5 -> 0pts
       # Total: 16, avg = 16/3 = 5.3
       Scoring.submit_score(session, p1, 0, 0)
       Scoring.submit_score(session, p2, 0, 2)

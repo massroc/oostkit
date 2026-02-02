@@ -11,10 +11,16 @@ defmodule ProductiveWorkgroups.Sessions.Session do
   Sessions progress through the following states:
   - `lobby` - Initial state, waiting for participants to join
   - `intro` - Introduction phase (can be skipped)
-  - `scoring` - Main phase, cycling through questions
+  - `scoring` - Main phase, cycling through questions with turn-based scoring
   - `summary` - Review of all scores
   - `actions` - Action planning phase
   - `completed` - Workshop finished
+
+  ## Turn-Based Scoring
+
+  During the scoring phase, participants score one at a time in join order:
+  - `current_turn_index` - Index into participant list for whose turn it is
+  - `in_catch_up_phase` - True when catching up skipped participants
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -28,6 +34,8 @@ defmodule ProductiveWorkgroups.Sessions.Session do
     field :code, :string
     field :state, :string, default: "lobby"
     field :current_question_index, :integer, default: 0
+    field :current_turn_index, :integer, default: 0
+    field :in_catch_up_phase, :boolean, default: false
     field :planned_duration_minutes, :integer
     field :settings, :map, default: %{}
     field :started_at, :utc_datetime
@@ -52,6 +60,8 @@ defmodule ProductiveWorkgroups.Sessions.Session do
       :code,
       :state,
       :current_question_index,
+      :current_turn_index,
+      :in_catch_up_phase,
       :planned_duration_minutes,
       :settings,
       :started_at,
@@ -61,6 +71,7 @@ defmodule ProductiveWorkgroups.Sessions.Session do
     |> validate_required([:code])
     |> validate_inclusion(:state, @states)
     |> validate_number(:current_question_index, greater_than_or_equal_to: 0)
+    |> validate_number(:current_turn_index, greater_than_or_equal_to: 0)
     |> unique_constraint(:code)
     |> normalize_code()
   end
@@ -91,6 +102,8 @@ defmodule ProductiveWorkgroups.Sessions.Session do
       :started_at,
       :completed_at,
       :current_question_index,
+      :current_turn_index,
+      :in_catch_up_phase,
       :last_activity_at
     ])
     |> validate_inclusion(:state, @states)
