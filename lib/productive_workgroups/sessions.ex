@@ -19,6 +19,7 @@ defmodule ProductiveWorkgroups.Sessions do
 
   alias ProductiveWorkgroups.Repo
   alias ProductiveWorkgroups.Sessions.{Participant, Session}
+  alias ProductiveWorkgroups.Timestamps
   alias ProductiveWorkgroups.Workshops.Template
 
   @pubsub ProductiveWorkgroups.PubSub
@@ -144,21 +145,12 @@ defmodule ProductiveWorkgroups.Sessions do
   Starts a session, transitioning from lobby to intro.
   """
   def start_session(%Session{state: "lobby"} = session) do
-    result =
-      session
-      |> Session.transition_changeset("intro", %{
-        started_at: DateTime.utc_now() |> DateTime.truncate(:second)
-      })
-      |> Repo.update()
-
-    case result do
-      {:ok, updated_session} ->
-        broadcast(updated_session, {:session_started, updated_session})
-        {:ok, updated_session}
-
-      error ->
-        error
-    end
+    session
+    |> Session.transition_changeset("intro", %{
+      started_at: Timestamps.now()
+    })
+    |> Repo.update()
+    |> with_broadcast(fn s -> broadcast(s, {:session_started, s}) end)
   end
 
   @doc """
@@ -231,7 +223,7 @@ defmodule ProductiveWorkgroups.Sessions do
     result =
       session
       |> Session.transition_changeset("completed", %{
-        completed_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        completed_at: Timestamps.now()
       })
       |> Repo.update()
 
@@ -245,7 +237,7 @@ defmodule ProductiveWorkgroups.Sessions do
     result =
       session
       |> Session.transition_changeset("completed", %{
-        completed_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        completed_at: Timestamps.now()
       })
       |> Repo.update()
 
@@ -318,12 +310,20 @@ defmodule ProductiveWorkgroups.Sessions do
 
   defp broadcast_session_update(error), do: error
 
+  # Helper for broadcasting on success
+  defp with_broadcast({:ok, session} = result, broadcast_fn) do
+    broadcast_fn.(session)
+    result
+  end
+
+  defp with_broadcast(error, _broadcast_fn), do: error
+
   @doc """
   Updates the last_activity_at timestamp for the session.
   """
   def touch_session(%Session{} = session) do
     session
-    |> Ecto.Changeset.change(last_activity_at: DateTime.utc_now() |> DateTime.truncate(:second))
+    |> Ecto.Changeset.change(last_activity_at: Timestamps.now())
     |> Repo.update()
   end
 
@@ -384,7 +384,7 @@ defmodule ProductiveWorkgroups.Sessions do
       existing
       |> Participant.changeset(%{
         name: name,
-        last_seen_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        last_seen_at: Timestamps.now()
       })
       |> Repo.update()
     end
@@ -411,15 +411,6 @@ defmodule ProductiveWorkgroups.Sessions do
   """
   def get_participant(%Session{} = session, browser_token) do
     Repo.get_by(Participant, session_id: session.id, browser_token: browser_token)
-  end
-
-  @doc """
-  Gets a participant by their browser token.
-
-  Alias for `get_participant/2`.
-  """
-  def get_participant_by_token(%Session{} = session, browser_token) do
-    get_participant(session, browser_token)
   end
 
   @doc """
@@ -587,19 +578,10 @@ defmodule ProductiveWorkgroups.Sessions do
   end
 
   defp advance_to_next_participant(session, next_index) do
-    result =
-      session
-      |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
-      |> Repo.update()
-
-    case result do
-      {:ok, updated_session} ->
-        broadcast_turn_advanced(updated_session)
-        {:ok, updated_session}
-
-      error ->
-        error
-    end
+    session
+    |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
+    |> Repo.update()
+    |> with_broadcast(&broadcast_turn_advanced/1)
   end
 
   defp handle_round_complete(session) do
@@ -642,22 +624,13 @@ defmodule ProductiveWorkgroups.Sessions do
   During catch-up, skipped participants can add their scores in turn order.
   """
   def enter_catch_up_phase(%Session{} = session, skipped_participants) do
-    result =
-      session
-      |> Session.transition_changeset("scoring", %{
-        in_catch_up_phase: true,
-        current_turn_index: 0
-      })
-      |> Repo.update()
-
-    case result do
-      {:ok, updated_session} ->
-        broadcast_catch_up_started(updated_session, skipped_participants)
-        {:ok, updated_session}
-
-      error ->
-        error
-    end
+    session
+    |> Session.transition_changeset("scoring", %{
+      in_catch_up_phase: true,
+      current_turn_index: 0
+    })
+    |> Repo.update()
+    |> with_broadcast(fn s -> broadcast_catch_up_started(s, skipped_participants) end)
   end
 
   @doc """
@@ -682,36 +655,18 @@ defmodule ProductiveWorkgroups.Sessions do
     if next_index >= length(skipped) do
       # All skipped participants have caught up (or been skipped again)
       # Exit catch-up phase
-      result =
-        session
-        |> Session.transition_changeset("scoring", %{
-          in_catch_up_phase: false,
-          current_turn_index: 0
-        })
-        |> Repo.update()
-
-      case result do
-        {:ok, updated_session} ->
-          broadcast(updated_session, {:catch_up_ended, %{}})
-          {:ok, updated_session}
-
-        error ->
-          error
-      end
+      session
+      |> Session.transition_changeset("scoring", %{
+        in_catch_up_phase: false,
+        current_turn_index: 0
+      })
+      |> Repo.update()
+      |> with_broadcast(fn s -> broadcast(s, {:catch_up_ended, %{}}) end)
     else
-      result =
-        session
-        |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
-        |> Repo.update()
-
-      case result do
-        {:ok, updated_session} ->
-          broadcast_turn_advanced(updated_session)
-          {:ok, updated_session}
-
-        error ->
-          error
-      end
+      session
+      |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
+      |> Repo.update()
+      |> with_broadcast(&broadcast_turn_advanced/1)
     end
   end
 

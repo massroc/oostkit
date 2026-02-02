@@ -9,8 +9,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.OperationHelpers do
   @doc """
   Handles operation result with standard error pattern.
 
-  ## Example
+  The success function can be either:
+  - 2-arity: `fn socket, result -> ... end` - receives the operation result
+  - 1-arity: `fn socket -> ... end` - ignores the result
 
+  ## Examples
+
+      # 2-arity: use the result
       handle_operation(
         socket,
         Sessions.start_session(session),
@@ -18,12 +23,16 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.OperationHelpers do
         &assign(&1, session: &2)
       )
 
-  For operations that return something other than the updated resource,
-  use `handle_operation/3` with a custom success function that ignores
-  the result.
+      # 1-arity: ignore the result
+      handle_operation(
+        socket,
+        Notes.delete_note(note),
+        "Failed to delete note",
+        fn socket -> load_notes(socket, session, question_index) end
+      )
   """
   def handle_operation(socket, {:ok, result}, _error_msg, success_fn) do
-    {:noreply, success_fn.(socket, result)}
+    {:noreply, apply_success(socket, result, success_fn)}
   end
 
   def handle_operation(socket, {:error, reason}, error_msg, _success_fn) do
@@ -31,25 +40,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.OperationHelpers do
     {:noreply, put_flash(socket, :error, error_msg)}
   end
 
-  @doc """
-  Handles operation result when you only care about success/failure,
-  not the returned value.
-
-  ## Example
-
-      handle_operation(
-        socket,
-        Notes.delete_note(note),
-        "Failed to delete note",
-        fn socket, _result -> load_notes(socket, session, question_index) end
-      )
-  """
-  def handle_operation_simple(socket, {:ok, _result}, _error_msg, success_fn) do
-    {:noreply, success_fn.(socket)}
-  end
-
-  def handle_operation_simple(socket, {:error, reason}, error_msg, _success_fn) do
-    Logger.error("#{error_msg}: #{inspect(reason)}")
-    {:noreply, put_flash(socket, :error, error_msg)}
-  end
+  defp apply_success(socket, result, fun) when is_function(fun, 2), do: fun.(socket, result)
+  defp apply_success(socket, _result, fun) when is_function(fun, 1), do: fun.(socket)
 end

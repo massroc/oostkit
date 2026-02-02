@@ -26,6 +26,7 @@ defmodule ProductiveWorkgroups.Sessions.Session do
   import Ecto.Changeset
 
   alias ProductiveWorkgroups.Sessions.Participant
+  alias ProductiveWorkgroups.Timestamps
   alias ProductiveWorkgroups.Workshops.Template
 
   @states ~w(lobby intro scoring summary actions completed)
@@ -83,7 +84,7 @@ defmodule ProductiveWorkgroups.Sessions.Session do
     session
     |> changeset(attrs)
     |> put_assoc(:template, template)
-    |> put_change(:last_activity_at, DateTime.utc_now() |> DateTime.truncate(:second))
+    |> put_change(:last_activity_at, Timestamps.now())
   end
 
   @doc """
@@ -92,7 +93,7 @@ defmodule ProductiveWorkgroups.Sessions.Session do
   def transition_changeset(session, new_state, additional_changes \\ %{}) do
     changes =
       Map.merge(
-        %{state: new_state, last_activity_at: DateTime.utc_now() |> DateTime.truncate(:second)},
+        %{state: new_state, last_activity_at: Timestamps.now()},
         additional_changes
       )
 

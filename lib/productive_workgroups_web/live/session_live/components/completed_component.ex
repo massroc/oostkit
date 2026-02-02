@@ -6,6 +6,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
   """
   use Phoenix.Component
 
+  import ProductiveWorkgroupsWeb.SessionLive.ScoreHelpers,
+    only: [text_color_class: 1, card_color_class: 1]
+
   alias ProductiveWorkgroupsWeb.SessionLive.ActionFormComponent
   alias ProductiveWorkgroupsWeb.SessionLive.Components.ExportModalComponent
 
@@ -39,26 +42,10 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.CompletedComponent do
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <%= for score <- @scores_summary do %>
-              <div class={[
-                "rounded-lg p-3 text-center border",
-                case score.color do
-                  :green -> "bg-green-900/30 border-green-700"
-                  :amber -> "bg-yellow-900/30 border-yellow-700"
-                  :red -> "bg-red-900/30 border-red-700"
-                  _ -> "bg-gray-700 border-gray-600"
-                end
-              ]}>
+              <div class={["rounded-lg p-3 text-center border", card_color_class(score.color)]}>
                 <div class="text-xs text-gray-400 mb-1">Q{score.question_index + 1}</div>
 
-                <div class={[
-                  "text-2xl font-bold",
-                  case score.color do
-                    :green -> "text-green-400"
-                    :amber -> "text-yellow-400"
-                    :red -> "text-red-400"
-                    _ -> "text-gray-400"
-                  end
-                ]}>
+                <div class={["text-2xl font-bold", text_color_class(score.color)]}>
                   <%= if score.combined_team_value do %>
                     {round(score.combined_team_value)}/10
                   <% else %>

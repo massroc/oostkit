@@ -6,6 +6,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
   """
   use Phoenix.Component
 
+  import ProductiveWorkgroupsWeb.SessionLive.ScoreHelpers,
+    only: [text_color_class: 1, bg_color_class: 1, card_color_class: 1]
+
   attr :session, :map, required: true
   attr :participant, :map, required: true
   attr :participants, :list, required: true
@@ -50,15 +53,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
           <%= for score <- @scores_summary do %>
             <% question_notes = Map.get(@notes_by_question, score.question_index, []) %> <% question_scores =
               Map.get(@individual_scores, score.question_index, []) %>
-            <div class={[
-              "rounded-lg p-4 border",
-              case score.color do
-                :green -> "bg-green-900/20 border-green-700"
-                :amber -> "bg-yellow-900/20 border-yellow-700"
-                :red -> "bg-red-900/20 border-red-700"
-                _ -> "bg-gray-700 border-gray-600"
-              end
-            ]}>
+            <div class={["rounded-lg p-4 border", card_color_class(score.color)]}>
               <!-- Question header -->
               <div class="flex items-start justify-between mb-3">
                 <div class="flex-1">
@@ -78,15 +73,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
 
                 <div class="text-right">
                   <%= if score.combined_team_value do %>
-                    <div class={[
-                      "text-2xl font-bold",
-                      case score.color do
-                        :green -> "text-green-400"
-                        :amber -> "text-yellow-400"
-                        :red -> "text-red-400"
-                        _ -> "text-gray-400"
-                      end
-                    ]}>
+                    <div class={["text-2xl font-bold", text_color_class(score.color)]}>
                       {round(score.combined_team_value)}/10
                     </div>
 
@@ -115,24 +102,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.SummaryComponent do
               <%= if length(question_scores) > 0 do %>
                 <div class="flex flex-wrap gap-2 justify-center">
                   <%= for s <- question_scores do %>
-                    <div class={[
-                      "rounded p-2 text-center w-16",
-                      case s.color do
-                        :green -> "bg-green-900/50 border border-green-700"
-                        :amber -> "bg-yellow-900/50 border border-yellow-700"
-                        :red -> "bg-red-900/50 border border-red-700"
-                        _ -> "bg-gray-700"
-                      end
-                    ]}>
-                      <div class={[
-                        "text-lg font-bold",
-                        case s.color do
-                          :green -> "text-green-400"
-                          :amber -> "text-yellow-400"
-                          :red -> "text-red-400"
-                          _ -> "text-gray-400"
-                        end
-                      ]}>
+                    <div class={["rounded p-2 text-center w-16", bg_color_class(s.color)]}>
+                      <div class={["text-lg font-bold", text_color_class(s.color)]}>
                         <%= if score.scale_type == "balance" and s.value > 0 do %>
                           +{s.value}
                         <% else %>
