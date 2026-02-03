@@ -302,7 +302,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
         <%= if @is_my_turn and not @my_turn_locked do %>
           <!-- It's this participant's turn -->
           <div class="text-center mb-4">
-            <div class="text-green-400 text-lg font-semibold">Your turn to score</div>
+            <div class="text-green-400 text-lg font-semibold">
+              <%= if @has_submitted do %>
+                Discuss your score
+              <% else %>
+                Your turn to score
+              <% end %>
+            </div>
 
             <%= if @in_catch_up_phase do %>
               <p class="text-gray-400 text-sm mt-1">Catch-up phase - add your score now</p>
