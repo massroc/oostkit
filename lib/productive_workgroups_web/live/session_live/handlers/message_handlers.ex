@@ -61,16 +61,22 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
     # Update participants first
     socket = assign(socket, participants: participants)
 
-    # Build score map from all_scores to check who was skipped
+    # Build score map from all_scores to check who actually scored (not skipped)
+    # Only include participants who have state :scored (not :skipped, :pending, :current)
     all_scores = socket.assigns[:all_scores] || []
-    score_map = Map.new(all_scores, fn s -> {s.participant_id, s} end)
+
+    score_map =
+      all_scores
+      |> Enum.filter(fn s -> s.state == :scored end)
+      |> Map.new(fn s -> {s.participant_id, s} end)
 
     # Check if all turns are done
     session = socket.assigns.session
     all_turns_done = Sessions.all_turns_complete?(session)
 
     # Recalculate readiness counts for non-facilitator, non-observer participants
-    # Ready if: clicked ready, has a score (participated), or was skipped
+    # Ready if: clicked ready, or was skipped (no score when all turns done)
+    # Note: Having a score (clicking Done) does NOT count as ready
     eligible_participants =
       Enum.filter(participants, fn p ->
         p.status == "active" and not p.is_facilitator and not p.is_observer
@@ -78,9 +84,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
 
     ready_count =
       Enum.count(eligible_participants, fn p ->
-        has_score = Map.has_key?(score_map, p.id)
-        was_skipped = all_turns_done and not has_score
-        p.is_ready or has_score or was_skipped
+        was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
+        p.is_ready or was_skipped
       end)
 
     eligible_count = length(eligible_participants)
@@ -102,7 +107,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
         %{p | is_ready: false}
       end)
 
+    # Also reset the individual participant assign
+    participant = %{socket.assigns.participant | is_ready: false}
+
     socket
+    |> assign(participant: participant)
     |> assign(participants: participants)
     |> assign(ready_count: 0)
     |> assign(all_ready: false)

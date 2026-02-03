@@ -15,7 +15,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   alias ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers
   alias ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders
   alias ProductiveWorkgroupsWeb.SessionLive.TimerHandler
-  alias ProductiveWorkgroupsWeb.SessionLive.TurnTimeoutHandler
 
   require Logger
 
@@ -67,12 +66,10 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
      |> assign(show_export_modal: false)
      |> assign(export_content: "all")
      |> TimerHandler.init_timer_assigns()
-     |> TurnTimeoutHandler.init_timeout_assigns()
      |> DataLoaders.load_scoring_data(workshop_session, participant)
      |> DataLoaders.load_summary_data(workshop_session)
      |> DataLoaders.load_actions_data(workshop_session)
-     |> TimerHandler.maybe_start_timer()
-     |> TurnTimeoutHandler.start_turn_timeout()}
+     |> TimerHandler.maybe_start_timer()}
   end
 
   @impl true
@@ -159,29 +156,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   @impl true
   def handle_info(:timer_tick, socket) do
     TimerHandler.handle_timer_tick(socket)
-  end
-
-  # Handle turn timeout tick for auto-skipping inactive participants
-  @impl true
-  def handle_info(:turn_timeout_tick, socket) do
-    case TurnTimeoutHandler.handle_timeout_tick(socket) do
-      {:continue, socket} ->
-        {:noreply, socket}
-
-      {:auto_skipped, updated_session, socket} ->
-        participant = socket.assigns.participant
-
-        socket =
-          socket
-          |> assign(session: updated_session)
-          |> DataLoaders.load_scoring_data(updated_session, participant)
-          |> TurnTimeoutHandler.start_turn_timeout()
-
-        {:noreply, socket}
-
-      {:noreply, socket} ->
-        {:noreply, socket}
-    end
   end
 
   @impl true

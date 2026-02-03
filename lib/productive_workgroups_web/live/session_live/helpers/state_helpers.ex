@@ -8,7 +8,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.StateHelpers do
 
   alias ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders
   alias ProductiveWorkgroupsWeb.SessionLive.TimerHandler
-  alias ProductiveWorkgroupsWeb.SessionLive.TurnTimeoutHandler
 
   @doc """
   Handles state transitions when session state or question changes.
@@ -25,7 +24,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.StateHelpers do
         socket
         |> DataLoaders.load_scoring_data(session, socket.assigns.participant)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
-        |> TurnTimeoutHandler.maybe_restart_on_turn_change(old_session, session)
 
       {_, true, "scoring"} ->
         # Load scoring data first to ensure template is available
@@ -38,34 +36,28 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.StateHelpers do
         socket
         |> assign(:show_mid_transition, show_transition)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
-        |> TurnTimeoutHandler.maybe_restart_on_turn_change(old_session, session)
 
       {false, false, "scoring"} when turn_changed or catch_up_changed ->
         # Turn changed within the same question - reload scoring data
-        socket
-        |> DataLoaders.load_scoring_data(session, socket.assigns.participant)
-        |> TurnTimeoutHandler.maybe_restart_on_turn_change(old_session, session)
+        DataLoaders.load_scoring_data(socket, session, socket.assigns.participant)
 
       {true, _, "summary"} ->
         socket
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
-        |> TurnTimeoutHandler.cancel_turn_timeout()
 
       {true, _, "actions"} ->
         # Don't restart timer when transitioning from summary to actions - shared timer
         socket
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
-        |> TurnTimeoutHandler.cancel_turn_timeout()
 
       {true, _, "completed"} ->
         socket
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.stop_timer()
-        |> TurnTimeoutHandler.cancel_turn_timeout()
 
       _ ->
         socket

@@ -140,18 +140,24 @@ The tool behaves like butcher paper on a wall: **visible, permanent within each 
 For each of the 8 questions (one row at a time):
 
 1. **Present the criterion** - explanation, what it means, scoring guidance
-2. **Sequential scoring** - participants score one at a time, in join order:
+2. **Individual turns** - participants score one at a time, in join order:
    - Current participant is highlighted (it's their turn)
-   - They place their score (visible immediately to all)
-   - They can edit their score while it's still their turn
-   - They click "Done" to pass the turn to the next participant
-   - Discussion happens naturally while scores are placed
-3. **Catch-up for skipped participants** - after all present participants have scored:
-   - Anyone who was skipped (disconnected, stepped away) can add their score
-   - If multiple were skipped, they score in turn order
-4. **Capture notes** - record key discussion points (optional)
-5. **Ready to advance** - all participants mark "Ready" to move to the next criterion
-6. **Row locks permanently** - once the group advances, scores for that row cannot be changed
+   - They select a score and click "Share" to make it visible
+   - **Individual discussion phase**: Team discusses THIS person's score
+   - When discussion is complete, they click "Done" to pass the turn
+   - They can edit their score while it's still their turn (before clicking Done)
+   - Facilitator can skip an inactive participant if needed
+3. **Team discussion phase** - after all turns are complete:
+   - All scores are visible; team discusses variance across the group
+   - Any participant can add notes to capture key discussion points
+   - Each participant clicks "Ready to Continue" when they're done discussing
+   - Skipped participants are automatically marked as ready
+4. **Ready to advance** - once all participants are ready, facilitator advances to next question
+5. **Row locks permanently** - once the group advances, scores for that row cannot be changed
+
+**Two Discussion Phases:**
+- **During each turn (Individual)**: "Discuss [Name]'s score" - focus on one person's perspective
+- **After all turns (Team)**: "Discuss as a team" - compare all scores, look for variance
 
 **Key Differences from Traditional Planning Poker:**
 - No hidden scores - everything is visible immediately
@@ -470,7 +476,7 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 - [ ] Turn progression with "Done" button
 - [ ] Score editing until turn passes
 - [ ] Row locking when group advances
-- [ ] Catch-up opportunity for skipped participants
+- [ ] Skipped participants auto-marked as ready
 - [ ] Discussion prompts per criterion
 - [ ] Basic notes capture per criterion
 - [ ] "Ready" confirmation from all to advance rows
@@ -868,8 +874,8 @@ The traffic light visualization needs to work within the dark theme:
 
 **Current participant is slow/away:**
 - **Subtle indicator** shows whose turn it is
-- Any participant (including facilitator) can skip to the next person if the current person is unavailable
-- Skipped participants get a catch-up opportunity after the last person scores
+- Facilitator can skip to the next person if the current person is unavailable
+- Skipped participants are automatically counted as ready for the team discussion phase
 - Team manages pacing socially
 
 **Solo participant (everyone else dropped):**
@@ -985,5 +991,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
-*Last Updated: 2026-02-02*
+*Document Version: 2.1 - Clarified two-phase discussion model (individual + team)*
+*Last Updated: 2026-02-03*

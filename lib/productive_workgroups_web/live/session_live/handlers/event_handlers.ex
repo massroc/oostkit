@@ -13,7 +13,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
   alias ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders
   alias ProductiveWorkgroupsWeb.SessionLive.Helpers.StateHelpers
   alias ProductiveWorkgroupsWeb.SessionLive.TimerHandler
-  alias ProductiveWorkgroupsWeb.SessionLive.TurnTimeoutHandler
 
   import ProductiveWorkgroupsWeb.SessionLive.OperationHelpers
 
@@ -142,8 +141,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
              socket
              |> assign(session: updated_session)
              |> assign(my_turn_locked: true)
-             |> DataLoaders.load_scoring_data(updated_session, participant)
-             |> TurnTimeoutHandler.maybe_restart_on_turn_change(session, updated_session)}
+             |> DataLoaders.load_scoring_data(updated_session, participant)}
 
           {:error, reason} ->
             Logger.error("Failed to advance turn: #{inspect(reason)}")
@@ -160,18 +158,16 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
   Skips the current participant's turn.
   """
   def handle_skip_turn(socket) do
-    session = socket.assigns.session
     participant = socket.assigns.participant
 
     handle_operation(
       socket,
-      Sessions.skip_turn(session),
+      Sessions.skip_turn(socket.assigns.session),
       "Failed to skip turn",
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
         |> DataLoaders.load_scoring_data(updated_session, participant)
-        |> TurnTimeoutHandler.maybe_restart_on_turn_change(session, updated_session)
       end
     )
   end

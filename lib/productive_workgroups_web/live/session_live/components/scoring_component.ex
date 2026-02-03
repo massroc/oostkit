@@ -159,15 +159,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
                   </div>
                 <% end %>
               </div>
-              <!-- Discussion prompt when all scores are in -->
-              <%= if @scores_revealed do %>
-                <div class="mt-4 pt-4 border-t border-gray-700 text-center">
-                  <p class="text-gray-300">
-                    All scores are in. <span class="text-white font-semibold">Discuss as a team</span>
-                    — look for variance across the group.
-                  </p>
-                </div>
-              <% end %>
             </div>
           <% end %>
 
