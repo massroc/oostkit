@@ -1405,13 +1405,16 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       alice_view |> element("button[phx-click='skip_turn']") |> render_click()
 
       # All turns are now complete (Alice scored, Bob skipped)
-      # Bob should see the results view with the Ready button, not another scoring chance
+      # Bob should see the results view with greyed-out Ready button
       bob_html = render(bob_view)
 
       # Should NOT see "Your turn to score" (no catch-up)
       refute bob_html =~ "Your turn to score"
-      # Should see the Ready button
+      # Should see the greyed-out Ready button and skipped message
       assert bob_html =~ "Ready to Continue"
+      assert bob_html =~ "You were skipped for this question"
+      # Should NOT see the active "I'm Ready to Continue" button
+      refute bob_html =~ "I'm Ready to Continue"
     end
   end
 

@@ -156,17 +156,30 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
             <% end %>
           </p>
         <% else %>
-          <%= if @participant.is_ready do %>
-            <div class="text-center text-gray-400">
-              <span class="text-green-400">✓</span> You're ready. Waiting for facilitator...
+          <%= if @participant_was_skipped do %>
+            <!-- Skipped participant - automatically ready, greyed out -->
+            <div class="text-center">
+              <button
+                disabled
+                class="w-full px-6 py-3 bg-gray-600 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
+              >
+                Ready to Continue
+              </button>
+              <p class="text-gray-500 text-sm mt-2">You were skipped for this question</p>
             </div>
           <% else %>
-            <button
-              phx-click="mark_ready"
-              class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              I'm Ready to Continue
-            </button>
+            <%= if @participant.is_ready do %>
+              <div class="text-center text-gray-400">
+                <span class="text-green-400">✓</span> You're ready. Waiting for facilitator...
+              </div>
+            <% else %>
+              <button
+                phx-click="mark_ready"
+                class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                I'm Ready to Continue
+              </button>
+            <% end %>
           <% end %>
         <% end %>
       </div>

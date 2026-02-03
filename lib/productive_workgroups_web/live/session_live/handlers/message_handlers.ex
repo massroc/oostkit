@@ -61,13 +61,27 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
     # Update participants first
     socket = assign(socket, participants: participants)
 
+    # Build score map from all_scores to check who was skipped
+    all_scores = socket.assigns[:all_scores] || []
+    score_map = Map.new(all_scores, fn s -> {s.participant_id, s} end)
+
+    # Check if all turns are done
+    session = socket.assigns.session
+    all_turns_done = Sessions.all_turns_complete?(session)
+
     # Recalculate readiness counts for non-facilitator, non-observer participants
+    # Skipped participants (no score when all turns done) count as ready
     eligible_participants =
       Enum.filter(participants, fn p ->
         p.status == "active" and not p.is_facilitator and not p.is_observer
       end)
 
-    ready_count = Enum.count(eligible_participants, & &1.is_ready)
+    ready_count =
+      Enum.count(eligible_participants, fn p ->
+        was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
+        p.is_ready or was_skipped
+      end)
+
     eligible_count = length(eligible_participants)
     all_ready = eligible_count > 0 and ready_count == eligible_count
 
