@@ -35,6 +35,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
   attr :ready_count, :integer, required: true
   attr :eligible_participant_count, :integer, required: true
   attr :all_ready, :boolean, required: true
+  attr :participant_was_skipped, :boolean, required: true
 
   def render(assigns) do
     ~H"""
@@ -185,6 +186,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
               ready_count={@ready_count}
               eligible_participant_count={@eligible_participant_count}
               all_ready={@all_ready}
+              participant_was_skipped={@participant_was_skipped}
             />
           <% else %>
             {render_score_input(assigns)}

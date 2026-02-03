@@ -22,21 +22,17 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     question = Enum.find(template.questions, &(&1.index == question_index))
 
     my_score = Scoring.get_score(session, participant, question_index)
-    my_turn_locked = my_score != nil and my_score.turn_locked
-
-    # Turn-based scoring state
     current_turn_participant = Sessions.get_current_turn_participant(session)
 
-    is_my_turn =
-      current_turn_participant != nil and current_turn_participant.id == participant.id
-
-    # Check if current turn participant has already submitted (for skip button visibility)
-    current_turn_has_score =
-      if current_turn_participant do
-        Scoring.get_score(session, current_turn_participant, question_index) != nil
-      else
-        false
-      end
+    # Calculate turn-based state
+    turn_state =
+      calculate_turn_state(
+        session,
+        participant,
+        my_score,
+        current_turn_participant,
+        question_index
+      )
 
     socket
     |> assign(template: template)
@@ -45,17 +41,46 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
     |> assign(my_score: if(my_score, do: my_score.value, else: nil))
     |> assign(has_submitted: my_score != nil)
-    |> assign(my_turn_locked: my_turn_locked)
-    |> assign(is_my_turn: is_my_turn and not participant.is_observer)
-    |> assign(
-      current_turn_participant_id: current_turn_participant && current_turn_participant.id
-    )
-    |> assign(current_turn_has_score: current_turn_has_score)
+    |> assign(my_turn_locked: turn_state.my_turn_locked)
+    |> assign(is_my_turn: turn_state.is_my_turn)
+    |> assign(current_turn_participant_id: turn_state.current_turn_participant_id)
+    |> assign(current_turn_has_score: turn_state.current_turn_has_score)
     |> assign(in_catch_up_phase: session.in_catch_up_phase)
+    |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_facilitator_tips: false)
     |> assign(show_notes: false)
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
+  end
+
+  defp calculate_turn_state(
+         session,
+         participant,
+         my_score,
+         current_turn_participant,
+         question_index
+       ) do
+    my_turn_locked = my_score != nil and my_score.turn_locked
+
+    is_my_turn =
+      current_turn_participant != nil and
+        current_turn_participant.id == participant.id and
+        not participant.is_observer
+
+    current_turn_has_score =
+      current_turn_participant != nil and
+        Scoring.get_score(session, current_turn_participant, question_index) != nil
+
+    all_turns_done = Sessions.all_turns_complete?(session)
+    participant_was_skipped = all_turns_done and my_score == nil and not participant.is_observer
+
+    %{
+      my_turn_locked: my_turn_locked,
+      is_my_turn: is_my_turn,
+      current_turn_participant_id: current_turn_participant && current_turn_participant.id,
+      current_turn_has_score: current_turn_has_score,
+      participant_was_skipped: participant_was_skipped
+    }
   end
 
   def load_scoring_data(socket, _session, _participant) do
@@ -78,6 +103,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     |> assign(current_turn_participant_id: nil)
     |> assign(current_turn_has_score: false)
     |> assign(in_catch_up_phase: false)
+    |> assign(participant_was_skipped: false)
     |> assign(all_scores: [])
     |> assign(scores_revealed: false)
     |> assign(score_count: 0)
@@ -122,8 +148,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
       current_turn_participant != nil and Map.has_key?(score_map, current_turn_participant.id)
 
     # Calculate readiness for non-facilitator, non-observer participants
+    # Skipped participants (no score when all turns done) count as ready
     {ready_count, eligible_count, all_ready} =
-      calculate_readiness(socket.assigns[:participants] || [])
+      calculate_readiness(socket.assigns[:participants] || [], score_map, all_turns_done)
 
     socket
     |> assign(all_scores: participant_scores)
@@ -178,13 +205,19 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     end
   end
 
-  defp calculate_readiness(all_participants) do
+  defp calculate_readiness(all_participants, score_map, all_turns_done) do
     eligible_participants =
       Enum.filter(all_participants, fn p ->
         p.status == "active" and not p.is_facilitator and not p.is_observer
       end)
 
-    ready_count = Enum.count(eligible_participants, & &1.is_ready)
+    # Count participants who are ready OR were skipped (no score when all turns done)
+    ready_count =
+      Enum.count(eligible_participants, fn p ->
+        was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
+        p.is_ready or was_skipped
+      end)
+
     eligible_count = length(eligible_participants)
     all_ready = eligible_count > 0 and ready_count == eligible_count
 

@@ -358,6 +358,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             ready_count={@ready_count}
             eligible_participant_count={@eligible_participant_count}
             all_ready={@all_ready}
+            participant_was_skipped={@participant_was_skipped}
           />
         <% "summary" -> %>
           <SummaryComponent.render
