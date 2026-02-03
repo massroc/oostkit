@@ -92,6 +92,22 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
   end
 
   @doc """
+  Handles participants_ready_reset message.
+  Resets all participants' ready state to false for a new question.
+  """
+  def handle_participants_ready_reset(socket) do
+    participants =
+      Enum.map(socket.assigns.participants, fn p ->
+        %{p | is_ready: false}
+      end)
+
+    socket
+    |> assign(participants: participants)
+    |> assign(ready_count: 0)
+    |> assign(all_ready: false)
+  end
+
+  @doc """
   Handles session_started message.
   Updates session and handles state transition.
   """

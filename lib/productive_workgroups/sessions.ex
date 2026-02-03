@@ -180,6 +180,9 @@ defmodule ProductiveWorkgroups.Sessions do
     # Lock all scores for the current question before advancing
     ProductiveWorkgroups.Scoring.lock_row(session, session.current_question_index)
 
+    # Reset all participants' ready state for the new question
+    reset_all_ready(session)
+
     result =
       session
       |> Session.transition_changeset("scoring", %{
@@ -188,6 +191,9 @@ defmodule ProductiveWorkgroups.Sessions do
         in_catch_up_phase: false
       })
       |> Repo.update()
+
+    # Broadcast participants_reset so clients refresh their participant data
+    broadcast(session, {:participants_ready_reset, %{}})
 
     broadcast_session_update(result)
   end
