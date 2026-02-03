@@ -411,7 +411,7 @@ defmodule ProductiveWorkgroups.SessionsTest do
       assert Sessions.get_current_turn_participant(updated_session).id == ctx.charlie.id
     end
 
-    test "advance_turn enters catch-up phase when all have had a turn", ctx do
+    test "advance_turn marks all turns complete when all have had a turn", ctx do
       session = ctx.session
 
       # Advance through all participants without anyone scoring
@@ -419,9 +419,13 @@ defmodule ProductiveWorkgroups.SessionsTest do
       {:ok, session} = Sessions.advance_turn(session)
       {:ok, session} = Sessions.advance_turn(session)
 
-      # Should enter catch-up phase since no one scored
-      assert session.in_catch_up_phase == true
-      assert session.current_turn_index == 0
+      # Should mark all turns complete (no catch-up phase)
+      assert session.in_catch_up_phase == false
+      # current_turn_index should be past the last participant
+      assert session.current_turn_index == 3
+      assert Sessions.all_turns_complete?(session) == true
+      # No current turn participant since all turns are done
+      assert Sessions.get_current_turn_participant(session) == nil
     end
 
     test "skip_turn advances to next participant", ctx do
