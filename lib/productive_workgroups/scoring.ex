@@ -234,7 +234,9 @@ defmodule ProductiveWorkgroups.Scoring do
     Enum.map(questions, fn question ->
       scores = Map.get(all_scores, question.index, [])
       summary = calculate_summary_from_scores(scores)
-      combined_value = calculate_combined_team_value(scores, question.scale_type, question.optimal_value)
+
+      combined_value =
+        calculate_combined_team_value(scores, question.scale_type, question.optimal_value)
 
       Map.merge(summary, %{
         question_index: question.index,
