@@ -32,6 +32,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
   attr :question_notes, :list, required: true
   attr :show_notes, :boolean, required: true
   attr :note_input, :string, required: true
+  attr :ready_count, :integer, required: true
+  attr :eligible_participant_count, :integer, required: true
+  attr :all_ready, :boolean, required: true
 
   def render(assigns) do
     ~H"""
@@ -167,7 +170,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
             </div>
           <% end %>
 
-          <%= if @scores_revealed do %>
+          <%= if @scores_revealed and not (@is_my_turn and not @my_turn_locked) do %>
             <.live_component
               module={ScoreResultsComponent}
               id="score-results"
@@ -179,6 +182,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
               note_input={@note_input}
               participant={@participant}
               session={@session}
+              ready_count={@ready_count}
+              eligible_participant_count={@eligible_participant_count}
+              all_ready={@all_ready}
             />
           <% else %>
             {render_score_input(assigns)}
@@ -312,19 +318,21 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
           <div class="flex gap-3 mt-6">
             <button
               phx-click="submit_score"
-              disabled={@selected_value == nil}
+              disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
               class={[
                 "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
-                if(@selected_value != nil and not @has_submitted,
+                if(
+                  @selected_value != nil and
+                    (not @has_submitted or @selected_value != @my_score),
                   do: "bg-blue-600 hover:bg-blue-700 text-white",
                   else: "bg-gray-600 text-gray-400 cursor-not-allowed"
                 )
               ]}
             >
               <%= if @has_submitted do %>
-                Score Placed
+                Change Score
               <% else %>
-                Place Score
+                Share Score
               <% end %>
             </button>
             <button

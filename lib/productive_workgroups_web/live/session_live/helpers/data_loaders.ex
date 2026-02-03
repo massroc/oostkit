@@ -85,6 +85,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     |> assign(question_notes: [])
     |> assign(show_facilitator_tips: false)
     |> assign(show_notes: false)
+    |> assign(ready_count: 0)
+    |> assign(eligible_participant_count: 0)
+    |> assign(all_ready: false)
   end
 
   @doc """
@@ -153,12 +156,29 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     current_turn_has_score =
       current_turn_participant != nil and Map.has_key?(score_map, current_turn_participant.id)
 
+    # Calculate readiness for non-facilitator, non-observer participants
+    # Use participants from socket.assigns if available, otherwise use DB participants
+    all_participants = socket.assigns[:participants] || []
+
+    # Get non-facilitator, non-observer participants for readiness check
+    eligible_participants =
+      Enum.filter(all_participants, fn p ->
+        p.status == "active" and not p.is_facilitator and not p.is_observer
+      end)
+
+    ready_count = Enum.count(eligible_participants, & &1.is_ready)
+    eligible_count = length(eligible_participants)
+    all_ready = eligible_count > 0 and ready_count == eligible_count
+
     socket
     |> assign(all_scores: participant_scores)
     |> assign(scores_revealed: all_scored)
     |> assign(score_count: length(scores))
     |> assign(active_participant_count: active_count)
     |> assign(current_turn_has_score: current_turn_has_score)
+    |> assign(ready_count: ready_count)
+    |> assign(eligible_participant_count: eligible_count)
+    |> assign(all_ready: all_ready)
   end
 
   @doc """

@@ -50,7 +50,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
 
   @doc """
   Handles participant_ready message.
-  Updates participant ready state in list.
+  Updates participant ready state in list and recalculates readiness counts.
   """
   def handle_participant_ready(socket, participant) do
     participants =
@@ -58,7 +58,23 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
         if p.id == participant.id, do: participant, else: p
       end)
 
-    assign(socket, participants: participants)
+    # Update participants first
+    socket = assign(socket, participants: participants)
+
+    # Recalculate readiness counts for non-facilitator, non-observer participants
+    eligible_participants =
+      Enum.filter(participants, fn p ->
+        p.status == "active" and not p.is_facilitator and not p.is_observer
+      end)
+
+    ready_count = Enum.count(eligible_participants, & &1.is_ready)
+    eligible_count = length(eligible_participants)
+    all_ready = eligible_count > 0 and ready_count == eligible_count
+
+    socket
+    |> assign(ready_count: ready_count)
+    |> assign(eligible_participant_count: eligible_count)
+    |> assign(all_ready: all_ready)
   end
 
   @doc """
