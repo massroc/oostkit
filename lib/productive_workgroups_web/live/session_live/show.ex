@@ -355,6 +355,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             question_notes={@question_notes}
             show_notes={@show_notes}
             note_input={@note_input}
+            ready_count={@ready_count}
+            eligible_participant_count={@eligible_participant_count}
+            all_ready={@all_ready}
           />
         <% "summary" -> %>
           <SummaryComponent.render

@@ -132,7 +132,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
             </button>
             <button
               phx-click="next_question"
-              class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+              disabled={not @all_ready}
+              class={[
+                "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
+                if(@all_ready,
+                  do: "bg-green-600 hover:bg-green-700 text-white",
+                  else: "bg-gray-600 text-gray-400 cursor-not-allowed"
+                )
+              ]}
             >
               <%= if @session.current_question_index + 1 >= @total_questions do %>
                 Continue to Summary →
@@ -142,7 +149,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
             </button>
           </div>
           <p class="text-center text-gray-500 text-sm mt-2">
-            As facilitator, advance when the team is ready.
+            <%= if @all_ready do %>
+              All participants ready
+            <% else %>
+              {@ready_count} of {@eligible_participant_count} participants ready
+            <% end %>
           </p>
         <% else %>
           <%= if @participant.is_ready do %>
