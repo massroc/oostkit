@@ -419,8 +419,7 @@ defmodule ProductiveWorkgroups.SessionsTest do
       {:ok, session} = Sessions.advance_turn(session)
       {:ok, session} = Sessions.advance_turn(session)
 
-      # Should mark all turns complete (no catch-up phase)
-      assert session.in_catch_up_phase == false
+      # Should mark all turns complete
       # current_turn_index should be past the last participant
       assert session.current_turn_index == 3
       assert Sessions.all_turns_complete?(session) == true

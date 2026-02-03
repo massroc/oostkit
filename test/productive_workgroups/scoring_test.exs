@@ -55,7 +55,6 @@ defmodule ProductiveWorkgroups.ScoringTest do
       assert score.question_index == 0
       assert score.participant_id == participant.id
       assert score.session_id == session.id
-      assert score.revealed == false
       assert score.submitted_at != nil
     end
 
@@ -113,41 +112,6 @@ defmodule ProductiveWorkgroups.ScoringTest do
 
       scores = Scoring.list_scores_for_question(session, 0)
       assert length(scores) == 2
-    end
-
-    test "reveal_scores/2 marks all scores as revealed", %{
-      session: session,
-      participant: participant
-    } do
-      {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-
-      {:ok, _} = Scoring.submit_score(session, participant, 0, 3)
-      {:ok, _} = Scoring.submit_score(session, p2, 0, -1)
-
-      :ok = Scoring.reveal_scores(session, 0)
-
-      scores = Scoring.list_scores_for_question(session, 0)
-      assert Enum.all?(scores, & &1.revealed)
-    end
-
-    test "unreveal_scores/2 marks all scores as unrevealed", %{
-      session: session,
-      participant: participant
-    } do
-      {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-
-      {:ok, _} = Scoring.submit_score(session, participant, 0, 3)
-      {:ok, _} = Scoring.submit_score(session, p2, 0, -1)
-
-      # First reveal the scores
-      :ok = Scoring.reveal_scores(session, 0)
-      scores = Scoring.list_scores_for_question(session, 0)
-      assert Enum.all?(scores, & &1.revealed)
-
-      # Then unreveal them
-      :ok = Scoring.unreveal_scores(session, 0)
-      scores = Scoring.list_scores_for_question(session, 0)
-      refute Enum.any?(scores, & &1.revealed)
     end
 
     test "all_scored?/2 checks if all active participants scored", %{

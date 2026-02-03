@@ -805,7 +805,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       assert html =~ "Question 1 of 8"
     end
 
-    test "going back from results page unreveals scores so participants can change them", ctx do
+    test "going back from question 1 results page goes to intro", ctx do
       # Start session and advance to scoring
       {:ok, session} = Sessions.start_session(ctx.session)
       {:ok, session} = Sessions.advance_to_scoring(session)
@@ -815,30 +815,23 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       {:ok, session} = Sessions.advance_turn(session)
       {:ok, _} = Scoring.submit_score(session, ctx.participant, 0, -1)
       {:ok, _} = Scoring.lock_participant_turn(session, ctx.participant, 0)
-      {:ok, session} = Sessions.advance_turn(session)
-      # Explicitly reveal scores (this happens automatically in the LiveView when all submit)
-      :ok = Scoring.reveal_scores(session, 0)
-
-      # Verify scores were revealed
-      scores_before = Scoring.list_scores_for_question(session, 0)
-      assert Enum.all?(scores_before, & &1.revealed)
+      {:ok, _session} = Sessions.advance_turn(session)
 
       conn =
         build_conn()
         |> Plug.Test.init_test_session(%{})
         |> put_session(:browser_token, ctx.facilitator_token)
 
-      # Load the page - should show results page since scores are revealed
+      # Load the page - should show results page since all turns complete
       {:ok, view, html} = live(conn, ~p"/session/#{ctx.session.code}")
-      # Verify we're on the facilitator results view - it now shows readiness status
+      # Verify we're on the facilitator results view - it shows readiness status
       assert html =~ "participants ready"
 
-      # Go back from results page to scoring entry
-      render_click(view, "go_back")
+      # Go back from results page - should go to intro (since this is question 1)
+      html = render_click(view, "go_back")
 
-      # Verify scores are now unrevealed
-      scores_after = Scoring.list_scores_for_question(session, 0)
-      refute Enum.any?(scores_after, & &1.revealed)
+      # Verify we're now at intro (step 4 - safe space)
+      assert html =~ "Creating a Safe Space"
     end
 
     test "facilitator can go back from question 1 to intro", ctx do

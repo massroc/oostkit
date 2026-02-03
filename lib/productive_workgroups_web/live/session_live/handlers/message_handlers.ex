@@ -3,7 +3,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
   Handlers for PubSub messages (handle_info callbacks) in the session LiveView.
   """
 
-  import Phoenix.Component, only: [assign: 2, assign: 3]
+  import Phoenix.Component, only: [assign: 2]
   import Phoenix.LiveView, only: [put_flash: 3]
 
   alias ProductiveWorkgroups.Sessions
@@ -208,29 +208,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
     socket
     |> assign(session: updated_session)
     |> DataLoaders.load_scoring_data(updated_session, participant)
-  end
-
-  @doc """
-  Handles catch_up_started message.
-  Updates catch-up phase state.
-  """
-  def handle_catch_up_started(socket, payload) do
-    participant = socket.assigns.participant
-    is_my_turn = participant.id in payload.skipped_participant_ids and not participant.is_observer
-
-    socket
-    |> assign(:in_catch_up_phase, true)
-    |> assign(:is_my_turn, is_my_turn)
-  end
-
-  @doc """
-  Handles catch_up_ended message.
-  Clears catch-up phase state.
-  """
-  def handle_catch_up_ended(socket, _payload) do
-    socket
-    |> assign(:in_catch_up_phase, false)
-    |> assign(:is_my_turn, false)
   end
 
   @doc """

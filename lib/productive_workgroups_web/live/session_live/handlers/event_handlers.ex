@@ -458,28 +458,21 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
     do_go_back_from_state(socket, session, session.state)
   end
 
+  # Back from scoring (first question) goes to intro
   defp do_go_back_from_state(socket, session, "scoring")
        when session.current_question_index == 0 do
-    if socket.assigns.scores_revealed do
-      unreveal_current_question_scores(socket, session)
-    else
-      go_back_to_intro(socket, session)
-    end
+    go_back_to_intro(socket, session)
   end
 
+  # Back from scoring (any other question) goes to previous question
   defp do_go_back_from_state(socket, session, "scoring") do
-    if socket.assigns.scores_revealed do
-      unreveal_current_question_scores(socket, session)
-    else
-      go_back_to_previous_question_results(socket, session)
-    end
+    go_back_to_previous_question(socket, session)
   end
 
   defp do_go_back_from_state(socket, session, "summary") do
     Sessions.reset_all_ready(session)
     template = DataLoaders.get_or_load_template(socket, session.template_id)
     last_index = length(template.questions) - 1
-    Scoring.unreveal_scores(session, last_index)
 
     handle_operation(
       socket,
@@ -489,8 +482,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
         socket
         |> assign(session: updated_session)
         |> DataLoaders.load_scoring_data(updated_session, socket.assigns.participant)
-        |> assign(scores_revealed: false)
-        |> assign(has_submitted: false)
       end
     )
   end
@@ -529,19 +520,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
     {:noreply, socket}
   end
 
-  defp unreveal_current_question_scores(socket, session) do
-    Sessions.reset_all_ready(session)
-    current_index = session.current_question_index
-    Scoring.unreveal_scores(session, current_index)
-
-    {:noreply,
-     socket
-     |> DataLoaders.load_scoring_data(session, socket.assigns.participant)
-     |> assign(scores_revealed: false)
-     |> assign(has_submitted: false)}
-  end
-
-  defp go_back_to_previous_question_results(socket, session) do
+  defp go_back_to_previous_question(socket, session) do
     Sessions.reset_all_ready(session)
 
     handle_operation(
@@ -584,7 +563,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
 
     case Scoring.submit_score(session, participant, question_index, selected_value) do
       {:ok, _score} ->
-        maybe_reveal_scores(session, question_index)
         broadcast(session, {:score_submitted, participant.id, question_index})
 
         {:noreply,
@@ -596,12 +574,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
       {:error, reason} ->
         Logger.error("Failed to submit score: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Failed to submit score")}
-    end
-  end
-
-  defp maybe_reveal_scores(session, question_index) do
-    if Scoring.all_scored?(session, question_index) do
-      Scoring.reveal_scores(session, question_index)
     end
   end
 

@@ -17,7 +17,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.StateHelpers do
     state_changed = old_session.state != session.state
     question_changed = old_session.current_question_index != session.current_question_index
     turn_changed = old_session.current_turn_index != session.current_turn_index
-    catch_up_changed = old_session.in_catch_up_phase != session.in_catch_up_phase
 
     case {state_changed, question_changed, session.state} do
       {true, _, "scoring"} ->
@@ -37,7 +36,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.StateHelpers do
         |> assign(:show_mid_transition, show_transition)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
 
-      {false, false, "scoring"} when turn_changed or catch_up_changed ->
+      {false, false, "scoring"} when turn_changed ->
         # Turn changed within the same question - reload scoring data
         DataLoaders.load_scoring_data(socket, session, socket.assigns.participant)
 

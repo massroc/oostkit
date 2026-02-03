@@ -12,7 +12,6 @@ defmodule ProductiveWorkgroups.Scoring.Score do
                     Score cannot be edited after this point.
   - `row_locked` - Set to true when the group advances to the next question.
                    All scores for a question are permanently locked.
-  - `revealed` - Legacy field, kept for backwards compatibility.
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -23,7 +22,6 @@ defmodule ProductiveWorkgroups.Scoring.Score do
     field :question_index, :integer
     field :value, :integer
     field :submitted_at, :utc_datetime
-    field :revealed, :boolean, default: false
     field :turn_locked, :boolean, default: false
     field :row_locked, :boolean, default: false
 
@@ -36,7 +34,7 @@ defmodule ProductiveWorkgroups.Scoring.Score do
   @doc false
   def changeset(score, attrs) do
     score
-    |> cast(attrs, [:question_index, :value, :submitted_at, :revealed, :turn_locked, :row_locked])
+    |> cast(attrs, [:question_index, :value, :submitted_at, :turn_locked, :row_locked])
     |> validate_required([:question_index, :value, :submitted_at])
     |> validate_number(:question_index, greater_than_or_equal_to: 0)
     |> unique_constraint([:participant_id, :question_index])
