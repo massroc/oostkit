@@ -1680,30 +1680,35 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
     test "when only participant is skipped, facilitator can immediately advance", _ctx do
       # This tests the scenario with just facilitator + one participant
       # Create a fresh session with only facilitator and one participant
-      {:ok, template} = Workshops.create_template(%{
-        name: "Skip Only Test",
-        slug: "skip-only-test-#{System.unique_integer()}",
-        version: "1.0.0"
-      })
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Skip Only Test",
+          slug: "skip-only-test-#{System.unique_integer()}",
+          version: "1.0.0"
+        })
 
-      {:ok, _} = Workshops.create_question(template, %{
-        index: 0,
-        title: "Test Question",
-        criterion_number: "1",
-        criterion_name: "Test",
-        explanation: "Test",
-        scale_type: "balance",
-        scale_min: -5,
-        scale_max: 5,
-        optimal_value: 0,
-        discussion_prompts: []
-      })
+      {:ok, _} =
+        Workshops.create_question(template, %{
+          index: 0,
+          title: "Test Question",
+          criterion_number: "1",
+          criterion_name: "Test",
+          explanation: "Test",
+          scale_type: "balance",
+          scale_min: -5,
+          scale_max: 5,
+          optimal_value: 0,
+          discussion_prompts: []
+        })
 
       {:ok, session} = Sessions.create_session(template)
 
       # Create facilitator
       facilitator_token = Ecto.UUID.generate()
-      {:ok, facilitator} = Sessions.join_session(session, "Facilitator", facilitator_token, is_facilitator: true)
+
+      {:ok, facilitator} =
+        Sessions.join_session(session, "Facilitator", facilitator_token, is_facilitator: true)
+
       Process.sleep(10)
 
       # Create just one regular participant
