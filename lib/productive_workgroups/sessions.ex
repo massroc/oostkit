@@ -163,8 +163,7 @@ defmodule ProductiveWorkgroups.Sessions do
       session
       |> Session.transition_changeset("scoring", %{
         current_question_index: 0,
-        current_turn_index: 0,
-        in_catch_up_phase: false
+        current_turn_index: 0
       })
       |> Repo.update()
 
@@ -187,8 +186,7 @@ defmodule ProductiveWorkgroups.Sessions do
       session
       |> Session.transition_changeset("scoring", %{
         current_question_index: session.current_question_index + 1,
-        current_turn_index: 0,
-        in_catch_up_phase: false
+        current_turn_index: 0
       })
       |> Repo.update()
 
@@ -626,62 +624,9 @@ defmodule ProductiveWorkgroups.Sessions do
     end)
   end
 
-  @doc """
-  Enters catch-up phase for skipped participants.
-
-  During catch-up, skipped participants can add their scores in turn order.
-  """
-  def enter_catch_up_phase(%Session{} = session, skipped_participants) do
-    session
-    |> Session.transition_changeset("scoring", %{
-      in_catch_up_phase: true,
-      current_turn_index: 0
-    })
-    |> Repo.update()
-    |> with_broadcast(fn s -> broadcast_catch_up_started(s, skipped_participants) end)
-  end
-
-  @doc """
-  Gets the current participant during catch-up phase.
-
-  Returns the skipped participant whose turn it is to catch up.
-  """
-  def get_current_catch_up_participant(%Session{in_catch_up_phase: true} = session) do
-    skipped = get_skipped_participants(session, session.current_question_index)
-    Enum.at(skipped, session.current_turn_index)
-  end
-
-  def get_current_catch_up_participant(%Session{}), do: nil
-
-  @doc """
-  Advances to the next skipped participant during catch-up phase.
-  """
-  def advance_catch_up_turn(%Session{state: "scoring", in_catch_up_phase: true} = session) do
-    skipped = get_skipped_participants(session, session.current_question_index)
-    next_index = session.current_turn_index + 1
-
-    if next_index >= length(skipped) do
-      # All skipped participants have caught up (or been skipped again)
-      # Exit catch-up phase
-      session
-      |> Session.transition_changeset("scoring", %{
-        in_catch_up_phase: false,
-        current_turn_index: 0
-      })
-      |> Repo.update()
-      |> with_broadcast(fn s -> broadcast(s, {:catch_up_ended, %{}}) end)
-    else
-      session
-      |> Session.transition_changeset("scoring", %{current_turn_index: next_index})
-      |> Repo.update()
-      |> with_broadcast(&broadcast_turn_advanced/1)
-    end
-  end
-
   # Private helpers for turn-based broadcasting
 
   defp broadcast_turn_advanced(%Session{} = session) do
-    # get_current_turn_participant already handles catch-up phase
     current_participant = get_current_turn_participant(session)
 
     broadcast(
@@ -689,18 +634,7 @@ defmodule ProductiveWorkgroups.Sessions do
       {:turn_advanced,
        %{
          current_turn_index: session.current_turn_index,
-         current_participant_id: current_participant && current_participant.id,
-         in_catch_up_phase: session.in_catch_up_phase
-       }}
-    )
-  end
-
-  defp broadcast_catch_up_started(%Session{} = session, skipped_participants) do
-    broadcast(
-      session,
-      {:catch_up_started,
-       %{
-         skipped_participant_ids: Enum.map(skipped_participants, & &1.id)
+         current_participant_id: current_participant && current_participant.id
        }}
     )
   end

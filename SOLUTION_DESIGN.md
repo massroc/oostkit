@@ -273,7 +273,6 @@ defmodule ProductiveWorkGroups.Sessions do
   def get_current_turn_participant(session_id, question_index)
   def advance_turn(session_id, question_index)  # Move to next participant
   def skip_turn(session_id, question_index)     # Skip current participant
-  def is_catch_up_phase?(session_id, question_index)  # All present have scored
   def get_skipped_participants(session_id, question_index)
 
   # State queries
@@ -501,7 +500,6 @@ defmodule ProductiveWorkGroups.Sessions.Session do
     field :state, Ecto.Enum, values: [:lobby, :intro, :scoring, :summary, :actions, :completed]
     field :current_question, :integer, default: 0
     field :current_turn_index, :integer, default: 0   # Index into turn_order for current scorer
-    field :in_catch_up_phase, :boolean, default: false # True when catching up skipped participants
 
     # Settings (embedded)
     embeds_one :settings, Settings do
@@ -580,8 +578,7 @@ defmodule ProductiveWorkGroups.Scoring.ScoreResult do
     :average,
     :average_color,
     :spread,           # Standard deviation
-    :all_submitted,
-    :revealed
+    :all_submitted
   ]
 end
 
@@ -654,7 +651,7 @@ defmodule ProductiveWorkGroups.Repo.Migrations.CreateSessions do
       add :code, :string, size: 6, null: false
       add :state, :string, default: "lobby"
       add :current_question, :integer, default: 0
-      add :scores_revealed, :boolean, default: false
+      add :current_turn_index, :integer, default: 0
       add :settings, :map, default: %{}
       add :started_at, :utc_datetime
       add :completed_at, :utc_datetime
@@ -839,8 +836,6 @@ defmodule ProductiveWorkGroups.PubSub.Events do
     :score_placed          # Participant placed/updated score (visible immediately)
     | :turn_completed      # Participant clicked "Done", turn advances
     | :turn_skipped        # Current participant was skipped
-    | :catch_up_started    # All present participants scored, catch-up phase begins
-    | :catch_up_ended      # Catch-up phase ended
 
   # Notes events
   @type notes_event ::
@@ -1205,12 +1200,6 @@ Frequently updated sections have been extracted into LiveComponents to isolate r
             │    │            │            │   │
             │    │            ▼            │   │
             │    │  ┌───────────────────┐  │   │
-            │    │  │   catch-up phase  │  │   │   (skipped participants
-            │    │  │   (if any skipped)│  │   │    can add scores)
-            │    │  └─────────┬─────────┘  │   │
-            │    │            │            │   │
-            │    │            ▼            │   │
-            │    │  ┌───────────────────┐  │   │
             │    │  │  all mark ready   │  │   │
             │    │  └─────────┬─────────┘  │   │
             │    │            │ row locks  │   │
@@ -1289,7 +1278,6 @@ defmodule ProductiveWorkGroupsWeb.WorkshopLive do
      |> assign(:current_question, current_question)
      |> assign(:current_turn_participant_id, current_turn_participant_id)
      |> assign(:is_my_turn, is_my_turn)
-     |> assign(:in_catch_up_phase, false)
      |> assign(:my_score, nil)
      |> assign(:my_turn_locked, false)       # Whether I've clicked "Done"
      |> assign(:all_scores, [])              # All scores for current question (visible immediately)
@@ -1315,10 +1303,6 @@ defmodule ProductiveWorkGroupsWeb.WorkshopLive do
      socket
      |> assign(:current_turn_participant_id, next_pid)
      |> assign(:is_my_turn, next_pid == socket.assigns.participant.id)}
-  end
-
-  def handle_info({:catch_up_started, %{skipped_participant_ids: skipped}}, socket) do
-    {:noreply, assign(socket, :in_catch_up_phase, true)}
   end
 
   def handle_info({:row_locked, %{question_index: qidx}}, socket) do

@@ -137,7 +137,6 @@ defmodule ProductiveWorkgroups.Factory do
       question_index: 0,
       value: 0,
       submitted_at: DateTime.utc_now() |> DateTime.truncate(:second),
-      revealed: false,
       session: build(:session),
       participant: build(:participant)
     }

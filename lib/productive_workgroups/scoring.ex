@@ -90,31 +90,6 @@ defmodule ProductiveWorkgroups.Scoring do
     |> Repo.aggregate(:count)
   end
 
-  @doc """
-  Marks all scores for a question as revealed.
-  """
-  def reveal_scores(%Session{} = session, question_index) do
-    Score
-    |> where([s], s.session_id == ^session.id and s.question_index == ^question_index)
-    |> Repo.update_all(set: [revealed: true])
-
-    :ok
-  end
-
-  @doc """
-  Marks all scores for a question as unrevealed.
-
-  Used when going back to a previous question to allow participants to change their scores.
-  Note: In turn-based scoring, this is largely deprecated in favor of locking.
-  """
-  def unreveal_scores(%Session{} = session, question_index) do
-    Score
-    |> where([s], s.session_id == ^session.id and s.question_index == ^question_index)
-    |> Repo.update_all(set: [revealed: false])
-
-    :ok
-  end
-
   ## Turn-Based Score Locking
 
   @doc """
@@ -260,18 +235,22 @@ defmodule ProductiveWorkgroups.Scoring do
       scores = Map.get(all_scores, question.index, [])
       summary = calculate_summary_from_scores(scores)
 
+      combined_value =
+        calculate_combined_team_value(scores, question.scale_type, question.optimal_value)
+
       Map.merge(summary, %{
         question_index: question.index,
         title: question.title,
         scale_type: question.scale_type,
         optimal_value: question.optimal_value,
+        # Use combined_team_value for consistent color logic across both scale types
+        # This treats the 0-10 combined value with maximal scale thresholds
         color:
-          if(summary.average,
-            do: traffic_light_color(question.scale_type, summary.average, question.optimal_value),
+          if(combined_value,
+            do: traffic_light_color("maximal", combined_value, nil),
             else: nil
           ),
-        combined_team_value:
-          calculate_combined_team_value(scores, question.scale_type, question.optimal_value)
+        combined_team_value: combined_value
       })
     end)
   end

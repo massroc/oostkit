@@ -22,7 +22,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
   attr :is_my_turn, :boolean, required: true
   attr :current_turn_participant_id, :any, required: true
   attr :current_turn_has_score, :boolean, required: true
-  attr :in_catch_up_phase, :boolean, required: true
   attr :my_turn_locked, :boolean, required: true
   attr :scores_revealed, :boolean, required: true
   attr :score_count, :integer, required: true
@@ -302,10 +301,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
                 Your turn to score
               <% end %>
             </div>
-
-            <%= if @in_catch_up_phase do %>
-              <p class="text-gray-400 text-sm mt-1">Catch-up phase - add your score now</p>
-            <% end %>
           </div>
 
           <%= if @current_question.scale_type == "balance" do %>

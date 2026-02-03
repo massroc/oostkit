@@ -45,12 +45,15 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     |> assign(is_my_turn: turn_state.is_my_turn)
     |> assign(current_turn_participant_id: turn_state.current_turn_participant_id)
     |> assign(current_turn_has_score: turn_state.current_turn_has_score)
-    |> assign(in_catch_up_phase: session.in_catch_up_phase)
     |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_facilitator_tips: false)
     |> assign(show_notes: false)
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
+  end
+
+  def load_scoring_data(socket, _session, _participant) do
+    reset_scoring_assigns(socket)
   end
 
   defp calculate_turn_state(
@@ -83,10 +86,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     }
   end
 
-  def load_scoring_data(socket, _session, _participant) do
-    reset_scoring_assigns(socket)
-  end
-
   @doc """
   Resets all scoring-related assigns to default values.
   """
@@ -102,7 +101,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     |> assign(is_my_turn: false)
     |> assign(current_turn_participant_id: nil)
     |> assign(current_turn_has_score: false)
-    |> assign(in_catch_up_phase: false)
     |> assign(participant_was_skipped: false)
     |> assign(all_scores: [])
     |> assign(scores_revealed: false)
@@ -165,7 +163,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
 
   defp build_participant_scores(participants, score_map, session, current_question) do
     current_turn_index = session.current_turn_index
-    in_catch_up = session.in_catch_up_phase
 
     participants
     |> Enum.with_index()
@@ -173,7 +170,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
       score = Map.get(score_map, participant.id)
 
       {value, state, color} =
-        determine_score_state(score, idx, current_turn_index, in_catch_up, current_question)
+        determine_score_state(score, idx, current_turn_index, current_question)
 
       %{
         value: value,
@@ -181,18 +178,15 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
         participant_name: participant.name,
         participant_id: participant.id,
         color: color,
-        is_current_turn: idx == current_turn_index and not in_catch_up
+        is_current_turn: idx == current_turn_index
       }
     end)
   end
 
-  defp determine_score_state(score, idx, current_turn_index, in_catch_up, current_question) do
+  defp determine_score_state(score, idx, current_turn_index, current_question) do
     cond do
       score != nil ->
         {score.value, :scored, get_score_color(current_question, score.value)}
-
-      in_catch_up ->
-        {nil, :skipped, nil}
 
       idx > current_turn_index ->
         {nil, :pending, nil}

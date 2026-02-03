@@ -138,16 +138,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_info({:catch_up_started, payload}, socket) do
-    {:noreply, MessageHandlers.handle_catch_up_started(socket, payload)}
-  end
-
-  @impl true
-  def handle_info({:catch_up_ended, payload}, socket) do
-    {:noreply, MessageHandlers.handle_catch_up_ended(socket, payload)}
-  end
-
-  @impl true
   def handle_info({:row_locked, payload}, socket) do
     {:noreply, MessageHandlers.handle_row_locked(socket, payload)}
   end
@@ -324,7 +314,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
             is_my_turn={@is_my_turn}
             current_turn_participant_id={@current_turn_participant_id}
             current_turn_has_score={@current_turn_has_score}
-            in_catch_up_phase={@in_catch_up_phase}
             my_turn_locked={@my_turn_locked}
             scores_revealed={@scores_revealed}
             score_count={@score_count}

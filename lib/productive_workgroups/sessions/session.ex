@@ -20,7 +20,6 @@ defmodule ProductiveWorkgroups.Sessions.Session do
 
   During the scoring phase, participants score one at a time in join order:
   - `current_turn_index` - Index into participant list for whose turn it is
-  - `in_catch_up_phase` - True when catching up skipped participants
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -36,7 +35,6 @@ defmodule ProductiveWorkgroups.Sessions.Session do
     field :state, :string, default: "lobby"
     field :current_question_index, :integer, default: 0
     field :current_turn_index, :integer, default: 0
-    field :in_catch_up_phase, :boolean, default: false
     field :planned_duration_minutes, :integer
     field :settings, :map, default: %{}
     field :started_at, :utc_datetime
@@ -62,7 +60,6 @@ defmodule ProductiveWorkgroups.Sessions.Session do
       :state,
       :current_question_index,
       :current_turn_index,
-      :in_catch_up_phase,
       :planned_duration_minutes,
       :settings,
       :started_at,
@@ -104,7 +101,6 @@ defmodule ProductiveWorkgroups.Sessions.Session do
       :completed_at,
       :current_question_index,
       :current_turn_index,
-      :in_catch_up_phase,
       :last_activity_at
     ])
     |> validate_inclusion(:state, @states)
