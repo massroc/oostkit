@@ -96,6 +96,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Show do
   end
 
   @impl true
+  def handle_info({:participants_ready_reset, _payload}, socket) do
+    {:noreply, MessageHandlers.handle_participants_ready_reset(socket)}
+  end
+
+  @impl true
   def handle_info({:session_started, session}, socket) do
     {:noreply, MessageHandlers.handle_session_started(socket, session)}
   end
