@@ -23,9 +23,18 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.ScoreResultsComponent do
   def render(assigns) do
     ~H"""
     <div class="space-y-6">
-      <!-- Results summary -->
+      <!-- Results summary with team discussion prompt -->
       <div class="bg-gray-800 rounded-lg p-6">
-        <!-- Individual scores - 10 horizontal boxes -->
+        <!-- Team discussion prompt - at top, matching individual turn prompts -->
+        <div class="text-center mb-4">
+          <div class="text-green-400 text-lg font-semibold">
+            Discuss as a team
+          </div>
+          <p class="text-gray-400 text-sm mt-1">
+            Look for variance across the group
+          </p>
+        </div>
+        <!-- Individual scores - horizontal boxes -->
         <div class="flex flex-wrap gap-2 justify-center">
           <%= for score <- @all_scores do %>
             <div

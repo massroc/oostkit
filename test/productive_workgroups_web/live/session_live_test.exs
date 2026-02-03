@@ -372,9 +372,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
     end
 
     test "participants can add notes", ctx do
-      # Submit scores for both participants
+      # Complete turns for both participants (submit score, lock turn, advance)
       {:ok, _} = Scoring.submit_score(ctx.session, ctx.facilitator, 0, 2)
-      {:ok, _} = Scoring.submit_score(ctx.session, ctx.participant, 0, -1)
+      {:ok, _} = Scoring.lock_participant_turn(ctx.session, ctx.facilitator, 0)
+      {:ok, session} = Sessions.advance_turn(ctx.session)
+      {:ok, _} = Scoring.submit_score(session, ctx.participant, 0, -1)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.participant, 0)
+      {:ok, _session} = Sessions.advance_turn(session)
 
       conn =
         build_conn()
@@ -402,9 +406,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
     end
 
     test "participants can delete notes", ctx do
-      # Submit scores
+      # Complete turns for both participants (submit score, lock turn, advance)
       {:ok, _} = Scoring.submit_score(ctx.session, ctx.facilitator, 0, 2)
-      {:ok, _} = Scoring.submit_score(ctx.session, ctx.participant, 0, -1)
+      {:ok, _} = Scoring.lock_participant_turn(ctx.session, ctx.facilitator, 0)
+      {:ok, session} = Sessions.advance_turn(ctx.session)
+      {:ok, _} = Scoring.submit_score(session, ctx.participant, 0, -1)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.participant, 0)
+      {:ok, _session} = Sessions.advance_turn(session)
 
       # Create a note
       {:ok, note} =
@@ -1477,7 +1485,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       }
     end
 
-    test "Next Question button is enabled when all participants have scored", ctx do
+    test "Next Question button is disabled when participants have scored but not clicked ready",
+         ctx do
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(ctx.session)
       {:ok, session} = Sessions.advance_to_scoring(session)
@@ -1501,13 +1510,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
 
-      # Participants who scored are automatically ready
-      # Button should be enabled (green) when all have scored
-      assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      # Scoring does NOT mean ready - button should be disabled
+      # 0 of 2 participants ready (facilitator doesn't count)
+      assert html =~ "0 of 2 participants ready"
+      assert html =~ "bg-gray-600"
     end
 
-    test "Next Question button is enabled when participant is skipped", ctx do
+    test "skipped participant counts as ready, but scored participant must click ready", ctx do
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(ctx.session)
       {:ok, session} = Sessions.advance_to_scoring(session)
@@ -1533,12 +1542,209 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
 
-      # Alice scored (ready), Bob skipped (ready) = All ready
+      # Bob skipped = auto-ready, Alice scored but NOT ready yet
+      # 1 of 2 participants ready
+      assert html =~ "1 of 2 participants ready"
+      assert html =~ "bg-gray-600"
+    end
+
+    test "facilitator can advance when skipped participant and scored participant are both ready",
+         ctx do
+      # Start and advance to scoring
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Facilitator scores
+      {:ok, _} = Scoring.submit_score(session, ctx.facilitator, 0, 0)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.facilitator, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Alice scores
+      {:ok, _} = Scoring.submit_score(session, ctx.alice, 0, 1)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.alice, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Skip Bob (don't score, just advance)
+      {:ok, _session} = Sessions.advance_turn(session)
+
+      # Alice clicks Ready
+      {:ok, _} = Sessions.set_participant_ready(ctx.alice, true)
+
+      # Load as facilitator
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
+
+      # Bob skipped = auto-ready, Alice clicked Ready = all ready
       assert html =~ "All participants ready"
       assert html =~ "bg-green-600"
     end
 
-    test "Next Question button becomes enabled when all participants are ready", ctx do
+    test "facilitator can skip via UI and advance when other participant clicks ready", ctx do
+      # Start and advance to scoring
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Facilitator scores and completes turn
+      {:ok, _} = Scoring.submit_score(session, ctx.facilitator, 0, 0)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.facilitator, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Alice scores and completes turn
+      {:ok, _} = Scoring.submit_score(session, ctx.alice, 0, 1)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.alice, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Now it's Bob's turn - facilitator will skip via UI
+      # Load as facilitator
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, view, html} = live(conn, ~p"/session/#{session.code}")
+
+      # Should see skip button for Bob
+      assert html =~ "Skip Bob"
+
+      # Click skip button
+      html = render_click(view, "skip_turn")
+
+      # Now Bob is skipped, Alice needs to click Ready
+      # Should show 1 of 2 ready (Bob auto-ready)
+      assert html =~ "1 of 2 participants ready"
+
+      # Alice clicks Ready (via backend since we're testing facilitator view)
+      {:ok, _} = Sessions.set_participant_ready(ctx.alice, true)
+
+      # Refresh the view to see updated state
+      {:ok, _view, html} = live(conn, ~p"/session/#{session.code}")
+
+      # Now all should be ready
+      assert html =~ "All participants ready"
+      assert html =~ "bg-green-600"
+    end
+
+    test "facilitator view updates via PubSub when participant clicks ready after skip", ctx do
+      # Start and advance to scoring
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Facilitator scores and completes turn
+      {:ok, _} = Scoring.submit_score(session, ctx.facilitator, 0, 0)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.facilitator, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Alice scores and completes turn
+      {:ok, _} = Scoring.submit_score(session, ctx.alice, 0, 1)
+      {:ok, _} = Scoring.lock_participant_turn(session, ctx.alice, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Skip Bob
+      {:ok, _session} = Sessions.advance_turn(session)
+
+      # Load facilitator view
+      facilitator_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, facilitator_view, html} = live(facilitator_conn, ~p"/session/#{ctx.session.code}")
+
+      # Should show 1 of 2 ready (Bob skipped = auto-ready, Alice not ready)
+      assert html =~ "1 of 2 participants ready"
+
+      # Now Alice clicks Ready via her own view (triggers PubSub broadcast)
+      alice_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.alice_token)
+
+      {:ok, alice_view, _html} = live(alice_conn, ~p"/session/#{ctx.session.code}")
+      render_click(alice_view, "mark_ready")
+
+      # Give PubSub a moment to propagate
+      Process.sleep(50)
+
+      # Re-render facilitator view to see the update
+      html = render(facilitator_view)
+
+      # Should now show all ready
+      assert html =~ "All participants ready"
+      assert html =~ "bg-green-600"
+    end
+
+    test "when only participant is skipped, facilitator can immediately advance", _ctx do
+      # This tests the scenario with just facilitator + one participant
+      # Create a fresh session with only facilitator and one participant
+      {:ok, template} =
+        Workshops.create_template(%{
+          name: "Skip Only Test",
+          slug: "skip-only-test-#{System.unique_integer()}",
+          version: "1.0.0"
+        })
+
+      {:ok, _} =
+        Workshops.create_question(template, %{
+          index: 0,
+          title: "Test Question",
+          criterion_number: "1",
+          criterion_name: "Test",
+          explanation: "Test",
+          scale_type: "balance",
+          scale_min: -5,
+          scale_max: 5,
+          optimal_value: 0,
+          discussion_prompts: []
+        })
+
+      {:ok, session} = Sessions.create_session(template)
+
+      # Create facilitator
+      facilitator_token = Ecto.UUID.generate()
+
+      {:ok, facilitator} =
+        Sessions.join_session(session, "Facilitator", facilitator_token, is_facilitator: true)
+
+      Process.sleep(10)
+
+      # Create just one regular participant
+      bob_token = Ecto.UUID.generate()
+      {:ok, _bob} = Sessions.join_session(session, "Bob", bob_token)
+
+      # Start and advance to scoring
+      {:ok, session} = Sessions.start_session(session)
+      {:ok, session} = Sessions.advance_to_scoring(session)
+
+      # Facilitator scores and completes turn
+      {:ok, _} = Scoring.submit_score(session, facilitator, 0, 0)
+      {:ok, _} = Scoring.lock_participant_turn(session, facilitator, 0)
+      {:ok, session} = Sessions.advance_turn(session)
+
+      # Now it's Bob's turn - facilitator will skip via UI
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, facilitator_token)
+
+      {:ok, view, html} = live(conn, ~p"/session/#{session.code}")
+
+      # Should see skip button for Bob
+      assert html =~ "Skip Bob"
+
+      # Click skip button
+      html = render_click(view, "skip_turn")
+
+      # Bob is the only eligible participant and he's skipped = auto-ready
+      # Should show all ready immediately
+      assert html =~ "All participants ready"
+      assert html =~ "bg-green-600"
+    end
+
+    test "Next Question button becomes enabled when all participants click ready", ctx do
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(ctx.session)
       {:ok, session} = Sessions.advance_to_scoring(session)
@@ -1554,7 +1760,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       {:ok, _} = Scoring.lock_participant_turn(session, ctx.bob, 0)
       {:ok, _session} = Sessions.advance_turn(session)
 
-      # Load as facilitator - all who scored are automatically ready
+      # Now participants must explicitly click "I'm Ready to Continue"
+      {:ok, _} = Sessions.set_participant_ready(ctx.alice, true)
+      {:ok, _} = Sessions.set_participant_ready(ctx.bob, true)
+
+      # Load as facilitator
       conn =
         build_conn()
         |> Plug.Test.init_test_session(%{})
@@ -1562,13 +1772,13 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
 
-      # Should show all ready message
+      # Should show all ready message now that both clicked ready
       assert html =~ "All participants ready"
-      # Button should NOT be disabled (look for bg-green which is the enabled state)
+      # Button should be enabled (green)
       assert html =~ "bg-green-600"
     end
 
-    test "participants who scored are automatically counted as ready", ctx do
+    test "participants who scored are NOT automatically counted as ready", ctx do
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(ctx.session)
       {:ok, session} = Sessions.advance_to_scoring(session)
@@ -1592,10 +1802,11 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/session/#{ctx.session.code}")
 
-      # All participants who scored are automatically ready
-      assert html =~ "All participants ready"
-      # Button should be enabled (green)
-      assert html =~ "bg-green-600"
+      # Scoring does NOT mean ready - participants must click "I'm Ready to Continue"
+      # 0 of 2 ready (Alice and Bob scored but haven't clicked ready)
+      assert html =~ "0 of 2 participants ready"
+      # Button should be disabled (gray)
+      assert html =~ "bg-gray-600"
     end
 
     test "observer participants are not counted in readiness", ctx do

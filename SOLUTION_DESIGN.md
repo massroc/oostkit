@@ -1017,30 +1017,6 @@ The following handler modules have been extracted from SessionLive.Show to impro
 - `maybe_restart_timer_on_transition/3` - Restart on phase change
 - `stop_timer/1` - Stop and disable timer
 
-#### TurnTimeoutHandler
-**File:** `lib/productive_workgroups_web/live/session_live/turn_timeout_handler.ex`
-
-**Purpose:** Automatically skips inactive participants during turn-based scoring to prevent sessions from getting stuck.
-
-**Configuration (via session settings):**
-- `turn_timeout_enabled` - Boolean to enable/disable (default: true)
-- `turn_timeout_seconds` - Timeout duration in seconds (default: 60)
-
-**Functions:**
-- `init_timeout_assigns/1` - Initialize timeout-related socket assigns
-- `start_turn_timeout/1` - Start timeout tracking (facilitator only)
-- `cancel_turn_timeout/1` - Cancel active timeout
-- `handle_timeout_tick/1` - Process timeout tick, auto-skip if expired
-- `maybe_restart_on_turn_change/3` - Restart on turn/question change
-- `get_timeout_seconds/1` - Get configured timeout duration
-- `timeout_enabled?/1` - Check if timeout is enabled
-
-**Behavior:**
-- Only the facilitator's process tracks timeouts
-- Timer resets when turn advances or question changes
-- Disabled during catch-up phase (self-paced)
-- On timeout: calls `Sessions.skip_turn/1` and reloads scoring data
-
 #### OperationHelpers
 **File:** `lib/productive_workgroups_web/live/session_live/helpers/operation_helpers.ex`
 
@@ -1862,47 +1838,10 @@ end
 Note: The "actions" state still exists for backwards compatibility but the
 default UI flow now skips it, going directly from "summary" to "completed".
 
-### Turn Timeout (Auto-Skip) Implementation
-
-To prevent sessions from getting stuck when a participant is inactive, the `TurnTimeoutHandler` module provides automatic timeout functionality.
-
-**Configuration (via session.settings map):**
-
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| `turn_timeout_enabled` | boolean | true | Enable/disable auto-skip |
-| `turn_timeout_seconds` | integer | 60 | Seconds before auto-skip |
-
-**Behavior:**
-- Only the **facilitator's process** tracks and triggers timeouts
-- Timeout **resets** when:
-  - Turn advances to next participant
-  - Question changes
-  - Session enters catch-up phase
-- Timeout is **disabled** during catch-up phase (participants score at their own pace)
-- On timeout expiration: `Sessions.skip_turn/1` is called automatically
-
-**Implementation Flow:**
-```
-1. Turn starts → TurnTimeoutHandler.start_turn_timeout/1
-2. Every second → :turn_timeout_tick message
-3. TurnTimeoutHandler.handle_timeout_tick/1 checks elapsed time
-4. If elapsed >= timeout_seconds:
-   - Log timeout event
-   - Call Sessions.skip_turn(session)
-   - Reload scoring data
-   - Restart timeout for new turn
-5. If turn changes → maybe_restart_on_turn_change/3 resets timer
-```
-
-**Socket Assigns:**
-- `turn_started_at` - DateTime when current turn began
-- `turn_timeout_ref` - Process timer reference
-- `turn_timeout_enabled` - Boolean flag
-
 ---
 
-*Document Version: 2.1*
+*Document Version: 2.2*
 *v2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
-*v2.1 - Added extracted handler modules (TimerHandler, TurnTimeoutHandler, OperationHelpers)*
-*Last Updated: 2026-02-02*
+*v2.1 - Added extracted handler modules (TimerHandler, OperationHelpers)*
+*v2.2 - Removed turn timeout (facilitator can manually skip inactive participants)*
+*Last Updated: 2026-02-03*
