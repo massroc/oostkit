@@ -211,11 +211,15 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
         p.status == "active" and not p.is_facilitator and not p.is_observer
       end)
 
-    # Count participants who are ready OR were skipped (no score when all turns done)
+    # Count participants who are ready:
+    # - Clicked "I'm Ready to Continue" (is_ready = true), OR
+    # - Have a score (they participated and clicked Done), OR
+    # - Were skipped (no score when all turns done)
     ready_count =
       Enum.count(eligible_participants, fn p ->
-        was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
-        p.is_ready or was_skipped
+        has_score = Map.has_key?(score_map, p.id)
+        was_skipped = all_turns_done and not has_score
+        p.is_ready or has_score or was_skipped
       end)
 
     eligible_count = length(eligible_participants)
