@@ -70,7 +70,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
     all_turns_done = Sessions.all_turns_complete?(session)
 
     # Recalculate readiness counts for non-facilitator, non-observer participants
-    # Skipped participants (no score when all turns done) count as ready
+    # Ready if: clicked ready, has a score (participated), or was skipped
     eligible_participants =
       Enum.filter(participants, fn p ->
         p.status == "active" and not p.is_facilitator and not p.is_observer
@@ -78,8 +78,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.MessageHandlers do
 
     ready_count =
       Enum.count(eligible_participants, fn p ->
-        was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
-        p.is_ready or was_skipped
+        has_score = Map.has_key?(score_map, p.id)
+        was_skipped = all_turns_done and not has_score
+        p.is_ready or has_score or was_skipped
       end)
 
     eligible_count = length(eligible_participants)
