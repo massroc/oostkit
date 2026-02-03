@@ -1371,6 +1371,48 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       assert charlie_html =~ "Your turn to score"
       refute charlie_html =~ "Waiting for"
     end
+
+    test "skipped participant sees results view with Ready button (no second chance)", ctx do
+      {:ok, session} = Sessions.start_session(ctx.session)
+      {:ok, _session} = Sessions.advance_to_scoring(session)
+
+      # Connect as Alice (facilitator)
+      alice_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.facilitator_token)
+
+      {:ok, alice_view, _} = live(alice_conn, ~p"/session/#{ctx.session.code}")
+
+      # Connect as Bob (second participant)
+      bob_conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{})
+        |> put_session(:browser_token, ctx.participant_token)
+
+      {:ok, bob_view, _} = live(bob_conn, ~p"/session/#{ctx.session.code}")
+
+      # Alice scores and completes her turn
+      alice_view
+      |> element("button[phx-click='select_score'][phx-value-score='0']")
+      |> render_click()
+
+      alice_view |> element("button[phx-click='submit_score']") |> render_click()
+      alice_view |> element("button[phx-click='complete_turn']") |> render_click()
+
+      # Now it's Bob's turn, but facilitator skips Bob
+      _alice_html = render(alice_view)
+      alice_view |> element("button[phx-click='skip_turn']") |> render_click()
+
+      # All turns are now complete (Alice scored, Bob skipped)
+      # Bob should see the results view with the Ready button, not another scoring chance
+      bob_html = render(bob_view)
+
+      # Should NOT see "Your turn to score" (no catch-up)
+      refute bob_html =~ "Your turn to score"
+      # Should see the Ready button
+      assert bob_html =~ "Ready to Continue"
+    end
   end
 
   describe "Require all participants ready before advancing" do

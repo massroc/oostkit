@@ -95,7 +95,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
   """
   def load_scores(socket, session, question_index) do
     scores = Scoring.list_scores_for_question(session, question_index)
-    all_scored = Scoring.all_scored?(session, question_index)
+    # Show results when all turns are complete (everyone has either scored or been skipped)
+    all_turns_done = Sessions.all_turns_complete?(session)
+    all_scored = all_turns_done or Scoring.all_scored?(session, question_index)
 
     # Get participants in turn order (active, non-observers)
     participants_in_turn_order = Sessions.get_participants_in_turn_order(session)

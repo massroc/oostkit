@@ -535,12 +535,8 @@ defmodule ProductiveWorkgroups.Sessions do
   @doc """
   Gets the participant whose turn it currently is.
 
-  Returns nil if there's no current turn participant (e.g., all have scored).
+  Returns nil if there's no current turn participant (e.g., all turns complete).
   """
-  def get_current_turn_participant(%Session{in_catch_up_phase: true} = session) do
-    get_current_catch_up_participant(session)
-  end
-
   def get_current_turn_participant(%Session{} = session) do
     participants = get_participants_in_turn_order(session)
     Enum.at(participants, session.current_turn_index)
@@ -555,15 +551,21 @@ defmodule ProductiveWorkgroups.Sessions do
   end
 
   @doc """
-  Advances to the next participant's turn.
+  Checks if all turns are complete for the current question.
 
-  Returns the updated session. If all active participants have scored,
-  enters catch-up phase for any skipped participants.
+  Returns true when all participants have either scored or been skipped.
   """
-  def advance_turn(%Session{state: "scoring", in_catch_up_phase: true} = session) do
-    advance_catch_up_turn(session)
+  def all_turns_complete?(%Session{} = session) do
+    participants = get_participants_in_turn_order(session)
+    session.current_turn_index >= length(participants)
   end
 
+  @doc """
+  Advances to the next participant's turn.
+
+  Returns the updated session. When all participants have had their turn
+  (either scored or skipped), marks all turns as complete.
+  """
   def advance_turn(%Session{state: "scoring"} = session) do
     participants = get_participants_in_turn_order(session)
     next_index = session.current_turn_index + 1
@@ -585,15 +587,15 @@ defmodule ProductiveWorkgroups.Sessions do
   end
 
   defp handle_round_complete(session) do
-    skipped = get_skipped_participants(session, session.current_question_index)
+    # All participants have had their turn (either scored or skipped)
+    # Mark all turns complete by setting current_turn_index past the end
+    # This signals that scoring input is done and discussion can begin
+    participants = get_participants_in_turn_order(session)
 
-    if Enum.empty?(skipped) do
-      # No one skipped - stay in current state, all have scored
-      {:ok, session}
-    else
-      # Enter catch-up phase for skipped participants
-      enter_catch_up_phase(session, skipped)
-    end
+    session
+    |> Session.transition_changeset("scoring", %{current_turn_index: length(participants)})
+    |> Repo.update()
+    |> with_broadcast(&broadcast_turn_advanced/1)
   end
 
   @doc """
