@@ -37,15 +37,15 @@ defmodule Wrt.Release do
     load_app()
 
     for repo <- repos() do
-      {:ok, _, _} =
-        Ecto.Migrator.with_repo(repo, fn _repo ->
-          # Run the seeds file
-          seed_script = Application.app_dir(@app, "priv/repo/seeds.exs")
+      {:ok, _, _} = Ecto.Migrator.with_repo(repo, fn _repo -> run_seeds() end)
+    end
+  end
 
-          if File.exists?(seed_script) do
-            Code.eval_file(seed_script)
-          end
-        end)
+  defp run_seeds do
+    seed_script = Application.app_dir(@app, "priv/repo/seeds.exs")
+
+    if File.exists?(seed_script) do
+      Code.eval_file(seed_script)
     end
   end
 
