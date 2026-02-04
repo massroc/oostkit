@@ -9,7 +9,7 @@
 ```
 /
 ├── apps/                          # Individual applications
-│   ├── productive_workgroups/     # Workgroup Pulse (6 Criteria workshop)
+│   ├── workgroup_pulse/           # Workgroup Pulse (6 Criteria workshop)
 │   └── <future: wrt>/             # Workshop Referral Tool
 ├── docs/                          # Platform-wide documentation
 ├── .github/workflows/             # CI/CD pipelines (per-app)
@@ -22,21 +22,21 @@
 
 | Product Name | Directory | Description |
 |--------------|-----------|-------------|
-| Workgroup Pulse | `apps/productive_workgroups/` | 6 Criteria for Productive Work |
+| Workgroup Pulse | `apps/workgroup_pulse/` | 6 Criteria for Productive Work |
 | Workshop Referral Tool (WRT) | `apps/wrt/` (planned) | PDW participant selection |
 
 ### App Conventions
 
 Each app in `apps/` should have:
 - Self-contained codebase with its own dependencies
-- `docker-compose.yml` with prefixed service names (e.g., `pw_app`, `pw_db`)
+- `docker-compose.yml` with prefixed service names (e.g., `wp_app`, `wp_db`)
 - Own CI workflow in `.github/workflows/<app_name>.yml` with path filtering
 - Own deployment configuration (e.g., `fly.toml`)
 - Own documentation (README, requirements, design docs)
 
 ### Naming Conventions
 
-- Docker services: `<prefix>_<service>` (e.g., `pw_app`, `pw_db`, `rt_app`, `rt_db`)
+- Docker services: `<prefix>_<service>` (e.g., `wp_app`, `wp_db`, `wrt_app`, `wrt_db`)
 - Ports: Each app gets unique port ranges to avoid conflicts
 - Databases: Separate database per app
 
@@ -44,7 +44,7 @@ Each app in `apps/` should have:
 
 ### Current: Elixir/Phoenix
 
-Used for `productive_workgroups` and likely future apps requiring:
+Used for `workgroup_pulse` and likely future apps requiring:
 - Real-time collaboration (LiveView, PubSub)
 - WebSocket-based features
 - Concurrent session handling
@@ -71,7 +71,7 @@ Shared services (e.g., future auth) would have their own database.
 
 | App | Dev Database | Test Database | Port |
 |-----|--------------|---------------|------|
-| productive_workgroups | `productive_workgroups_dev` | `productive_workgroups_test` | 5432/5433 |
+| workgroup_pulse | `workgroup_pulse_dev` | `workgroup_pulse_test` | 5432/5433 |
 
 ## Shared Infrastructure (Planned)
 
@@ -102,7 +102,7 @@ Each app deploys independently:
 ### CI/CD
 
 GitHub Actions with path filtering:
-- Changes to `apps/productive_workgroups/**` trigger only that app's CI
+- Changes to `apps/workgroup_pulse/**` trigger only that app's CI
 - Each app has own workflow file
 - Deploys to Fly.io on merge to main
 
@@ -132,7 +132,7 @@ Preference: Keep apps independent as long as possible. Add communication only wh
 
 ```bash
 # Start specific app
-cd apps/productive_workgroups
+cd apps/workgroup_pulse
 docker compose up
 
 # Or from root (starts all)

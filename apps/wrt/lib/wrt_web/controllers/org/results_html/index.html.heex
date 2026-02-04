@@ -1,0 +1,65 @@
+<.header>
+  Results
+  <:subtitle><%= @campaign.name %></:subtitle>
+  <:actions>
+    <div class="flex gap-4">
+      <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/export/csv"}>
+        <.button>Export CSV</.button>
+      </.link>
+      <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/export/pdf"}>
+        <.button>Export PDF</.button>
+      </.link>
+      <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
+        &larr; Back to Campaign
+      </.link>
+    </div>
+  </:actions>
+</.header>
+
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-sm font-medium text-gray-500">Rounds Completed</h3>
+    <p class="mt-2 text-3xl font-semibold text-gray-900">
+      <%= Enum.count(@rounds, fn r -> r.status == "closed" end) %>
+    </p>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-sm font-medium text-gray-500">People Nominated</h3>
+    <p class="mt-2 text-3xl font-semibold text-indigo-600"><%= length(@nominees) %></p>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-sm font-medium text-gray-500">Total Nominations</h3>
+    <p class="mt-2 text-3xl font-semibold text-green-600">
+      <%= Enum.sum(Enum.map(@nominees, & &1.nomination_count)) %>
+    </p>
+  </div>
+</div>
+
+<div class="mt-8">
+  <h2 class="text-lg font-semibold text-gray-900">Convergence Results</h2>
+  <p class="text-sm text-gray-600 mt-1 mb-4">
+    People ranked by number of nominations received (convergence)
+  </p>
+
+  <%= if Enum.empty?(@nominees) do %>
+    <p class="text-gray-500 mt-4">No nominations have been submitted yet.</p>
+  <% else %>
+    <.table id="nominees" rows={@nominees}>
+      <:col :let={person} label="Rank">
+        <%= Enum.find_index(@nominees, fn p -> p.id == person.id end) + 1 %>
+      </:col>
+      <:col :let={person} label="Name"><%= person.name %></:col>
+      <:col :let={person} label="Email"><%= person.email %></:col>
+      <:col :let={person} label="Source">
+        <span class={"px-2 py-1 text-xs rounded-full #{source_class(person.source)}"}>
+          <%= person.source %>
+        </span>
+      </:col>
+      <:col :let={person} label="Nominations">
+        <span class="font-semibold text-indigo-600"><%= person.nomination_count %></span>
+      </:col>
+    </.table>
+  <% end %>
+</div>

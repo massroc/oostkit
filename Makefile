@@ -1,11 +1,11 @@
-# Productive Tools Monorepo - Makefile
+# OOSTKit Monorepo - Makefile
 # Convenience commands for development
 
 .PHONY: help up down logs clean
 
 # Default target
 help:
-	@echo "Productive Tools Monorepo"
+	@echo "OOSTKit Monorepo"
 	@echo ""
 	@echo "Usage: make <target>"
 	@echo ""
@@ -15,11 +15,11 @@ help:
 	@echo "  logs      - Follow logs for all apps"
 	@echo "  clean     - Remove Docker volumes (careful!)"
 	@echo ""
-	@echo "Productive Workgroups:"
-	@echo "  pw-up     - Start productive_workgroups"
-	@echo "  pw-test   - Run tests"
-	@echo "  pw-tdd    - Start TDD mode"
-	@echo "  pw-shell  - Open IEx shell"
+	@echo "Workgroup Pulse:"
+	@echo "  wp-up     - Start workgroup_pulse"
+	@echo "  wp-test   - Run tests"
+	@echo "  wp-tdd    - Start TDD mode"
+	@echo "  wp-shell  - Open IEx shell"
 	@echo ""
 	@echo "For more commands, see apps/*/scripts/dev.sh"
 
@@ -37,15 +37,15 @@ clean:
 	@echo "This will remove all Docker volumes. Are you sure? [y/N]"
 	@read -r response; if [ "$$response" = "y" ]; then docker compose down -v; fi
 
-# Productive Workgroups commands
-pw-up:
-	cd apps/productive_workgroups && docker compose up
+# Workgroup Pulse commands
+wp-up:
+	cd apps/workgroup_pulse && docker compose up
 
-pw-test:
-	cd apps/productive_workgroups && docker compose --profile test run --rm pw_test
+wp-test:
+	cd apps/workgroup_pulse && docker compose --profile test run --rm wp_test
 
-pw-tdd:
-	cd apps/productive_workgroups && docker compose --profile tdd run --rm pw_test_watch
+wp-tdd:
+	cd apps/workgroup_pulse && docker compose --profile tdd run --rm wp_test_watch
 
-pw-shell:
-	cd apps/productive_workgroups && docker compose exec pw_app iex -S mix
+wp-shell:
+	cd apps/workgroup_pulse && docker compose exec wp_app iex -S mix

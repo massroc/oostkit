@@ -1,10 +1,10 @@
-name: Auto Format (Productive Workgroups)
+name: Auto Format (Workgroup Pulse)
 
 on:
   push:
     branches: [main]
     paths:
-      - 'apps/productive_workgroups/**'
+      - 'apps/workgroup_pulse/**'
       - '.github/workflows/format.yml'
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: apps/productive_workgroups
+    working-directory: apps/workgroup_pulse
 
 jobs:
   format:

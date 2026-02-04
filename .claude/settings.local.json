@@ -46,7 +46,25 @@
       "Bash(gh repo view:*)",
       "Bash(gh api:*)",
       "Bash(gh pr checks:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(wc:*)",
+      "Bash(for file in lib/productive_workgroups_web/live/session_live/helpers/score_helpers.ex lib/productive_workgroups_web/live/session_live/components/intro_component.ex lib/productive_workgroups_web/live/session_live/components/summary_component.ex lib/productive_workgroups_web/live/session_live/components/lobby_component.ex lib/productive_workgroups_web/live/session_live/components/export_modal_component.ex lib/productive_workgroups_web/live/session_live/components/completed_component.ex lib/productive_workgroups_web/live/session_live/components/actions_component.ex)",
+      "Bash(do sed -i 's/\\\\r$//' \"$file\")",
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(gh workflow run:*)",
+      "Bash(wsl --status:*)",
+      "Bash(wsl -l -v:*)",
+      "Bash(wsl --install:*)",
+      "Bash(wsl:*)",
+      "Bash(where ubuntu*)",
+      "Bash(git config:*)",
+      "Bash(git mv:*)",
+      "Bash(sudo rm:*)",
+      "Bash(tree:*)",
+      "WebSearch",
+      "Bash(ls:*)",
+      "Bash(xargs:*)"
     ]
   }
 }

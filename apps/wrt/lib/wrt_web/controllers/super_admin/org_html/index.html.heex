@@ -1,0 +1,86 @@
+<.header>
+  Organisations
+  <:subtitle>Manage organisation registrations and access</:subtitle>
+</.header>
+
+<div class="mt-6 flex gap-2">
+  <.link
+    navigate={~p"/admin/orgs"}
+    class={"rounded-md px-3 py-2 text-sm font-medium #{if @status_filter == nil, do: "bg-zinc-900 text-white", else: "text-zinc-600 hover:text-zinc-900"}"}
+  >
+    All
+  </.link>
+  <.link
+    navigate={~p"/admin/orgs?status=pending"}
+    class={"rounded-md px-3 py-2 text-sm font-medium #{if @status_filter == "pending", do: "bg-zinc-900 text-white", else: "text-zinc-600 hover:text-zinc-900"}"}
+  >
+    Pending
+  </.link>
+  <.link
+    navigate={~p"/admin/orgs?status=approved"}
+    class={"rounded-md px-3 py-2 text-sm font-medium #{if @status_filter == "approved", do: "bg-zinc-900 text-white", else: "text-zinc-600 hover:text-zinc-900"}"}
+  >
+    Approved
+  </.link>
+  <.link
+    navigate={~p"/admin/orgs?status=suspended"}
+    class={"rounded-md px-3 py-2 text-sm font-medium #{if @status_filter == "suspended", do: "bg-zinc-900 text-white", else: "text-zinc-600 hover:text-zinc-900"}"}
+  >
+    Suspended
+  </.link>
+</div>
+
+<div class="mt-8 flow-root">
+  <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+      <%= if @organisations == [] do %>
+        <p class="text-center text-zinc-500 py-8">No organisations found.</p>
+      <% else %>
+        <table class="min-w-full divide-y divide-zinc-300">
+          <thead>
+            <tr>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-zinc-900 sm:pl-0">
+                Organisation
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-zinc-900">
+                Admin
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-zinc-900">
+                Status
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-zinc-900">
+                Submitted
+              </th>
+              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-200">
+            <%= for org <- @organisations do %>
+              <tr>
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-zinc-900 sm:pl-0">
+                  <%= org.name %>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-zinc-500">
+                  <%= org.admin_email %>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <.status_badge status={org.status} />
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-zinc-500">
+                  <%= Calendar.strftime(org.inserted_at, "%d %b %Y") %>
+                </td>
+                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                  <.link navigate={~p"/admin/orgs/#{org.id}"} class="text-zinc-600 hover:text-zinc-900">
+                    View
+                  </.link>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+</div>

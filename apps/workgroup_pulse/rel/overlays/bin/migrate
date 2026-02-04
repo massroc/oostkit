@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+
+echo "Running database migrations..."
+./workgroup_pulse eval "WorkgroupPulse.Release.migrate()"
+
+echo "Running database seeds..."
+./workgroup_pulse eval "WorkgroupPulse.Release.seed()"
+
+echo "Database setup complete."

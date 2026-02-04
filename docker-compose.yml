@@ -1,12 +1,12 @@
 # Root docker-compose.yml - Orchestrates all apps in the monorepo
 # For development, you can either:
 #   1. Run all apps: docker compose up
-#   2. Run specific app: docker compose --profile productive_workgroups up
-#   3. Run from app directory: cd apps/productive_workgroups && docker compose up
+#   2. Run specific app: docker compose --profile workgroup_pulse up
+#   3. Run from app directory: cd apps/workgroup_pulse && docker compose up
 
 # Include app-specific compose files
 include:
-  - path: apps/productive_workgroups/docker-compose.yml
+  - path: apps/workgroup_pulse/docker-compose.yml
     env_file: []
 
 # Shared services can be added here as the monorepo grows
