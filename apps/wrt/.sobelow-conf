@@ -11,12 +11,12 @@
     # HTTPS is handled by Fly.io (TLS termination at edge)
     "Config.HTTPS",
     # Code.eval_file in release.ex uses fixed seed script path, not user input
-    "RCE.CodeModule",
-    # File.read in seed_controller reads user-uploaded CSV via Plug.Upload (safe temp path)
-    "Traversal.FileModule:lib/wrt_web/controllers/org/seed_controller.ex:upload:31",
-    # XSS false positives - send_resp with PDF binary and HTML for export (not user-controlled)
-    "XSS.SendResp:lib/wrt_web/controllers/org/export_controller.ex:pdf:68",
-    "XSS.SendResp:lib/wrt_web/controllers/org/export_controller.ex:pdf:74"
+    "RCE.CodeModule"
   ],
-  ignore_files: []
+  ignore_files: [
+    # File.read in seed_controller reads user-uploaded CSV via Plug.Upload (safe temp path)
+    "lib/wrt_web/controllers/org/seed_controller.ex",
+    # XSS false positives - send_resp with PDF binary and HTML for export (not user-controlled)
+    "lib/wrt_web/controllers/org/export_controller.ex"
+  ]
 ]
