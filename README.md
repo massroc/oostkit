@@ -31,10 +31,17 @@ docker compose up
 /
 ├── apps/                          # Individual applications
 │   └── productive_workgroups/     # Workshop facilitation tool
+├── docs/                          # Platform-wide documentation
 ├── .github/workflows/             # CI/CD pipelines (per-app)
 ├── docker-compose.yml             # Root orchestration
 └── Makefile                       # Convenience commands
 ```
+
+## Documentation
+
+Platform-wide documentation lives in [`docs/`](docs/):
+
+- [Referral Tool Requirements](docs/referral-tool-requirements.md) - PDW participant selection tool
 
 ### Adding a New App
 
