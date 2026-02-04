@@ -1,0 +1,276 @@
+# Deployment Checklist
+
+Step-by-step guide to deploying OOSTKit applications to production.
+
+## Prerequisites
+
+- [ ] Fly.io CLI installed (`curl -L https://fly.io/install.sh | sh`)
+- [ ] Fly.io account created (`fly auth signup`)
+- [ ] Domain name purchased
+
+## Domain Setup
+
+### Purchase Domain
+
+- [ ] Choose domain name (e.g., `oostkit.com`, `oostkit.io`)
+- [ ] Purchase from registrar (Namecheap, Cloudflare, Google Domains, etc.)
+- [ ] Verify ownership via email confirmation
+
+### Domain Strategy
+
+| Domain | Purpose |
+|--------|---------|
+| `oostkit.com` | Main landing/portal |
+| `pulse.oostkit.com` | Workgroup Pulse app |
+| `wrt.oostkit.com` | Workshop Referral Tool |
+
+Alternative: Use root domain for the primary app if no portal needed initially.
+
+## Workgroup Pulse Deployment
+
+### Create Fly.io App
+
+```bash
+cd apps/workgroup_pulse
+
+# Create the app
+fly apps create workgroup-pulse
+
+# Verify creation
+fly apps list
+```
+
+### Create PostgreSQL Database
+
+```bash
+# Create database cluster (Sydney region)
+fly postgres create \
+  --name workgroup-pulse-db \
+  --region syd \
+  --vm-size shared-cpu-1x \
+  --initial-cluster-size 1 \
+  --volume-size 1
+
+# Attach to app (automatically sets DATABASE_URL secret)
+fly postgres attach workgroup-pulse-db --app workgroup-pulse
+```
+
+- [ ] Database created
+- [ ] Database attached to app
+
+### Set Application Secrets
+
+```bash
+# Generate and set secret key base
+fly secrets set SECRET_KEY_BASE=$(openssl rand -base64 64 | tr -d '\n')
+
+# Verify secrets are set
+fly secrets list
+```
+
+- [ ] SECRET_KEY_BASE set
+
+### Update Configuration
+
+Update `apps/workgroup_pulse/fly.toml`:
+
+```toml
+app = "workgroup-pulse"
+
+[env]
+  PHX_HOST = "pulse.oostkit.com"  # or your domain
+```
+
+- [ ] `fly.toml` updated with correct app name
+- [ ] `fly.toml` updated with correct PHX_HOST
+
+### Deploy
+
+```bash
+# Deploy the app
+fly deploy
+
+# Check status
+fly status
+
+# View logs
+fly logs
+```
+
+- [ ] Initial deployment successful
+- [ ] Health checks passing
+
+### Configure Custom Domain
+
+```bash
+# Get IP addresses
+fly ips list
+
+# Add SSL certificate for domain
+fly certs add pulse.oostkit.com
+
+# Check certificate status
+fly certs show pulse.oostkit.com
+```
+
+- [ ] IP addresses noted
+- [ ] SSL certificate requested
+
+### DNS Configuration
+
+Add these records at your domain registrar:
+
+| Type | Name | Value | TTL |
+|------|------|-------|-----|
+| A | pulse | `<IPv4 from fly ips list>` | 300 |
+| AAAA | pulse | `<IPv6 from fly ips list>` | 300 |
+
+- [ ] DNS A record added
+- [ ] DNS AAAA record added
+- [ ] SSL certificate issued (check with `fly certs show`)
+- [ ] Site accessible via custom domain
+
+## CI/CD Setup (GitHub Actions)
+
+### Generate Fly.io Deploy Token
+
+```bash
+# Create a deploy token
+fly tokens create deploy -x 999999h
+
+# Copy the token value
+```
+
+### Add GitHub Secret
+
+1. Go to GitHub repository → Settings → Secrets and variables → Actions
+2. Click "New repository secret"
+3. Name: `FLY_API_TOKEN`
+4. Value: (paste token from above)
+
+- [ ] Deploy token generated
+- [ ] GitHub secret `FLY_API_TOKEN` added
+
+### Verify CI/CD
+
+1. Push a change to `apps/workgroup_pulse/` on main branch
+2. Check GitHub Actions for successful deployment
+
+- [ ] CI/CD pipeline deploying successfully
+
+## Future Apps (WRT, etc.)
+
+Repeat the process for each new app:
+
+1. [ ] Create Fly.io app: `fly apps create <app-name>`
+2. [ ] Create or attach database
+3. [ ] Set secrets
+4. [ ] Configure `fly.toml`
+5. [ ] Deploy: `fly deploy`
+6. [ ] Add subdomain certificate
+7. [ ] Configure DNS
+
+## Portal/Landing Page (Optional)
+
+Options for the main `oostkit.com` domain:
+
+### Option A: Static Site on Fly.io
+
+```bash
+# Simple static site with links to apps
+fly apps create oostkit-portal
+```
+
+### Option B: GitHub Pages (Free)
+
+- Create `docs/` folder or separate repo
+- Enable GitHub Pages in repository settings
+- Configure custom domain in GitHub
+
+### Option C: Cloudflare Pages (Free)
+
+- Connect GitHub repo
+- Configure build settings
+- Add custom domain
+
+- [ ] Portal approach decided
+- [ ] Portal deployed
+- [ ] Root domain configured
+
+## Monitoring & Maintenance
+
+### Fly.io Dashboard
+
+- View at: https://fly.io/dashboard
+
+### Useful Commands
+
+```bash
+# View app status
+fly status -a workgroup-pulse
+
+# View logs
+fly logs -a workgroup-pulse
+
+# SSH into running machine
+fly ssh console -a workgroup-pulse
+
+# Run migrations manually
+fly ssh console -a workgroup-pulse -C "/app/bin/migrate"
+
+# Scale app
+fly scale count 2 -a workgroup-pulse
+
+# View metrics
+fly dashboard -a workgroup-pulse
+```
+
+### Database Maintenance
+
+```bash
+# Connect to database
+fly postgres connect -a workgroup-pulse-db
+
+# View database status
+fly status -a workgroup-pulse-db
+```
+
+## Cost Summary
+
+| Resource | Estimated Cost |
+|----------|----------------|
+| Fly.io shared-cpu-1x VM (1GB) | ~$5-7/month |
+| Fly.io PostgreSQL (1GB) | ~$7/month |
+| Domain name | ~$10-15/year |
+| SSL certificates | Free (via Fly.io) |
+| **Total per app** | **~$12-15/month** |
+
+Note: Costs may vary. Check [Fly.io pricing](https://fly.io/docs/about/pricing/) for current rates.
+
+## Troubleshooting
+
+### App won't start
+
+```bash
+# Check logs for errors
+fly logs -a workgroup-pulse
+
+# Check machine status
+fly machine list -a workgroup-pulse
+```
+
+### Database connection issues
+
+```bash
+# Verify DATABASE_URL is set
+fly secrets list -a workgroup-pulse
+
+# Test database connectivity
+fly postgres connect -a workgroup-pulse-db
+```
+
+### SSL certificate pending
+
+- DNS propagation can take up to 48 hours
+- Verify DNS records with: `dig pulse.oostkit.com`
+- Check certificate status: `fly certs show pulse.oostkit.com`

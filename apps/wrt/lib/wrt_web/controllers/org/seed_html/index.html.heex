@@ -1,0 +1,75 @@
+<.header>
+  Seed Group
+  <:subtitle>
+    Manage the initial group of people for <%= @campaign.name %>
+  </:subtitle>
+  <:actions>
+    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
+      &larr; Back to Campaign
+    </.link>
+  </:actions>
+</.header>
+
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Upload CSV</h2>
+    <p class="text-sm text-gray-600 mb-4">
+      Upload a CSV file with columns: <code>name</code>, <code>email</code>
+    </p>
+    <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed/upload"} method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+      <div class="flex items-center gap-4">
+        <input
+          type="file"
+          name="csv"
+          accept=".csv"
+          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+        />
+        <.button type="submit">Upload</.button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Add Person</h2>
+    <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed/add"} method="post">
+      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+      <div class="space-y-4">
+        <div>
+          <label for="person_name" class="block text-sm font-medium text-gray-700">Name</label>
+          <input
+            type="text"
+            name="person[name]"
+            id="person_name"
+            required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          />
+        </div>
+        <div>
+          <label for="person_email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            name="person[email]"
+            id="person_email"
+            required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          />
+        </div>
+        <.button type="submit">Add to Seed Group</.button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="mt-8">
+  <h2 class="text-lg font-semibold text-gray-900">Seed Group (<%= length(@seed_people) %> people)</h2>
+
+  <%= if Enum.empty?(@seed_people) do %>
+    <p class="text-gray-500 mt-4">No people in the seed group yet. Upload a CSV or add people manually.</p>
+  <% else %>
+    <.table id="seed-people" rows={@seed_people}>
+      <:col :let={person} label="Name"><%= person.name %></:col>
+      <:col :let={person} label="Email"><%= person.email %></:col>
+    </.table>
+  <% end %>
+</div>

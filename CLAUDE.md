@@ -9,10 +9,11 @@ This is a monorepo containing multiple applications:
 ```
 /
 ├── apps/
-│   └── productive_workgroups/   # Workshop facilitation tool (Elixir/Phoenix)
-├── .github/workflows/           # CI/CD pipelines (per-app with path filtering)
-├── docker-compose.yml           # Root orchestration (includes all apps)
-└── Makefile                     # Convenience commands
+│   ├── workgroup_pulse/   # Workgroup Pulse - 6 Criteria workshop (Elixir/Phoenix)
+│   └── wrt/               # Workshop Referral Tool (Elixir/Phoenix) - planned
+├── .github/workflows/     # CI/CD pipelines (per-app with path filtering)
+├── docker-compose.yml     # Root orchestration (includes all apps)
+└── Makefile               # Convenience commands
 ```
 
 Each app is self-contained with its own:
@@ -32,58 +33,111 @@ Do NOT attempt to run `mix`, `elixir`, or `iex` commands directly. All Elixir co
 Always work from the app directory:
 
 ```bash
-cd apps/productive_workgroups
+cd apps/workgroup_pulse
 ```
 
-### Common Commands (Productive Workgroups)
+### Common Commands (Workgroup Pulse)
 
 ```bash
-# From apps/productive_workgroups directory:
+# From apps/workgroup_pulse directory:
 
 # Start the app
 docker compose up
 
 # Compile the project
-docker compose exec pw_app mix compile
+docker compose exec wp_app mix compile
 
 # Compile with warnings as errors
-docker compose exec pw_app mix compile --warnings-as-errors
+docker compose exec wp_app mix compile --warnings-as-errors
 
 # Run tests
-docker compose --profile test run --rm pw_test
+docker compose --profile test run --rm wp_test
 
 # Run tests in TDD mode (watches for file changes)
-docker compose --profile tdd run --rm pw_test_watch
+docker compose --profile tdd run --rm wp_test_watch
 
 # Run a specific test file
-docker compose --profile test run --rm pw_test mix test test/path/to/test.exs
+docker compose --profile test run --rm wp_test mix test test/path/to/test.exs
 
 # Open IEx shell
-docker compose exec pw_app iex -S mix
+docker compose exec wp_app iex -S mix
 
 # Run database migrations
-docker compose exec pw_app mix ecto.migrate
+docker compose exec wp_app mix ecto.migrate
 
 # Reset database (drop, create, migrate, seed)
-docker compose exec pw_app mix ecto.reset
+docker compose exec wp_app mix ecto.reset
 
 # Run code quality checks
-docker compose exec pw_app mix quality
+docker compose exec wp_app mix quality
 
 # Format code
-docker compose exec pw_app mix format
+docker compose exec wp_app mix format
 
 # View logs
-docker compose logs -f pw_app
+docker compose logs -f wp_app
 ```
 
-### Service Names (Productive Workgroups)
+### Service Names (Workgroup Pulse)
 
-- `pw_app` - The Phoenix application container
-- `pw_db` - PostgreSQL database (development)
-- `pw_db_test` - PostgreSQL database (test)
-- `pw_test` - Test runner container (profile: test)
-- `pw_test_watch` - TDD watcher container (profile: tdd)
+- `wp_app` - The Phoenix application container
+- `wp_db` - PostgreSQL database (development)
+- `wp_db_test` - PostgreSQL database (test)
+- `wp_test` - Test runner container (profile: test)
+- `wp_test_watch` - TDD watcher container (profile: tdd)
+
+### Common Commands (WRT - Workshop Referral Tool)
+
+```bash
+# From apps/wrt directory:
+
+# Start the app
+docker compose up
+
+# Compile the project
+docker compose exec wrt_app mix compile
+
+# Compile with warnings as errors
+docker compose exec wrt_app mix compile --warnings-as-errors
+
+# Run tests
+docker compose --profile test run --rm wrt_test
+
+# Run tests in TDD mode (watches for file changes)
+docker compose --profile tdd run --rm wrt_test_watch
+
+# Run a specific test file
+docker compose --profile test run --rm wrt_test mix test test/path/to/test.exs
+
+# Open IEx shell
+docker compose exec wrt_app iex -S mix
+
+# Run database migrations
+docker compose exec wrt_app mix ecto.migrate
+
+# Migrate all tenant schemas
+docker compose exec wrt_app mix wrt.migrate_tenants
+
+# Reset database (drop, create, migrate, seed)
+docker compose exec wrt_app mix ecto.reset
+
+# Run code quality checks
+docker compose exec wrt_app mix quality
+
+# Format code
+docker compose exec wrt_app mix format
+
+# View logs
+docker compose logs -f wrt_app
+```
+
+### Service Names (WRT)
+
+- `wrt_app` - The Phoenix application container (port 4001)
+- `wrt_db` - PostgreSQL database (development, port 5434)
+- `wrt_db_test` - PostgreSQL database (test, port 5435)
+- `wrt_test` - Test runner container (profile: test)
+- `wrt_test_watch` - TDD watcher container (profile: tdd)
 
 ## Testing (TDD Required)
 
@@ -106,7 +160,7 @@ docker compose logs -f pw_app
 ## CI/CD
 
 Each app has its own workflow file with path filtering:
-- `.github/workflows/productive_workgroups.yml` - Runs only when `apps/productive_workgroups/**` changes
+- `.github/workflows/workgroup_pulse.yml` - Runs only when `apps/workgroup_pulse/**` changes
 
 Changes to one app do not trigger CI for other apps.
 
@@ -124,6 +178,11 @@ Each app maintains its own documentation:
 - `apps/<app>/README.md` - App overview and setup
 - `apps/<app>/REQUIREMENTS.md` - Functional requirements (if applicable)
 - `apps/<app>/SOLUTION_DESIGN.md` - Technical architecture (if applicable)
+
+Platform-wide documentation lives in `docs/`:
+- [Product Vision](docs/product-vision.md)
+- [Architecture](docs/architecture.md)
+- [WRT Requirements](docs/wrt-requirements.md)
 
 ### Documentation Guidelines
 

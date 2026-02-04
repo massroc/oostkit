@@ -1,0 +1,21 @@
+<div class="mx-auto max-w-sm">
+  <.header class="text-center">
+    Platform Admin Login
+    <:subtitle>Log in to manage organisations and platform settings</:subtitle>
+  </.header>
+
+  <.simple_form :let={f} for={%{}} as={:admin} action={~p"/admin/login"} class="mt-10">
+    <%= if @error_message do %>
+      <div class="rounded-md bg-red-50 p-4 mb-6">
+        <p class="text-sm text-red-700"><%= @error_message %></p>
+      </div>
+    <% end %>
+
+    <.input field={f[:email]} type="email" label="Email" required />
+    <.input field={f[:password]} type="password" label="Password" required />
+
+    <:actions>
+      <.button type="submit" class="w-full">Log in</.button>
+    </:actions>
+  </.simple_form>
+</div>

@@ -1,0 +1,108 @@
+<.header>
+  <%= @campaign.name %>
+  <:subtitle>
+    <span class={"px-2 py-1 text-xs rounded-full #{status_class(@campaign.status)}"}>
+      <%= @campaign.status %>
+    </span>
+    <%= if @campaign.description do %>
+      <span class="ml-4 text-gray-600"><%= @campaign.description %></span>
+    <% end %>
+  </:subtitle>
+  <:actions>
+    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/results"}>
+      <.button>View Results</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-sm font-medium text-gray-500">Seed Group</h3>
+    <p class="mt-2 text-3xl font-semibold text-gray-900"><%= @seed_count %></p>
+    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed"} class="mt-2 text-sm text-indigo-600 hover:text-indigo-800">
+      Manage Seed Group &rarr;
+    </.link>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-sm font-medium text-gray-500">Total People</h3>
+    <p class="mt-2 text-3xl font-semibold text-gray-900">
+      <%= Map.get(@people_counts, "seed", 0) + Map.get(@people_counts, "nominated", 0) %>
+    </p>
+    <p class="mt-2 text-sm text-gray-500">
+      <%= Map.get(@people_counts, "nominated", 0) %> nominated
+    </p>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <h3 class="text-sm font-medium text-gray-500">Rounds</h3>
+    <p class="mt-2 text-3xl font-semibold text-gray-900"><%= length(@rounds) %></p>
+    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"} class="mt-2 text-sm text-indigo-600 hover:text-indigo-800">
+      View Rounds &rarr;
+    </.link>
+  </div>
+</div>
+
+<%= if @active_round do %>
+  <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-green-800">Active Round <%= @active_round.round_number %></h2>
+    <p class="text-green-700 mt-1">
+      Deadline: <%= Calendar.strftime(@active_round.deadline, "%B %d, %Y at %I:%M %p") %>
+    </p>
+    <div class="mt-4 flex gap-4">
+      <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@active_round}"}>
+        <.button>View Round</.button>
+      </.link>
+    </div>
+  </div>
+<% else %>
+  <%= if @campaign.status == "draft" and @seed_count > 0 do %>
+    <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-yellow-800">Ready to Start</h2>
+      <p class="text-yellow-700 mt-1">
+        Your seed group has <%= @seed_count %> people. Start the first round to begin collecting nominations.
+      </p>
+      <div class="mt-4">
+        <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"}>
+          <.button>Start Round 1</.button>
+        </.link>
+      </div>
+    </div>
+  <% end %>
+
+  <%= if @campaign.status == "draft" and @seed_count == 0 do %>
+    <div class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-800">Add Seed Group</h2>
+      <p class="text-gray-600 mt-1">
+        Upload a CSV or manually add people to your seed group before starting the campaign.
+      </p>
+      <div class="mt-4">
+        <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed"}>
+          <.button>Manage Seed Group</.button>
+        </.link>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+
+<%= if length(@rounds) > 0 do %>
+  <div class="mt-8">
+    <h2 class="text-lg font-semibold text-gray-900">Rounds History</h2>
+    <.table id="rounds" rows={@rounds}>
+      <:col :let={round} label="Round"><%= round.round_number %></:col>
+      <:col :let={round} label="Status">
+        <span class={"px-2 py-1 text-xs rounded-full #{round_status_class(round.status)}"}>
+          <%= round.status %>
+        </span>
+      </:col>
+      <:col :let={round} label="Deadline">
+        <%= if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-" %>
+      </:col>
+      <:action :let={round}>
+        <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"} class="text-indigo-600 hover:text-indigo-900">
+          View
+        </.link>
+      </:action>
+    </.table>
+  </div>
+<% end %>

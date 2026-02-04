@@ -6,7 +6,7 @@ Online Open Systems Theory toolkit. Team-facing workshop tools and facilitator t
 
 | App | Product Name | Description | Port | Status |
 |-----|--------------|-------------|------|--------|
-| [productive_workgroups](apps/productive_workgroups/) | Workgroup Pulse | 6 Criteria for Productive Work workshop | 4000 | Production |
+| [workgroup_pulse](apps/workgroup_pulse/) | Workgroup Pulse | 6 Criteria for Productive Work workshop | 4000 | Production |
 | wrt (planned) | Workshop Referral Tool | PDW participant selection | - | Planned |
 
 ## Development
@@ -22,7 +22,7 @@ Online Open Systems Theory toolkit. Team-facing workshop tools and facilitator t
 docker compose up
 
 # Or start a specific app
-cd apps/productive_workgroups
+cd apps/workgroup_pulse
 docker compose up
 ```
 
@@ -31,7 +31,7 @@ docker compose up
 ```
 /
 ├── apps/                          # Individual applications
-│   └── productive_workgroups/     # Workgroup Pulse
+│   └── workgroup_pulse/           # Workgroup Pulse
 ├── docs/                          # Platform-wide documentation
 ├── .github/workflows/             # CI/CD pipelines (per-app)
 ├── docker-compose.yml             # Root orchestration

@@ -1,0 +1,54 @@
+<.header>
+  <%= @org.name %> Dashboard
+  <:subtitle>Manage your referral campaigns</:subtitle>
+  <:actions>
+    <.link href={~p"/org/#{@org.slug}/campaigns/new"}>
+      <.button>New Campaign</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div class="mt-8">
+  <%= if @active_campaign do %>
+    <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-semibold text-green-800">Active Campaign</h2>
+      <p class="text-green-700 mt-1"><%= @active_campaign.name %></p>
+
+      <%= if @active_round do %>
+        <p class="text-sm text-green-600 mt-2">
+          Round <%= @active_round.round_number %> in progress
+          <span class="ml-2">Deadline: <%= Calendar.strftime(@active_round.deadline, "%B %d, %Y") %></span>
+        </p>
+      <% else %>
+        <p class="text-sm text-green-600 mt-2">No active round</p>
+      <% end %>
+
+      <div class="mt-4">
+        <.link href={~p"/org/#{@org.slug}/campaigns/#{@active_campaign}"} class="text-green-600 hover:text-green-800 underline">
+          View Campaign &rarr;
+        </.link>
+      </div>
+    </div>
+  <% end %>
+
+  <h2 class="text-lg font-semibold text-gray-900">Campaigns</h2>
+
+  <%= if Enum.empty?(@campaigns) do %>
+    <p class="text-gray-500 mt-4">No campaigns yet. Create your first campaign to get started.</p>
+  <% else %>
+    <.table id="campaigns" rows={@campaigns}>
+      <:col :let={campaign} label="Name"><%= campaign.name %></:col>
+      <:col :let={campaign} label="Status">
+        <span class={"px-2 py-1 text-xs rounded-full #{status_class(campaign.status)}"}>
+          <%= campaign.status %>
+        </span>
+      </:col>
+      <:col :let={campaign} label="Created"><%= Calendar.strftime(campaign.inserted_at, "%B %d, %Y") %></:col>
+      <:action :let={campaign}>
+        <.link href={~p"/org/#{@org.slug}/campaigns/#{campaign}"} class="text-indigo-600 hover:text-indigo-900">
+          View
+        </.link>
+      </:action>
+    </.table>
+  <% end %>
+</div>
