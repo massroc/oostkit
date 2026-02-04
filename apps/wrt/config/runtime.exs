@@ -45,10 +45,26 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   # Email configuration
-  if postmark_api_key = System.get_env("POSTMARK_API_KEY") do
-    config :wrt, Wrt.Mailer,
-      adapter: Swoosh.Adapters.Postmark,
-      api_key: postmark_api_key
+  # MAIL_ADAPTER options:
+  #   - "postmark" (default if POSTMARK_API_KEY set) - sends real emails
+  #   - "logger" - logs emails to stdout (useful for staging)
+  #   - unset without POSTMARK_API_KEY - emails silently dropped
+  mail_adapter = System.get_env("MAIL_ADAPTER")
+  postmark_api_key = System.get_env("POSTMARK_API_KEY")
+
+  cond do
+    mail_adapter == "logger" ->
+      config :wrt, Wrt.Mailer, adapter: Swoosh.Adapters.Logger
+
+    postmark_api_key != nil ->
+      config :wrt, Wrt.Mailer,
+        adapter: Swoosh.Adapters.Postmark,
+        api_key: postmark_api_key
+
+    true ->
+      # No adapter configured - emails will fail
+      # This is intentional to catch missing config in staging/prod
+      :ok
   end
 
   # Data retention configuration
