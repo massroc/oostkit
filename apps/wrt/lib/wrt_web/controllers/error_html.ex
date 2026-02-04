@@ -37,66 +37,66 @@ defmodule WrtWeb.ErrorHTML do
     ~H"""
     <!DOCTYPE html>
     <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Error <%= @status_code %> - Workshop Referral Tool</title>
-      <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.5;
-          color: #1f2937;
-          background: #f9fafb;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-        }
-        .container {
-          text-align: center;
-          padding: 40px;
-          max-width: 500px;
-        }
-        .error-code {
-          font-size: 120px;
-          font-weight: bold;
-          color: #e5e7eb;
-          margin: 0;
-          line-height: 1;
-        }
-        h1 {
-          font-size: 24px;
-          margin: 20px 0 10px;
-          color: #1f2937;
-        }
-        p {
-          color: #6b7280;
-          margin: 0 0 30px;
-        }
-        .button {
-          display: inline-block;
-          background: #4f46e5;
-          color: white;
-          padding: 12px 24px;
-          text-decoration: none;
-          border-radius: 6px;
-          font-weight: 500;
-        }
-        .button:hover {
-          background: #4338ca;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <p class="error-code"><%= @status_code %></p>
-        <h1>Oops!</h1>
-        <p><%= @message %></p>
-        <a href="/" class="button">Go Home</a>
-      </div>
-    </body>
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Error {@status_code} - Workshop Referral Tool</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            color: #1f2937;
+            background: #f9fafb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+          }
+          .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+          }
+          .error-code {
+            font-size: 120px;
+            font-weight: bold;
+            color: #e5e7eb;
+            margin: 0;
+            line-height: 1;
+          }
+          h1 {
+            font-size: 24px;
+            margin: 20px 0 10px;
+            color: #1f2937;
+          }
+          p {
+            color: #6b7280;
+            margin: 0 0 30px;
+          }
+          .button {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+          }
+          .button:hover {
+            background: #4338ca;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <p class="error-code">{@status_code}</p>
+          <h1>Oops!</h1>
+          <p>{@message}</p>
+          <a href="/" class="button">Go Home</a>
+        </div>
+      </body>
     </html>
     """
   end

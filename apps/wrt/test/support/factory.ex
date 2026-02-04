@@ -6,9 +6,9 @@ defmodule Wrt.Factory do
   use ExMachina.Ecto, repo: Wrt.Repo
 
   alias Wrt.Campaigns.Campaign
-  alias Wrt.Rounds.{Round, Contact}
-  alias Wrt.People.{Person, Nomination}
   alias Wrt.MagicLinks.MagicLink
+  alias Wrt.People.{Nomination, Person}
+  alias Wrt.Rounds.{Contact, Round}
 
   # ============================================================================
   # Campaign Factory
@@ -36,7 +36,8 @@ defmodule Wrt.Factory do
     struct!(
       campaign_factory(),
       status: "completed",
-      started_at: DateTime.utc_now() |> DateTime.add(-7 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      started_at:
+        DateTime.utc_now() |> DateTime.add(-7 * 24 * 60 * 60) |> DateTime.truncate(:second),
       completed_at: DateTime.utc_now() |> DateTime.truncate(:second)
     )
   end
@@ -58,7 +59,8 @@ defmodule Wrt.Factory do
     struct!(
       round_factory(),
       status: "active",
-      deadline: DateTime.utc_now() |> DateTime.add(7 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      deadline:
+        DateTime.utc_now() |> DateTime.add(7 * 24 * 60 * 60) |> DateTime.truncate(:second),
       started_at: DateTime.utc_now() |> DateTime.truncate(:second)
     )
   end
@@ -67,8 +69,10 @@ defmodule Wrt.Factory do
     struct!(
       round_factory(),
       status: "closed",
-      deadline: DateTime.utc_now() |> DateTime.add(-1 * 24 * 60 * 60) |> DateTime.truncate(:second),
-      started_at: DateTime.utc_now() |> DateTime.add(-8 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      deadline:
+        DateTime.utc_now() |> DateTime.add(-1 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      started_at:
+        DateTime.utc_now() |> DateTime.add(-8 * 24 * 60 * 60) |> DateTime.truncate(:second),
       closed_at: DateTime.utc_now() |> DateTime.truncate(:second)
     )
   end
@@ -114,10 +118,14 @@ defmodule Wrt.Factory do
     struct!(
       contact_factory(),
       email_status: "clicked",
-      invited_at: DateTime.utc_now() |> DateTime.add(-2 * 24 * 60 * 60) |> DateTime.truncate(:second),
-      delivered_at: DateTime.utc_now() |> DateTime.add(-2 * 24 * 60 * 60) |> DateTime.truncate(:second),
-      opened_at: DateTime.utc_now() |> DateTime.add(-1 * 24 * 60 * 60) |> DateTime.truncate(:second),
-      clicked_at: DateTime.utc_now() |> DateTime.add(-1 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      invited_at:
+        DateTime.utc_now() |> DateTime.add(-2 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      delivered_at:
+        DateTime.utc_now() |> DateTime.add(-2 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      opened_at:
+        DateTime.utc_now() |> DateTime.add(-1 * 24 * 60 * 60) |> DateTime.truncate(:second),
+      clicked_at:
+        DateTime.utc_now() |> DateTime.add(-1 * 24 * 60 * 60) |> DateTime.truncate(:second),
       responded_at: DateTime.utc_now() |> DateTime.truncate(:second)
     )
   end

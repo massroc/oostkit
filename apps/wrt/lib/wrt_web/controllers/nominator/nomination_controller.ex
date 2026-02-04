@@ -95,29 +95,32 @@ defmodule WrtWeb.Nominator.NominationController do
       end)
 
     # Check for errors
-    errors = Enum.filter(results, fn
-      {:error, _} -> true
-      _ -> false
-    end)
+    errors =
+      Enum.filter(results, fn
+        {:error, _} -> true
+        _ -> false
+      end)
 
-    successful = Enum.count(results, fn
-      {:ok, _} -> true
-      _ -> false
-    end)
+    successful =
+      Enum.count(results, fn
+        {:ok, _} -> true
+        _ -> false
+      end)
 
     if Enum.empty?(errors) and successful > 0 do
       conn
       |> put_flash(:info, "Thank you! Your #{successful} nomination(s) have been submitted.")
       |> redirect(to: ~p"/org/#{org.slug}/nominate/form")
-    else if successful > 0 do
-      conn
-      |> put_flash(:warning, "#{successful} nomination(s) submitted, but some had errors.")
-      |> redirect(to: ~p"/org/#{org.slug}/nominate/form")
     else
-      conn
-      |> put_flash(:error, "Please add at least one nomination with name and email.")
-      |> redirect(to: ~p"/org/#{org.slug}/nominate/form")
-    end
+      if successful > 0 do
+        conn
+        |> put_flash(:warning, "#{successful} nomination(s) submitted, but some had errors.")
+        |> redirect(to: ~p"/org/#{org.slug}/nominate/form")
+      else
+        conn
+        |> put_flash(:error, "Please add at least one nomination with name and email.")
+        |> redirect(to: ~p"/org/#{org.slug}/nominate/form")
+      end
     end
   end
 

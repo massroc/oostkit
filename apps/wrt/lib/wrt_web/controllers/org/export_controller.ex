@@ -124,7 +124,8 @@ defmodule WrtWeb.Org.ExportController do
         round: round,
         contacts: stats.total,
         responded: stats.responded,
-        response_rate: if(stats.total > 0, do: Float.round(stats.responded / stats.total * 100, 1), else: 0)
+        response_rate:
+          if(stats.total > 0, do: Float.round(stats.responded / stats.total * 100, 1), else: 0)
       }
     end)
   end
@@ -187,7 +188,7 @@ defmodule WrtWeb.Org.ExportController do
 
   defp generate_pdf(html_content) do
     if Code.ensure_loaded?(ChromicPDF) do
-      ChromicPDF.print_to_pdf({:html, html_content}, [
+      ChromicPDF.print_to_pdf({:html, html_content},
         print_to_pdf: %{
           preferCSSPageSize: true,
           marginTop: 0.5,
@@ -195,7 +196,7 @@ defmodule WrtWeb.Org.ExportController do
           marginLeft: 0.5,
           marginRight: 0.5
         }
-      ])
+      )
     else
       {:error, :chromic_pdf_not_available}
     end
@@ -347,8 +348,16 @@ defmodule WrtWeb.Org.ExportController do
 
   defp generate_filter_info(filters) do
     active_filters = []
-    active_filters = if filters.source != "all", do: ["Source: #{filters.source}" | active_filters], else: active_filters
-    active_filters = if filters.min_nominations > 0, do: ["Min nominations: #{filters.min_nominations}" | active_filters], else: active_filters
+
+    active_filters =
+      if filters.source != "all",
+        do: ["Source: #{filters.source}" | active_filters],
+        else: active_filters
+
+    active_filters =
+      if filters.min_nominations > 0,
+        do: ["Min nominations: #{filters.min_nominations}" | active_filters],
+        else: active_filters
 
     if Enum.empty?(active_filters) do
       ""
@@ -365,8 +374,7 @@ defmodule WrtWeb.Org.ExportController do
 
   defp generate_rounds_section(round_stats) do
     rows =
-      round_stats
-      |> Enum.map(fn stat ->
+      Enum.map_join(round_stats, "\n", fn stat ->
         """
         <tr>
           <td>Round #{stat.round.round_number}</td>
@@ -377,7 +385,6 @@ defmodule WrtWeb.Org.ExportController do
         </tr>
         """
       end)
-      |> Enum.join("\n")
 
     """
     <h2>Round Statistics</h2>
@@ -410,7 +417,7 @@ defmodule WrtWeb.Org.ExportController do
     rows =
       nominees
       |> Enum.with_index(1)
-      |> Enum.map(fn {person, rank} ->
+      |> Enum.map_join("\n", fn {person, rank} ->
         source_class = if person.source == "seed", do: "source-seed", else: "source-nominated"
 
         """
@@ -423,7 +430,6 @@ defmodule WrtWeb.Org.ExportController do
         </tr>
         """
       end)
-      |> Enum.join("\n")
 
     """
     <table>

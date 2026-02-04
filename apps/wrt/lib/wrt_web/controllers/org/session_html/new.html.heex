@@ -1,11 +1,11 @@
 <div class="mx-auto max-w-sm">
   <.header class="text-center">
-    <%= @org.name %> Login
+    {@org.name} Login
     <:subtitle>Sign in to manage your campaigns</:subtitle>
   </.header>
 
   <.simple_form :let={f} for={%{}} action={~p"/org/#{@org.slug}/login"} as={:admin}>
-    <.error :if={@error_message}><%= @error_message %></.error>
+    <.error :if={@error_message}>{@error_message}</.error>
 
     <.input field={f[:email]} type="email" label="Email" required />
     <.input field={f[:password]} type="password" label="Password" required />

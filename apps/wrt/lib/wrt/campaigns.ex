@@ -9,8 +9,9 @@ defmodule Wrt.Campaigns do
   """
 
   import Ecto.Query, warn: false
-  alias Wrt.Repo
+
   alias Wrt.Campaigns.{Campaign, CampaignAdmin}
+  alias Wrt.Repo
 
   # =============================================================================
   # Campaign Functions

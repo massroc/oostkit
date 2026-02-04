@@ -13,7 +13,9 @@ defmodule Wrt.Workers.SendReminderEmail do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"tenant" => tenant, "contact_id" => contact_id, "org_id" => org_id}}) do
+  def perform(%Oban.Job{
+        args: %{"tenant" => tenant, "contact_id" => contact_id, "org_id" => org_id}
+      }) do
     with {:ok, contact} <- get_contact(tenant, contact_id),
          false <- already_responded?(contact),
          {:ok, org} <- get_org(org_id),
@@ -27,7 +29,10 @@ defmodule Wrt.Workers.SendReminderEmail do
         :ok
 
       {:error, reason} ->
-        Logger.error("Failed to send reminder email for contact #{contact_id}: #{inspect(reason)}")
+        Logger.error(
+          "Failed to send reminder email for contact #{contact_id}: #{inspect(reason)}"
+        )
+
         {:error, reason}
     end
   end

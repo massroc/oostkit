@@ -117,18 +117,26 @@ defmodule WrtWeb.Telemetry do
   def measure_oban_queue_lengths do
     if Process.whereis(Oban) do
       queues = [:default, :emails, :rounds, :maintenance]
-
-      Enum.each(queues, fn queue ->
-        count = Oban.check_queue(queue: queue) |> length()
-
-        :telemetry.execute(
-          [:wrt, :oban, :queue_length],
-          %{count: count},
-          %{queue: queue}
-        )
-      end)
+      Enum.each(queues, &measure_single_queue/1)
     end
   rescue
     _ -> :ok
+  end
+
+  defp measure_single_queue(queue) do
+    count = get_queue_running_count(queue)
+
+    :telemetry.execute(
+      [:wrt, :oban, :queue_length],
+      %{count: count},
+      %{queue: queue}
+    )
+  end
+
+  defp get_queue_running_count(queue) do
+    case Oban.check_queue(queue: queue) do
+      %{running: running} when is_list(running) -> Enum.count(running)
+      _ -> 0
+    end
   end
 end

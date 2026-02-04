@@ -17,17 +17,25 @@ defmodule Wrt.Workers.SendInvitationEmail do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"tenant" => tenant, "contact_id" => contact_id, "org_id" => org_id}}) do
+  def perform(%Oban.Job{
+        args: %{"tenant" => tenant, "contact_id" => contact_id, "org_id" => org_id}
+      }) do
     with {:ok, contact} <- get_contact(tenant, contact_id),
          {:ok, org} <- get_org(org_id),
          {:ok, magic_link} <- get_or_create_magic_link(tenant, contact),
          {:ok, _email} <- send_email(contact, magic_link, org),
          {:ok, _contact} <- mark_invited(tenant, contact) do
-      Logger.info("Sent invitation email to #{contact.person.email} for round #{contact.round_id}")
+      Logger.info(
+        "Sent invitation email to #{contact.person.email} for round #{contact.round_id}"
+      )
+
       :ok
     else
       {:error, reason} ->
-        Logger.error("Failed to send invitation email for contact #{contact_id}: #{inspect(reason)}")
+        Logger.error(
+          "Failed to send invitation email for contact #{contact_id}: #{inspect(reason)}"
+        )
+
         {:error, reason}
     end
   end

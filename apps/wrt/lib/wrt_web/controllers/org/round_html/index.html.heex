@@ -1,6 +1,6 @@
 <.header>
   Rounds
-  <:subtitle><%= @campaign.name %></:subtitle>
+  <:subtitle>{@campaign.name}</:subtitle>
   <:actions>
     <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
       &larr; Back to Campaign
@@ -15,7 +15,9 @@
       <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
       <div class="flex items-end gap-4">
         <div>
-          <label for="duration_days" class="block text-sm font-medium text-gray-700">Duration (days)</label>
+          <label for="duration_days" class="block text-sm font-medium text-gray-700">
+            Duration (days)
+          </label>
           <select
             name="round[duration_days]"
             id="duration_days"
@@ -28,7 +30,7 @@
           </select>
         </div>
         <.button type="submit">
-          Start Round <%= length(@rounds) + 1 %>
+          Start Round {length(@rounds) + 1}
         </.button>
       </div>
     </form>
@@ -36,8 +38,11 @@
 <% else %>
   <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
     <p class="text-yellow-800">
-      Round <%= @active_round.round_number %> is currently active.
-      <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@active_round}"} class="underline">
+      Round {@active_round.round_number} is currently active.
+      <.link
+        href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@active_round}"}
+        class="underline"
+      >
         View active round
       </.link>
       or close it to start a new round.
@@ -52,20 +57,23 @@
     <p class="text-gray-500 mt-4">No rounds yet. Start your first round above.</p>
   <% else %>
     <.table id="rounds" rows={@rounds}>
-      <:col :let={round} label="Round"><%= round.round_number %></:col>
+      <:col :let={round} label="Round">{round.round_number}</:col>
       <:col :let={round} label="Status">
         <span class={"px-2 py-1 text-xs rounded-full #{status_class(round.status)}"}>
-          <%= round.status %>
+          {round.status}
         </span>
       </:col>
       <:col :let={round} label="Started">
-        <%= if round.started_at, do: Calendar.strftime(round.started_at, "%B %d, %Y"), else: "-" %>
+        {if round.started_at, do: Calendar.strftime(round.started_at, "%B %d, %Y"), else: "-"}
       </:col>
       <:col :let={round} label="Deadline">
-        <%= if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-" %>
+        {if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-"}
       </:col>
       <:action :let={round}>
-        <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"} class="text-indigo-600 hover:text-indigo-900">
+        <.link
+          href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"}
+          class="text-indigo-600 hover:text-indigo-900"
+        >
           View
         </.link>
       </:action>

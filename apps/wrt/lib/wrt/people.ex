@@ -10,8 +10,9 @@ defmodule Wrt.People do
   """
 
   import Ecto.Query, warn: false
+
+  alias Wrt.People.{Nomination, Person}
   alias Wrt.Repo
-  alias Wrt.People.{Person, Nomination}
 
   NimbleCSV.define(CsvParser, separator: ",", escape: "\"")
 
@@ -132,44 +133,42 @@ defmodule Wrt.People do
   Returns {:ok, people} or {:error, reason}
   """
   def parse_seed_csv(csv_content) do
-    try do
-      [headers | rows] = CsvParser.parse_string(csv_content, skip_headers: false)
+    [headers | rows] = CsvParser.parse_string(csv_content, skip_headers: false)
 
-      # Normalize headers to lowercase
-      headers = Enum.map(headers, &String.downcase(String.trim(&1)))
+    # Normalize headers to lowercase
+    headers = Enum.map(headers, &String.downcase(String.trim(&1)))
 
-      # Find column indices
-      name_idx = Enum.find_index(headers, &(&1 in ["name", "full name", "fullname"]))
-      email_idx = Enum.find_index(headers, &(&1 in ["email", "email address", "e-mail"]))
+    # Find column indices
+    name_idx = Enum.find_index(headers, &(&1 in ["name", "full name", "fullname"]))
+    email_idx = Enum.find_index(headers, &(&1 in ["email", "email address", "e-mail"]))
 
-      cond do
-        is_nil(name_idx) ->
-          {:error, "CSV must have a 'name' column"}
+    cond do
+      is_nil(name_idx) ->
+        {:error, "CSV must have a 'name' column"}
 
-        is_nil(email_idx) ->
-          {:error, "CSV must have an 'email' column"}
+      is_nil(email_idx) ->
+        {:error, "CSV must have an 'email' column"}
 
-        true ->
-          people =
-            rows
-            |> Enum.with_index(2)
-            |> Enum.map(fn {row, line_num} ->
-              name = Enum.at(row, name_idx, "") |> String.trim()
-              email = Enum.at(row, email_idx, "") |> String.trim()
+      true ->
+        people =
+          rows
+          |> Enum.with_index(2)
+          |> Enum.map(fn {row, line_num} ->
+            name = Enum.at(row, name_idx, "") |> String.trim()
+            email = Enum.at(row, email_idx, "") |> String.trim()
 
-              %{
-                name: name,
-                email: email,
-                line: line_num,
-                valid: name != "" && email != "" && valid_email?(email)
-              }
-            end)
+            %{
+              name: name,
+              email: email,
+              line: line_num,
+              valid: name != "" && email != "" && valid_email?(email)
+            }
+          end)
 
-          {:ok, people}
-      end
-    rescue
-      e -> {:error, "Failed to parse CSV: #{Exception.message(e)}"}
+        {:ok, people}
     end
+  rescue
+    e -> {:error, "Failed to parse CSV: #{Exception.message(e)}"}
   end
 
   @doc """
@@ -180,26 +179,34 @@ defmodule Wrt.People do
   def import_seed_people(tenant, parsed_people) do
     results =
       Enum.reduce(parsed_people, %{imported: 0, skipped: 0, errors: []}, fn person, acc ->
-        if person.valid do
-          case create_seed_person(tenant, %{name: person.name, email: person.email}) do
-            {:ok, _} ->
-              %{acc | imported: acc.imported + 1}
-
-            {:error, changeset} ->
-              if duplicate_email_error?(changeset) do
-                %{acc | skipped: acc.skipped + 1}
-              else
-                error = "Line #{person.line}: #{format_changeset_errors(changeset)}"
-                %{acc | errors: [error | acc.errors]}
-              end
-          end
-        else
-          error = "Line #{person.line}: Invalid or missing data"
-          %{acc | errors: [error | acc.errors]}
-        end
+        import_single_person(tenant, person, acc)
       end)
 
     {:ok, %{results | errors: Enum.reverse(results.errors)}}
+  end
+
+  defp import_single_person(_tenant, %{valid: false, line: line}, acc) do
+    error = "Line #{line}: Invalid or missing data"
+    %{acc | errors: [error | acc.errors]}
+  end
+
+  defp import_single_person(tenant, person, acc) do
+    case create_seed_person(tenant, %{name: person.name, email: person.email}) do
+      {:ok, _} ->
+        %{acc | imported: acc.imported + 1}
+
+      {:error, changeset} ->
+        handle_import_error(changeset, person.line, acc)
+    end
+  end
+
+  defp handle_import_error(changeset, line, acc) do
+    if duplicate_email_error?(changeset) do
+      %{acc | skipped: acc.skipped + 1}
+    else
+      error = "Line #{line}: #{format_changeset_errors(changeset)}"
+      %{acc | errors: [error | acc.errors]}
+    end
   end
 
   defp valid_email?(email) do
@@ -214,13 +221,13 @@ defmodule Wrt.People do
   end
 
   defp format_changeset_errors(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+    changeset
+    |> Ecto.Changeset.traverse_errors(fn {msg, opts} ->
       Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)
     end)
-    |> Enum.map(fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
-    |> Enum.join("; ")
+    |> Enum.map_join("; ", fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
   end
 
   # =============================================================================

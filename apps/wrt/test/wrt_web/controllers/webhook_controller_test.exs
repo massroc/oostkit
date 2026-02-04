@@ -11,17 +11,26 @@ defmodule WrtWeb.WebhookControllerTest do
       person = insert_in_tenant(tenant, :person)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
-      contact = Wrt.Repo.insert!(%Contact{
-        person_id: person.id,
-        round_id: round.id,
-        email_status: "sent",
-        invited_at: now
-      }, prefix: tenant)
+
+      contact =
+        Wrt.Repo.insert!(
+          %Contact{
+            person_id: person.id,
+            round_id: round.id,
+            email_status: "sent",
+            invited_at: now
+          },
+          prefix: tenant
+        )
 
       %{tenant: tenant, contact: contact}
     end
 
-    test "processes Delivery event and updates contact status", %{conn: conn, tenant: tenant, contact: contact} do
+    test "processes Delivery event and updates contact status", %{
+      conn: conn,
+      tenant: tenant,
+      contact: contact
+    } do
       payload = %{
         "RecordType" => "Delivery",
         "Metadata" => %{
@@ -118,12 +127,17 @@ defmodule WrtWeb.WebhookControllerTest do
       person = insert_in_tenant(tenant, :person)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
-      contact = Wrt.Repo.insert!(%Contact{
-        person_id: person.id,
-        round_id: round.id,
-        email_status: "sent",
-        invited_at: now
-      }, prefix: tenant)
+
+      contact =
+        Wrt.Repo.insert!(
+          %Contact{
+            person_id: person.id,
+            round_id: round.id,
+            email_status: "sent",
+            invited_at: now
+          },
+          prefix: tenant
+        )
 
       %{tenant: tenant, contact: contact}
     end

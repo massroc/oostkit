@@ -1,6 +1,6 @@
 <.header>
   Results
-  <:subtitle><%= @campaign.name %></:subtitle>
+  <:subtitle>{@campaign.name}</:subtitle>
   <:actions>
     <div class="flex gap-4">
       <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/export/csv"}>
@@ -20,19 +20,19 @@
   <div class="bg-white shadow rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Rounds Completed</h3>
     <p class="mt-2 text-3xl font-semibold text-gray-900">
-      <%= Enum.count(@rounds, fn r -> r.status == "closed" end) %>
+      {Enum.count(@rounds, fn r -> r.status == "closed" end)}
     </p>
   </div>
 
   <div class="bg-white shadow rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">People Nominated</h3>
-    <p class="mt-2 text-3xl font-semibold text-indigo-600"><%= length(@nominees) %></p>
+    <p class="mt-2 text-3xl font-semibold text-indigo-600">{length(@nominees)}</p>
   </div>
 
   <div class="bg-white shadow rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Total Nominations</h3>
     <p class="mt-2 text-3xl font-semibold text-green-600">
-      <%= Enum.sum(Enum.map(@nominees, & &1.nomination_count)) %>
+      {Enum.sum(Enum.map(@nominees, & &1.nomination_count))}
     </p>
   </div>
 </div>
@@ -48,17 +48,17 @@
   <% else %>
     <.table id="nominees" rows={@nominees}>
       <:col :let={person} label="Rank">
-        <%= Enum.find_index(@nominees, fn p -> p.id == person.id end) + 1 %>
+        {Enum.find_index(@nominees, fn p -> p.id == person.id end) + 1}
       </:col>
-      <:col :let={person} label="Name"><%= person.name %></:col>
-      <:col :let={person} label="Email"><%= person.email %></:col>
+      <:col :let={person} label="Name">{person.name}</:col>
+      <:col :let={person} label="Email">{person.email}</:col>
       <:col :let={person} label="Source">
         <span class={"px-2 py-1 text-xs rounded-full #{source_class(person.source)}"}>
-          <%= person.source %>
+          {person.source}
         </span>
       </:col>
       <:col :let={person} label="Nominations">
-        <span class="font-semibold text-indigo-600"><%= person.nomination_count %></span>
+        <span class="font-semibold text-indigo-600">{person.nomination_count}</span>
       </:col>
     </.table>
   <% end %>

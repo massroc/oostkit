@@ -14,7 +14,9 @@ defmodule Wrt.Workers.SendVerificationCode do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"tenant" => tenant, "magic_link_id" => magic_link_id, "org_id" => org_id}}) do
+  def perform(%Oban.Job{
+        args: %{"tenant" => tenant, "magic_link_id" => magic_link_id, "org_id" => org_id}
+      }) do
     with {:ok, magic_link} <- get_magic_link(tenant, magic_link_id),
          {:ok, org} <- get_org(org_id),
          {:ok, _email} <- send_email(magic_link, org) do
@@ -22,7 +24,10 @@ defmodule Wrt.Workers.SendVerificationCode do
       :ok
     else
       {:error, reason} ->
-        Logger.error("Failed to send verification code for magic_link #{magic_link_id}: #{inspect(reason)}")
+        Logger.error(
+          "Failed to send verification code for magic_link #{magic_link_id}: #{inspect(reason)}"
+        )
+
         {:error, reason}
     end
   end

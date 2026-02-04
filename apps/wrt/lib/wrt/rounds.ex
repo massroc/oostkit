@@ -9,9 +9,10 @@ defmodule Wrt.Rounds do
   """
 
   import Ecto.Query, warn: false
-  alias Wrt.Repo
-  alias Wrt.Rounds.{Round, Contact}
+
   alias Wrt.People
+  alias Wrt.Repo
+  alias Wrt.Rounds.{Contact, Round}
 
   # =============================================================================
   # Round Functions

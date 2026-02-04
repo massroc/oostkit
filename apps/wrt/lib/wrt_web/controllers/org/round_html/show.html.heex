@@ -1,10 +1,10 @@
 <.header>
-  Round <%= @round.round_number %>
+  Round {@round.round_number}
   <:subtitle>
     <span class={"px-2 py-1 text-xs rounded-full #{status_class(@round.status)}"}>
-      <%= @round.status %>
+      {@round.status}
     </span>
-    <%= @campaign.name %>
+    {@campaign.name}
   </:subtitle>
   <:actions>
     <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"}>
@@ -16,15 +16,15 @@
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
   <div class="bg-white shadow rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Contacts</h3>
-    <p class="mt-2 text-3xl font-semibold text-gray-900"><%= @contact_stats.total %></p>
+    <p class="mt-2 text-3xl font-semibold text-gray-900">{@contact_stats.total}</p>
   </div>
 
   <div class="bg-white shadow rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Responded</h3>
-    <p class="mt-2 text-3xl font-semibold text-green-600"><%= @contact_stats.responded %></p>
+    <p class="mt-2 text-3xl font-semibold text-green-600">{@contact_stats.responded}</p>
     <p class="mt-1 text-sm text-gray-500">
       <%= if @contact_stats.total > 0 do %>
-        <%= Float.round(@contact_stats.responded / @contact_stats.total * 100, 1) %>% response rate
+        {Float.round(@contact_stats.responded / @contact_stats.total * 100, 1)}% response rate
       <% else %>
         -
       <% end %>
@@ -33,7 +33,7 @@
 
   <div class="bg-white shadow rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Nominations</h3>
-    <p class="mt-2 text-3xl font-semibold text-indigo-600"><%= length(@nominations) %></p>
+    <p class="mt-2 text-3xl font-semibold text-indigo-600">{length(@nominations)}</p>
   </div>
 </div>
 
@@ -41,13 +41,19 @@
   <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
     <h2 class="text-lg font-semibold text-green-800">Round Active</h2>
     <p class="text-green-700 mt-1">
-      Deadline: <%= Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p") %>
+      Deadline: {Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p")}
     </p>
     <div class="mt-4 flex gap-4">
-      <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@round}/extend"} method="post" class="flex items-end gap-2">
+      <form
+        action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@round}/extend"}
+        method="post"
+        class="flex items-end gap-2"
+      >
         <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
         <div>
-          <label for="extension_days" class="block text-sm font-medium text-green-700">Extend by</label>
+          <label for="extension_days" class="block text-sm font-medium text-green-700">
+            Extend by
+          </label>
           <select
             name="extension[days]"
             id="extension_days"
@@ -60,7 +66,10 @@
         <.button type="submit" class="bg-green-600 hover:bg-green-700">Extend</.button>
       </form>
 
-      <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@round}/close"} method="post">
+      <form
+        action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@round}/close"}
+        method="post"
+      >
         <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
         <.button type="submit" class="bg-red-600 hover:bg-red-700">Close Round</.button>
       </form>
@@ -75,18 +84,24 @@
     <p class="text-gray-500 mt-4">No contacts in this round.</p>
   <% else %>
     <.table id="contacts" rows={@contacts}>
-      <:col :let={contact} label="Name"><%= contact.person.name %></:col>
-      <:col :let={contact} label="Email"><%= contact.person.email %></:col>
+      <:col :let={contact} label="Name">{contact.person.name}</:col>
+      <:col :let={contact} label="Email">{contact.person.email}</:col>
       <:col :let={contact} label="Status">
         <%= cond do %>
           <% contact.responded_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Responded</span>
+            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+              Responded
+            </span>
           <% contact.clicked_at -> %>
             <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Clicked</span>
           <% contact.opened_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Opened</span>
+            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+              Opened
+            </span>
           <% contact.delivered_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Delivered</span>
+            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+              Delivered
+            </span>
           <% true -> %>
             <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Pending</span>
         <% end %>
@@ -99,9 +114,9 @@
   <div class="mt-8">
     <h2 class="text-lg font-semibold text-gray-900">Nominations</h2>
     <.table id="nominations" rows={@nominations}>
-      <:col :let={nom} label="Nominee"><%= nom.nominee.name %></:col>
-      <:col :let={nom} label="Nominated By"><%= nom.nominator.name %></:col>
-      <:col :let={nom} label="Reason"><%= nom.reason || "-" %></:col>
+      <:col :let={nom} label="Nominee">{nom.nominee.name}</:col>
+      <:col :let={nom} label="Nominated By">{nom.nominator.name}</:col>
+      <:col :let={nom} label="Reason">{nom.reason || "-"}</:col>
     </.table>
   </div>
 <% end %>

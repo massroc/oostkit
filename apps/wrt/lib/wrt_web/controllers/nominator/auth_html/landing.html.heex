@@ -1,20 +1,19 @@
 <div class="mx-auto max-w-lg">
   <.header class="text-center">
-    Welcome, <%= @person.name %>
+    Welcome, {@person.name}
     <:subtitle>
-      You've been invited to participate in <%= @org.name %>'s referral process
+      You've been invited to participate in {@org.name}'s referral process
     </:subtitle>
   </.header>
 
   <div class="mt-8 bg-white shadow rounded-lg p-6">
     <p class="text-gray-600 mb-6">
-      Round <%= @round.round_number %> is currently open until
-      <strong><%= Calendar.strftime(@round.deadline, "%B %d, %Y") %></strong>.
+      Round {@round.round_number} is currently open until <strong><%= Calendar.strftime(@round.deadline, "%B %d, %Y") %></strong>.
     </p>
 
     <p class="text-gray-600 mb-6">
       To continue, we'll send a verification code to your email address
-      (<%= @person.email %>).
+      ({@person.email}).
     </p>
 
     <form action={~p"/org/#{@org.slug}/nominate/request-link?token=#{@token}"} method="post">

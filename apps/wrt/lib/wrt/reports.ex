@@ -10,9 +10,10 @@ defmodule Wrt.Reports do
   """
 
   import Ecto.Query, warn: false
+
+  alias Wrt.People.{Nomination, Person}
   alias Wrt.Repo
-  alias Wrt.Rounds.{Round, Contact}
-  alias Wrt.People.{Person, Nomination}
+  alias Wrt.Rounds.{Contact, Round}
 
   # =============================================================================
   # Campaign Statistics
@@ -208,7 +209,10 @@ defmodule Wrt.Reports do
           responded: stats.responded,
           pending: stats.total - stats.responded,
           response_rate:
-            if(stats.total > 0, do: Float.round(stats.responded / stats.total * 100, 1), else: 0.0)
+            if(stats.total > 0,
+              do: Float.round(stats.responded / stats.total * 100, 1),
+              else: 0.0
+            )
         }
     end
   end

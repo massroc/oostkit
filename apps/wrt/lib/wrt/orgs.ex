@@ -7,8 +7,9 @@ defmodule Wrt.Orgs do
   """
 
   import Ecto.Query, warn: false
-  alias Wrt.Repo
+
   alias Wrt.Orgs.OrgAdmin
+  alias Wrt.Repo
 
   # =============================================================================
   # Org Admin Functions

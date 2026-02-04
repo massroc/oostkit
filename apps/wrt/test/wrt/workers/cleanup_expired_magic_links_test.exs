@@ -1,9 +1,9 @@
 defmodule Wrt.Workers.CleanupExpiredMagicLinksTest do
   use Wrt.DataCase, async: true
 
-  alias Wrt.Workers.CleanupExpiredMagicLinks
   alias Wrt.MagicLinks
   alias Wrt.MagicLinks.MagicLink
+  alias Wrt.Workers.CleanupExpiredMagicLinks
 
   describe "perform/1" do
     setup do
@@ -15,12 +15,17 @@ defmodule Wrt.Workers.CleanupExpiredMagicLinksTest do
       %{tenant: tenant, round: round, person: person}
     end
 
-    test "deletes expired magic links across tenants", %{tenant: tenant, round: round, person: person} do
+    test "deletes expired magic links across tenants", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
       # Create expired links
       for i <- 1..3 do
         expired = %MagicLink{
           token: "expired-#{i}-#{System.unique_integer([:positive])}",
-          expires_at: DateTime.utc_now() |> DateTime.add(-i * 60 * 60) |> DateTime.truncate(:second),
+          expires_at:
+            DateTime.utc_now() |> DateTime.add(-i * 60 * 60) |> DateTime.truncate(:second),
           person_id: person.id,
           round_id: round.id
         }
@@ -29,7 +34,8 @@ defmodule Wrt.Workers.CleanupExpiredMagicLinksTest do
       end
 
       # Create a valid link that should not be deleted
-      {:ok, valid} = MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+      {:ok, valid} =
+        MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
 
       # Run the worker
       assert :ok = CleanupExpiredMagicLinks.perform(%Oban.Job{})
@@ -38,8 +44,13 @@ defmodule Wrt.Workers.CleanupExpiredMagicLinksTest do
       assert MagicLinks.get_by_token(tenant, valid.token) != nil
     end
 
-    test "returns :ok even when no expired links exist", %{tenant: tenant, round: round, person: person} do
-      {:ok, _valid} = MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+    test "returns :ok even when no expired links exist", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
+      {:ok, _valid} =
+        MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
 
       assert :ok = CleanupExpiredMagicLinks.perform(%Oban.Job{})
     end

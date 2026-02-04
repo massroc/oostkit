@@ -16,6 +16,11 @@ defmodule Wrt.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Wrt.Factory
+  alias Wrt.Repo
+
   using do
     quote do
       alias Wrt.Repo
@@ -55,112 +60,140 @@ defmodule Wrt.DataCase do
   This avoids module redefinition issues from running migrations.
   """
   def create_tenant_tables(tenant) do
-    Ecto.Adapters.SQL.query!(Wrt.Repo, "CREATE SCHEMA IF NOT EXISTS #{tenant}", [])
+    SQL.query!(Repo, "CREATE SCHEMA IF NOT EXISTS #{tenant}", [])
 
     # Create campaigns table
-    Ecto.Adapters.SQL.query!(Wrt.Repo, """
-      CREATE TABLE #{tenant}.campaigns (
-        id BIGSERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        status VARCHAR(255) NOT NULL DEFAULT 'draft',
-        default_round_duration_days INTEGER DEFAULT 7,
-        target_participant_count INTEGER,
-        started_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        completed_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
-      )
-    """, [])
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.campaigns (
+          id BIGSERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          description TEXT,
+          status VARCHAR(255) NOT NULL DEFAULT 'draft',
+          default_round_duration_days INTEGER DEFAULT 7,
+          target_participant_count INTEGER,
+          started_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          completed_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
+        )
+      """,
+      []
+    )
 
     # Create people table
-    Ecto.Adapters.SQL.query!(Wrt.Repo, """
-      CREATE TABLE #{tenant}.people (
-        id BIGSERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        source VARCHAR(255) NOT NULL DEFAULT 'nominated',
-        inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
-      )
-    """, [])
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.people (
+          id BIGSERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          source VARCHAR(255) NOT NULL DEFAULT 'nominated',
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
+        )
+      """,
+      []
+    )
 
-    Ecto.Adapters.SQL.query!(Wrt.Repo, "CREATE UNIQUE INDEX ON #{tenant}.people (LOWER(email))", [])
+    SQL.query!(
+      Repo,
+      "CREATE UNIQUE INDEX ON #{tenant}.people (LOWER(email))",
+      []
+    )
 
     # Create rounds table
-    Ecto.Adapters.SQL.query!(Wrt.Repo, """
-      CREATE TABLE #{tenant}.rounds (
-        id BIGSERIAL PRIMARY KEY,
-        campaign_id BIGINT NOT NULL REFERENCES #{tenant}.campaigns(id) ON DELETE CASCADE,
-        round_number INTEGER NOT NULL,
-        status VARCHAR(255) NOT NULL DEFAULT 'pending',
-        deadline TIMESTAMP(0) WITHOUT TIME ZONE,
-        reminder_enabled BOOLEAN DEFAULT false,
-        reminder_days INTEGER DEFAULT 2,
-        started_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        closed_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        UNIQUE (campaign_id, round_number)
-      )
-    """, [])
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.rounds (
+          id BIGSERIAL PRIMARY KEY,
+          campaign_id BIGINT NOT NULL REFERENCES #{tenant}.campaigns(id) ON DELETE CASCADE,
+          round_number INTEGER NOT NULL,
+          status VARCHAR(255) NOT NULL DEFAULT 'pending',
+          deadline TIMESTAMP(0) WITHOUT TIME ZONE,
+          reminder_enabled BOOLEAN DEFAULT false,
+          reminder_days INTEGER DEFAULT 2,
+          started_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          closed_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          UNIQUE (campaign_id, round_number)
+        )
+      """,
+      []
+    )
 
     # Create contacts table
-    Ecto.Adapters.SQL.query!(Wrt.Repo, """
-      CREATE TABLE #{tenant}.contacts (
-        id BIGSERIAL PRIMARY KEY,
-        person_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
-        round_id BIGINT NOT NULL REFERENCES #{tenant}.rounds(id) ON DELETE CASCADE,
-        email_status VARCHAR(255) NOT NULL DEFAULT 'pending',
-        invited_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        delivered_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        opened_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        clicked_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        responded_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        UNIQUE (person_id, round_id)
-      )
-    """, [])
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.contacts (
+          id BIGSERIAL PRIMARY KEY,
+          person_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
+          round_id BIGINT NOT NULL REFERENCES #{tenant}.rounds(id) ON DELETE CASCADE,
+          email_status VARCHAR(255) NOT NULL DEFAULT 'pending',
+          invited_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          delivered_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          opened_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          clicked_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          responded_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          UNIQUE (person_id, round_id)
+        )
+      """,
+      []
+    )
 
     # Create nominations table
-    Ecto.Adapters.SQL.query!(Wrt.Repo, """
-      CREATE TABLE #{tenant}.nominations (
-        id BIGSERIAL PRIMARY KEY,
-        round_id BIGINT NOT NULL REFERENCES #{tenant}.rounds(id) ON DELETE CASCADE,
-        nominator_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
-        nominee_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
-        inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        UNIQUE (round_id, nominator_id, nominee_id)
-      )
-    """, [])
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.nominations (
+          id BIGSERIAL PRIMARY KEY,
+          round_id BIGINT NOT NULL REFERENCES #{tenant}.rounds(id) ON DELETE CASCADE,
+          nominator_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
+          nominee_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          UNIQUE (round_id, nominator_id, nominee_id)
+        )
+      """,
+      []
+    )
 
     # Create magic_links table
-    Ecto.Adapters.SQL.query!(Wrt.Repo, """
-      CREATE TABLE #{tenant}.magic_links (
-        id BIGSERIAL PRIMARY KEY,
-        person_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
-        round_id BIGINT NOT NULL REFERENCES #{tenant}.rounds(id) ON DELETE CASCADE,
-        token VARCHAR(255) NOT NULL,
-        code VARCHAR(255),
-        code_expires_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        expires_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        used_at TIMESTAMP(0) WITHOUT TIME ZONE,
-        inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-        updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
-      )
-    """, [])
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.magic_links (
+          id BIGSERIAL PRIMARY KEY,
+          person_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
+          round_id BIGINT NOT NULL REFERENCES #{tenant}.rounds(id) ON DELETE CASCADE,
+          token VARCHAR(255) NOT NULL,
+          code VARCHAR(255),
+          code_expires_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          expires_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          used_at TIMESTAMP(0) WITHOUT TIME ZONE,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
+        )
+      """,
+      []
+    )
 
-    Ecto.Adapters.SQL.query!(Wrt.Repo, "CREATE UNIQUE INDEX ON #{tenant}.magic_links (token)", [])
+    SQL.query!(Repo, "CREATE UNIQUE INDEX ON #{tenant}.magic_links (token)", [])
   end
 
   @doc """
   Inserts a factory-built struct into a specific tenant schema.
   """
   def insert_in_tenant(tenant, factory, attrs \\ %{}) do
-    struct = Wrt.Factory.build(factory, attrs)
-    Wrt.Repo.insert!(struct, prefix: tenant)
+    struct = Factory.build(factory, attrs)
+    Repo.insert!(struct, prefix: tenant)
   end
 
   @doc """
@@ -168,8 +201,8 @@ defmodule Wrt.DataCase do
   """
   def insert_list_in_tenant(tenant, count, factory, attrs \\ %{}) do
     Enum.map(1..count, fn _ ->
-      struct = Wrt.Factory.build(factory, attrs)
-      Wrt.Repo.insert!(struct, prefix: tenant)
+      struct = Factory.build(factory, attrs)
+      Repo.insert!(struct, prefix: tenant)
     end)
   end
 
@@ -177,8 +210,8 @@ defmodule Wrt.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Wrt.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = Sandbox.start_owner!(Repo, shared: not tags[:async])
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 
   @doc """

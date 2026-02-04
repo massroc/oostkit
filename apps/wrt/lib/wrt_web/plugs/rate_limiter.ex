@@ -17,13 +17,15 @@ defmodule WrtWeb.Plugs.RateLimiter do
 
   import Plug.Conn
 
+  alias WrtWeb.Plugs.RateLimiter.Rules
+
   @impl true
   def init(opts), do: opts
 
   @impl true
   def call(conn, opts) do
     if enabled?() do
-      WrtWeb.Plugs.RateLimiter.Rules.call(conn, opts)
+      Rules.call(conn, opts)
     else
       conn
     end

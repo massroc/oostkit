@@ -9,8 +9,9 @@ defmodule Wrt.Platform do
   """
 
   import Ecto.Query, warn: false
-  alias Wrt.Repo
+
   alias Wrt.Platform.{Organisation, SuperAdmin}
+  alias Wrt.Repo
   alias Wrt.TenantManager
 
   # =============================================================================
@@ -83,7 +84,8 @@ defmodule Wrt.Platform do
   @doc """
   Lists organisations by status.
   """
-  def list_organisations_by_status(status) when status in ~w(pending approved rejected suspended) do
+  def list_organisations_by_status(status)
+      when status in ~w(pending approved rejected suspended) do
     Organisation
     |> where([o], o.status == ^status)
     |> order_by([o], desc: o.inserted_at)
