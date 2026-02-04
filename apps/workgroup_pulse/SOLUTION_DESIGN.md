@@ -1636,7 +1636,7 @@ primary_region = "syd"  # Sydney for AU-based teams
     MIX_ENV = "prod"
 
 [env]
-  PHX_HOST = "productiveworkgroups.fly.dev"
+  PHX_HOST = "workgroup-pulse.fly.dev"
   PORT = "8080"
 
 [http_service]
