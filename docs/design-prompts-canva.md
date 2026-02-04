@@ -1,6 +1,6 @@
 # Design Prompts for Claude.ai + Canva
 
-Use these prompts with Claude.ai's Canva integration to generate design concepts for the Productive Workgroups app. The prompts are based on the "butcher paper principle" - the app should feel like butcher paper on a wall: visible, permanent within each phase, sequential, shared, and simple.
+Use these prompts with Claude.ai's Canva integration to generate design concepts for the Workgroup Pulse app. The prompts are based on the "butcher paper principle" - the app should feel like butcher paper on a wall: visible, permanent within each phase, sequential, shared, and simple.
 
 ## Prerequisites
 

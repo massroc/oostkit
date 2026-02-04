@@ -1,4 +1,4 @@
-# Productive Work Groups - Solution Design
+# Workgroup Pulse - Solution Design
 
 ## Document Info
 - **Version:** 1.2
@@ -89,15 +89,15 @@ Each module has one reason to change:
 
 ```elixir
 # New workshop types can be added as data without changing core logic
-defmodule ProductiveWorkGroups.Workshops.Template do
+defmodule WorkgroupPulse.Workshops.Template do
   @callback questions() :: [Question.t()]
   @callback introduction_screens() :: [Screen.t()]
   @callback time_allocations() :: map()
 end
 
 # Six Criteria is one implementation
-defmodule ProductiveWorkGroups.Workshops.SixCriteria do
-  @behaviour ProductiveWorkGroups.Workshops.Template
+defmodule WorkgroupPulse.Workshops.SixCriteria do
+  @behaviour WorkgroupPulse.Workshops.Template
   # Implementation...
 end
 ```
@@ -105,20 +105,20 @@ end
 **Scoring strategies are pluggable:**
 
 ```elixir
-defmodule ProductiveWorkGroups.Scoring.Strategy do
+defmodule WorkgroupPulse.Scoring.Strategy do
   @callback validate(score :: integer(), question :: Question.t()) :: :ok | {:error, String.t()}
   @callback color_code(score :: integer(), question :: Question.t()) :: :green | :amber | :red
   @callback optimal_score(question :: Question.t()) :: integer()
 end
 
 # Balance scale (-5 to +5, optimal at 0)
-defmodule ProductiveWorkGroups.Scoring.BalanceScale do
-  @behaviour ProductiveWorkGroups.Scoring.Strategy
+defmodule WorkgroupPulse.Scoring.BalanceScale do
+  @behaviour WorkgroupPulse.Scoring.Strategy
 end
 
 # Maximal scale (0 to 10, optimal at 10)
-defmodule ProductiveWorkGroups.Scoring.MaximalScale do
-  @behaviour ProductiveWorkGroups.Scoring.Strategy
+defmodule WorkgroupPulse.Scoring.MaximalScale do
+  @behaviour WorkgroupPulse.Scoring.Strategy
 end
 ```
 
@@ -140,17 +140,17 @@ Focused behaviours rather than monolithic interfaces:
 
 ```elixir
 # Separate concerns into focused behaviours
-defmodule ProductiveWorkGroups.Scoreable do
+defmodule WorkgroupPulse.Scoreable do
   @callback submit_score(participant_id, question_id, score) :: {:ok, Score.t()} | {:error, term()}
 end
 
-defmodule ProductiveWorkGroups.Timeable do
+defmodule WorkgroupPulse.Timeable do
   @callback start_timer(section_id, duration_ms) :: {:ok, Timer.t()}
   @callback pause_timer(timer_id) :: :ok
   @callback resume_timer(timer_id) :: :ok
 end
 
-defmodule ProductiveWorkGroups.Notable do
+defmodule WorkgroupPulse.Notable do
   @callback add_note(session_id, question_id, content) :: {:ok, Note.t()}
 end
 ```
@@ -161,16 +161,16 @@ High-level modules don't depend on low-level details:
 
 ```elixir
 # LiveView depends on abstract Session behaviour, not concrete implementation
-defmodule ProductiveWorkGroupsWeb.WorkshopLive do
+defmodule WorkgroupPulseWeb.WorkshopLive do
   # Injected dependency - can be mocked in tests
   def mount(_params, _session, socket) do
-    session_server = socket.assigns[:session_server] || ProductiveWorkGroups.Sessions.Server
+    session_server = socket.assigns[:session_server] || WorkgroupPulse.Sessions.Server
     # Use session_server abstraction
   end
 end
 
 # PubSub abstracted for testing
-defmodule ProductiveWorkGroups.Broadcaster do
+defmodule WorkgroupPulse.Broadcaster do
   @callback broadcast(topic :: String.t(), event :: atom(), payload :: map()) :: :ok
 end
 ```
@@ -219,7 +219,7 @@ end
 **Purpose:** Manage workshop templates and content (the "what" of workshops)
 
 ```elixir
-defmodule ProductiveWorkGroups.Workshops do
+defmodule WorkgroupPulse.Workshops do
   @moduledoc """
   The Workshops context manages workshop templates, questions, and content.
   This is the domain knowledge - what questions to ask and how to present them.
@@ -247,7 +247,7 @@ end
 **Purpose:** Manage session lifecycle, participants, and turn-based flow (the "who" and "when")
 
 ```elixir
-defmodule ProductiveWorkGroups.Sessions do
+defmodule WorkgroupPulse.Sessions do
   @moduledoc """
   The Sessions context manages workshop sessions and participants.
   Handles session creation, joining, state transitions, participant tracking,
@@ -320,7 +320,7 @@ Sessions are fully persisted to the database, allowing teams to pause and resume
 **Purpose:** Handle score submission, validation, locking, and aggregation
 
 ```elixir
-defmodule ProductiveWorkGroups.Scoring do
+defmodule WorkgroupPulse.Scoring do
   @moduledoc """
   The Scoring context handles all scoring operations.
   Validates scores, manages score locking (turn-based and row-based),
@@ -368,7 +368,7 @@ end
 **Purpose:** Manage workshop flow, timing, and guidance
 
 ```elixir
-defmodule ProductiveWorkGroups.Facilitation do
+defmodule WorkgroupPulse.Facilitation do
   @moduledoc """
   The Facilitation context manages the workshop flow.
   Handles phase transitions, timers, and contextual guidance.
@@ -405,7 +405,7 @@ end
 **Purpose:** Capture discussion notes and action items
 
 ```elixir
-defmodule ProductiveWorkGroups.Notes do
+defmodule WorkgroupPulse.Notes do
   @moduledoc """
   The Notes context handles capturing discussion notes and action items.
   """
@@ -490,7 +490,7 @@ end
 ### Core Schemas
 
 ```elixir
-defmodule ProductiveWorkGroups.Sessions.Session do
+defmodule WorkgroupPulse.Sessions.Session do
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -514,17 +514,17 @@ defmodule ProductiveWorkGroups.Sessions.Session do
     field :last_activity_at, :utc_datetime  # Updated on any participant action
     field :expires_at, :utc_datetime        # Calculated: last_activity + 14 days (or completed + 90 days)
 
-    belongs_to :template, ProductiveWorkGroups.Workshops.Template, type: :binary_id
-    has_many :participants, ProductiveWorkGroups.Sessions.Participant
-    has_many :scores, ProductiveWorkGroups.Scoring.Score
-    has_many :notes, ProductiveWorkGroups.Notes.Note
-    has_many :actions, ProductiveWorkGroups.Notes.Action
+    belongs_to :template, WorkgroupPulse.Workshops.Template, type: :binary_id
+    has_many :participants, WorkgroupPulse.Sessions.Participant
+    has_many :scores, WorkgroupPulse.Scoring.Score
+    has_many :notes, WorkgroupPulse.Notes.Note
+    has_many :actions, WorkgroupPulse.Notes.Action
 
     timestamps()
   end
 end
 
-defmodule ProductiveWorkGroups.Sessions.Participant do
+defmodule WorkgroupPulse.Sessions.Participant do
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -539,14 +539,14 @@ defmodule ProductiveWorkGroups.Sessions.Participant do
     field :joined_at, :utc_datetime
     field :last_seen_at, :utc_datetime
 
-    belongs_to :session, ProductiveWorkGroups.Sessions.Session, type: :binary_id
-    has_many :scores, ProductiveWorkGroups.Scoring.Score
+    belongs_to :session, WorkgroupPulse.Sessions.Session, type: :binary_id
+    has_many :scores, WorkgroupPulse.Scoring.Score
 
     timestamps()
   end
 end
 
-defmodule ProductiveWorkGroups.Scoring.Score do
+defmodule WorkgroupPulse.Scoring.Score do
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -557,9 +557,9 @@ defmodule ProductiveWorkGroups.Scoring.Score do
     field :row_locked, :boolean, default: false    # Locked when group advances to next row
     field :submitted_at, :utc_datetime
 
-    belongs_to :session, ProductiveWorkGroups.Sessions.Session, type: :binary_id
-    belongs_to :participant, ProductiveWorkGroups.Sessions.Participant, type: :binary_id
-    belongs_to :question, ProductiveWorkGroups.Workshops.Question, type: :binary_id
+    belongs_to :session, WorkgroupPulse.Sessions.Session, type: :binary_id
+    belongs_to :participant, WorkgroupPulse.Sessions.Participant, type: :binary_id
+    belongs_to :question, WorkgroupPulse.Workshops.Question, type: :binary_id
 
     timestamps()
   end
@@ -569,7 +569,7 @@ end
 ### Value Objects
 
 ```elixir
-defmodule ProductiveWorkGroups.Scoring.ScoreResult do
+defmodule WorkgroupPulse.Scoring.ScoreResult do
   @moduledoc "Immutable value object representing a scored question result"
 
   defstruct [
@@ -582,7 +582,7 @@ defmodule ProductiveWorkGroups.Scoring.ScoreResult do
   ]
 end
 
-defmodule ProductiveWorkGroups.Facilitation.TimeStatus do
+defmodule WorkgroupPulse.Facilitation.TimeStatus do
   @moduledoc "Immutable value object representing current time status"
 
   defstruct [
@@ -605,7 +605,7 @@ end
 
 ```elixir
 # Migration: Create Templates and Questions (Workshop Content)
-defmodule ProductiveWorkGroups.Repo.Migrations.CreateWorkshopContent do
+defmodule WorkgroupPulse.Repo.Migrations.CreateWorkshopContent do
   use Ecto.Migration
 
   def change do
@@ -641,7 +641,7 @@ defmodule ProductiveWorkGroups.Repo.Migrations.CreateWorkshopContent do
 end
 
 # Migration: Create Sessions and Participants
-defmodule ProductiveWorkGroups.Repo.Migrations.CreateSessions do
+defmodule WorkgroupPulse.Repo.Migrations.CreateSessions do
   use Ecto.Migration
 
   def change do
@@ -685,7 +685,7 @@ defmodule ProductiveWorkGroups.Repo.Migrations.CreateSessions do
 end
 
 # Migration: Create Scores
-defmodule ProductiveWorkGroups.Repo.Migrations.CreateScores do
+defmodule WorkgroupPulse.Repo.Migrations.CreateScores do
   use Ecto.Migration
 
   def change do
@@ -707,7 +707,7 @@ defmodule ProductiveWorkGroups.Repo.Migrations.CreateScores do
 end
 
 # Migration: Create Notes and Actions
-defmodule ProductiveWorkGroups.Repo.Migrations.CreateNotesAndActions do
+defmodule WorkgroupPulse.Repo.Migrations.CreateNotesAndActions do
   use Ecto.Migration
 
   def change do
@@ -740,7 +740,7 @@ defmodule ProductiveWorkGroups.Repo.Migrations.CreateNotesAndActions do
 end
 
 # Migration: Create Timers
-defmodule ProductiveWorkGroups.Repo.Migrations.CreateTimers do
+defmodule WorkgroupPulse.Repo.Migrations.CreateTimers do
   use Ecto.Migration
 
   def change do
@@ -762,7 +762,7 @@ defmodule ProductiveWorkGroups.Repo.Migrations.CreateTimers do
 end
 
 # Migration: Create Feedback
-defmodule ProductiveWorkGroups.Repo.Migrations.CreateFeedback do
+defmodule WorkgroupPulse.Repo.Migrations.CreateFeedback do
   use Ecto.Migration
 
   def change do
@@ -800,7 +800,7 @@ end
 ### PubSub Topics
 
 ```elixir
-defmodule ProductiveWorkGroups.PubSub.Topics do
+defmodule WorkgroupPulse.PubSub.Topics do
   @moduledoc "Centralized topic definitions for PubSub"
 
   # Session-level events (all participants)
@@ -817,7 +817,7 @@ end
 ### Event Types
 
 ```elixir
-defmodule ProductiveWorkGroups.PubSub.Events do
+defmodule WorkgroupPulse.PubSub.Events do
   @moduledoc "Event definitions for real-time updates"
 
   # Session events
@@ -859,10 +859,10 @@ end
 ### Presence Tracking
 
 ```elixir
-defmodule ProductiveWorkGroupsWeb.Presence do
+defmodule WorkgroupPulseWeb.Presence do
   use Phoenix.Presence,
-    otp_app: :productive_work_groups,
-    pubsub_server: ProductiveWorkGroups.PubSub
+    otp_app: :workgroup_pulse,
+    pubsub_server: WorkgroupPulse.PubSub
 
   @doc "Track a participant joining a session"
   def track_participant(socket, session_id, participant) do
@@ -885,15 +885,15 @@ end
 ### Broadcast Helper
 
 ```elixir
-defmodule ProductiveWorkGroups.Broadcaster do
+defmodule WorkgroupPulse.Broadcaster do
   @moduledoc "Centralized broadcasting for real-time events"
 
   alias Phoenix.PubSub
-  alias ProductiveWorkGroups.PubSub.Topics
+  alias WorkgroupPulse.PubSub.Topics
 
   def broadcast_session_event(session_id, event, payload \\ %{}) do
     PubSub.broadcast(
-      ProductiveWorkGroups.PubSub,
+      WorkgroupPulse.PubSub,
       Topics.session(session_id),
       {event, payload}
     )
@@ -901,7 +901,7 @@ defmodule ProductiveWorkGroups.Broadcaster do
 
   def broadcast_timer_tick(session_id, time_status) do
     PubSub.broadcast(
-      ProductiveWorkGroups.PubSub,
+      WorkgroupPulse.PubSub,
       Topics.timer(session_id),
       {:timer_tick, time_status}
     )
@@ -1055,7 +1055,7 @@ handle_operation(
 ### Example Components
 
 ```elixir
-defmodule ProductiveWorkGroupsWeb.Components.TrafficLight do
+defmodule WorkgroupPulseWeb.Components.TrafficLight do
   use Phoenix.Component
 
   @doc """
@@ -1091,7 +1091,7 @@ defmodule ProductiveWorkGroupsWeb.Components.TrafficLight do
   defp color_class(:red), do: "bg-red-500"
 end
 
-defmodule ProductiveWorkGroupsWeb.Components.ScoreInput do
+defmodule WorkgroupPulseWeb.Components.ScoreInput do
   use Phoenix.Component
 
   @doc """
@@ -1283,18 +1283,18 @@ When navigating back to a row-locked (completed) question:
 ### LiveView State Structure
 
 ```elixir
-defmodule ProductiveWorkGroupsWeb.WorkshopLive do
-  use ProductiveWorkGroupsWeb, :live_view
+defmodule WorkgroupPulseWeb.WorkshopLive do
+  use WorkgroupPulseWeb, :live_view
 
   @impl true
   def mount(%{"code" => code}, _session, socket) do
     if connected?(socket) do
       # Subscribe to real-time updates
-      Phoenix.PubSub.subscribe(ProductiveWorkGroups.PubSub, "session:#{session.id}")
-      Phoenix.PubSub.subscribe(ProductiveWorkGroups.PubSub, "timer:#{session.id}")
+      Phoenix.PubSub.subscribe(WorkgroupPulse.PubSub, "session:#{session.id}")
+      Phoenix.PubSub.subscribe(WorkgroupPulse.PubSub, "timer:#{session.id}")
 
       # Track presence
-      ProductiveWorkGroupsWeb.Presence.track_participant(socket, session.id, participant)
+      WorkgroupPulseWeb.Presence.track_participant(socket, session.id, participant)
     end
 
     {:ok,
@@ -1359,7 +1359,7 @@ end
 ### Input Validation
 
 ```elixir
-defmodule ProductiveWorkGroups.Scoring do
+defmodule WorkgroupPulse.Scoring do
   def submit_score(participant_id, question_id, value) do
     with {:ok, participant} <- get_active_participant(participant_id),
          {:ok, question} <- Workshops.get_question(question_id),
@@ -1379,7 +1379,7 @@ end
 
 ```elixir
 # In endpoint.ex or a plug
-plug ProductiveWorkGroupsWeb.Plugs.RateLimiter,
+plug WorkgroupPulseWeb.Plugs.RateLimiter,
   routes: [
     {"/api/sessions", :create, limit: 10, window: :minute},
     {"/api/feedback", :create, limit: 5, window: :minute}
@@ -1399,7 +1399,7 @@ plug ProductiveWorkGroupsWeb.Plugs.RateLimiter,
 ### Error Types
 
 ```elixir
-defmodule ProductiveWorkGroups.Error do
+defmodule WorkgroupPulse.Error do
   defexception [:type, :message, :details]
 
   @type error_type ::
@@ -1420,7 +1420,7 @@ end
 ### Context Error Handling
 
 ```elixir
-defmodule ProductiveWorkGroups.Sessions do
+defmodule WorkgroupPulse.Sessions do
   def join_session(session_id, name) do
     with {:ok, session} <- get_active_session(session_id),
          :ok <- validate_can_join(session),
@@ -1441,7 +1441,7 @@ end
 ### LiveView Error Display
 
 ```elixir
-defmodule ProductiveWorkGroupsWeb.WorkshopLive do
+defmodule WorkgroupPulseWeb.WorkshopLive do
   def handle_info({:error, %Error{} = error}, socket) do
     {:noreply,
      socket
@@ -1459,7 +1459,7 @@ end
 ### Connection Recovery
 
 ```elixir
-defmodule ProductiveWorkGroupsWeb.WorkshopLive do
+defmodule WorkgroupPulseWeb.WorkshopLive do
   # Automatic reconnection handling
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff"}, socket) do
     # Re-sync state after reconnection
@@ -1503,10 +1503,10 @@ end
 ### Context Testing
 
 ```elixir
-defmodule ProductiveWorkGroups.ScoringTest do
-  use ProductiveWorkGroups.DataCase
+defmodule WorkgroupPulse.ScoringTest do
+  use WorkgroupPulse.DataCase
 
-  alias ProductiveWorkGroups.Scoring
+  alias WorkgroupPulse.Scoring
 
   describe "submit_score/3" do
     setup do
@@ -1527,7 +1527,7 @@ defmodule ProductiveWorkGroups.ScoringTest do
     end
 
     test "broadcasts score_submitted event", ctx do
-      Phoenix.PubSub.subscribe(ProductiveWorkGroups.PubSub, "session:#{ctx.session.id}")
+      Phoenix.PubSub.subscribe(WorkgroupPulse.PubSub, "session:#{ctx.session.id}")
 
       {:ok, _} = Scoring.submit_score(ctx.participant.id, ctx.question.id, 3)
 
@@ -1541,8 +1541,8 @@ end
 ### LiveView Testing
 
 ```elixir
-defmodule ProductiveWorkGroupsWeb.WorkshopLiveTest do
-  use ProductiveWorkGroupsWeb.ConnCase
+defmodule WorkgroupPulseWeb.WorkshopLiveTest do
+  use WorkgroupPulseWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
@@ -1587,11 +1587,11 @@ end
 ### Factory Pattern
 
 ```elixir
-defmodule ProductiveWorkGroups.Factory do
-  use ExMachina.Ecto, repo: ProductiveWorkGroups.Repo
+defmodule WorkgroupPulse.Factory do
+  use ExMachina.Ecto, repo: WorkgroupPulse.Repo
 
   def session_factory do
-    %ProductiveWorkGroups.Sessions.Session{
+    %WorkgroupPulse.Sessions.Session{
       code: sequence(:code, &"TEST#{&1}"),
       state: :lobby,
       template: build(:template),
@@ -1600,7 +1600,7 @@ defmodule ProductiveWorkGroups.Factory do
   end
 
   def participant_factory do
-    %ProductiveWorkGroups.Sessions.Participant{
+    %WorkgroupPulse.Sessions.Participant{
       name: sequence(:name, &"Participant #{&1}"),
       browser_token: Ecto.UUID.generate(),
       status: :active,
@@ -1609,7 +1609,7 @@ defmodule ProductiveWorkGroups.Factory do
   end
 
   def score_factory do
-    %ProductiveWorkGroups.Scoring.Score{
+    %WorkgroupPulse.Scoring.Score{
       value: Enum.random(-5..5),
       locked: false,
       session: build(:session),
@@ -1628,7 +1628,7 @@ end
 
 ```toml
 # fly.toml
-app = "productive-work-groups"
+app = "workgroup-pulse"
 primary_region = "syd"  # Sydney for AU-based teams
 
 [build]
@@ -1692,7 +1692,7 @@ if config_env() == :prod do
     System.get_env("DATABASE_URL") ||
       raise "DATABASE_URL not set"
 
-  config :productive_work_groups, ProductiveWorkGroups.Repo,
+  config :workgroup_pulse, WorkgroupPulse.Repo,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     ssl: true
@@ -1704,7 +1704,7 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
-  config :productive_work_groups, ProductiveWorkGroupsWeb.Endpoint,
+  config :workgroup_pulse, WorkgroupPulseWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [port: port],
     secret_key_base: secret_key_base,
@@ -1725,9 +1725,9 @@ end
 ### Template Seed Data
 
 ```elixir
-defmodule ProductiveWorkGroups.Seeds.SixCriteria do
-  alias ProductiveWorkGroups.Repo
-  alias ProductiveWorkGroups.Workshops.{Template, Question}
+defmodule WorkgroupPulse.Seeds.SixCriteria do
+  alias WorkgroupPulse.Repo
+  alias WorkgroupPulse.Workshops.{Template, Question}
 
   def seed! do
     template = Repo.insert!(%Template{
@@ -1765,7 +1765,7 @@ end
 ### Time Allocation Defaults
 
 ```elixir
-defmodule ProductiveWorkGroups.Facilitation.TimeAllocations do
+defmodule WorkgroupPulse.Facilitation.TimeAllocations do
   @default_percentages %{
     introduction: 0.05,
     questions_1_4: 0.35,
