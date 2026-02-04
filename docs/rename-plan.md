@@ -113,7 +113,7 @@ Optional future: custom domain `pulse.oostkit.com`
 
 #### 4. Update Documentation References
 
-- [ ] `apps/workgroup_pulse/SOLUTION_DESIGN.md` - update `productiveworkgroups.fly.dev` reference
+- [x] `apps/workgroup_pulse/SOLUTION_DESIGN.md` - update `productiveworkgroups.fly.dev` reference
 
 ### Notes
 
