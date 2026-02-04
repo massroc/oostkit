@@ -6,10 +6,10 @@ set -e
 case "$1" in
   start)
     echo "Starting development environment..."
-    docker compose up -d pw_db
+    docker compose up -d wp_db
     echo "Waiting for PostgreSQL..."
     sleep 3
-    docker compose up pw_app
+    docker compose up wp_app
     ;;
 
   stop)
@@ -19,36 +19,36 @@ case "$1" in
 
   test)
     echo "Running tests..."
-    docker compose up -d pw_db_test
+    docker compose up -d wp_db_test
     sleep 2
-    docker compose --profile test run --rm pw_test
+    docker compose --profile test run --rm wp_test
     ;;
 
   tdd)
     echo "Starting TDD mode (watching for changes)..."
-    docker compose up -d pw_db_test
+    docker compose up -d wp_db_test
     sleep 2
-    docker compose --profile tdd run --rm pw_test_watch
+    docker compose --profile tdd run --rm wp_test_watch
     ;;
 
   shell)
     echo "Opening IEx shell..."
-    docker compose exec pw_app iex -S mix
+    docker compose exec wp_app iex -S mix
     ;;
 
   migrate)
     echo "Running migrations..."
-    docker compose exec pw_app mix ecto.migrate
+    docker compose exec wp_app mix ecto.migrate
     ;;
 
   reset)
     echo "Resetting database..."
-    docker compose exec pw_app mix ecto.reset
+    docker compose exec wp_app mix ecto.reset
     ;;
 
   quality)
     echo "Running code quality checks..."
-    docker compose exec pw_app mix quality
+    docker compose exec wp_app mix quality
     ;;
 
   logs)
@@ -56,7 +56,7 @@ case "$1" in
     ;;
 
   *)
-    echo "Productive Work Groups - Development Commands"
+    echo "Workgroup Pulse - Development Commands"
     echo ""
     echo "Usage: ./scripts/dev.sh <command>"
     echo ""

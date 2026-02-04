@@ -118,9 +118,9 @@ GitHub Actions runs on every push and pull request:
 
 | Resource | Name | Region |
 |----------|------|--------|
-| App | `productive-workgroups` | Sydney (syd) |
-| Database | `productive-workgroups-db` | Sydney (syd) |
-| URL | https://productive-workgroups.fly.dev | |
+| App | `workgroup-pulse` | Sydney (syd) |
+| Database | `workgroup-pulse-db` | Sydney (syd) |
+| URL | https://workgroup-pulse.fly.dev | |
 
 ### Manual Deployment
 
