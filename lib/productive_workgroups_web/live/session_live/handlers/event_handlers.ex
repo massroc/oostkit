@@ -375,7 +375,12 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
 
   @doc """
   Handles go_back event.
-  Only facilitator can go back.
+  Only facilitator can navigate back to keep all participants in sync.
+
+  Navigation phases:
+  - Question phase ("scoring") - back to previous question (not past Q1)
+  - Summary screen ("summary") - back to last question
+  - Wrap-up screen ("completed") - back to summary
   """
   def handle_go_back(socket) do
     participant = socket.assigns.participant
@@ -458,10 +463,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
     do_go_back_from_state(socket, session, session.state)
   end
 
-  # Back from scoring (first question) goes to intro
-  defp do_go_back_from_state(socket, session, "scoring")
-       when session.current_question_index == 0 do
-    go_back_to_intro(socket, session)
+  # Back from scoring (first question) - can't go back any further
+  defp do_go_back_from_state(socket, %{current_question_index: 0}, "scoring") do
+    {:noreply, socket}
   end
 
   # Back from scoring (any other question) goes to previous question
@@ -532,22 +536,6 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Handlers.EventHandlers do
         |> assign(session: updated_session)
         |> assign(show_mid_transition: false)
         |> DataLoaders.load_scoring_data(updated_session, socket.assigns.participant)
-      end
-    )
-  end
-
-  defp go_back_to_intro(socket, session) do
-    Sessions.reset_all_ready(session)
-
-    handle_operation(
-      socket,
-      Sessions.go_back_to_intro(session),
-      "Failed to go back",
-      fn socket, updated_session ->
-        socket
-        |> assign(session: updated_session)
-        |> assign(intro_step: 4)
-        |> TimerHandler.stop_timer()
       end
     )
   end

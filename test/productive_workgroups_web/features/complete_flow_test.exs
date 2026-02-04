@@ -198,19 +198,19 @@ defmodule ProductiveWorkgroupsWeb.Features.CompleteFlowTest do
       assert render(view) =~ "bg-green-500"
     end
 
-    test "go_back from scoring returns to intro", %{
+    test "back button is not shown on Q1 scoring", %{
       conn: conn,
       session: session,
       fac_token: fac_token
     } do
       fac_conn = Plug.Test.init_test_session(conn, %{browser_token: fac_token})
-      {:ok, view, _} = live(fac_conn, ~p"/session/#{session.code}")
+      {:ok, _view, html} = live(fac_conn, ~p"/session/#{session.code}")
 
-      # Go back from scoring
-      view |> element("button[phx-click='go_back']") |> render_click()
+      # Should be on Q1 scoring
+      assert html =~ "Question 1"
 
-      # Should be back in intro
-      assert render(view) =~ "Begin Scoring" or render(view) =~ "Welcome"
+      # Back button should not be present on Q1
+      refute html =~ "go_back"
     end
   end
 end
