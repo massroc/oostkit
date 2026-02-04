@@ -1,9 +1,9 @@
 defmodule Wrt.ReportsTest do
   use Wrt.DataCase, async: true
 
+  alias Wrt.People.Nomination
   alias Wrt.Reports
   alias Wrt.Rounds.Contact
-  alias Wrt.People.Nomination
 
   describe "get_campaign_stats/2" do
     setup do

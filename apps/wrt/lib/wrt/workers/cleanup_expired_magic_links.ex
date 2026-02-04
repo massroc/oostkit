@@ -8,8 +8,8 @@ defmodule Wrt.Workers.CleanupExpiredMagicLinks do
 
   use Oban.Worker, queue: :maintenance, max_attempts: 3
 
-  alias Wrt.TenantManager
   alias Wrt.MagicLinks
+  alias Wrt.TenantManager
 
   require Logger
 
@@ -25,7 +25,7 @@ defmodule Wrt.Workers.CleanupExpiredMagicLinks do
 
     if total_deleted > 0 do
       Logger.info(
-        "Cleaned up #{total_deleted} expired magic links across #{length(tenants)} tenants"
+        "Cleaned up #{total_deleted} expired magic links across #{Enum.count(tenants)} tenants"
       )
     end
 

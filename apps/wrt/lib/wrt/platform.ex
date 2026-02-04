@@ -9,8 +9,9 @@ defmodule Wrt.Platform do
   """
 
   import Ecto.Query, warn: false
-  alias Wrt.Repo
+
   alias Wrt.Platform.{Organisation, SuperAdmin}
+  alias Wrt.Repo
   alias Wrt.TenantManager
 
   # =============================================================================

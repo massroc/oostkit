@@ -374,8 +374,7 @@ defmodule WrtWeb.Org.ExportController do
 
   defp generate_rounds_section(round_stats) do
     rows =
-      round_stats
-      |> Enum.map(fn stat ->
+      Enum.map_join(round_stats, "\n", fn stat ->
         """
         <tr>
           <td>Round #{stat.round.round_number}</td>
@@ -386,7 +385,6 @@ defmodule WrtWeb.Org.ExportController do
         </tr>
         """
       end)
-      |> Enum.join("\n")
 
     """
     <h2>Round Statistics</h2>
@@ -419,7 +417,7 @@ defmodule WrtWeb.Org.ExportController do
     rows =
       nominees
       |> Enum.with_index(1)
-      |> Enum.map(fn {person, rank} ->
+      |> Enum.map_join("\n", fn {person, rank} ->
         source_class = if person.source == "seed", do: "source-seed", else: "source-nominated"
 
         """
@@ -432,7 +430,6 @@ defmodule WrtWeb.Org.ExportController do
         </tr>
         """
       end)
-      |> Enum.join("\n")
 
     """
     <table>

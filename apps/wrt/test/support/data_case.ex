@@ -16,6 +16,11 @@ defmodule Wrt.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Wrt.Factory
+  alias Wrt.Repo
+
   using do
     quote do
       alias Wrt.Repo
@@ -55,11 +60,11 @@ defmodule Wrt.DataCase do
   This avoids module redefinition issues from running migrations.
   """
   def create_tenant_tables(tenant) do
-    Ecto.Adapters.SQL.query!(Wrt.Repo, "CREATE SCHEMA IF NOT EXISTS #{tenant}", [])
+    SQL.query!(Repo, "CREATE SCHEMA IF NOT EXISTS #{tenant}", [])
 
     # Create campaigns table
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       """
         CREATE TABLE #{tenant}.campaigns (
           id BIGSERIAL PRIMARY KEY,
@@ -78,8 +83,8 @@ defmodule Wrt.DataCase do
     )
 
     # Create people table
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       """
         CREATE TABLE #{tenant}.people (
           id BIGSERIAL PRIMARY KEY,
@@ -93,15 +98,15 @@ defmodule Wrt.DataCase do
       []
     )
 
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       "CREATE UNIQUE INDEX ON #{tenant}.people (LOWER(email))",
       []
     )
 
     # Create rounds table
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       """
         CREATE TABLE #{tenant}.rounds (
           id BIGSERIAL PRIMARY KEY,
@@ -122,8 +127,8 @@ defmodule Wrt.DataCase do
     )
 
     # Create contacts table
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       """
         CREATE TABLE #{tenant}.contacts (
           id BIGSERIAL PRIMARY KEY,
@@ -144,8 +149,8 @@ defmodule Wrt.DataCase do
     )
 
     # Create nominations table
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       """
         CREATE TABLE #{tenant}.nominations (
           id BIGSERIAL PRIMARY KEY,
@@ -161,8 +166,8 @@ defmodule Wrt.DataCase do
     )
 
     # Create magic_links table
-    Ecto.Adapters.SQL.query!(
-      Wrt.Repo,
+    SQL.query!(
+      Repo,
       """
         CREATE TABLE #{tenant}.magic_links (
           id BIGSERIAL PRIMARY KEY,
@@ -180,15 +185,15 @@ defmodule Wrt.DataCase do
       []
     )
 
-    Ecto.Adapters.SQL.query!(Wrt.Repo, "CREATE UNIQUE INDEX ON #{tenant}.magic_links (token)", [])
+    SQL.query!(Repo, "CREATE UNIQUE INDEX ON #{tenant}.magic_links (token)", [])
   end
 
   @doc """
   Inserts a factory-built struct into a specific tenant schema.
   """
   def insert_in_tenant(tenant, factory, attrs \\ %{}) do
-    struct = Wrt.Factory.build(factory, attrs)
-    Wrt.Repo.insert!(struct, prefix: tenant)
+    struct = Factory.build(factory, attrs)
+    Repo.insert!(struct, prefix: tenant)
   end
 
   @doc """
@@ -196,8 +201,8 @@ defmodule Wrt.DataCase do
   """
   def insert_list_in_tenant(tenant, count, factory, attrs \\ %{}) do
     Enum.map(1..count, fn _ ->
-      struct = Wrt.Factory.build(factory, attrs)
-      Wrt.Repo.insert!(struct, prefix: tenant)
+      struct = Factory.build(factory, attrs)
+      Repo.insert!(struct, prefix: tenant)
     end)
   end
 
@@ -205,8 +210,8 @@ defmodule Wrt.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Wrt.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = Sandbox.start_owner!(Repo, shared: not tags[:async])
+    on_exit(fn -> Sandbox.stop_owner(pid) end)
   end
 
   @doc """

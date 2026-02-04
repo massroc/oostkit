@@ -45,12 +45,10 @@ defmodule WrtWeb.HealthController do
   end
 
   defp check_database do
-    try do
-      Repo.query!("SELECT 1")
-      :ok
-    rescue
-      _ -> :error
-    end
+    Repo.query!("SELECT 1")
+    :ok
+  rescue
+    _ -> :error
   end
 
   defp check_oban do

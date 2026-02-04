@@ -10,9 +10,10 @@ defmodule Wrt.Reports do
   """
 
   import Ecto.Query, warn: false
+
+  alias Wrt.People.{Nomination, Person}
   alias Wrt.Repo
-  alias Wrt.Rounds.{Round, Contact}
-  alias Wrt.People.{Person, Nomination}
+  alias Wrt.Rounds.{Contact, Round}
 
   # =============================================================================
   # Campaign Statistics

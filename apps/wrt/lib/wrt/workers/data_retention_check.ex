@@ -9,8 +9,8 @@ defmodule Wrt.Workers.DataRetentionCheck do
 
   use Oban.Worker, queue: :maintenance, max_attempts: 3
 
-  alias Wrt.Platform
   alias Wrt.Campaigns
+  alias Wrt.Platform
 
   require Logger
 
@@ -58,17 +58,17 @@ defmodule Wrt.Workers.DataRetentionCheck do
             DateTime.compare(c.updated_at, cutoff_date) == :lt
         end)
 
-      if length(warning_campaigns) > 0 do
+      if warning_campaigns != [] do
         Logger.info(
-          "Queueing retention warnings for #{length(warning_campaigns)} campaigns in org #{org.id}"
+          "Queueing retention warnings for #{Enum.count(warning_campaigns)} campaigns in org #{org.id}"
         )
 
         queue_warnings(org.id, Enum.map(warning_campaigns, & &1.id))
       end
 
-      if length(archive_campaigns) > 0 do
+      if archive_campaigns != [] do
         Logger.info(
-          "Queueing archival for #{length(archive_campaigns)} campaigns in org #{org.id}"
+          "Queueing archival for #{Enum.count(archive_campaigns)} campaigns in org #{org.id}"
         )
 
         queue_archival(tenant, Enum.map(archive_campaigns, & &1.id))

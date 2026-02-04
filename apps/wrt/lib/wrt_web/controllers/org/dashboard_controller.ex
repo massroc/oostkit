@@ -2,8 +2,8 @@ defmodule WrtWeb.Org.DashboardController do
   use WrtWeb, :controller
 
   alias Wrt.Campaigns
-  alias Wrt.Rounds
   alias Wrt.Reports
+  alias Wrt.Rounds
 
   plug WrtWeb.Plugs.TenantPlug
   plug WrtWeb.Plugs.RequireOrgAdmin

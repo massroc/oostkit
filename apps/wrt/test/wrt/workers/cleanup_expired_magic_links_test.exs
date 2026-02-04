@@ -1,9 +1,9 @@
 defmodule Wrt.Workers.CleanupExpiredMagicLinksTest do
   use Wrt.DataCase, async: true
 
-  alias Wrt.Workers.CleanupExpiredMagicLinks
   alias Wrt.MagicLinks
   alias Wrt.MagicLinks.MagicLink
+  alias Wrt.Workers.CleanupExpiredMagicLinks
 
   describe "perform/1" do
     setup do

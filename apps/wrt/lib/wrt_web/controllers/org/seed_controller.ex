@@ -30,27 +30,7 @@ defmodule WrtWeb.Org.SeedController do
 
     case File.read(upload.path) do
       {:ok, content} ->
-        case People.parse_seed_csv(content) do
-          {:ok, parsed_people} ->
-            {:ok, results} = People.import_seed_people(tenant, parsed_people)
-
-            message =
-              "Imported #{results.imported} people." <>
-                if(results.skipped > 0, do: " Skipped #{results.skipped} duplicates.", else: "") <>
-                if(length(results.errors) > 0,
-                  do: " #{length(results.errors)} errors.",
-                  else: ""
-                )
-
-            conn
-            |> put_flash(:info, message)
-            |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/seed")
-
-          {:error, reason} ->
-            conn
-            |> put_flash(:error, "Failed to parse CSV: #{reason}")
-            |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/seed")
-        end
+        process_csv_content(conn, tenant, org, campaign, content)
 
       {:error, _reason} ->
         conn
@@ -90,5 +70,29 @@ defmodule WrtWeb.Org.SeedController do
           changeset: changeset
         )
     end
+  end
+
+  defp process_csv_content(conn, tenant, org, campaign, content) do
+    case People.parse_seed_csv(content) do
+      {:ok, parsed_people} ->
+        {:ok, results} = People.import_seed_people(tenant, parsed_people)
+        message = build_import_message(results)
+
+        conn
+        |> put_flash(:info, message)
+        |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/seed")
+
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Failed to parse CSV: #{reason}")
+        |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/seed")
+    end
+  end
+
+  defp build_import_message(results) do
+    base = "Imported #{results.imported} people."
+    skipped_msg = if results.skipped > 0, do: " Skipped #{results.skipped} duplicates.", else: ""
+    errors_msg = if results.errors != [], do: " #{Enum.count(results.errors)} errors.", else: ""
+    base <> skipped_msg <> errors_msg
   end
 end

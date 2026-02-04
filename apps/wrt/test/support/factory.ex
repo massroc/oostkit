@@ -6,9 +6,9 @@ defmodule Wrt.Factory do
   use ExMachina.Ecto, repo: Wrt.Repo
 
   alias Wrt.Campaigns.Campaign
-  alias Wrt.Rounds.{Round, Contact}
-  alias Wrt.People.{Person, Nomination}
   alias Wrt.MagicLinks.MagicLink
+  alias Wrt.People.{Nomination, Person}
+  alias Wrt.Rounds.{Contact, Round}
 
   # ============================================================================
   # Campaign Factory

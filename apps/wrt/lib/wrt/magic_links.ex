@@ -9,8 +9,9 @@ defmodule Wrt.MagicLinks do
   """
 
   import Ecto.Query, warn: false
-  alias Wrt.Repo
+
   alias Wrt.MagicLinks.MagicLink
+  alias Wrt.Repo
 
   @doc """
   Creates a magic link for a person in a round.

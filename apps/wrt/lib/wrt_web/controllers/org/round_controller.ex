@@ -2,8 +2,8 @@ defmodule WrtWeb.Org.RoundController do
   use WrtWeb, :controller
 
   alias Wrt.Campaigns
-  alias Wrt.Rounds
   alias Wrt.People
+  alias Wrt.Rounds
 
   plug WrtWeb.Plugs.TenantPlug
   plug WrtWeb.Plugs.RequireOrgAdmin
@@ -42,35 +42,45 @@ defmodule WrtWeb.Org.RoundController do
       )
       |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds")
     else
-      duration_days = String.to_integer(round_params["duration_days"] || "7")
+      do_create_round(conn, tenant, org, campaign, round_params)
+    end
+  end
 
-      case Rounds.create_round(tenant, campaign.id) do
-        {:ok, round} ->
-          # If this is the first round, activate the campaign
-          if round.round_number == 1 and campaign.status == "draft" do
-            Campaigns.start_campaign(tenant, campaign)
-          end
+  defp do_create_round(conn, tenant, org, campaign, round_params) do
+    duration_days = String.to_integer(round_params["duration_days"] || "7")
 
-          case Rounds.start_round(tenant, round, duration_days) do
-            {:ok, {started_round, contacts}} ->
-              conn
-              |> put_flash(
-                :info,
-                "Round #{started_round.round_number} started with #{length(contacts)} contacts."
-              )
-              |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds/#{started_round}")
+    case Rounds.create_round(tenant, campaign.id) do
+      {:ok, round} ->
+        maybe_start_campaign(tenant, campaign, round)
+        start_round_and_redirect(conn, tenant, org, campaign, round, duration_days)
 
-            {:error, reason} ->
-              conn
-              |> put_flash(:error, "Failed to start round: #{inspect(reason)}")
-              |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds")
-          end
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "Failed to create round.")
+        |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds")
+    end
+  end
 
-        {:error, _changeset} ->
-          conn
-          |> put_flash(:error, "Failed to create round.")
-          |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds")
-      end
+  defp maybe_start_campaign(tenant, campaign, round) do
+    if round.round_number == 1 and campaign.status == "draft" do
+      Campaigns.start_campaign(tenant, campaign)
+    end
+  end
+
+  defp start_round_and_redirect(conn, tenant, org, campaign, round, duration_days) do
+    case Rounds.start_round(tenant, round, duration_days) do
+      {:ok, {started_round, contacts}} ->
+        conn
+        |> put_flash(
+          :info,
+          "Round #{started_round.round_number} started with #{Enum.count(contacts)} contacts."
+        )
+        |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds/#{started_round}")
+
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Failed to start round: #{inspect(reason)}")
+        |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds")
     end
   end
 
