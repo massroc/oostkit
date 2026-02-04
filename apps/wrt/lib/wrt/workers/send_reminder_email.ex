@@ -1,0 +1,62 @@
+defmodule Wrt.Workers.SendReminderEmail do
+  @moduledoc """
+  Oban worker for sending reminder emails to contacts who haven't responded.
+  """
+
+  use Oban.Worker, queue: :emails, max_attempts: 3
+
+  alias Wrt.Emails
+  alias Wrt.MagicLinks
+  alias Wrt.Platform
+  alias Wrt.Rounds
+
+  require Logger
+
+  @impl Oban.Worker
+  def perform(%Oban.Job{args: %{"tenant" => tenant, "contact_id" => contact_id, "org_id" => org_id}}) do
+    with {:ok, contact} <- get_contact(tenant, contact_id),
+         false <- already_responded?(contact),
+         {:ok, org} <- get_org(org_id),
+         {:ok, magic_link} <- get_or_create_magic_link(tenant, contact),
+         {:ok, _email} <- send_email(contact, magic_link, org) do
+      Logger.info("Sent reminder email to #{contact.person.email} for round #{contact.round_id}")
+      :ok
+    else
+      true ->
+        Logger.info("Skipping reminder for #{contact_id} - already responded")
+        :ok
+
+      {:error, reason} ->
+        Logger.error("Failed to send reminder email for contact #{contact_id}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp get_contact(tenant, contact_id) do
+    case Rounds.get_contact(tenant, contact_id) do
+      nil -> {:error, :contact_not_found}
+      contact -> {:ok, contact}
+    end
+  end
+
+  defp already_responded?(%{responded_at: nil}), do: false
+  defp already_responded?(_contact), do: true
+
+  defp get_org(org_id) do
+    case Platform.get_organisation(org_id) do
+      nil -> {:error, :org_not_found}
+      org -> {:ok, org}
+    end
+  end
+
+  defp get_or_create_magic_link(tenant, contact) do
+    MagicLinks.get_or_create_magic_link(tenant, contact.person_id, contact.round_id)
+  end
+
+  defp send_email(contact, magic_link, org) do
+    case Emails.send_reminder(contact, magic_link, org) do
+      {:ok, _} -> {:ok, :sent}
+      {:error, reason} -> {:error, {:email_send_failed, reason}}
+    end
+  end
+end

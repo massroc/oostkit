@@ -22,6 +22,8 @@ defmodule Wrt.Application do
       {Oban, Application.fetch_env!(:wrt, Oban)},
       # Start the Finch HTTP client for Swoosh
       {Finch, name: Wrt.Finch},
+      # Start ETS storage for rate limiting
+      {PlugAttack.Storage.Ets, name: WrtWeb.Plugs.RateLimiter.Storage, clean_period: 60_000},
       # Start the Endpoint (http/https)
       WrtWeb.Endpoint
     ]

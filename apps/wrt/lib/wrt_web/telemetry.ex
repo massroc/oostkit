@@ -75,6 +75,28 @@ defmodule WrtWeb.Telemetry do
         description: "Count of job exceptions"
       ),
 
+      # WRT Business Metrics
+      counter("wrt.auth.login.count",
+        tags: [:result],
+        description: "Count of login attempts"
+      ),
+      counter("wrt.auth.magic_link.count",
+        tags: [:action],
+        description: "Magic link operations"
+      ),
+      counter("wrt.nomination.submit.count",
+        tags: [:tenant],
+        description: "Nomination submissions"
+      ),
+      counter("wrt.email.send.count",
+        tags: [:type, :result],
+        description: "Emails sent"
+      ),
+      counter("wrt.rate_limit.blocked.count",
+        tags: [:path],
+        description: "Rate limited requests"
+      ),
+
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
@@ -85,7 +107,28 @@ defmodule WrtWeb.Telemetry do
 
   defp periodic_measurements do
     [
-      # A module, function and arguments to be invoked periodically.
+      {__MODULE__, :measure_oban_queue_lengths, []}
     ]
+  end
+
+  @doc """
+  Measures Oban queue lengths for monitoring.
+  """
+  def measure_oban_queue_lengths do
+    if Process.whereis(Oban) do
+      queues = [:default, :emails, :rounds, :maintenance]
+
+      Enum.each(queues, fn queue ->
+        count = Oban.check_queue(queue: queue) |> length()
+
+        :telemetry.execute(
+          [:wrt, :oban, :queue_length],
+          %{count: count},
+          %{queue: queue}
+        )
+      end)
+    end
+  rescue
+    _ -> :ok
   end
 end
