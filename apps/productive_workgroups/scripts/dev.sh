@@ -6,10 +6,10 @@ set -e
 case "$1" in
   start)
     echo "Starting development environment..."
-    docker compose up -d db
+    docker compose up -d pw_db
     echo "Waiting for PostgreSQL..."
     sleep 3
-    docker compose up app
+    docker compose up pw_app
     ;;
 
   stop)
@@ -19,36 +19,36 @@ case "$1" in
 
   test)
     echo "Running tests..."
-    docker compose up -d db_test
+    docker compose up -d pw_db_test
     sleep 2
-    docker compose --profile test run --rm test
+    docker compose --profile test run --rm pw_test
     ;;
 
   tdd)
     echo "Starting TDD mode (watching for changes)..."
-    docker compose up -d db_test
+    docker compose up -d pw_db_test
     sleep 2
-    docker compose --profile tdd run --rm test_watch
+    docker compose --profile tdd run --rm pw_test_watch
     ;;
 
   shell)
     echo "Opening IEx shell..."
-    docker compose exec app iex -S mix
+    docker compose exec pw_app iex -S mix
     ;;
 
   migrate)
     echo "Running migrations..."
-    docker compose exec app mix ecto.migrate
+    docker compose exec pw_app mix ecto.migrate
     ;;
 
   reset)
     echo "Resetting database..."
-    docker compose exec app mix ecto.reset
+    docker compose exec pw_app mix ecto.reset
     ;;
 
   quality)
     echo "Running code quality checks..."
-    docker compose exec app mix quality
+    docker compose exec pw_app mix quality
     ;;
 
   logs)

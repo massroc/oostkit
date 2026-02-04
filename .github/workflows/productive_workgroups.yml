@@ -1,15 +1,25 @@
-name: CI
+name: Productive Workgroups CI
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/productive_workgroups/**'
+      - '.github/workflows/productive_workgroups.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/productive_workgroups/**'
+      - '.github/workflows/productive_workgroups.yml'
 
 env:
   MIX_ENV: test
   ELIXIR_VERSION: '1.18.3'
   OTP_VERSION: '27.2'
+
+defaults:
+  run:
+    working-directory: apps/productive_workgroups
 
 jobs:
   test:
@@ -45,10 +55,10 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            deps
-            _build
-          key: ${{ runner.os }}-mix-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-${{ hashFiles('**/mix.lock', '**/mix.exs') }}
-          restore-keys: ${{ runner.os }}-mix-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-
+            apps/productive_workgroups/deps
+            apps/productive_workgroups/_build
+          key: ${{ runner.os }}-mix-pw-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-${{ hashFiles('apps/productive_workgroups/mix.lock', 'apps/productive_workgroups/mix.exs') }}
+          restore-keys: ${{ runner.os }}-mix-pw-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-
 
       - name: Install dependencies
         run: mix deps.get
@@ -82,7 +92,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ./cover/excoveralls.json
+          files: apps/productive_workgroups/cover/excoveralls.json
           fail_ci_if_error: false
 
   dialyzer:
@@ -103,18 +113,18 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            deps
-            _build
-          key: ${{ runner.os }}-mix-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-${{ hashFiles('**/mix.lock', '**/mix.exs') }}
-          restore-keys: ${{ runner.os }}-mix-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-
+            apps/productive_workgroups/deps
+            apps/productive_workgroups/_build
+          key: ${{ runner.os }}-mix-pw-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-${{ hashFiles('apps/productive_workgroups/mix.lock', 'apps/productive_workgroups/mix.exs') }}
+          restore-keys: ${{ runner.os }}-mix-pw-${{ env.ELIXIR_VERSION }}-${{ env.OTP_VERSION }}-
 
       - name: Restore PLT cache
         uses: actions/cache@v5
         id: plt-cache
         with:
-          path: priv/plts
-          key: ${{ runner.os }}-plt-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('**/mix.lock', '**/mix.exs') }}
-          restore-keys: ${{ runner.os }}-plt-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
+          path: apps/productive_workgroups/priv/plts
+          key: ${{ runner.os }}-plt-pw-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('apps/productive_workgroups/mix.lock', 'apps/productive_workgroups/mix.exs') }}
+          restore-keys: ${{ runner.os }}-plt-pw-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
 
       - name: Install dependencies
         run: mix deps.get
