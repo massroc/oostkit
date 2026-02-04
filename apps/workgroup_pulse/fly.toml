@@ -1,14 +1,14 @@
-# Fly.io deployment configuration for Productive Work Groups
+# Fly.io deployment configuration for Workgroup Pulse
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 
-app = "productive-workgroups"
+app = "workgroup-pulse"
 primary_region = "syd"  # Sydney, AU (matches database region)
 
 [build]
   dockerfile = "Dockerfile"
 
 [env]
-  PHX_HOST = "productive-workgroups.fly.dev"
+  PHX_HOST = "workgroup-pulse.fly.dev"
   PORT = "8080"
   PHX_SERVER = "true"
 
