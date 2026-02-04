@@ -1,0 +1,186 @@
+# Reusable workflow for Elixir/Phoenix CI
+# Called by per-app workflows with app-specific parameters
+
+name: Elixir CI
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: 'Application name (used in job names and cache keys)'
+        required: true
+        type: string
+      app_path:
+        description: 'Path to the application directory'
+        required: true
+        type: string
+      database_name:
+        description: 'PostgreSQL database name for tests'
+        required: true
+        type: string
+      deploy_enabled:
+        description: 'Whether to deploy to Fly.io on main branch'
+        required: false
+        type: boolean
+        default: false
+      elixir_version:
+        description: 'Elixir version'
+        required: false
+        type: string
+        default: '1.18.3'
+      otp_version:
+        description: 'OTP version'
+        required: false
+        type: string
+        default: '27.2'
+
+env:
+  MIX_ENV: test
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ${{ inputs.database_name }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ inputs.elixir_version }}
+          otp-version: ${{ inputs.otp_version }}
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ inputs.app_path }}/deps
+            ${{ inputs.app_path }}/_build
+          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path)) }}
+          restore-keys: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile dependencies
+        run: mix deps.compile
+
+      - name: Check formatting
+        if: github.event_name == 'pull_request'
+        run: mix format --check-formatted
+
+      - name: Compile
+        run: mix compile
+
+      - name: Run Credo
+        run: mix credo --strict
+
+      - name: Run Sobelow security scan
+        run: mix sobelow --config
+
+      - name: Run tests
+        env:
+          DATABASE_URL: ecto://postgres:postgres@localhost:5432/${{ inputs.database_name }}
+        run: mix test
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: ecto://postgres:postgres@localhost:5432/${{ inputs.database_name }}
+        run: mix coveralls.json
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ inputs.app_path }}/cover/excoveralls.json
+          fail_ci_if_error: false
+
+  dialyzer:
+    name: Dialyzer
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ inputs.elixir_version }}
+          otp-version: ${{ inputs.otp_version }}
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ inputs.app_path }}/deps
+            ${{ inputs.app_path }}/_build
+          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path)) }}
+          restore-keys: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-
+
+      - name: Restore PLT cache
+        uses: actions/cache@v5
+        id: plt-cache
+        with:
+          path: ${{ inputs.app_path }}/priv/plts
+          key: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path)) }}
+          restore-keys: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Create PLTs
+        if: steps.plt-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p priv/plts
+          mix dialyzer --plt
+        timeout-minutes: 20
+
+      - name: Run Dialyzer
+        run: mix dialyzer --format github
+
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    needs: [test, dialyzer]
+    if: inputs.deploy_enabled && github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
