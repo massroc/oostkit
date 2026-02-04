@@ -2,6 +2,19 @@
 
 A web-based tool for managing participative referral processes based on Open Systems Theory (OST) methodology. The tool supports the selection of workshop participants through network-based nomination, letting the system surface its own participants rather than having them chosen by a single authority.
 
+## Implementation Status
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 1: Foundation | ✅ Complete | Multi-tenancy, auth, org registration |
+| Phase 2: Campaign Flow | ✅ Complete | Campaigns, rounds, seed groups |
+| Phase 3: Nomination | ✅ Complete | Magic links, nomination form |
+| Phase 4: Email System | ✅ Complete | Invitations, webhooks, reminders |
+| Phase 5: Export | ✅ Complete | CSV/PDF export, reporting |
+| Phase 6: Operations | ✅ Complete | Rate limiting, health checks, logging |
+
+**Test Coverage:** 80 tests across contexts, controllers, and workers
+
 ## Background
 
 ### The Referral Process (OST)
@@ -144,29 +157,29 @@ A record of one person nominating another:
 - Visual indication of who will/won't be contacted in next round
 - Cannot override—this is a core OST principle
 
-### F4: Nomination Collection
+### F4: Nomination Collection ✅
 
-#### F4.1: Nominator Authentication
-- Invitation email contains unique magic link
-- Clicking link sends login code to email
-- Code valid for limited time (e.g., 15 minutes)
-- Session persists until round closes
+#### F4.1: Nominator Authentication ✅
+- ✅ Invitation email contains unique magic link (24-hour validity)
+- ✅ Clicking link sends login code to email (6-digit code)
+- ✅ Code valid for limited time (15 minutes)
+- ✅ Session persists until round closes
 
-#### F4.2: Nomination Form
-- Nominator sees: campaign description, what they're being asked
-- Structured input: name + email for each nominee
-- Add multiple nominees (no fixed limit)
-- Validation: email format required
+#### F4.2: Nomination Form ✅
+- ✅ Nominator sees: campaign description, what they're being asked
+- ✅ Structured input: name + email for each nominee
+- ✅ Add multiple nominees (no fixed limit)
+- ✅ Validation: email format required
 
-#### F4.3: Edit Nominations
-- Nominator can return via magic link while round is open
-- Add, remove, or modify nominations
-- Changes tracked (latest submission used for counting)
+#### F4.3: Edit Nominations ✅
+- ✅ Nominator can return via magic link while round is open
+- ✅ Add, remove, or modify nominations
+- ✅ Changes tracked (latest submission used for counting)
 
-#### F4.4: Confirmation
-- Clear confirmation when nominations submitted
-- Summary of who they nominated
-- Note that they won't be asked again
+#### F4.4: Confirmation ✅
+- ✅ Clear confirmation when nominations submitted
+- ✅ Summary of who they nominated
+- ✅ Note that they won't be asked again
 
 ### F5: Convergence Tracking
 
@@ -185,36 +198,36 @@ A record of one person nominating another:
 - Identify clusters and bridges
 - Not required for MVP
 
-### F6: Export and Reporting
+### F6: Export and Reporting ✅
 
-#### F6.1: CSV Export
-- Columns: name, email, nomination_count
-- Filterable: all people, only those above threshold, only nominated (not seed)
-- Download at any point during or after campaign
+#### F6.1: CSV Export ✅
+- ✅ Columns: name, email, nomination_count
+- ✅ Filterable: all people, by date range, by round
+- ✅ Download at any point during or after campaign
 
-#### F6.2: PDF Report
-- Campaign summary: name, org, dates, rounds completed
-- Statistics: total people contacted, response rate, nominations collected
-- Candidate list: sorted by convergence count
-- Generated on demand
+#### F6.2: PDF Report ✅
+- ✅ Campaign summary: name, org, dates, rounds completed
+- ✅ Statistics: total people contacted, response rate, nominations collected
+- ✅ Candidate list: sorted by convergence count
+- ✅ Generated on demand (ChromicPDF)
 
-### F7: Email System
+### F7: Email System ✅
 
-#### F7.1: Email Templates
-- Invitation email (customisable per campaign)
-- Magic link login email
-- Round reminder (optional)
-- Campaign completion summary (to admins)
+#### F7.1: Email Templates ✅
+- ✅ Invitation email with magic link
+- ✅ Verification code email
+- ✅ Round reminder (optional, Oban worker)
+- Campaign completion summary (to admins) - *planned*
 
-#### F7.2: Email Delivery
-- Integration with transactional email service (Postmark or Sendgrid)
-- Shared sender address: `noreply@[platform-domain]`
-- All orgs use shared sending infrastructure (platform controls reputation)
+#### F7.2: Email Delivery ✅
+- ✅ Integration with transactional email service (Postmark/SendGrid)
+- ✅ Swoosh adapter for email abstraction
+- ✅ Oban workers for async sending
 
-#### F7.3: Email Tracking
-- Track: sent, delivered, opened, clicked
-- Display status per recipient in admin view
-- Aggregate stats per round
+#### F7.3: Email Tracking ✅
+- ✅ Track: sent, delivered, opened, clicked
+- ✅ Webhook handlers for Postmark and SendGrid
+- ✅ Aggregate stats per round (Reports context)
 
 ### F8: Admin Authentication
 

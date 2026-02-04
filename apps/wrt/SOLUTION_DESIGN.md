@@ -75,97 +75,137 @@ lib/
 │   │
 │   ├── repo.ex                     # Ecto Repo
 │   │
-│   ├── tenant_manager.ex           # Multi-tenancy orchestration
+│   ├── tenant_manager.ex           # Multi-tenancy orchestration ✓
 │   │
-│   ├── platform/                   # Public schema (cross-tenant)
+│   ├── platform/                   # Public schema (cross-tenant) ✓
 │   │   ├── organisation.ex         # Schema
 │   │   ├── super_admin.ex          # Schema
 │   │   └── platform.ex             # Context
 │   │
-│   ├── orgs/                       # Org management (tenant-scoped)
+│   ├── orgs/                       # Org management (tenant-scoped) ✓
 │   │   ├── org_admin.ex            # Schema
 │   │   └── orgs.ex                 # Context
 │   │
-│   ├── campaigns/                  # Campaign management
+│   ├── campaigns/                  # Campaign management ✓
 │   │   ├── campaign.ex             # Schema
 │   │   ├── campaign_admin.ex       # Schema
 │   │   └── campaigns.ex            # Context
 │   │
-│   ├── rounds/                     # Round management
+│   ├── rounds/                     # Round management ✓
 │   │   ├── round.ex                # Schema
 │   │   ├── contact.ex              # Schema (invitation tracking)
 │   │   └── rounds.ex               # Context
 │   │
-│   ├── people/                     # People & nominations
+│   ├── people/                     # People & nominations ✓
 │   │   ├── person.ex               # Schema
 │   │   ├── nomination.ex           # Schema
 │   │   └── people.ex               # Context
 │   │
-│   ├── auth/                       # Authentication
-│   │   ├── magic_link.ex           # Schema
-│   │   ├── session.ex              # Session management
-│   │   └── auth.ex                 # Context
+│   ├── magic_links/                # Magic link authentication ✓
+│   │   ├── magic_link.ex           # Schema (24hr token, 15min code)
+│   │   └── magic_links.ex          # Context (create, verify, use)
 │   │
-│   ├── mailer/                     # Email system
-│   │   ├── mailer.ex               # Swoosh mailer
-│   │   ├── templates/              # Email templates
-│   │   │   ├── invitation.ex
-│   │   │   ├── magic_link.ex
-│   │   │   ├── reminder.ex
-│   │   │   └── admin_summary.ex
-│   │   └── tracker.ex              # Webhook handler for open/click
+│   ├── emails.ex                   # Email composition ✓
+│   │                               # - Invitation, verification, reminder emails
+│   │                               # - HTML and text templates
 │   │
-│   ├── export/                     # Export functionality
-│   │   ├── csv_exporter.ex
-│   │   └── pdf_report.ex
+│   ├── reports.ex                  # Reporting context ✓
+│   │                               # - Campaign/round statistics
+│   │                               # - Convergence metrics
+│   │                               # - Top nominees/nominators
 │   │
-│   └── workers/                    # Oban workers
-│       ├── send_invitation.ex
-│       ├── send_reminder.ex
-│       ├── close_round.ex
-│       └── retention_cleanup.ex
+│   ├── logger.ex                   # Structured logging ✓
+│   │                               # - Security events
+│   │                               # - Business metrics
+│   │
+│   ├── telemetry.ex                # Business telemetry ✓
+│   │                               # - Login attempts
+│   │                               # - Magic links
+│   │                               # - Nominations
+│   │                               # - Rate limiting
+│   │
+│   ├── mailer.ex                   # Swoosh mailer ✓
+│   │
+│   └── workers/                    # Oban workers ✓
+│       ├── send_invitation_email.ex
+│       ├── send_round_invitations.ex
+│       ├── send_reminder_email.ex
+│       ├── send_verification_code.ex
+│       ├── cleanup_expired_magic_links.ex
+│       └── data_retention_check.ex
 │
 ├── wrt_web/
-│   ├── router.ex
+│   ├── router.ex                   # ✓
+│   │
+│   ├── endpoint.ex                 # ✓ (with rate limiter)
 │   │
 │   ├── plugs/
-│   │   ├── tenant_plug.ex          # Extracts tenant from path
-│   │   ├── require_super_admin.ex
-│   │   ├── require_org_admin.ex
-│   │   ├── require_campaign_admin.ex
-│   │   └── require_nominator.ex
+│   │   └── rate_limiter.ex         # PlugAttack rate limiting ✓
+│   │                               # - Login: 5/min
+│   │                               # - Magic links: 3/min
+│   │                               # - Nominations: 10/min
+│   │                               # - Webhooks: 100/min
+│   │                               # - General: 120/min
 │   │
 │   ├── controllers/
-│   │   ├── super_admin/
+│   │   ├── super_admin/            # ✓
 │   │   │   ├── session_controller.ex
 │   │   │   ├── org_controller.ex
 │   │   │   └── dashboard_controller.ex
 │   │   │
-│   │   ├── org/
+│   │   ├── org/                    # ✓
 │   │   │   ├── session_controller.ex
 │   │   │   ├── dashboard_controller.ex
 │   │   │   ├── campaign_controller.ex
 │   │   │   ├── round_controller.ex
-│   │   │   ├── people_controller.ex
-│   │   │   └── export_controller.ex
+│   │   │   ├── seed_controller.ex
+│   │   │   ├── results_controller.ex
+│   │   │   └── export_controller.ex  # CSV/PDF with filters
 │   │   │
-│   │   ├── nominator/
+│   │   ├── nominator/              # ✓
 │   │   │   ├── auth_controller.ex    # Magic link flow
-│   │   │   └── nomination_controller.ex
+│   │   │   ├── auth_html.ex          # Landing, verify templates
+│   │   │   ├── nomination_controller.ex
+│   │   │   └── nomination_html.ex    # Nomination form
 │   │   │
-│   │   ├── registration_controller.ex  # Org registration
+│   │   ├── health_controller.ex    # Health check endpoints ✓
+│   │   │                           # - /health (liveness)
+│   │   │                           # - /health/ready (readiness)
 │   │   │
-│   │   └── webhook_controller.ex       # Email tracking webhooks
+│   │   ├── registration_controller.ex  # ✓
+│   │   │
+│   │   └── webhook_controller.ex       # ✓ Postmark/SendGrid webhooks
 │   │
-│   ├── components/                   # Phoenix components
+│   ├── telemetry.ex                # Metrics definitions ✓
+│   │
+│   ├── components/                 # ✓
 │   │   ├── layouts.ex
 │   │   └── core_components.ex
 │   │
-│   └── templates/                    # EEx templates
-│       ├── layouts/
-│       ├── super_admin/
-│       ├── org/
+│   └── templates/                  # ✓
 │       └── nominator/
+│           └── auth_html/
+│               ├── landing.html.heex
+│               ├── verify_form.html.heex
+│               ├── invalid_link.html.heex
+│               └── round_closed.html.heex
+
+test/
+├── support/
+│   ├── data_case.ex                # Test case with tenant support ✓
+│   ├── conn_case.ex                # Controller test case ✓
+│   └── factory.ex                  # ExMachina factories ✓
+│
+├── wrt/
+│   ├── magic_links_test.exs        # MagicLinks context tests ✓
+│   ├── reports_test.exs            # Reports context tests ✓
+│   └── workers/
+│       ├── cleanup_expired_magic_links_test.exs ✓
+│       └── data_retention_check_test.exs ✓
+│
+└── wrt_web/controllers/
+    ├── health_controller_test.exs  # ✓
+    └── webhook_controller_test.exs # ✓
 ```
 
 ## Multi-Tenancy Implementation
@@ -824,41 +864,49 @@ end
 
 ## Implementation Phases
 
-### Phase 1: Foundation
-- Phoenix app scaffolding
-- Multi-tenancy setup with Triplex
-- Public schema migrations (orgs, super_admins)
-- Tenant schema migrations
-- Super admin authentication
-- Org registration flow
+### Phase 1: Foundation ✓
+- [x] Phoenix app scaffolding
+- [x] Multi-tenancy setup with Triplex
+- [x] Public schema migrations (orgs, super_admins)
+- [x] Tenant schema migrations
+- [x] Super admin authentication
+- [x] Org registration flow
 
-### Phase 2: Core Campaign Flow
-- Org admin authentication
-- Campaign CRUD
-- Seed group upload (CSV + manual)
-- Round management (start, close, extend)
-- Single-ask constraint enforcement
+### Phase 2: Core Campaign Flow ✓
+- [x] Org admin authentication
+- [x] Campaign CRUD
+- [x] Seed group upload (CSV + manual)
+- [x] Round management (start, close, extend)
+- [x] Single-ask constraint enforcement
 
-### Phase 3: Nomination Collection
-- Magic link authentication
-- Nomination form
-- Edit nominations while round open
-- Convergence counting
+### Phase 3: Nomination Collection ✓
+- [x] Magic link authentication (24hr tokens, 15min codes)
+- [x] Nominator landing and verification flow
+- [x] Nomination form with add/remove nominees
+- [x] Edit nominations while round open
+- [x] Convergence counting
 
-### Phase 4: Email System
-- Swoosh integration with Postmark
-- Invitation emails
-- Magic link emails
-- Webhook handlers for tracking
-- Optional reminder emails
+### Phase 4: Email System ✓
+- [x] Swoosh integration with Postmark/SendGrid
+- [x] Invitation emails with magic links
+- [x] Verification code emails
+- [x] Webhook handlers for delivery/open/click tracking
+- [x] Optional reminder emails (Oban worker)
+- [x] Oban workers for async email sending
 
-### Phase 5: Export & Reporting
-- CSV export with filters
-- PDF report generation
-- Admin dashboard stats
+### Phase 5: Export & Reporting ✓
+- [x] Reports context with campaign/round statistics
+- [x] Convergence metrics (distribution, threshold)
+- [x] Top nominees and nominators tracking
+- [x] CSV export with filters (date range, rounds)
+- [x] PDF report generation with ChromicPDF
+- [x] Admin dashboard with real-time stats
 
-### Phase 6: Polish & Operations
-- Rate limiting
-- Error handling and logging
-- Data retention jobs
-- Monitoring and metrics
+### Phase 6: Polish & Operations ✓
+- [x] Rate limiting (PlugAttack with configurable limits)
+- [x] Health check endpoints (/health, /health/ready)
+- [x] Structured logging for security events
+- [x] Business telemetry events
+- [x] Data retention check worker (24-month policy)
+- [x] Magic link cleanup worker (expired tokens)
+- [x] Comprehensive test suite (80 tests)
