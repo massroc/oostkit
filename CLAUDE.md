@@ -10,7 +10,7 @@ This is a monorepo containing multiple applications:
 /
 ├── apps/
 │   ├── workgroup_pulse/   # Workgroup Pulse - 6 Criteria workshop (Elixir/Phoenix)
-│   └── wrt/               # Workshop Referral Tool (Elixir/Phoenix) - planned
+│   └── wrt/               # Workshop Referral Tool (Elixir/Phoenix)
 ├── .github/workflows/     # CI/CD pipelines (per-app with path filtering)
 ├── docker-compose.yml     # Root orchestration (includes all apps)
 └── Makefile               # Convenience commands
@@ -159,16 +159,29 @@ docker compose logs -f wrt_app
 
 ## CI/CD
 
-Each app has its own workflow file with path filtering:
-- `.github/workflows/workgroup_pulse.yml` - Runs only when `apps/workgroup_pulse/**` changes
+CI uses a **reusable workflow pattern** for consistency across apps:
 
-Changes to one app do not trigger CI for other apps.
+- `.github/workflows/_elixir-ci.yml` - Shared CI logic (test, dialyzer, deploy)
+- `.github/workflows/workgroup_pulse.yml` - Thin caller for Workgroup Pulse
+- `.github/workflows/wrt.yml` - Thin caller for WRT
+
+Each app workflow has path filtering so changes to one app don't trigger CI for others. Updates to `_elixir-ci.yml` trigger CI for all apps.
 
 ## Adding a New App
 
 1. Create `apps/your_app_name/` directory
 2. Add app-specific `docker-compose.yml` with prefixed service names (e.g., `ya_app`, `ya_db`)
-3. Create CI workflow: `.github/workflows/your_app_name.yml` with path filtering
+3. Create CI workflow: `.github/workflows/your_app_name.yml` that calls `_elixir-ci.yml`:
+   ```yaml
+   jobs:
+     ci:
+       uses: ./.github/workflows/_elixir-ci.yml
+       with:
+         app_name: your_app
+         app_path: apps/your_app_name
+         database_name: your_app_test
+       secrets: inherit
+   ```
 4. Update root `docker-compose.yml` to include the new app
 5. Add app-specific section to this CLAUDE.md with commands
 
