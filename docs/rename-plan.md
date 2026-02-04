@@ -42,9 +42,13 @@ All items below have been completed and tested. 234 tests passing.
 - [x] Update format.yml workflow
 
 ### 8. Fly.io
-- [ ] Update `fly.toml` app name (requires manual Fly.io changes)
-- [ ] Create new Fly app or rename existing
-- [ ] Update secrets/environment
+- [x] Update `fly.toml` app name: `workgroup-pulse`
+- [x] Create new Fly app `workgroup-pulse`
+- [x] Attach new database `workgroup-pulse-db`
+- [x] Set secrets (SECRET_KEY_BASE, DATABASE_URL, ECTO_IPV6)
+- [x] Deploy and verify
+- [x] Destroy old app `productive-workgroups`
+- [x] Destroy old database `productive-workgroups-db`
 
 ### 9. Documentation
 - [x] `apps/workgroup_pulse/README.md` - update references
@@ -62,6 +66,8 @@ All items below have been completed and tested. 234 tests passing.
 - Docker containers start with new names (wp_app, wp_db, etc.)
 - All module references updated
 - All documentation updated
+- Fly.io app deployed at https://workgroup-pulse.fly.dev/
+- Fly.io database `workgroup-pulse-db` attached and working
 
 ---
 
@@ -96,12 +102,14 @@ git remote set-url origin git@github.com:<username>/oostkit.git
 git remote -v
 ```
 
-#### 3. Update Fly.io Configuration
+#### 3. Update Fly.io Configuration (DONE)
 
-| File | Current | Change To |
-|------|---------|-----------|
-| `apps/workgroup_pulse/fly.toml` | `app = "productive-workgroups"` | `app = "workgroup-pulse"` |
-| `apps/workgroup_pulse/fly.toml` | `PHX_HOST = "productive-workgroups.fly.dev"` | `PHX_HOST = "pulse.oostkit.com"` |
+Fly.io has already been updated:
+- App: `workgroup-pulse`
+- Database: `workgroup-pulse-db`
+- URL: https://workgroup-pulse.fly.dev/
+
+Optional future: custom domain `pulse.oostkit.com`
 
 #### 4. Update Documentation References
 
