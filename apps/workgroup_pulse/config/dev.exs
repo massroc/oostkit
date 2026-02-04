@@ -18,8 +18,7 @@ config :workgroup_pulse, WorkgroupPulseWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "dev_secret_key_base_that_is_at_least_64_characters_long_for_development_only",
   watchers: [
-    esbuild:
-      {Esbuild, :install_and_run, [:workgroup_pulse, ~w(--sourcemap=inline --watch)]},
+    esbuild: {Esbuild, :install_and_run, [:workgroup_pulse, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:workgroup_pulse, ~w(--watch)]}
   ]
 

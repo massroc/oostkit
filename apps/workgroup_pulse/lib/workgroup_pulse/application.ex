@@ -16,8 +16,7 @@ defmodule WorkgroupPulse.Application do
     children = [
       WorkgroupPulseWeb.Telemetry,
       WorkgroupPulse.Repo,
-      {DNSCluster,
-       query: Application.get_env(:workgroup_pulse, :dns_cluster_query) || :ignore},
+      {DNSCluster, query: Application.get_env(:workgroup_pulse, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: WorkgroupPulse.PubSub},
       # Presence for tracking participants in sessions
       WorkgroupPulseWeb.Presence,
