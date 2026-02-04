@@ -46,7 +46,7 @@ coveralls.json
 postgres_data/
 
 # Dialyzer PLT cache
-priv/plts/
+**/priv/plts/
 
 # Test screenshots
 screenshots/
