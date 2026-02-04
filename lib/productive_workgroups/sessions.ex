@@ -188,7 +188,9 @@ defmodule ProductiveWorkgroups.Sessions do
     turn_index =
       if is_revisit do
         # Revisiting - restore turn state based on locked turns
-        locked_count = ProductiveWorkgroups.Scoring.count_locked_turns(session, next_question_index)
+        locked_count =
+          ProductiveWorkgroups.Scoring.count_locked_turns(session, next_question_index)
+
         locked_count
       else
         # First visit - start from beginning

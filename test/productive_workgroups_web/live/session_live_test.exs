@@ -1621,7 +1621,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       assert html =~ "bg-green-600"
     end
 
-    test "skipped participants auto-ready immediately; scored participants must click ready", ctx do
+    test "skipped participants auto-ready immediately; scored participants must click ready",
+         ctx do
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(ctx.session)
       {:ok, session} = Sessions.advance_to_scoring(session)
@@ -1884,7 +1885,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       facilitator_token = Ecto.UUID.generate()
 
       {:ok, facilitator} =
-        Sessions.join_session(session, "Solo Facilitator", facilitator_token, is_facilitator: true)
+        Sessions.join_session(session, "Solo Facilitator", facilitator_token,
+          is_facilitator: true
+        )
 
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(session)
@@ -1909,7 +1912,8 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       assert html =~ "bg-green-600"
     end
 
-    test "facilitator-only session can navigate back and forward and still see score input", _ctx do
+    test "facilitator-only session can navigate back and forward and still see score input",
+         _ctx do
       # Create a fresh session with only a facilitator
       {:ok, template} =
         Workshops.create_template(%{
@@ -1952,7 +1956,9 @@ defmodule ProductiveWorkgroupsWeb.SessionLiveTest do
       facilitator_token = Ecto.UUID.generate()
 
       {:ok, facilitator} =
-        Sessions.join_session(session, "Solo Facilitator", facilitator_token, is_facilitator: true)
+        Sessions.join_session(session, "Solo Facilitator", facilitator_token,
+          is_facilitator: true
+        )
 
       # Start and advance to scoring
       {:ok, session} = Sessions.start_session(session)

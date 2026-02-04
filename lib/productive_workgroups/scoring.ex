@@ -174,7 +174,8 @@ defmodule ProductiveWorkgroups.Scoring do
     Score
     |> where(
       [s],
-      s.session_id == ^session.id and s.question_index == ^question_index and s.turn_locked == true
+      s.session_id == ^session.id and s.question_index == ^question_index and
+        s.turn_locked == true
     )
     |> Repo.aggregate(:count)
   end
