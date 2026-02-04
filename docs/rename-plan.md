@@ -83,9 +83,9 @@ After the app rename is complete and merged to main. This is a separate operatio
 
 #### 1. Rename on GitHub
 
-- [ ] Go to repository **Settings → General → Repository name**
-- [ ] Change `productiveworkgroups` → `oostkit`
-- [ ] GitHub automatically sets up redirects from old URL
+- [x] Go to repository **Settings → General → Repository name**
+- [x] Change `productiveworkgroups` → `oostkit`
+- [x] GitHub automatically sets up redirects from old URL
 
 #### 2. Update Local Clone
 
