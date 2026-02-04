@@ -1,43 +1,29 @@
-# The directory Mix will write compiled artifacts to.
-/_build/
-
-# If you run "mix test --cover", coverage assets end up here.
-/cover/
-
-# The directory Mix downloads your dependencies sources to.
-/deps/
-
-# Where 3rd-party dependencies like ExDoc output generated docs.
-/doc/
-
-# Ignore .fetch files in case you like to edit your project deps locally.
-/.fetch
-
-# If the VM crashes, it generates a dump, let's ignore it too.
+# Elixir/Phoenix build artifacts (for all apps)
+_build/
+deps/
+cover/
+doc/
+*.ez
 erl_crash.dump
 
-# Also ignore archive artifacts (built via "mix archive.build").
-*.ez
+# Elixir fetch files
+.fetch
 
-# Temporary files, for example, from tests.
-/tmp/
+# Temporary files
+tmp/
 
-# Ignore package tarball (built via "mix hex.build").
-productive_workgroups-*.tar
+# Package tarballs
+*.tar
 
-# Ignore assets that are produced by build tools.
-/priv/static/assets/
+# Phoenix static assets
+priv/static/assets/
+priv/static/cache_manifest.json
+priv/static/
 
-# Ignore digested assets cache.
-/priv/static/cache_manifest.json
+# Node.js
+node_modules/
 
-# In case you use Node.js/CLI tools for your assets
-/assets/node_modules/
-
-# Ignore generated static files
-/priv/static/
-
-# Local development files
+# Environment files
 .env
 .env.local
 *.local
@@ -54,13 +40,13 @@ productive_workgroups-*.tar
 Thumbs.db
 
 # Test coverage
-/coveralls.json
+coveralls.json
 
 # Docker volumes
 postgres_data/
 
 # Dialyzer PLT cache
-/priv/plts/
+priv/plts/
 
 # Test screenshots
-/screenshots/
+screenshots/
