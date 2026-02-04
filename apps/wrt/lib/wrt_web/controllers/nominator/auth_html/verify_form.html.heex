@@ -1,0 +1,47 @@
+<div class="mx-auto max-w-lg">
+  <.header class="text-center">
+    Enter Verification Code
+    <:subtitle>
+      We've sent a 6-digit code to <%= @email %>
+    </:subtitle>
+  </.header>
+
+  <div class="mt-8 bg-white shadow rounded-lg p-6">
+    <%= if assigns[:error] do %>
+      <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <%= @error %>
+      </div>
+    <% end %>
+
+    <form action={~p"/org/#{@org.slug}/nominate/verify/code"} method="post">
+      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+      <input type="hidden" name="magic_link_id" value={@magic_link_id} />
+
+      <div class="mb-6">
+        <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
+          Verification Code
+        </label>
+        <input
+          type="text"
+          name="code"
+          id="code"
+          inputmode="numeric"
+          pattern="[0-9]{6}"
+          maxlength="6"
+          required
+          autofocus
+          class="block w-full text-center text-2xl tracking-widest rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          placeholder="000000"
+        />
+      </div>
+
+      <.button type="submit" class="w-full">
+        Verify and Continue
+      </.button>
+    </form>
+
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      Didn't receive the code? Check your spam folder or request a new link.
+    </p>
+  </div>
+</div>

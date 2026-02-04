@@ -14,6 +14,14 @@ defmodule WrtWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Health check routes (no auth required)
+  scope "/health", WrtWeb do
+    pipe_through :api
+
+    get "/", HealthController, :index
+    get "/ready", HealthController, :ready
+  end
+
   # Public routes
   scope "/", WrtWeb do
     pipe_through :browser
@@ -74,9 +82,10 @@ defmodule WrtWeb.Router do
   scope "/org/:org_slug/nominate", WrtWeb.Nominator, as: :nominate do
     pipe_through :browser
 
+    get "/invalid", AuthController, :invalid
     get "/:token", AuthController, :landing
     post "/request-link", AuthController, :request_link
-    get "/verify/:code", AuthController, :verify
+    post "/verify/code", AuthController, :verify
     get "/form", NominationController, :edit
     post "/submit", NominationController, :submit
   end

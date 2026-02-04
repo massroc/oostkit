@@ -222,14 +222,25 @@ defmodule Wrt.Rounds do
         _ -> nil
       end
 
-    if timestamp_field do
-      contact = Repo.get!(Contact, contact_id, prefix: tenant)
+    contact = Repo.get(Contact, contact_id, prefix: tenant)
 
-      contact
-      |> Contact.email_status_changeset(status, timestamp_field)
-      |> Repo.update(prefix: tenant)
-    else
-      {:error, :invalid_status}
+    cond do
+      is_nil(contact) ->
+        {:error, :not_found}
+
+      timestamp_field ->
+        contact
+        |> Contact.email_status_changeset(status, timestamp_field)
+        |> Repo.update(prefix: tenant)
+
+      status in ["bounced", "spam"] ->
+        # For bounced/spam, just update the status without a timestamp
+        contact
+        |> Ecto.Changeset.change(%{email_status: status})
+        |> Repo.update(prefix: tenant)
+
+      true ->
+        {:error, :invalid_status}
     end
   end
 

@@ -28,6 +28,8 @@ defmodule WrtWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import WrtWeb.ConnCase
+      import Wrt.Factory
+      import Wrt.DataCase, only: [create_test_tenant: 0, insert_in_tenant: 2, insert_in_tenant: 3]
     end
   end
 

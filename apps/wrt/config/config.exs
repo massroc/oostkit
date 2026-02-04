@@ -44,7 +44,16 @@ config :tailwind,
 # Configures Oban for background jobs
 config :wrt, Oban,
   repo: Wrt.Repo,
-  plugins: [Oban.Plugins.Pruner],
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+     crontab: [
+       # Clean up expired magic links daily at 3am UTC
+       {"0 3 * * *", Wrt.Workers.CleanupExpiredMagicLinks},
+       # Check data retention weekly on Sundays at 4am UTC
+       {"0 4 * * 0", Wrt.Workers.DataRetentionCheck, args: %{action: "check"}}
+     ]}
+  ],
   queues: [default: 10, emails: 20, rounds: 5, maintenance: 2]
 
 # Configures Elixir's Logger

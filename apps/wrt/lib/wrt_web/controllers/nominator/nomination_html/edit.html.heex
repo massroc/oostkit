@@ -1,0 +1,162 @@
+<div class="mx-auto max-w-2xl">
+  <.header>
+    Submit Your Nominations
+    <:subtitle>
+      Hello <%= @person.name %>! Please nominate people you believe would be valuable workshop participants.
+    </:subtitle>
+  </.header>
+
+  <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <p class="text-sm text-blue-800">
+      <strong>Round <%= @round.round_number %></strong> is open until
+      <strong><%= Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p") %></strong>.
+      You can edit your nominations until the round closes.
+    </p>
+  </div>
+
+  <%= if length(@existing_nominations) > 0 do %>
+    <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+      <p class="text-sm text-green-800">
+        You have already submitted <%= length(@existing_nominations) %> nomination(s).
+        Submitting again will replace your previous nominations.
+      </p>
+    </div>
+  <% end %>
+
+  <form action={~p"/org/#{@org.slug}/nominate/submit"} method="post" class="mt-8" id="nomination-form">
+    <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+
+    <div id="nominations-container" class="space-y-6">
+      <%= for i <- 0..2 do %>
+        <% existing = Enum.at(@existing_nominations, i) %>
+        <div class="nomination-entry bg-white shadow rounded-lg p-6" data-index={i}>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Nomination <%= i + 1 %></h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for={"nominations_#{i}_name"} class="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name={"nominations[#{i}][name]"}
+                id={"nominations_#{i}_name"}
+                value={existing && existing.nominee.name}
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="Jane Smith"
+              />
+            </div>
+
+            <div>
+              <label for={"nominations_#{i}_email"} class="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name={"nominations[#{i}][email]"}
+                id={"nominations_#{i}_email"}
+                value={existing && existing.nominee.email}
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="jane@example.com"
+              />
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label for={"nominations_#{i}_reason"} class="block text-sm font-medium text-gray-700">
+              Why are you nominating this person? (Optional)
+            </label>
+            <textarea
+              name={"nominations[#{i}][reason]"}
+              id={"nominations_#{i}_reason"}
+              rows="2"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              placeholder="Their experience, skills, or perspective that would be valuable..."
+            ><%= existing && existing.reason %></textarea>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-6 flex items-center justify-between">
+      <button
+        type="button"
+        id="add-nomination"
+        class="text-sm text-indigo-600 hover:text-indigo-500"
+        onclick="addNomination()"
+      >
+        + Add another nomination
+      </button>
+
+      <.button type="submit">
+        Submit Nominations
+      </.button>
+    </div>
+  </form>
+
+  <div class="mt-8 text-sm text-gray-500">
+    <p>
+      <strong>Privacy note:</strong> Your nominations are confidential.
+      Only campaign administrators can see who nominated whom.
+    </p>
+  </div>
+</div>
+
+<script>
+  let nominationCount = 3;
+
+  function addNomination() {
+    const container = document.getElementById('nominations-container');
+    const newIndex = nominationCount;
+    nominationCount++;
+
+    const html = `
+      <div class="nomination-entry bg-white shadow rounded-lg p-6" data-index="${newIndex}">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Nomination ${newIndex + 1}</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="nominations_${newIndex}_name" class="block text-sm font-medium text-gray-700">
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="nominations[${newIndex}][name]"
+              id="nominations_${newIndex}_name"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              placeholder="Jane Smith"
+            />
+          </div>
+
+          <div>
+            <label for="nominations_${newIndex}_email" class="block text-sm font-medium text-gray-700">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="nominations[${newIndex}][email]"
+              id="nominations_${newIndex}_email"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              placeholder="jane@example.com"
+            />
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="nominations_${newIndex}_reason" class="block text-sm font-medium text-gray-700">
+            Why are you nominating this person? (Optional)
+          </label>
+          <textarea
+            name="nominations[${newIndex}][reason]"
+            id="nominations_${newIndex}_reason"
+            rows="2"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            placeholder="Their experience, skills, or perspective that would be valuable..."
+          ></textarea>
+        </div>
+      </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', html);
+  }
+</script>
