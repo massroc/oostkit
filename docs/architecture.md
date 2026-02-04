@@ -1,0 +1,148 @@
+# Platform Architecture
+
+## Overview
+
+A monorepo containing multiple applications supporting OST methodology. Each app is self-contained with its own tech stack, database, and deployment, while sharing common infrastructure where beneficial.
+
+## Monorepo Structure
+
+```
+/
+├── apps/                          # Individual applications
+│   ├── productive_workgroups/     # 6 Criteria workshop tool
+│   └── <future_apps>/
+├── docs/                          # Platform-wide documentation
+├── .github/workflows/             # CI/CD pipelines (per-app)
+├── docker-compose.yml             # Root orchestration
+├── Makefile                       # Convenience commands
+└── CLAUDE.md                      # AI assistant context
+```
+
+### App Conventions
+
+Each app in `apps/` should have:
+- Self-contained codebase with its own dependencies
+- `docker-compose.yml` with prefixed service names (e.g., `pw_app`, `pw_db`)
+- Own CI workflow in `.github/workflows/<app_name>.yml` with path filtering
+- Own deployment configuration (e.g., `fly.toml`)
+- Own documentation (README, requirements, design docs)
+
+### Naming Conventions
+
+- Docker services: `<prefix>_<service>` (e.g., `pw_app`, `pw_db`, `rt_app`, `rt_db`)
+- Ports: Each app gets unique port ranges to avoid conflicts
+- Databases: Separate database per app
+
+## Tech Stack
+
+### Current: Elixir/Phoenix
+
+Used for `productive_workgroups` and likely future apps requiring:
+- Real-time collaboration (LiveView, PubSub)
+- WebSocket-based features
+- Concurrent session handling
+
+### Stack Selection Criteria
+
+Choose tech stack based on app requirements:
+- **Real-time collaborative**: Elixir/Phoenix with LiveView
+- **Async workflow/CRUD**: Could be lighter weight, but stack consistency has value
+- **Different stacks**: Supported by monorepo structure if genuinely needed
+
+## Databases
+
+### Strategy: Isolated Databases
+
+Each app has its own database:
+- Prevents coupling between apps
+- Allows independent schema evolution
+- Simplifies deployment and scaling
+
+Shared services (e.g., future auth) would have their own database.
+
+### Current Databases
+
+| App | Dev Database | Test Database | Port |
+|-----|--------------|---------------|------|
+| productive_workgroups | `productive_workgroups_dev` | `productive_workgroups_test` | 5432/5433 |
+
+## Shared Infrastructure (Planned)
+
+### Authentication
+
+Not yet implemented. When needed:
+- Build as separate app in `apps/auth/` with own database
+- Other apps validate tokens against it
+- Options: JWT tokens, API-based validation
+- Fly.io internal networking for service-to-service communication
+
+### Portal/Landing Page
+
+Planned entry point for tool selection:
+- Could be simple static site or lightweight app
+- Links to individual tool apps
+- Presents tools by audience (team tools vs facilitator toolkit)
+
+## Deployment
+
+### Platform: Fly.io
+
+Each app deploys independently:
+- Own `fly.toml` configuration
+- Own database instance
+- Sydney region (primary)
+
+### CI/CD
+
+GitHub Actions with path filtering:
+- Changes to `apps/productive_workgroups/**` trigger only that app's CI
+- Each app has own workflow file
+- Deploys to Fly.io on merge to main
+
+### Environment Configuration
+
+- Development: Docker Compose (local)
+- Production: Fly.io with secrets management
+- Database URLs, secrets injected via environment
+
+## Inter-App Communication
+
+### Current: None Required
+
+Apps are currently independent with no need to communicate.
+
+### Future Options (if needed)
+
+- **Shared auth**: Token validation via internal API
+- **Event-based**: Message queue if apps need loose coupling
+- **Direct API**: REST/GraphQL between services
+
+Preference: Keep apps independent as long as possible. Add communication only when genuinely needed.
+
+## Development Workflow
+
+### Local Development
+
+```bash
+# Start specific app
+cd apps/productive_workgroups
+docker compose up
+
+# Or from root (starts all)
+docker compose up
+```
+
+### Testing
+
+```bash
+cd apps/<app_name>
+docker compose --profile test run --rm <prefix>_test
+```
+
+### Adding a New App
+
+1. Create `apps/<app_name>/` with app code
+2. Add `docker-compose.yml` with prefixed services
+3. Create `.github/workflows/<app_name>.yml` with path filtering
+4. Update root `docker-compose.yml` to include new app
+5. Add to root README apps table

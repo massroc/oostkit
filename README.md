@@ -1,6 +1,6 @@
 # Productive Tools Monorepo
 
-A collection of productivity tools built primarily with Elixir/Phoenix.
+Online tools supporting Open Systems Theory (OST) methodology. Includes team-facing workshop tools and facilitator toolkit for running OST engagements.
 
 ## Apps
 
@@ -41,6 +41,8 @@ docker compose up
 
 Platform-wide documentation lives in [`docs/`](docs/):
 
+- [Product Vision](docs/product-vision.md) - Product lines, audiences, and strategic context
+- [Architecture](docs/architecture.md) - Technical design, stack decisions, deployment
 - [Referral Tool Requirements](docs/referral-tool-requirements.md) - PDW participant selection tool
 
 ### Adding a New App
