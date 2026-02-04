@@ -45,7 +45,12 @@ defmodule WrtWeb.WebhookController do
         json(conn, %{status: "ignored", reason: "unknown_record_type"})
 
       true ->
-        process_postmark_status(conn, tenant, contact_id, postmark_record_type_to_status(record_type))
+        process_postmark_status(
+          conn,
+          tenant,
+          contact_id,
+          postmark_record_type_to_status(record_type)
+        )
     end
   end
 
