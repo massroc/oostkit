@@ -6,10 +6,16 @@
       </a>
       <%= if assigns[:current_super_admin] do %>
         <div class="flex gap-x-6">
-          <.link navigate={~p"/admin/dashboard"} class="text-sm font-semibold text-zinc-300 hover:text-white">
+          <.link
+            navigate={~p"/admin/dashboard"}
+            class="text-sm font-semibold text-zinc-300 hover:text-white"
+          >
             Dashboard
           </.link>
-          <.link navigate={~p"/admin/orgs"} class="text-sm font-semibold text-zinc-300 hover:text-white">
+          <.link
+            navigate={~p"/admin/orgs"}
+            class="text-sm font-semibold text-zinc-300 hover:text-white"
+          >
             Organisations
           </.link>
         </div>
@@ -17,8 +23,12 @@
     </div>
     <div class="flex items-center gap-x-6">
       <%= if assigns[:current_super_admin] do %>
-        <span class="text-sm text-zinc-400"><%= @current_super_admin.email %></span>
-        <.link href={~p"/admin/logout"} method="delete" class="text-sm font-semibold text-zinc-300 hover:text-white">
+        <span class="text-sm text-zinc-400">{@current_super_admin.email}</span>
+        <.link
+          href={~p"/admin/logout"}
+          method="delete"
+          class="text-sm font-semibold text-zinc-300 hover:text-white"
+        >
           Log out
         </.link>
       <% end %>
@@ -28,6 +38,6 @@
 <main class="px-4 py-10 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-4xl">
     <.flash_group flash={@flash} />
-    <%= @inner_content %>
+    {@inner_content}
   </div>
 </main>

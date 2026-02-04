@@ -119,7 +119,11 @@ defmodule WrtWeb.Telemetry do
       queues = [:default, :emails, :rounds, :maintenance]
 
       Enum.each(queues, fn queue ->
-        count = Oban.check_queue(queue: queue) |> length()
+        count =
+          case Oban.check_queue(queue: queue) do
+            %{running: running} when is_list(running) -> length(running)
+            _ -> 0
+          end
 
         :telemetry.execute(
           [:wrt, :oban, :queue_length],

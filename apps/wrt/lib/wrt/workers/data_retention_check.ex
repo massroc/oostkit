@@ -32,7 +32,8 @@ defmodule Wrt.Workers.DataRetentionCheck do
   defp check_retention(retention_months, warning_days) do
     cutoff_date = months_ago(retention_months)
     # Warning date is retention period minus warning days
-    warning_cutoff = months_ago(retention_months) |> DateTime.add(warning_days * 24 * 60 * 60, :second)
+    warning_cutoff =
+      months_ago(retention_months) |> DateTime.add(warning_days * 24 * 60 * 60, :second)
 
     orgs = Platform.list_organisations()
 
@@ -58,12 +59,18 @@ defmodule Wrt.Workers.DataRetentionCheck do
         end)
 
       if length(warning_campaigns) > 0 do
-        Logger.info("Queueing retention warnings for #{length(warning_campaigns)} campaigns in org #{org.id}")
+        Logger.info(
+          "Queueing retention warnings for #{length(warning_campaigns)} campaigns in org #{org.id}"
+        )
+
         queue_warnings(org.id, Enum.map(warning_campaigns, & &1.id))
       end
 
       if length(archive_campaigns) > 0 do
-        Logger.info("Queueing archival for #{length(archive_campaigns)} campaigns in org #{org.id}")
+        Logger.info(
+          "Queueing archival for #{length(archive_campaigns)} campaigns in org #{org.id}"
+        )
+
         queue_archival(tenant, Enum.map(archive_campaigns, & &1.id))
       end
     end)
@@ -76,7 +83,9 @@ defmodule Wrt.Workers.DataRetentionCheck do
 
     if org do
       # TODO: Send email to org admins about upcoming data deletion
-      Logger.info("Would send retention warning to org #{org_id} for campaigns: #{inspect(campaign_ids)}")
+      Logger.info(
+        "Would send retention warning to org #{org_id} for campaigns: #{inspect(campaign_ids)}"
+      )
     end
 
     :ok

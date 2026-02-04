@@ -42,10 +42,29 @@ defmodule Wrt.ReportsTest do
 
     test "counts rounds by status", %{tenant: tenant, campaign: campaign} do
       # Create rounds with different statuses
-      insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 1, status: "pending"})
-      insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 2, status: "active"})
-      insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 3, status: "active"})
-      insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 4, status: "closed"})
+      insert_in_tenant(tenant, :round, %{
+        campaign_id: campaign.id,
+        round_number: 1,
+        status: "pending"
+      })
+
+      insert_in_tenant(tenant, :round, %{
+        campaign_id: campaign.id,
+        round_number: 2,
+        status: "active"
+      })
+
+      insert_in_tenant(tenant, :round, %{
+        campaign_id: campaign.id,
+        round_number: 3,
+        status: "active"
+      })
+
+      insert_in_tenant(tenant, :round, %{
+        campaign_id: campaign.id,
+        round_number: 4,
+        status: "closed"
+      })
 
       summary = Reports.get_rounds_summary(tenant, campaign.id)
 
@@ -346,9 +365,15 @@ defmodule Wrt.ReportsTest do
       end)
 
       # Second nominee gets 3 nominations
-      nominators |> Enum.take(3) |> Enum.each(fn nominator ->
+      nominators
+      |> Enum.take(3)
+      |> Enum.each(fn nominator ->
         Wrt.Repo.insert!(
-          %Nomination{round_id: round.id, nominator_id: nominator.id, nominee_id: second_nominee.id},
+          %Nomination{
+            round_id: round.id,
+            nominator_id: nominator.id,
+            nominee_id: second_nominee.id
+          },
           prefix: tenant
         )
       end)
@@ -406,9 +431,15 @@ defmodule Wrt.ReportsTest do
       end)
 
       # Second nominator makes 2 nominations
-      nominees |> Enum.take(2) |> Enum.each(fn nominee ->
+      nominees
+      |> Enum.take(2)
+      |> Enum.each(fn nominee ->
         Wrt.Repo.insert!(
-          %Nomination{round_id: round.id, nominator_id: second_nominator.id, nominee_id: nominee.id},
+          %Nomination{
+            round_id: round.id,
+            nominator_id: second_nominator.id,
+            nominee_id: nominee.id
+          },
           prefix: tenant
         )
       end)

@@ -39,7 +39,10 @@
         <table class="min-w-full divide-y divide-zinc-300">
           <thead>
             <tr>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-zinc-900 sm:pl-0">
+              <th
+                scope="col"
+                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-zinc-900 sm:pl-0"
+              >
                 Organisation
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-zinc-900">
@@ -60,19 +63,22 @@
             <%= for org <- @organisations do %>
               <tr>
                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-zinc-900 sm:pl-0">
-                  <%= org.name %>
+                  {org.name}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-zinc-500">
-                  <%= org.admin_email %>
+                  {org.admin_email}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <.status_badge status={org.status} />
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-zinc-500">
-                  <%= Calendar.strftime(org.inserted_at, "%d %b %Y") %>
+                  {Calendar.strftime(org.inserted_at, "%d %b %Y")}
                 </td>
                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                  <.link navigate={~p"/admin/orgs/#{org.id}"} class="text-zinc-600 hover:text-zinc-900">
+                  <.link
+                    navigate={~p"/admin/orgs/#{org.id}"}
+                    class="text-zinc-600 hover:text-zinc-900"
+                  >
                     View
                   </.link>
                 </td>

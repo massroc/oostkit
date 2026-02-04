@@ -1,7 +1,7 @@
 <.header>
   Seed Group
   <:subtitle>
-    Manage the initial group of people for <%= @campaign.name %>
+    Manage the initial group of people for {@campaign.name}
   </:subtitle>
   <:actions>
     <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
@@ -16,7 +16,11 @@
     <p class="text-sm text-gray-600 mb-4">
       Upload a CSV file with columns: <code>name</code>, <code>email</code>
     </p>
-    <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed/upload"} method="post" enctype="multipart/form-data">
+    <form
+      action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed/upload"}
+      method="post"
+      enctype="multipart/form-data"
+    >
       <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
       <div class="flex items-center gap-4">
         <input
@@ -62,14 +66,16 @@
 </div>
 
 <div class="mt-8">
-  <h2 class="text-lg font-semibold text-gray-900">Seed Group (<%= length(@seed_people) %> people)</h2>
+  <h2 class="text-lg font-semibold text-gray-900">Seed Group ({length(@seed_people)} people)</h2>
 
   <%= if Enum.empty?(@seed_people) do %>
-    <p class="text-gray-500 mt-4">No people in the seed group yet. Upload a CSV or add people manually.</p>
+    <p class="text-gray-500 mt-4">
+      No people in the seed group yet. Upload a CSV or add people manually.
+    </p>
   <% else %>
     <.table id="seed-people" rows={@seed_people}>
-      <:col :let={person} label="Name"><%= person.name %></:col>
-      <:col :let={person} label="Email"><%= person.email %></:col>
+      <:col :let={person} label="Name">{person.name}</:col>
+      <:col :let={person} label="Email">{person.email}</:col>
     </.table>
   <% end %>
 </div>

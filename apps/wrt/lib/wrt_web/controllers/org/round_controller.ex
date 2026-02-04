@@ -36,7 +36,10 @@ defmodule WrtWeb.Org.RoundController do
     # Check if there's already an active round
     if Rounds.get_active_round(tenant, campaign.id) do
       conn
-      |> put_flash(:error, "There is already an active round. Close it before starting a new one.")
+      |> put_flash(
+        :error,
+        "There is already an active round. Close it before starting a new one."
+      )
       |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds")
     else
       duration_days = String.to_integer(round_params["duration_days"] || "7")
@@ -51,7 +54,10 @@ defmodule WrtWeb.Org.RoundController do
           case Rounds.start_round(tenant, round, duration_days) do
             {:ok, {started_round, contacts}} ->
               conn
-              |> put_flash(:info, "Round #{started_round.round_number} started with #{length(contacts)} contacts.")
+              |> put_flash(
+                :info,
+                "Round #{started_round.round_number} started with #{length(contacts)} contacts."
+              )
               |> redirect(to: ~p"/org/#{org.slug}/campaigns/#{campaign}/rounds/#{started_round}")
 
             {:error, reason} ->
@@ -109,7 +115,11 @@ defmodule WrtWeb.Org.RoundController do
     end
   end
 
-  def extend(conn, %{"campaign_id" => campaign_id, "round_id" => round_id, "extension" => extension_params}) do
+  def extend(conn, %{
+        "campaign_id" => campaign_id,
+        "round_id" => round_id,
+        "extension" => extension_params
+      }) do
     tenant = conn.assigns.tenant
     org = conn.assigns.current_org
 

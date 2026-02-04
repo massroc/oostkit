@@ -69,7 +69,8 @@ defmodule WrtWeb.Nominator.AuthController do
         render(conn, :invalid_link,
           page_title: "Link Already Used",
           org: org,
-          reason: "This link has already been used. If you need to edit your nominations, please request a new link."
+          reason:
+            "This link has already been used. If you need to edit your nominations, please request a new link."
         )
 
       {:error, :expired} ->

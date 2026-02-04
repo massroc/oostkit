@@ -16,7 +16,7 @@ defmodule Wrt.TenantManager do
   def create_tenant(org_id) when is_integer(org_id) do
     schema_name = tenant_schema_name(org_id)
 
-    with :ok <- Triplex.create(schema_name, Repo),
+    with {:ok, _} <- Triplex.create(schema_name, Repo),
          {:ok, _} <- migrate_tenant(schema_name) do
       {:ok, schema_name}
     end

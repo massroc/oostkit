@@ -39,7 +39,9 @@ defmodule Wrt.Platform.Organisation do
     organisation
     |> cast(attrs, [:name, :description, :admin_name, :admin_email])
     |> validate_required([:name, :admin_name, :admin_email])
-    |> validate_format(:admin_email, ~r/^[^\s]+@[^\s]+\.[^\s]+$/, message: "must be a valid email")
+    |> validate_format(:admin_email, ~r/^[^\s]+@[^\s]+\.[^\s]+$/,
+      message: "must be a valid email"
+    )
     |> generate_slug()
     |> unique_constraint(:slug)
     |> unique_constraint(:admin_email)

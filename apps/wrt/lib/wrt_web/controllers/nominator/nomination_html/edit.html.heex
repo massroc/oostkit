@@ -2,14 +2,14 @@
   <.header>
     Submit Your Nominations
     <:subtitle>
-      Hello <%= @person.name %>! Please nominate people you believe would be valuable workshop participants.
+      Hello {@person.name}! Please nominate people you believe would be valuable workshop participants.
     </:subtitle>
   </.header>
 
   <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
     <p class="text-sm text-blue-800">
-      <strong>Round <%= @round.round_number %></strong> is open until
-      <strong><%= Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p") %></strong>.
+      <strong>Round {@round.round_number}</strong>
+      is open until <strong><%= Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p") %></strong>.
       You can edit your nominations until the round closes.
     </p>
   </div>
@@ -17,20 +17,25 @@
   <%= if length(@existing_nominations) > 0 do %>
     <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
       <p class="text-sm text-green-800">
-        You have already submitted <%= length(@existing_nominations) %> nomination(s).
+        You have already submitted {length(@existing_nominations)} nomination(s).
         Submitting again will replace your previous nominations.
       </p>
     </div>
   <% end %>
 
-  <form action={~p"/org/#{@org.slug}/nominate/submit"} method="post" class="mt-8" id="nomination-form">
+  <form
+    action={~p"/org/#{@org.slug}/nominate/submit"}
+    method="post"
+    class="mt-8"
+    id="nomination-form"
+  >
     <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
 
     <div id="nominations-container" class="space-y-6">
       <%= for i <- 0..2 do %>
         <% existing = Enum.at(@existing_nominations, i) %>
         <div class="nomination-entry bg-white shadow rounded-lg p-6" data-index={i}>
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Nomination <%= i + 1 %></h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Nomination {i + 1}</h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -48,7 +53,10 @@
             </div>
 
             <div>
-              <label for={"nominations_#{i}_email"} class="block text-sm font-medium text-gray-700">
+              <label
+                for={"nominations_#{i}_email"}
+                class="block text-sm font-medium text-gray-700"
+              >
                 Email Address
               </label>
               <input

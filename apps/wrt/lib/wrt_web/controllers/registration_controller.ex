@@ -13,7 +13,10 @@ defmodule WrtWeb.RegistrationController do
     case Platform.register_organisation(org_params) do
       {:ok, _org} ->
         conn
-        |> put_flash(:info, "Registration submitted! You will receive an email when your organisation is approved.")
+        |> put_flash(
+          :info,
+          "Registration submitted! You will receive an email when your organisation is approved."
+        )
         |> redirect(to: ~p"/")
 
       {:error, changeset} ->

@@ -15,7 +15,10 @@ defmodule WrtWeb.Org.CampaignController do
 
     if Campaigns.has_active_campaign?(tenant) do
       conn
-      |> put_flash(:error, "You already have an active campaign. Complete or archive it before creating a new one.")
+      |> put_flash(
+        :error,
+        "You already have an active campaign. Complete or archive it before creating a new one."
+      )
       |> redirect(to: ~p"/org/#{org.slug}/dashboard")
     else
       changeset = Campaigns.change_campaign(%Campaign{})

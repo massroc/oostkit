@@ -14,7 +14,11 @@ defmodule Wrt.MagicLinksTest do
       %{tenant: tenant, round: round, person: person}
     end
 
-    test "creates a magic link with generated token", %{tenant: tenant, round: round, person: person} do
+    test "creates a magic link with generated token", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
       attrs = %{person_id: person.id, round_id: round.id}
 
       assert {:ok, magic_link} = MagicLinks.create_magic_link(tenant, attrs)
@@ -74,7 +78,12 @@ defmodule Wrt.MagicLinksTest do
       assert result.token == magic_link.token
     end
 
-    test "preloads person and round", %{tenant: tenant, magic_link: magic_link, person: person, round: round} do
+    test "preloads person and round", %{
+      tenant: tenant,
+      magic_link: magic_link,
+      person: person,
+      round: round
+    } do
       result = MagicLinks.get_by_token(tenant, magic_link.token)
 
       assert result.person.id == person.id
@@ -108,7 +117,10 @@ defmodule Wrt.MagicLinksTest do
       assert {:error, :not_found} = MagicLinks.verify_token(tenant, "bad-token")
     end
 
-    test "returns {:error, :already_used} for used token", %{tenant: tenant, magic_link: magic_link} do
+    test "returns {:error, :already_used} for used token", %{
+      tenant: tenant,
+      magic_link: magic_link
+    } do
       {:ok, _} = MagicLinks.use_magic_link(tenant, magic_link)
 
       assert {:error, :already_used} = MagicLinks.verify_token(tenant, magic_link.token)
@@ -122,7 +134,8 @@ defmodule Wrt.MagicLinksTest do
       # Create an expired magic link directly in the database
       expired_link = %MagicLink{
         token: "expired-token-#{System.unique_integer([:positive])}",
-        expires_at: DateTime.utc_now() |> DateTime.add(-1 * 60 * 60) |> DateTime.truncate(:second),
+        expires_at:
+          DateTime.utc_now() |> DateTime.add(-1 * 60 * 60) |> DateTime.truncate(:second),
         person_id: person.id,
         round_id: round.id
       }
@@ -186,18 +199,28 @@ defmodule Wrt.MagicLinksTest do
       assert result.id == magic_link.id
     end
 
-    test "returns {:error, :not_found} for non-existent magic link", %{tenant: tenant, magic_link: magic_link} do
+    test "returns {:error, :not_found} for non-existent magic link", %{
+      tenant: tenant,
+      magic_link: magic_link
+    } do
       assert {:error, :not_found} = MagicLinks.verify_code(tenant, -1, magic_link.code)
     end
 
-    test "returns {:error, :invalid_code} for wrong code", %{tenant: tenant, magic_link: magic_link} do
+    test "returns {:error, :invalid_code} for wrong code", %{
+      tenant: tenant,
+      magic_link: magic_link
+    } do
       assert {:error, :invalid_code} = MagicLinks.verify_code(tenant, magic_link.id, "000000")
     end
 
-    test "returns {:error, :already_used} for used magic link", %{tenant: tenant, magic_link: magic_link} do
+    test "returns {:error, :already_used} for used magic link", %{
+      tenant: tenant,
+      magic_link: magic_link
+    } do
       {:ok, _} = MagicLinks.use_magic_link(tenant, magic_link)
 
-      assert {:error, :already_used} = MagicLinks.verify_code(tenant, magic_link.id, magic_link.code)
+      assert {:error, :already_used} =
+               MagicLinks.verify_code(tenant, magic_link.id, magic_link.code)
     end
 
     test "returns {:error, :code_expired} for expired code", %{tenant: tenant} do
@@ -208,9 +231,11 @@ defmodule Wrt.MagicLinksTest do
       # Create a magic link with an expired code directly
       expired_code_link = %MagicLink{
         token: "token-#{System.unique_integer([:positive])}",
-        expires_at: DateTime.utc_now() |> DateTime.add(24 * 60 * 60) |> DateTime.truncate(:second),
+        expires_at:
+          DateTime.utc_now() |> DateTime.add(24 * 60 * 60) |> DateTime.truncate(:second),
         code: "123456",
-        code_expires_at: DateTime.utc_now() |> DateTime.add(-5 * 60) |> DateTime.truncate(:second),
+        code_expires_at:
+          DateTime.utc_now() |> DateTime.add(-5 * 60) |> DateTime.truncate(:second),
         person_id: person.id,
         round_id: round.id
       }
@@ -254,26 +279,41 @@ defmodule Wrt.MagicLinksTest do
       %{tenant: tenant, round: round, person: person}
     end
 
-    test "creates a new magic link when none exists", %{tenant: tenant, round: round, person: person} do
+    test "creates a new magic link when none exists", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
       assert {:ok, magic_link} = MagicLinks.get_or_create_magic_link(tenant, person.id, round.id)
 
       assert magic_link.person_id == person.id
       assert magic_link.round_id == round.id
     end
 
-    test "returns existing active link if one exists", %{tenant: tenant, round: round, person: person} do
-      {:ok, original} = MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+    test "returns existing active link if one exists", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
+      {:ok, original} =
+        MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+
       {:ok, retrieved} = MagicLinks.get_or_create_magic_link(tenant, person.id, round.id)
 
       assert retrieved.id == original.id
       assert retrieved.token == original.token
     end
 
-    test "creates new link if existing one is expired", %{tenant: tenant, round: round, person: person} do
+    test "creates new link if existing one is expired", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
       # Create an expired link
       expired_link = %MagicLink{
         token: "expired-#{System.unique_integer([:positive])}",
-        expires_at: DateTime.utc_now() |> DateTime.add(-1 * 60 * 60) |> DateTime.truncate(:second),
+        expires_at:
+          DateTime.utc_now() |> DateTime.add(-1 * 60 * 60) |> DateTime.truncate(:second),
         person_id: person.id,
         round_id: round.id
       }
@@ -286,8 +326,14 @@ defmodule Wrt.MagicLinksTest do
       assert new_link.token != expired.token
     end
 
-    test "creates new link if existing one is used", %{tenant: tenant, round: round, person: person} do
-      {:ok, original} = MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+    test "creates new link if existing one is used", %{
+      tenant: tenant,
+      round: round,
+      person: person
+    } do
+      {:ok, original} =
+        MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+
       {:ok, _used} = MagicLinks.use_magic_link(tenant, original)
 
       {:ok, new_link} = MagicLinks.get_or_create_magic_link(tenant, person.id, round.id)
@@ -311,7 +357,8 @@ defmodule Wrt.MagicLinksTest do
       for i <- 1..3 do
         expired = %MagicLink{
           token: "expired-#{i}-#{System.unique_integer([:positive])}",
-          expires_at: DateTime.utc_now() |> DateTime.add(-i * 60 * 60) |> DateTime.truncate(:second),
+          expires_at:
+            DateTime.utc_now() |> DateTime.add(-i * 60 * 60) |> DateTime.truncate(:second),
           person_id: person.id,
           round_id: round.id
         }
@@ -320,7 +367,8 @@ defmodule Wrt.MagicLinksTest do
       end
 
       # Create a valid link
-      {:ok, valid} = MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+      {:ok, valid} =
+        MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
 
       deleted_count = MagicLinks.delete_expired(tenant)
 
@@ -331,7 +379,8 @@ defmodule Wrt.MagicLinksTest do
     end
 
     test "returns 0 when no expired links exist", %{tenant: tenant, round: round, person: person} do
-      {:ok, _valid} = MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
+      {:ok, _valid} =
+        MagicLinks.create_magic_link(tenant, %{person_id: person.id, round_id: round.id})
 
       assert MagicLinks.delete_expired(tenant) == 0
     end

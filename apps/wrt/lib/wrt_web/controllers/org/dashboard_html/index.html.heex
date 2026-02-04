@@ -1,5 +1,5 @@
 <.header>
-  <%= @org.name %> Dashboard
+  {@org.name} Dashboard
   <:subtitle>Manage your referral campaigns</:subtitle>
   <:actions>
     <.link href={~p"/org/#{@org.slug}/campaigns/new"}>
@@ -14,7 +14,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-lg font-semibold text-green-800">Active Campaign</h2>
-          <p class="text-green-700 mt-1"><%= @active_campaign.name %></p>
+          <p class="text-green-700 mt-1">{@active_campaign.name}</p>
         </div>
         <.link href={~p"/org/#{@org.slug}/campaigns/#{@active_campaign}"}>
           <.button class="bg-green-600 hover:bg-green-700">View Campaign</.button>
@@ -23,8 +23,10 @@
 
       <%= if @active_round do %>
         <p class="text-sm text-green-600 mt-2">
-          Round <%= @active_round.round_number %> in progress
-          <span class="ml-2">Deadline: <%= Calendar.strftime(@active_round.deadline, "%B %d, %Y") %></span>
+          Round {@active_round.round_number} in progress
+          <span class="ml-2">
+            Deadline: {Calendar.strftime(@active_round.deadline, "%B %d, %Y")}
+          </span>
         </p>
       <% else %>
         <p class="text-sm text-green-600 mt-2">No active round</p>
@@ -36,40 +38,40 @@
         <div class="bg-white shadow rounded-lg p-4">
           <h3 class="text-sm font-medium text-gray-500">Response Rate</h3>
           <p class="mt-1 text-2xl font-semibold text-indigo-600">
-            <%= @campaign_stats.contacts.response_rate %>%
+            {@campaign_stats.contacts.response_rate}%
           </p>
           <p class="text-xs text-gray-400">
-            <%= @campaign_stats.contacts.responded %> / <%= @campaign_stats.contacts.total %> responded
+            {@campaign_stats.contacts.responded} / {@campaign_stats.contacts.total} responded
           </p>
         </div>
 
         <div class="bg-white shadow rounded-lg p-4">
           <h3 class="text-sm font-medium text-gray-500">Total Nominations</h3>
           <p class="mt-1 text-2xl font-semibold text-green-600">
-            <%= @campaign_stats.nominations.total %>
+            {@campaign_stats.nominations.total}
           </p>
           <p class="text-xs text-gray-400">
-            from <%= @campaign_stats.nominations.unique_nominators %> nominators
+            from {@campaign_stats.nominations.unique_nominators} nominators
           </p>
         </div>
 
         <div class="bg-white shadow rounded-lg p-4">
           <h3 class="text-sm font-medium text-gray-500">Unique Nominees</h3>
           <p class="mt-1 text-2xl font-semibold text-purple-600">
-            <%= @campaign_stats.nominations.unique_nominees %>
+            {@campaign_stats.nominations.unique_nominees}
           </p>
           <p class="text-xs text-gray-400">
-            avg <%= @campaign_stats.nominations.avg_per_nominator %> nominations each
+            avg {@campaign_stats.nominations.avg_per_nominator} nominations each
           </p>
         </div>
 
         <div class="bg-white shadow rounded-lg p-4">
           <h3 class="text-sm font-medium text-gray-500">Rounds</h3>
           <p class="mt-1 text-2xl font-semibold text-gray-700">
-            <%= @campaign_stats.rounds.total %>
+            {@campaign_stats.rounds.total}
           </p>
           <p class="text-xs text-gray-400">
-            <%= @campaign_stats.rounds.closed %> closed, <%= @campaign_stats.rounds.active %> active
+            {@campaign_stats.rounds.closed} closed, {@campaign_stats.rounds.active} active
           </p>
         </div>
       </div>
@@ -81,20 +83,23 @@
             <%= for {nominee, index} <- Enum.with_index(@top_nominees) do %>
               <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                 <div class="flex items-center">
-                  <span class="w-6 text-sm font-bold text-indigo-600"><%= index + 1 %>.</span>
-                  <span class="font-medium"><%= nominee.name %></span>
+                  <span class="w-6 text-sm font-bold text-indigo-600">{index + 1}.</span>
+                  <span class="font-medium">{nominee.name}</span>
                   <span class={"ml-2 px-2 py-0.5 text-xs rounded-full #{if nominee.source == "seed", do: "bg-blue-100 text-blue-700", else: "bg-purple-100 text-purple-700"}"}>
-                    <%= nominee.source %>
+                    {nominee.source}
                   </span>
                 </div>
                 <span class="font-semibold text-green-600">
-                  <%= nominee.nomination_count %> nominations
+                  {nominee.nomination_count} nominations
                 </span>
               </div>
             <% end %>
           </div>
           <div class="mt-4">
-            <.link href={~p"/org/#{@org.slug}/campaigns/#{@active_campaign}/results"} class="text-sm text-indigo-600 hover:text-indigo-800">
+            <.link
+              href={~p"/org/#{@org.slug}/campaigns/#{@active_campaign}/results"}
+              class="text-sm text-indigo-600 hover:text-indigo-800"
+            >
               View all results &rarr;
             </.link>
           </div>
@@ -109,15 +114,20 @@
     <p class="text-gray-500 mt-4">No campaigns yet. Create your first campaign to get started.</p>
   <% else %>
     <.table id="campaigns" rows={@campaigns}>
-      <:col :let={campaign} label="Name"><%= campaign.name %></:col>
+      <:col :let={campaign} label="Name">{campaign.name}</:col>
       <:col :let={campaign} label="Status">
         <span class={"px-2 py-1 text-xs rounded-full #{status_class(campaign.status)}"}>
-          <%= campaign.status %>
+          {campaign.status}
         </span>
       </:col>
-      <:col :let={campaign} label="Created"><%= Calendar.strftime(campaign.inserted_at, "%B %d, %Y") %></:col>
+      <:col :let={campaign} label="Created">
+        {Calendar.strftime(campaign.inserted_at, "%B %d, %Y")}
+      </:col>
       <:action :let={campaign}>
-        <.link href={~p"/org/#{@org.slug}/campaigns/#{campaign}"} class="text-indigo-600 hover:text-indigo-900">
+        <.link
+          href={~p"/org/#{@org.slug}/campaigns/#{campaign}"}
+          class="text-indigo-600 hover:text-indigo-900"
+        >
           View
         </.link>
       </:action>

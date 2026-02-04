@@ -208,7 +208,10 @@ defmodule Wrt.Reports do
           responded: stats.responded,
           pending: stats.total - stats.responded,
           response_rate:
-            if(stats.total > 0, do: Float.round(stats.responded / stats.total * 100, 1), else: 0.0)
+            if(stats.total > 0,
+              do: Float.round(stats.responded / stats.total * 100, 1),
+              else: 0.0
+            )
         }
     end
   end

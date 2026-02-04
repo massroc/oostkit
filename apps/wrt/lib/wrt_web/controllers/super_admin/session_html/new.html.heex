@@ -7,7 +7,7 @@
   <.simple_form :let={f} for={%{}} as={:admin} action={~p"/admin/login"} class="mt-10">
     <%= if @error_message do %>
       <div class="rounded-md bg-red-50 p-4 mb-6">
-        <p class="text-sm text-red-700"><%= @error_message %></p>
+        <p class="text-sm text-red-700">{@error_message}</p>
       </div>
     <% end %>
 

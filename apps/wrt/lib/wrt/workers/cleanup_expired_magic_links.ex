@@ -24,7 +24,9 @@ defmodule Wrt.Workers.CleanupExpiredMagicLinks do
       end)
 
     if total_deleted > 0 do
-      Logger.info("Cleaned up #{total_deleted} expired magic links across #{length(tenants)} tenants")
+      Logger.info(
+        "Cleaned up #{total_deleted} expired magic links across #{length(tenants)} tenants"
+      )
     end
 
     :ok
