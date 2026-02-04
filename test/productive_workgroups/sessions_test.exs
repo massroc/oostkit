@@ -159,18 +159,6 @@ defmodule ProductiveWorkgroups.SessionsTest do
       assert {:error, :at_first_question} = Sessions.go_back_question(session)
     end
 
-    test "go_back_to_intro/1 transitions from scoring Q0 to intro", %{template: template} do
-      {:ok, session} = Sessions.create_session(template)
-      {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
-      assert session.state == "scoring"
-      assert session.current_question_index == 0
-
-      {:ok, updated} = Sessions.go_back_to_intro(session)
-      assert updated.state == "intro"
-      assert updated.current_question_index == 0
-    end
-
     test "go_back_to_scoring/2 transitions from summary to last question", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)

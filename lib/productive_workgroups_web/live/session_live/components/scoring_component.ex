@@ -184,12 +184,14 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Components.ScoringComponent do
             <%= if @participant.is_facilitator do %>
               <div class="bg-gray-800 rounded-lg p-6">
                 <div class="flex gap-3">
-                  <button
-                    phx-click="go_back"
-                    class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <span>←</span> <span>Back</span>
-                  </button>
+                  <%= if @session.current_question_index > 0 do %>
+                    <button
+                      phx-click="go_back"
+                      class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <span>←</span> <span>Back</span>
+                    </button>
+                  <% end %>
                   <button
                     disabled
                     class="flex-1 px-6 py-3 bg-gray-600 text-gray-400 font-semibold rounded-lg cursor-not-allowed"

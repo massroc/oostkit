@@ -166,6 +166,26 @@ defmodule ProductiveWorkgroups.Scoring do
     active_count > 0 and active_count == score_count
   end
 
+  @doc """
+  Counts the number of turn-locked scores for a question.
+  Used to determine turn state when revisiting a question.
+  """
+  def count_locked_turns(%Session{} = session, question_index) do
+    Score
+    |> where(
+      [s],
+      s.session_id == ^session.id and s.question_index == ^question_index and s.turn_locked == true
+    )
+    |> Repo.aggregate(:count)
+  end
+
+  @doc """
+  Checks if any scores exist for a question (to detect revisits).
+  """
+  def has_scores?(%Session{} = session, question_index) do
+    count_scores(session, question_index) > 0
+  end
+
   ## Score Aggregation
 
   @doc """

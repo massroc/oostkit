@@ -145,10 +145,24 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     current_turn_has_score =
       current_turn_participant != nil and Map.has_key?(score_map, current_turn_participant.id)
 
+    # Get fresh participants list for readiness calculation
+    # Use socket.assigns if available, otherwise load from database
+    all_participants =
+      case socket.assigns[:participants] do
+        participants when is_list(participants) and length(participants) > 0 ->
+          participants
+
+        _ ->
+          Sessions.list_participants(session)
+      end
+
     # Calculate readiness for non-facilitator, non-observer participants
     # Skipped participants (no score when all turns done) count as ready
+    # If row is locked (revisiting completed question), all are auto-ready
+    row_locked = Scoring.row_locked?(session, question_index)
+
     {ready_count, eligible_count, all_ready} =
-      calculate_readiness(socket.assigns[:participants] || [], score_map, all_turns_done)
+      calculate_readiness(all_participants, score_map, all_turns_done, row_locked)
 
     socket
     |> assign(all_scores: participant_scores)
@@ -199,26 +213,34 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     end
   end
 
-  defp calculate_readiness(all_participants, score_map, all_turns_done) do
+  defp calculate_readiness(all_participants, score_map, all_turns_done, row_locked) do
     eligible_participants =
       Enum.filter(all_participants, fn p ->
         p.status == "active" and not p.is_facilitator and not p.is_observer
       end)
 
-    # Count participants who are ready:
-    # - Clicked "I'm Ready to Continue" (is_ready = true), OR
-    # - Were skipped (no score when all turns done)
-    # Note: Having a score (clicking Done) does NOT count as ready
-    ready_count =
-      Enum.count(eligible_participants, fn p ->
-        was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
-        p.is_ready or was_skipped
-      end)
-
     eligible_count = length(eligible_participants)
-    all_ready = eligible_count > 0 and ready_count == eligible_count
 
-    {ready_count, eligible_count, all_ready}
+    # If row is locked, we're revisiting a completed question - everyone is auto-ready
+    if row_locked do
+      {eligible_count, eligible_count, true}
+    else
+      # Count participants who are ready:
+      # - Clicked "I'm Ready to Continue" (is_ready = true), OR
+      # - Were skipped (no score when all turns done)
+      # Note: Having a score does NOT count as ready - participants must explicitly
+      # click "I'm Ready to Continue" after team discussion
+      ready_count =
+        Enum.count(eligible_participants, fn p ->
+          was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
+          p.is_ready or was_skipped
+        end)
+
+      # When no eligible participants (only facilitator/observers), consider all ready
+      all_ready = eligible_count == 0 or ready_count == eligible_count
+
+      {ready_count, eligible_count, all_ready}
+    end
   end
 
   @doc """

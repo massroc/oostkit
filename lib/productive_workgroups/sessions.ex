@@ -179,19 +179,39 @@ defmodule ProductiveWorkgroups.Sessions do
     # Lock all scores for the current question before advancing
     ProductiveWorkgroups.Scoring.lock_row(session, session.current_question_index)
 
-    # Reset all participants' ready state for the new question
-    reset_all_ready(session)
+    next_question_index = session.current_question_index + 1
+
+    # Check if we're revisiting a question that already has scores
+    is_revisit = ProductiveWorkgroups.Scoring.has_scores?(session, next_question_index)
+
+    # Calculate the turn index for the next question
+    turn_index =
+      if is_revisit do
+        # Revisiting - restore turn state based on locked turns
+        locked_count = ProductiveWorkgroups.Scoring.count_locked_turns(session, next_question_index)
+        locked_count
+      else
+        # First visit - start from beginning
+        0
+      end
+
+    # Only reset ready state if this is a first visit
+    unless is_revisit do
+      reset_all_ready(session)
+    end
 
     result =
       session
       |> Session.transition_changeset("scoring", %{
-        current_question_index: session.current_question_index + 1,
-        current_turn_index: 0
+        current_question_index: next_question_index,
+        current_turn_index: turn_index
       })
       |> Repo.update()
 
-    # Broadcast participants_reset so clients refresh their participant data
-    broadcast(session, {:participants_ready_reset, %{}})
+    # Broadcast participants_reset only for first visits
+    unless is_revisit do
+      broadcast(session, {:participants_ready_reset, %{}})
+    end
 
     broadcast_session_update(result)
   end
@@ -260,23 +280,16 @@ defmodule ProductiveWorkgroups.Sessions do
   end
 
   def go_back_question(%Session{state: "scoring"} = session) do
+    # When going back, set turn index to participant count to indicate all turns complete
+    # (since we're returning to a question that was already fully discussed)
+    participant_count = length(get_participants_in_turn_order(session))
+
     result =
       session
       |> Session.transition_changeset("scoring", %{
-        current_question_index: session.current_question_index - 1
+        current_question_index: session.current_question_index - 1,
+        current_turn_index: participant_count
       })
-      |> Repo.update()
-
-    broadcast_session_update(result)
-  end
-
-  @doc """
-  Goes back from scoring (at question 0) to intro.
-  """
-  def go_back_to_intro(%Session{state: "scoring", current_question_index: 0} = session) do
-    result =
-      session
-      |> Session.transition_changeset("intro", %{current_question_index: 0})
       |> Repo.update()
 
     broadcast_session_update(result)
@@ -286,9 +299,16 @@ defmodule ProductiveWorkgroups.Sessions do
   Goes back from summary to the last scoring question.
   """
   def go_back_to_scoring(%Session{state: "summary"} = session, last_question_index) do
+    # When going back from summary, set turn index to participant count to indicate all turns complete
+    # (since we're returning to a question that was already fully discussed)
+    participant_count = length(get_participants_in_turn_order(session))
+
     result =
       session
-      |> Session.transition_changeset("scoring", %{current_question_index: last_question_index})
+      |> Session.transition_changeset("scoring", %{
+        current_question_index: last_question_index,
+        current_turn_index: participant_count
+      })
       |> Repo.update()
 
     broadcast_session_update(result)

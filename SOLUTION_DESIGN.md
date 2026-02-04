@@ -1252,6 +1252,34 @@ Note: The "actions" state still exists in the schema for backwards compatibility
 but the default UI flow now goes directly from "summary" to "completed".
 The "completed" state serves as the wrap-up page where actions are created.
 
+### Navigation Rules
+
+**Back Button Availability:**
+| Screen | Facilitator | Participants |
+|--------|-------------|--------------|
+| Question phase (Q1) | Hidden (can't go further back) | Hidden |
+| Question phase (Q2+) | Back to previous question | Hidden |
+| Summary screen | Back to last question | Hidden |
+| Wrap-up screen | Back to summary | Hidden |
+
+**Navigation Constraints:**
+- Back button cannot navigate earlier than Q1 (no return to intro from scoring)
+- Only facilitator can navigate - participants follow the session state
+- Going back resets participants' ready state for the current question
+
+### Readiness Rules
+
+**Team Discussion Phase (after all turns complete):**
+- Scored participants must explicitly click "I'm Ready to Continue"
+- Skipped participants are automatically marked as ready
+- Facilitator can advance once all participants are ready
+
+**Revisiting Completed Questions:**
+When navigating back to a row-locked (completed) question:
+- All participants are automatically marked as ready
+- This allows immediate forward navigation without re-clicking Ready
+- The team has already discussed and agreed to move forward previously
+
 ### LiveView State Structure
 
 ```elixir
@@ -1824,8 +1852,9 @@ default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
-*Document Version: 2.2*
+*Document Version: 2.3*
 *v2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
 *v2.1 - Added extracted handler modules (TimerHandler, OperationHelpers)*
 *v2.2 - Removed turn timeout (facilitator can manually skip inactive participants)*
-*Last Updated: 2026-02-03*
+*v2.3 - Added navigation rules and readiness behavior documentation*
+*Last Updated: 2026-02-04*
