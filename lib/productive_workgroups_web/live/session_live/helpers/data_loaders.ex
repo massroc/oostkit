@@ -149,7 +149,7 @@ defmodule ProductiveWorkgroupsWeb.SessionLive.Helpers.DataLoaders do
     # Use socket.assigns if available, otherwise load from database
     all_participants =
       case socket.assigns[:participants] do
-        participants when is_list(participants) and length(participants) > 0 ->
+        [_ | _] = participants ->
           participants
 
         _ ->
