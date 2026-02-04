@@ -2,21 +2,28 @@
 
 ## Overview
 
-A monorepo containing multiple applications supporting OST methodology. Each app is self-contained with its own tech stack, database, and deployment, while sharing common infrastructure where beneficial.
+**OOSTKit** (Online Open Systems Theory Kit) - a monorepo containing multiple applications supporting OST methodology. Each app is self-contained with its own tech stack, database, and deployment, while sharing common infrastructure where beneficial.
 
 ## Monorepo Structure
 
 ```
 /
 ├── apps/                          # Individual applications
-│   ├── productive_workgroups/     # 6 Criteria workshop tool
-│   └── <future_apps>/
+│   ├── productive_workgroups/     # Workgroup Pulse (6 Criteria workshop)
+│   └── <future: wrt>/             # Workshop Referral Tool
 ├── docs/                          # Platform-wide documentation
 ├── .github/workflows/             # CI/CD pipelines (per-app)
 ├── docker-compose.yml             # Root orchestration
 ├── Makefile                       # Convenience commands
 └── CLAUDE.md                      # AI assistant context
 ```
+
+### Apps
+
+| Product Name | Directory | Description |
+|--------------|-----------|-------------|
+| Workgroup Pulse | `apps/productive_workgroups/` | 6 Criteria for Productive Work |
+| Workshop Referral Tool (WRT) | `apps/wrt/` (planned) | PDW participant selection |
 
 ### App Conventions
 

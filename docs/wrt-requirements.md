@@ -1,8 +1,8 @@
-# Referral Process Tool Requirements
+# Workshop Referral Tool (WRT) Requirements
 
 ## Context
 
-This tool supports Participative Design Workshops (PDW) using the referral-based participant selection process from Open Systems Theory (OST). The methodology comes from Merrelyn Emery's work. The goal is a reusable tool that can support this process for multiple engagements.
+WRT supports Participative Design Workshops (PDW) using the referral-based participant selection process from Open Systems Theory (OST). The methodology comes from Merrelyn Emery's work. The goal is a reusable tool that can support this process for multiple engagements.
 
 ## The Referral Process
 
