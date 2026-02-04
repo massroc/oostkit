@@ -5,7 +5,12 @@ const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
 
+// Import shared design system preset
+// Note: Local copy used for Docker builds - keep in sync with /shared/tailwind.preset.js
+const designSystemPreset = require("./tailwind.preset.js")
+
 module.exports = {
+  presets: [designSystemPreset],
   content: [
     "./js/**/*.js",
     "../lib/wrt_web.ex",
@@ -13,9 +18,8 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        brand: "#FD4F00",
-      }
+      // App-specific overrides go here
+      // The design system colors, spacing, etc. come from the preset
     },
   },
   plugins: [

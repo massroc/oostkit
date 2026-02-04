@@ -71,7 +71,7 @@ defmodule WrtWeb.Plugs.RateLimiter.Rules do
   rule "throttle login attempts", conn do
     if RateLimiter.login_path?(conn) do
       throttle(
-        conn.remote_ip,
+        ip_to_string(conn.remote_ip),
         period: 60_000,
         limit: 5,
         storage: @storage
@@ -82,7 +82,7 @@ defmodule WrtWeb.Plugs.RateLimiter.Rules do
   rule "throttle magic link requests", conn do
     if RateLimiter.magic_link_path?(conn) do
       throttle(
-        conn.remote_ip,
+        ip_to_string(conn.remote_ip),
         period: 60_000,
         limit: 3,
         storage: @storage
@@ -93,7 +93,7 @@ defmodule WrtWeb.Plugs.RateLimiter.Rules do
   rule "throttle nomination submissions", conn do
     if RateLimiter.nomination_path?(conn) do
       # Use session ID if available, otherwise IP
-      key = get_session(conn, :nominator_person_id) || conn.remote_ip
+      key = get_session(conn, :nominator_person_id) || ip_to_string(conn.remote_ip)
 
       throttle(
         key,
@@ -107,7 +107,7 @@ defmodule WrtWeb.Plugs.RateLimiter.Rules do
   rule "throttle webhooks", conn do
     if RateLimiter.webhook_path?(conn) do
       throttle(
-        conn.remote_ip,
+        ip_to_string(conn.remote_ip),
         period: 60_000,
         limit: 100,
         storage: @storage
@@ -118,12 +118,17 @@ defmodule WrtWeb.Plugs.RateLimiter.Rules do
   rule "general rate limit", conn do
     # General rate limit for all other requests
     throttle(
-      conn.remote_ip,
+      ip_to_string(conn.remote_ip),
       period: 60_000,
       limit: 120,
       storage: @storage
     )
   end
+
+  # Convert IP tuple to string for use as throttle key
+  # PlugAttack's do_throttle has issues with IPv6 tuples
+  defp ip_to_string(ip) when is_tuple(ip), do: :inet.ntoa(ip) |> to_string()
+  defp ip_to_string(ip), do: to_string(ip)
 
   # Handle blocked requests
 

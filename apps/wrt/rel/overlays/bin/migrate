@@ -6,7 +6,7 @@ cd -P -- "$(dirname -- "$0")"
 echo "Running database migrations..."
 ./wrt eval "Wrt.Release.migrate()"
 
-echo "Running database seeds..."
-./wrt eval "Wrt.Release.seed()"
+# Seeds are not run in production - they create dev test data
+# To seed in production, SSH in and run: /app/bin/wrt eval "Wrt.Release.seed()"
 
 echo "Database setup complete."
