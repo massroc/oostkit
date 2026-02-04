@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+
+echo "Running database migrations..."
+./wrt eval "Wrt.Release.migrate()"
+
+echo "Running database seeds..."
+./wrt eval "Wrt.Release.seed()"
+
+echo "Database setup complete."
