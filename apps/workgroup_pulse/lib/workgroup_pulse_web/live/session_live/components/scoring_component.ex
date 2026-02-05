@@ -241,7 +241,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
               <ul class="space-y-2 text-text-body">
                 <li>
-                  • For these, <span class="text-traffic-green font-semibold">more is always better</span>
+                  • For these,
+                  <span class="text-traffic-green font-semibold">more is always better</span>
                 </li>
 
                 <li>• <span class="text-traffic-green font-semibold">10 is optimal</span></li>
@@ -400,9 +401,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             class={[
               "flex-1 min-w-0 py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer",
               cond do
-                @selected_value == v -> "bg-traffic-green text-white"
-                v == 0 -> "bg-green-100 text-traffic-green border-2 border-traffic-green hover:bg-green-200"
-                true -> "bg-gray-200 text-text-dark hover:bg-gray-300"
+                @selected_value == v ->
+                  "bg-traffic-green text-white"
+
+                v == 0 ->
+                  "bg-green-100 text-traffic-green border-2 border-traffic-green hover:bg-green-200"
+
+                true ->
+                  "bg-gray-200 text-text-dark hover:bg-gray-300"
               end
             ]}
           >
@@ -416,7 +422,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
       </div>
 
       <div class="flex justify-between text-xs text-text-body">
-        <span>-5</span> <span class="text-traffic-green font-semibold">0 = optimal</span> <span>+5</span>
+        <span>-5</span> <span class="text-traffic-green font-semibold">0 = optimal</span>
+        <span>+5</span>
       </div>
     </div>
     """
@@ -425,7 +432,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   defp render_maximal_scale(assigns) do
     ~H"""
     <div class="space-y-4">
-      <div class="flex justify-between text-sm text-text-body"><span>Low</span> <span>High</span></div>
+      <div class="flex justify-between text-sm text-text-body">
+        <span>Low</span> <span>High</span>
+      </div>
 
       <div class="flex gap-1">
         <%= for v <- 0..10 do %>

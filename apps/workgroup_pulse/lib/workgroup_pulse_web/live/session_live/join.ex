@@ -48,7 +48,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
     ~H"""
     <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
       <div class="max-w-md w-full">
-        <.link navigate={~p"/"} class="text-text-body hover:text-text-dark mb-8 inline-flex items-center">
+        <.link
+          navigate={~p"/"}
+          class="text-text-body hover:text-text-dark mb-8 inline-flex items-center"
+        >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"

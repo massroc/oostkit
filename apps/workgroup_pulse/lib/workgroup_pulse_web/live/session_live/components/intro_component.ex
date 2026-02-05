@@ -92,7 +92,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   defp render_intro_welcome(assigns) do
     ~H"""
     <div class="text-center min-h-[340px]">
-      <h1 class="text-3xl font-bold text-text-dark mb-6 font-brand">Welcome to the Six Criteria Workshop</h1>
+      <h1 class="text-3xl font-bold text-text-dark mb-6 font-brand">
+        Welcome to the Six Criteria Workshop
+      </h1>
 
       <div class="text-text-body space-y-8 text-lg leading-tight">
         <p>
@@ -145,11 +147,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   defp render_intro_balance_scale(assigns) do
     ~H"""
     <div class="text-center min-h-[340px]">
-      <h1 class="text-3xl font-bold text-text-dark mb-6 font-brand">Understanding the Balance Scale</h1>
+      <h1 class="text-3xl font-bold text-text-dark mb-6 font-brand">
+        Understanding the Balance Scale
+      </h1>
 
       <div class="text-text-body text-lg text-left leading-tight">
         <p class="mb-4">
-          The first four questions use a <span class="text-text-dark font-semibold">balance scale</span>
+          The first four questions use a
+          <span class="text-text-dark font-semibold">balance scale</span>
           from -5 to +5:
         </p>
 

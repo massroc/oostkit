@@ -170,7 +170,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
               Finish the workshop and return to the home page.
             </p>
           <% else %>
-            <p class="text-center text-text-body">Waiting for facilitator to finish the workshop...</p>
+            <p class="text-center text-text-body">
+              Waiting for facilitator to finish the workshop...
+            </p>
           <% end %>
         </div>
       </div>

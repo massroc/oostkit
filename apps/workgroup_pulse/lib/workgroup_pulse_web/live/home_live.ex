@@ -62,8 +62,8 @@ defmodule WorkgroupPulseWeb.HomeLive do
               Start New Workshop
             </.link>
           </div>
-
-          <!-- Join Option -->
+          
+    <!-- Join Option -->
           <div class="bg-surface-sheet rounded-sheet shadow-sheet p-sheet-padding text-left flex flex-col">
             <h2 class="text-xl font-semibold text-text-dark mb-2">Join</h2>
             <p class="text-text-body text-sm mb-4">
