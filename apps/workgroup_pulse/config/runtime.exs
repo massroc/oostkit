@@ -8,6 +8,15 @@ if System.get_env("PHX_SERVER") do
   config :workgroup_pulse, WorkgroupPulseWeb.Endpoint, server: true
 end
 
+# PostHog analytics (optional - set POSTHOG_API_KEY to enable)
+posthog_key = System.get_env("POSTHOG_API_KEY")
+posthog_host = System.get_env("POSTHOG_HOST") || "https://us.i.posthog.com"
+
+config :workgroup_pulse, :posthog,
+  api_key: posthog_key,
+  host: posthog_host,
+  enabled: posthog_key != nil
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
