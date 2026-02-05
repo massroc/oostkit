@@ -225,6 +225,24 @@ Hooks.DurationPicker = {
   }
 }
 
+// PostHog analytics hook for custom event tracking from LiveView
+// Usage in LiveView: push_event(socket, "posthog:capture", %{event: "event_name", properties: %{}})
+Hooks.PostHogTracker = {
+  mounted() {
+    this.handleEvent("posthog:capture", ({event, properties}) => {
+      if (window.posthog) {
+        window.posthog.capture(event, properties || {})
+      }
+    })
+
+    this.handleEvent("posthog:identify", ({distinct_id, properties}) => {
+      if (window.posthog) {
+        window.posthog.identify(distinct_id, properties || {})
+      }
+    })
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},

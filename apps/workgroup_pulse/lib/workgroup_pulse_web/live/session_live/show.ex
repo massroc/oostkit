@@ -286,7 +286,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-surface-wall">
+    <div id="session-analytics" phx-hook="PostHogTracker" class="min-h-screen bg-surface-wall">
       {render_facilitator_timer(assigns)}
       <%= case @session.state do %>
         <% "lobby" -> %>
