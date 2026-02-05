@@ -1,0 +1,12 @@
+[
+  verbose: false,
+  private: false,
+  skip: false,
+  router: "lib/portal_web/router.ex",
+  exit: "low",
+  format: "txt",
+  out: "",
+  threshold: "low",
+  ignore: [],
+  ignore_files: []
+]

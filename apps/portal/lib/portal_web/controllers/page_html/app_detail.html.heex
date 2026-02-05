@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-gradient-to-b from-zinc-50 to-white">
+  <div class="mx-auto max-w-3xl px-6 py-16 sm:px-8">
+    <!-- Back link -->
+    <div class="mb-8">
+      <.link navigate={~p"/"} class="inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-zinc-900">
+        <.icon name="hero-arrow-left" class="h-4 w-4" />
+        Back to all tools
+      </.link>
+    </div>
+
+    <!-- App Header -->
+    <div class="mb-8">
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-zinc-900">
+            {@app.name}
+          </h1>
+          <p class="mt-2 text-lg text-zinc-600">
+            {@app.tagline}
+          </p>
+        </div>
+        <span class={[
+          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+          @app.audience == :facilitator && "bg-purple-100 text-purple-800",
+          @app.audience == :team && "bg-blue-100 text-blue-800"
+        ]}>
+          {if @app.audience == :facilitator, do: "For Facilitators", else: "For Teams"}
+        </span>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="prose prose-zinc mb-8">
+      <p class="text-zinc-700 whitespace-pre-line">{@app.description}</p>
+    </div>
+
+    <!-- Auth notice -->
+    <div :if={@app.requires_auth} class="mb-8 rounded-lg bg-amber-50 p-4">
+      <div class="flex">
+        <.icon name="hero-lock-closed" class="h-5 w-5 text-amber-500" />
+        <p class="ml-3 text-sm text-amber-700">
+          This tool requires login. You'll need an account to access it.
+        </p>
+      </div>
+    </div>
+
+    <!-- Launch button -->
+    <div class="flex gap-4">
+      <a
+        href={@app.url}
+        class="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-zinc-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+      >
+        Launch {@app.name}
+        <.icon name="hero-arrow-top-right-on-square" class="ml-2 h-4 w-4" />
+      </a>
+    </div>
+  </div>
+</div>

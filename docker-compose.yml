@@ -6,6 +6,8 @@
 
 # Include app-specific compose files
 include:
+  - path: apps/portal/docker-compose.yml
+    env_file: []
   - path: apps/workgroup_pulse/docker-compose.yml
     env_file: []
 

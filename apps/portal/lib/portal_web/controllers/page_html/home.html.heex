@@ -1,0 +1,60 @@
+<div class="min-h-screen bg-gradient-to-b from-zinc-50 to-white">
+  <!-- Hero Section -->
+  <div class="px-6 py-16 sm:px-8 lg:px-12">
+    <div class="mx-auto max-w-4xl text-center">
+      <h1 class="text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
+        OOSTKit
+      </h1>
+      <p class="mt-4 text-lg leading-8 text-zinc-600">
+        Tools for Open Systems Thinking practitioners
+      </p>
+      <p class="mt-2 text-base text-zinc-500">
+        Supporting facilitators and teams with participative design workshops
+      </p>
+    </div>
+  </div>
+
+  <!-- App Cards Section -->
+  <div class="mx-auto max-w-6xl px-6 pb-16 sm:px-8 lg:px-12">
+    <div class="grid gap-8 lg:grid-cols-2">
+      <!-- Tools for Facilitators -->
+      <div>
+        <h2 class="mb-6 text-xl font-semibold text-zinc-800">
+          <span class="inline-flex items-center gap-2">
+            <.icon name="hero-user-group" class="h-5 w-5" />
+            Tools for Facilitators
+          </span>
+        </h2>
+        <div class="space-y-4">
+          <.app_card :for={app <- @facilitator_apps} app={app} />
+          <.empty_state :if={@facilitator_apps == []}>
+            More facilitator tools coming soon.
+          </.empty_state>
+        </div>
+      </div>
+
+      <!-- Tools for Teams -->
+      <div>
+        <h2 class="mb-6 text-xl font-semibold text-zinc-800">
+          <span class="inline-flex items-center gap-2">
+            <.icon name="hero-users" class="h-5 w-5" />
+            Tools for Teams
+          </span>
+        </h2>
+        <div class="space-y-4">
+          <.app_card :for={app <- @team_apps} app={app} />
+          <.empty_state :if={@team_apps == []}>
+            More team tools coming soon.
+          </.empty_state>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-zinc-100 bg-zinc-50 py-8">
+    <div class="mx-auto max-w-6xl px-6 text-center text-sm text-zinc-500">
+      <p>OOSTKit - Open Systems Thinking Toolkit</p>
+    </div>
+  </footer>
+</div>

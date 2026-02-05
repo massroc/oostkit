@@ -317,7 +317,9 @@ primary_region = "syd"
   handlers = ["tls", "http"]
 ```
 
-### DNS (once domain registered)
+### DNS
+
+Domain: **oostkit.com** (registered)
 
 ```
 oostkit.com        → portal.fly.dev
@@ -331,7 +333,7 @@ wrt.oostkit.com    → wrt.fly.dev
 
 | Dependency | Required For | Notes |
 |------------|--------------|-------|
-| Domain registration | Phase 2 (subdomains) | Can develop locally without |
+| ~~Domain registration~~ | Phase 2 (subdomains) | ✓ oostkit.com registered |
 | WRT completion | Phase 2 (auth migration) | WRT should be stable first |
 | Branding decisions | Phase 1 (but placeholder OK) | Can iterate later |
 

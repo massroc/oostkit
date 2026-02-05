@@ -259,7 +259,7 @@ Key requirements:
 
 ## Decisions
 
-1. **Domain:** To be registered (e.g., oostkit.com or similar)
+1. **Domain:** oostkit.com (registered)
 2. **Branding:** Use placeholder logo/assets initially, create proper branding later
 3. **WRT integration:** Replace WRT's auth entirely when portal auth is ready
 4. **App metadata:** Config file versioned in git (simple, easy to update)

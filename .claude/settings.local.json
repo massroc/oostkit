@@ -64,7 +64,26 @@
       "Bash(tree:*)",
       "WebSearch",
       "Bash(ls:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(sh)",
+      "Bash(/home/rossm/.fly/bin/flyctl auth whoami)",
+      "Bash(/home/rossm/.fly/bin/flyctl apps create:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl postgres create:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl postgres attach:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl deploy:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl secrets list:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl postgres list:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl secrets set:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl status:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl ips private:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl logs:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl ssh console:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl machine list:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl machine destroy:*)",
+      "Bash(chmod:*)",
+      "Bash(/home/rossm/.fly/bin/flyctl machine update:*)",
+      "Bash(tee:*)",
+      "Bash(git cherry-pick:*)"
     ]
   }
 }

@@ -9,6 +9,7 @@ This is a monorepo containing multiple applications:
 ```
 /
 ├── apps/
+│   ├── portal/            # OOSTKit Portal - Landing page and auth hub (Elixir/Phoenix)
 │   ├── workgroup_pulse/   # Workgroup Pulse - 6 Criteria workshop (Elixir/Phoenix)
 │   └── wrt/               # Workshop Referral Tool (Elixir/Phoenix)
 ├── .github/workflows/     # CI/CD pipelines (per-app with path filtering)
@@ -139,6 +140,56 @@ docker compose logs -f wrt_app
 - `wrt_test` - Test runner container (profile: test)
 - `wrt_test_watch` - TDD watcher container (profile: tdd)
 
+### Common Commands (Portal)
+
+```bash
+# From apps/portal directory:
+
+# Start the app
+docker compose up
+
+# Compile the project
+docker compose exec portal_app mix compile
+
+# Compile with warnings as errors
+docker compose exec portal_app mix compile --warnings-as-errors
+
+# Run tests
+docker compose --profile test run --rm portal_test
+
+# Run tests in TDD mode (watches for file changes)
+docker compose --profile tdd run --rm portal_test_watch
+
+# Run a specific test file
+docker compose --profile test run --rm portal_test mix test test/path/to/test.exs
+
+# Open IEx shell
+docker compose exec portal_app iex -S mix
+
+# Run database migrations
+docker compose exec portal_app mix ecto.migrate
+
+# Reset database (drop, create, migrate, seed)
+docker compose exec portal_app mix ecto.reset
+
+# Run code quality checks
+docker compose exec portal_app mix quality
+
+# Format code
+docker compose exec portal_app mix format
+
+# View logs
+docker compose logs -f portal_app
+```
+
+### Service Names (Portal)
+
+- `portal_app` - The Phoenix application container (port 4002)
+- `portal_db` - PostgreSQL database (development, port 5436)
+- `portal_db_test` - PostgreSQL database (test, port 5437)
+- `portal_test` - Test runner container (profile: test)
+- `portal_test_watch` - TDD watcher container (profile: tdd)
+
 ## Testing (TDD Required)
 
 **This project strictly follows Test-Driven Development (TDD).** When implementing new features or making changes:
@@ -162,6 +213,7 @@ docker compose logs -f wrt_app
 CI uses a **reusable workflow pattern** for consistency across apps:
 
 - `.github/workflows/_elixir-ci.yml` - Shared CI logic (test, dialyzer, deploy)
+- `.github/workflows/portal.yml` - Thin caller for Portal
 - `.github/workflows/workgroup_pulse.yml` - Thin caller for Workgroup Pulse
 - `.github/workflows/wrt.yml` - Thin caller for WRT
 
@@ -195,6 +247,8 @@ Each app maintains its own documentation:
 Platform-wide documentation lives in `docs/`:
 - [Product Vision](docs/product-vision.md)
 - [Architecture](docs/architecture.md)
+- [Portal Requirements](docs/portal-requirements.md)
+- [Portal Implementation Plan](docs/portal-implementation-plan.md)
 - [WRT Requirements](docs/wrt-requirements.md)
 
 ### Documentation Guidelines

@@ -1,0 +1,25 @@
+name: Portal CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/portal/**'
+      - '.github/workflows/portal.yml'
+      - '.github/workflows/_elixir-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/portal/**'
+      - '.github/workflows/portal.yml'
+      - '.github/workflows/_elixir-ci.yml'
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_elixir-ci.yml
+    with:
+      app_name: portal
+      app_path: apps/portal
+      database_name: portal_test
+      deploy_enabled: false  # Enable when Fly.io is configured for Portal
+    secrets: inherit

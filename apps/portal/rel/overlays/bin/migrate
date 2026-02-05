@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+
+echo "Running database migrations..."
+./portal eval "Portal.Release.migrate()"
+
+echo "Database setup complete."
