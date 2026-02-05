@@ -103,3 +103,37 @@ fly secrets set POSTMARK_API_KEY=your-production-token -a your-prod-app
 - If `MAIL_ADAPTER=logger` → logs emails (staging mode)
 - If `POSTMARK_API_KEY` set → sends via Postmark
 - If neither set → emails will fail (intentional, to catch misconfig)
+
+## Rate Limiting
+
+Rate limiting can be disabled via environment variable if needed for debugging:
+
+```bash
+fly secrets set RATE_LIMITER_ENABLED=false -a wrt-tool
+```
+
+To re-enable:
+```bash
+fly secrets set RATE_LIMITER_ENABLED=true -a wrt-tool
+```
+
+## Fly.io Deployment
+
+The app is deployed to Fly.io as `wrt-tool`.
+
+**Useful commands:**
+```bash
+# View status
+fly status -a wrt-tool
+
+# View logs
+fly logs -a wrt-tool
+
+# SSH into the machine
+fly ssh console -a wrt-tool
+
+# Run migrations manually
+fly ssh console -a wrt-tool -C "/app/bin/migrate"
+```
+
+**Database:** `wrt-db` (PostgreSQL, 1GB RAM in syd region)
