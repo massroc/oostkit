@@ -262,3 +262,34 @@ Platform-wide documentation lives in `docs/`:
 - Elixir projects use `mix format` for code formatting
 - Run formatting through Docker (see commands above)
 - Compilation warnings should be treated as errors in CI
+
+## Git Workflow (CRITICAL)
+
+**NEVER push directly to main.** The main branch has protection enabled requiring pull requests.
+
+### Committing Changes
+
+When the user asks to "commit" or "save" changes:
+1. **Always use `/ship`** - never use manual `git add`, `git commit`, `git push origin main`
+2. The `/ship` skill handles creating branches and PRs properly
+
+### Monorepo PR Guidelines
+
+When creating PRs in this monorepo, consider what files are changed:
+
+| Changed Files | PR Scope | Notes |
+|--------------|----------|-------|
+| Only `apps/portal/**` | Portal only | CI runs portal workflow |
+| Only `apps/workgroup_pulse/**` | Pulse only | CI runs pulse workflow |
+| Only `apps/wrt/**` | WRT only | CI runs WRT workflow |
+| `CLAUDE.md`, `.gitignore`, root configs | Shared/infrastructure | Affects all apps |
+| `.github/workflows/_elixir-ci.yml` | CI infrastructure | Triggers ALL app workflows |
+| Multiple apps | Split into separate PRs | One PR per app when possible |
+
+### Branch Naming
+
+Use descriptive branch names with app prefix when app-specific:
+- `feature/portal-auth` - Portal-specific feature
+- `feature/wrt-tenants` - WRT-specific feature
+- `fix/shared-gitignore` - Shared infrastructure fix
+- `docs/update-readme` - Documentation changes
