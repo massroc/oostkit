@@ -65,13 +65,13 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
             "w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
             if(@show_notes,
               do: "bg-accent-purple text-white",
-              else: "bg-gray-100 text-text-body hover:bg-gray-600"
+              else: "bg-gray-200 text-text-dark hover:bg-gray-300"
             )
           ]}
         >
           <span>{if @show_notes, do: "Hide", else: "Add"} Notes</span>
           <%= if length(@question_notes) > 0 do %>
-            <span class="bg-gray-600 text-text-dark text-xs px-2 py-0.5 rounded-full">
+            <span class="bg-gray-300 text-text-dark text-xs px-2 py-0.5 rounded-full">
               {length(@question_notes)}
             </span>
           <% end %>
@@ -135,7 +135,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
             <%= if @session.current_question_index > 0 do %>
               <button
                 phx-click="go_back"
-                class="px-6 py-3 bg-gray-100 hover:bg-gray-600 text-text-body hover:text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
+                class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
               >
                 <span>←</span>
                 <span>Back</span>
@@ -148,7 +148,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
                 "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
                 if(@all_ready,
                   do: "bg-df-green hover:bg-secondary-green-light text-white",
-                  else: "bg-gray-600 text-text-body cursor-not-allowed"
+                  else: "bg-gray-200 text-gray-400 cursor-not-allowed"
                 )
               ]}
             >
@@ -172,7 +172,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
             <div class="text-center">
               <button
                 disabled
-                class="w-full px-6 py-3 bg-gray-600 text-text-body font-semibold rounded-lg cursor-not-allowed"
+                class="w-full px-6 py-3 bg-gray-200 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
               >
                 Ready to Continue
               </button>

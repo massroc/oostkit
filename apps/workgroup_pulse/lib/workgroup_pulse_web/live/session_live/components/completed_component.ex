@@ -154,7 +154,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
             <div class="flex gap-3">
               <button
                 phx-click="go_back"
-                class="px-6 py-3 bg-gray-100 hover:bg-gray-600 text-text-body hover:text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
+                class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
               >
                 <span>←</span> <span>Back</span>
               </button>

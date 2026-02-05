@@ -90,7 +90,7 @@
 }
 
 .ready-button-waiting {
-  @apply bg-gray-600 hover:bg-gray-500;
+  @apply bg-gray-200 hover:bg-gray-300;
 }
 
 .ready-button-ready {
