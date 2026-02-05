@@ -15,10 +15,9 @@ tmp/
 # Package tarballs
 *.tar
 
-# Phoenix static assets
-priv/static/assets/
-priv/static/cache_manifest.json
-priv/static/
+# Phoenix static assets (with ** to match in apps/ subdirectories)
+**/priv/static/assets/
+**/priv/static/cache_manifest.json
 
 # Node.js
 node_modules/
