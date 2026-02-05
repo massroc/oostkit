@@ -71,4 +71,9 @@ if config_env() == :prod do
   config :wrt, :data_retention,
     campaign_retention_months: 24,
     warning_days_before_deletion: 30
+
+  # Rate limiter configuration
+  # Set RATE_LIMITER_ENABLED=false to disable rate limiting
+  rate_limiter_enabled = System.get_env("RATE_LIMITER_ENABLED", "true") == "true"
+  config :wrt, WrtWeb.Plugs.RateLimiter, enabled: rate_limiter_enabled
 end
