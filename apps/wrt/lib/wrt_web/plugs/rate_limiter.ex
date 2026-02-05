@@ -64,7 +64,8 @@ defmodule WrtWeb.Plugs.RateLimiter.Rules do
   alias WrtWeb.Plugs.RateLimiter
 
   # Storage for rate limit counters (uses ETS)
-  @storage {PlugAttack.Storage.Ets, WrtWeb.Plugs.RateLimiter.Storage, [clean_period: 60_000]}
+  # Note: clean_period is configured in application.ex when starting the GenServer
+  @storage {PlugAttack.Storage.Ets, WrtWeb.Plugs.RateLimiter.Storage}
 
   # Rate limit rules
 
