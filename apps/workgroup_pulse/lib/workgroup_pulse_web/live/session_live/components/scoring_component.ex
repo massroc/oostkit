@@ -113,9 +113,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     case s.state do
                       :scored -> bg_color_class(s.color)
                       :current -> "bg-blue-900/30 border-2 border-blue-500 animate-pulse"
-                      :skipped -> "bg-surface-sheet border border-gray-600"
-                      :pending -> "bg-surface-sheet/50 border border-gray-700"
-                      _ -> "bg-gray-100 border border-gray-600"
+                      :skipped -> "bg-gray-100 border border-gray-300"
+                      :pending -> "bg-gray-50 border border-gray-200"
+                      _ -> "bg-gray-100 border border-gray-300"
                     end
                   ]}>
                     <div class={[
@@ -187,14 +187,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                   <%= if @session.current_question_index > 0 do %>
                     <button
                       phx-click="go_back"
-                      class="px-6 py-3 bg-gray-100 hover:bg-gray-600 text-text-body hover:text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
+                      class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
                     >
                       <span>←</span> <span>Back</span>
                     </button>
                   <% end %>
                   <button
                     disabled
-                    class="flex-1 px-6 py-3 bg-gray-600 text-text-body font-semibold rounded-lg cursor-not-allowed"
+                    class="flex-1 px-6 py-3 bg-gray-200 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
                   >
                     <%= if @session.current_question_index + 1 >= @total_questions do %>
                       Continue to Summary →
@@ -322,7 +322,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                   @selected_value != nil and
                     (not @has_submitted or @selected_value != @my_score),
                   do: "bg-accent-purple hover:bg-highlight text-white",
-                  else: "bg-gray-600 text-text-body cursor-not-allowed"
+                  else: "bg-gray-200 text-gray-400 cursor-not-allowed"
                 )
               ]}
             >
@@ -339,7 +339,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                 "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
                 if(@has_submitted,
                   do: "bg-df-green hover:bg-secondary-green-light text-white",
-                  else: "bg-gray-600 text-text-body cursor-not-allowed"
+                  else: "bg-gray-200 text-gray-400 cursor-not-allowed"
                 )
               ]}
             >

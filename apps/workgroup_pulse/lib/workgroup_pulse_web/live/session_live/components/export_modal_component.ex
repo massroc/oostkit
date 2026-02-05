@@ -62,8 +62,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
               <label class={[
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                 if(@export_content == "all",
-                  do: "bg-accent-purple/20 border border-blue-500",
-                  else: "bg-gray-100 border border-gray-600 hover:bg-gray-600"
+                  do: "bg-accent-purple/20 border border-accent-purple",
+                  else: "bg-gray-100 border border-gray-300 hover:bg-gray-200"
                 )
               ]}>
                 <input
@@ -84,8 +84,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
               <label class={[
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                 if(@export_content == "results",
-                  do: "bg-accent-purple/20 border border-blue-500",
-                  else: "bg-gray-100 border border-gray-600 hover:bg-gray-600"
+                  do: "bg-accent-purple/20 border border-accent-purple",
+                  else: "bg-gray-100 border border-gray-300 hover:bg-gray-200"
                 )
               ]}>
                 <input
@@ -107,13 +107,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                 "flex items-center gap-3 p-3 rounded-lg transition-colors",
                 cond do
                   @action_count == 0 ->
-                    "bg-surface-sheet border border-gray-700 cursor-not-allowed opacity-50"
+                    "bg-gray-100 border border-gray-300 cursor-not-allowed opacity-50"
 
                   @export_content == "actions" ->
-                    "bg-accent-purple/20 border border-blue-500 cursor-pointer"
+                    "bg-accent-purple/20 border border-accent-purple cursor-pointer"
 
                   true ->
-                    "bg-gray-100 border border-gray-600 hover:bg-gray-600 cursor-pointer"
+                    "bg-gray-100 border border-gray-300 hover:bg-gray-200 cursor-pointer"
                 end
               ]}>
                 <input
@@ -159,7 +159,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                 type="button"
                 phx-click="export"
                 phx-value-format="json"
-                class="px-4 py-3 bg-gray-100 hover:bg-gray-600 text-text-dark rounded-lg transition-colors font-medium"
+                class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark rounded-lg transition-colors font-medium"
               >
                 Export JSON
               </button>

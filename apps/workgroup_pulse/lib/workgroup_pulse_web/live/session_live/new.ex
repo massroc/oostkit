@@ -133,7 +133,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                     "px-8 py-3 rounded-lg border transition-colors flex items-center gap-3",
                     if(@facilitator_participating,
                       do: "bg-accent-purple border-accent-purple text-white",
-                      else: "bg-surface-wall border-gray-300 text-text-body hover:border-gray-400"
+                      else: "bg-surface-wall border-gray-300 text-text-dark hover:border-gray-400"
                     )
                   ]}
                 >
@@ -169,7 +169,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                     "px-8 py-3 rounded-lg border transition-colors flex items-center gap-3",
                     if(!@facilitator_participating,
                       do: "bg-accent-purple border-accent-purple text-white",
-                      else: "bg-surface-wall border-gray-300 text-text-body hover:border-gray-400"
+                      else: "bg-surface-wall border-gray-300 text-text-dark hover:border-gray-400"
                     )
                   ]}
                 >
