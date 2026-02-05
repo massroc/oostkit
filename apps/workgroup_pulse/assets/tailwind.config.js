@@ -5,7 +5,12 @@ const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
 
+// Import shared design system preset
+// Path is /shared in Docker (mounted volume) or ../../../shared locally
+const designSystemPreset = require("/shared/tailwind.preset.js")
+
 module.exports = {
+  presets: [designSystemPreset],
   content: [
     "./js/**/*.js",
     "../lib/workgroup_pulse_web.ex",
@@ -13,13 +18,8 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        brand: "#FD4F00",
-        // Traffic light colors
-        "traffic-green": "#22c55e",
-        "traffic-amber": "#f59e0b",
-        "traffic-red": "#ef4444",
-      }
+      // App-specific overrides go here
+      // The design system colors, spacing, etc. come from the preset
     },
   },
   plugins: [
@@ -49,7 +49,7 @@ module.exports = {
       matchComponents({
         "hero": ({name, fullPath}) => {
           let content = fs.readFileSync(fullPath).toString().replace(/\r?\n|\r/g, "")
-          let size = theme("googFontSize.xs")
+          let size = theme("spacing.5")
           return {
             [`--hero-${name}`]: `url('data:image/svg+xml;utf8,${content}')`,
             "-webkit-mask": `var(--hero-${name})`,
@@ -58,8 +58,8 @@ module.exports = {
             "background-color": "currentColor",
             "vertical-align": "middle",
             "display": "inline-block",
-            "width": theme("spacing.5"),
-            "height": theme("spacing.5")
+            "width": size,
+            "height": size
           }
         }
       }, {values})

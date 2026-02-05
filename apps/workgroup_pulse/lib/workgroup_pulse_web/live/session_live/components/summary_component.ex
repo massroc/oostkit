@@ -21,25 +21,25 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
     <div class="flex flex-col items-center min-h-screen px-4 py-8">
       <div class="max-w-4xl w-full">
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-white mb-2">Workshop Summary</h1>
+          <h1 class="text-3xl font-bold text-text-dark mb-2">Workshop Summary</h1>
 
-          <p class="text-gray-400">Review your team's responses before creating action items.</p>
+          <p class="text-text-body">Review your team's responses before creating action items.</p>
         </div>
         <!-- Participants -->
-        <div class="bg-gray-800 rounded-lg p-4 mb-6">
-          <h2 class="text-sm font-semibold text-gray-400 mb-3">Participants</h2>
+        <div class="bg-surface-sheet rounded-lg p-4 mb-6">
+          <h2 class="text-sm font-semibold text-text-body mb-3">Participants</h2>
 
           <div class="flex flex-wrap gap-2">
             <%= for p <- @participants do %>
-              <div class="bg-gray-700 rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm">
-                <span class="text-white">{p.name}</span>
+              <div class="bg-gray-100 rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm">
+                <span class="text-text-dark">{p.name}</span>
                 <%= cond do %>
                   <% p.is_observer -> %>
-                    <span class="text-xs bg-gray-600 text-gray-300 px-1.5 py-0.5 rounded">
+                    <span class="text-xs bg-gray-600 text-text-body px-1.5 py-0.5 rounded">
                       Observer
                     </span>
                   <% p.is_facilitator -> %>
-                    <span class="text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded">
+                    <span class="text-xs bg-purple-600 text-text-dark px-1.5 py-0.5 rounded">
                       Facilitator
                     </span>
                   <% true -> %>
@@ -58,8 +58,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
               <div class="flex items-start justify-between mb-3">
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-400">Q{score.question_index + 1}</span>
-                    <h3 class="font-semibold text-white">{score.title}</h3>
+                    <span class="text-sm text-text-body">Q{score.question_index + 1}</span>
+                    <h3 class="font-semibold text-text-dark">{score.title}</h3>
                   </div>
 
                   <div class="text-xs text-gray-500 mt-1">
@@ -111,7 +111,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
                         <% end %>
                       </div>
 
-                      <div class="text-xs text-gray-400 truncate" title={s.participant_name}>
+                      <div class="text-xs text-text-body truncate" title={s.participant_name}>
                         {s.participant_name}
                       </div>
                     </div>
@@ -125,7 +125,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
 
                   <ul class="space-y-1.5">
                     <%= for note <- question_notes do %>
-                      <li class="text-sm text-gray-300 bg-gray-700/50 rounded px-2 py-1.5">
+                      <li class="text-sm text-text-body bg-gray-100/50 rounded px-2 py-1.5">
                         {note.content}
                         <span class="text-xs text-gray-500 ml-1">— {note.author_name}</span>
                       </li>
@@ -137,18 +137,18 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
           <% end %>
         </div>
         <!-- Navigation Footer -->
-        <div class="bg-gray-800 rounded-lg p-6">
+        <div class="bg-surface-sheet rounded-lg p-6">
           <%= if @participant.is_facilitator do %>
             <div class="flex gap-3">
               <button
                 phx-click="go_back"
-                class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                class="px-6 py-3 bg-gray-100 hover:bg-gray-600 text-text-body hover:text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
               >
                 <span>←</span> <span>Back</span>
               </button>
               <button
                 phx-click="continue_to_wrapup"
-                class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                class="flex-1 px-6 py-3 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors"
               >
                 Continue to Wrap-Up →
               </button>
@@ -158,7 +158,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
               Proceed to create action items and finish the workshop.
             </p>
           <% else %>
-            <div class="text-center text-gray-400">
+            <div class="text-center text-text-body">
               Reviewing summary. Waiting for facilitator to continue...
             </div>
           <% end %>
