@@ -293,3 +293,27 @@ Use descriptive branch names with app prefix when app-specific:
 - `feature/wrt-tenants` - WRT-specific feature
 - `fix/shared-gitignore` - Shared infrastructure fix
 - `docs/update-readme` - Documentation changes
+
+### Concurrent Work on Different Apps
+
+**Safe to work concurrently** on different apps (e.g., one session on portal, another on wrt).
+PRs can merge independently without rebasing, as long as there are no file conflicts.
+
+Branch protection uses `strict: false` to enable this - PRs don't need to be up-to-date
+with main before merging.
+
+### Handling Merge Conflicts
+
+If GitHub shows "This branch has conflicts", resolve before merging:
+
+```bash
+git fetch origin main
+git merge origin/main
+# Resolve conflicts in editor
+git add <resolved-files>
+git commit
+git push
+```
+
+**Minimize conflicts** by keeping changes to shared files (CLAUDE.md, .gitignore, root configs)
+small and merging quickly.
