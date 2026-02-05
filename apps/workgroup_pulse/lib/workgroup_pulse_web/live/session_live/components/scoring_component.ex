@@ -45,25 +45,25 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <div class="max-w-2xl w-full">
           <!-- Progress indicator -->
           <div class="mb-6">
-            <div class="flex justify-between items-center text-sm text-gray-400 mb-2">
+            <div class="flex justify-between items-center text-sm text-text-body mb-2">
               <span>Question {@session.current_question_index + 1} of {@total_questions}</span>
               <span>{@score_count}/{@active_participant_count} submitted</span>
             </div>
 
-            <div class="w-full bg-gray-700 rounded-full h-2">
+            <div class="w-full bg-gray-100 rounded-full h-2">
               <div
-                class="bg-green-500 h-2 rounded-full transition-all duration-300"
+                class="bg-traffic-green h-2 rounded-full transition-all duration-300"
                 style={"width: #{(@session.current_question_index + 1) / @total_questions * 100}%"}
               />
             </div>
           </div>
           <!-- Question card -->
-          <div class="bg-gray-800 rounded-lg p-6 mb-6">
-            <div class="text-sm text-green-400 mb-2">{@current_question.criterion_name}</div>
+          <div class="bg-surface-sheet rounded-lg p-6 mb-6">
+            <div class="text-sm text-traffic-green mb-2">{@current_question.criterion_name}</div>
 
-            <h1 class="text-2xl font-bold text-white mb-4">{@current_question.title}</h1>
+            <h1 class="text-2xl font-bold text-text-dark mb-4">{@current_question.title}</h1>
 
-            <p class="text-gray-300 whitespace-pre-line">
+            <p class="text-text-body whitespace-pre-line">
               {format_description(@current_question.explanation)}
             </p>
 
@@ -77,7 +77,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     <button
                       type="button"
                       phx-click="toggle_facilitator_tips"
-                      class="text-sm text-gray-400 hover:text-white transition-colors"
+                      class="text-sm text-text-body hover:text-text-dark transition-colors"
                     >
                       Hide tips
                     </button>
@@ -85,7 +85,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
                   <ul class="space-y-2">
                     <%= for prompt <- @current_question.discussion_prompts do %>
-                      <li class="flex gap-2 text-gray-300 text-sm">
+                      <li class="flex gap-2 text-text-body text-sm">
                         <span class="text-purple-400">•</span> <span>{prompt}</span>
                       </li>
                     <% end %>
@@ -105,7 +105,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
           </div>
           <!-- Score grid showing all participants (butcher paper model) - only during scoring, not after reveal -->
           <%= if length(@all_scores) > 0 and not @scores_revealed do %>
-            <div class="bg-gray-800 rounded-lg p-4 mb-4">
+            <div class="bg-surface-sheet rounded-lg p-4 mb-4">
               <div class="flex flex-wrap gap-2 justify-center">
                 <%= for s <- @all_scores do %>
                   <div class={[
@@ -113,9 +113,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     case s.state do
                       :scored -> bg_color_class(s.color)
                       :current -> "bg-blue-900/30 border-2 border-blue-500 animate-pulse"
-                      :skipped -> "bg-gray-800 border border-gray-600"
-                      :pending -> "bg-gray-800/50 border border-gray-700"
-                      _ -> "bg-gray-700 border border-gray-600"
+                      :skipped -> "bg-surface-sheet border border-gray-600"
+                      :pending -> "bg-surface-sheet/50 border border-gray-700"
+                      _ -> "bg-gray-100 border border-gray-600"
                     end
                   ]}>
                     <div class={[
@@ -125,7 +125,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                         :current -> "text-blue-400"
                         :skipped -> "text-gray-500"
                         :pending -> "text-gray-600"
-                        _ -> "text-gray-400"
+                        _ -> "text-text-body"
                       end
                     ]}>
                       <%= case s.state do %>
@@ -149,7 +149,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     <div
                       class={[
                         "text-xs truncate",
-                        if(s.state == :scored, do: "text-gray-400", else: "text-gray-500")
+                        if(s.state == :scored, do: "text-text-body", else: "text-gray-500")
                       ]}
                       title={s.participant_name}
                     >
@@ -182,19 +182,19 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             {render_score_input(assigns)}
             <!-- Facilitator navigation bar during scoring entry -->
             <%= if @participant.is_facilitator do %>
-              <div class="bg-gray-800 rounded-lg p-6">
+              <div class="bg-surface-sheet rounded-lg p-6">
                 <div class="flex gap-3">
                   <%= if @session.current_question_index > 0 do %>
                     <button
                       phx-click="go_back"
-                      class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                      class="px-6 py-3 bg-gray-100 hover:bg-gray-600 text-text-body hover:text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
                     >
                       <span>←</span> <span>Back</span>
                     </button>
                   <% end %>
                   <button
                     disabled
-                    class="flex-1 px-6 py-3 bg-gray-600 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
+                    class="flex-1 px-6 py-3 bg-gray-600 text-text-body font-semibold rounded-lg cursor-not-allowed"
                   >
                     <%= if @session.current_question_index + 1 >= @total_questions do %>
                       Continue to Summary →
@@ -220,42 +220,43 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     ~H"""
     <div class="flex flex-col items-center justify-center min-h-screen px-4">
       <div class="max-w-2xl w-full text-center">
-        <div class="bg-gray-800 rounded-lg p-8">
+        <div class="bg-surface-sheet rounded-lg p-8">
           <div class="text-6xl mb-4">🔄</div>
 
-          <h1 class="text-3xl font-bold text-white mb-6">New Scoring Scale Ahead</h1>
+          <h1 class="text-3xl font-bold text-text-dark mb-6">New Scoring Scale Ahead</h1>
 
-          <div class="text-gray-300 space-y-4 text-lg text-left">
+          <div class="text-text-body space-y-4 text-lg text-left">
             <p class="text-center">Great progress! You've completed the first four questions.</p>
 
-            <div class="bg-gray-700 rounded-lg p-6 my-6">
-              <p class="text-white font-semibold mb-3">
+            <div class="bg-gray-100 rounded-lg p-6 my-6">
+              <p class="text-text-dark font-semibold mb-3">
                 The next four questions use a different scale:
               </p>
 
               <div class="flex justify-between items-center mb-4">
-                <span class="text-gray-400">0</span>
-                <span class="text-green-400 font-semibold text-xl">→</span>
-                <span class="text-green-400 font-semibold">10</span>
+                <span class="text-text-body">0</span>
+                <span class="text-traffic-green font-semibold text-xl">→</span>
+                <span class="text-traffic-green font-semibold">10</span>
               </div>
 
-              <ul class="space-y-2 text-gray-300">
+              <ul class="space-y-2 text-text-body">
                 <li>
-                  • For these, <span class="text-green-400 font-semibold">more is always better</span>
+                  • For these,
+                  <span class="text-traffic-green font-semibold">more is always better</span>
                 </li>
 
-                <li>• <span class="text-green-400 font-semibold">10 is optimal</span></li>
+                <li>• <span class="text-traffic-green font-semibold">10 is optimal</span></li>
               </ul>
             </div>
 
-            <p class="text-gray-400 text-center">
+            <p class="text-text-body text-center">
               These measure aspects of work where you can never have too much.
             </p>
           </div>
 
           <button
             phx-click="continue_past_transition"
-            class="mt-8 px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors text-lg"
+            class="mt-8 px-8 py-3 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors text-lg"
           >
             Continue to Question 5 →
           </button>
@@ -279,16 +280,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     assigns = assign(assigns, :current_turn_name, current_turn_name)
 
     ~H"""
-    <div class="bg-gray-800 rounded-lg p-6 mb-6">
+    <div class="bg-surface-sheet rounded-lg p-6 mb-6">
       <%= if @participant.is_observer do %>
         <div class="text-center">
           <div class="text-purple-400 text-lg font-semibold mb-2">Observer Mode</div>
 
-          <p class="text-gray-400">You are observing this session.</p>
+          <p class="text-text-body">You are observing this session.</p>
 
           <%= if @current_turn_name do %>
             <p class="text-gray-500 mt-2">
-              <span class="text-white">{@current_turn_name}</span> is scoring
+              <span class="text-text-dark">{@current_turn_name}</span> is scoring
             </p>
           <% end %>
         </div>
@@ -296,7 +297,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <%= if @is_my_turn and not @my_turn_locked do %>
           <!-- It's this participant's turn -->
           <div class="text-center mb-4">
-            <div class="text-green-400 text-lg font-semibold">
+            <div class="text-traffic-green text-lg font-semibold">
               <%= if @has_submitted do %>
                 Discuss your score
               <% else %>
@@ -320,8 +321,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                 if(
                   @selected_value != nil and
                     (not @has_submitted or @selected_value != @my_score),
-                  do: "bg-blue-600 hover:bg-blue-700 text-white",
-                  else: "bg-gray-600 text-gray-400 cursor-not-allowed"
+                  do: "bg-accent-purple hover:bg-highlight text-white",
+                  else: "bg-gray-600 text-text-body cursor-not-allowed"
                 )
               ]}
             >
@@ -337,8 +338,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
               class={[
                 "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
                 if(@has_submitted,
-                  do: "bg-green-600 hover:bg-green-700 text-white",
-                  else: "bg-gray-600 text-gray-400 cursor-not-allowed"
+                  do: "bg-df-green hover:bg-secondary-green-light text-white",
+                  else: "bg-gray-600 text-text-body cursor-not-allowed"
                 )
               ]}
             >
@@ -347,7 +348,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
           </div>
 
           <%= if @has_submitted do %>
-            <p class="text-center text-gray-400 text-sm mt-2">
+            <p class="text-center text-text-body text-sm mt-2">
               Discuss this score, then click "Done" when ready
             </p>
           <% end %>
@@ -355,11 +356,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
           <!-- Not this participant's turn, or they've completed their turn -->
           <div class="text-center">
             <%= if @current_turn_name do %>
-              <p class="text-gray-400">
+              <p class="text-text-body">
                 <%= if @current_turn_has_score do %>
-                  Discuss <span class="text-white">{@current_turn_name}</span>'s score
+                  Discuss <span class="text-text-dark">{@current_turn_name}</span>'s score
                 <% else %>
-                  Waiting for <span class="text-white">{@current_turn_name}</span> to score
+                  Waiting for <span class="text-text-dark">{@current_turn_name}</span> to score
                 <% end %>
               </p>
               <!-- Skip button - facilitator only, only when current turn hasn't placed a score -->
@@ -367,7 +368,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                 <div class="mt-4">
                   <button
                     phx-click="skip_turn"
-                    class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                    class="text-sm text-gray-500 hover:text-text-body transition-colors"
                   >
                     Skip {String.split(@current_turn_name) |> List.first()}'s turn
                   </button>
@@ -375,7 +376,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
               <% end %>
             <% else %>
               <!-- No current turn - all done or between turns -->
-              <p class="text-gray-400">Waiting for next turn...</p>
+              <p class="text-text-body">Waiting for next turn...</p>
             <% end %>
           </div>
         <% end %>
@@ -387,7 +388,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   defp render_balance_scale(assigns) do
     ~H"""
     <div class="space-y-4">
-      <div class="flex justify-between text-sm text-gray-400">
+      <div class="flex justify-between text-sm text-text-body">
         <span>Too little</span> <span>Just right</span> <span>Too much</span>
       </div>
 
@@ -400,9 +401,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             class={[
               "flex-1 min-w-0 py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer",
               cond do
-                @selected_value == v -> "bg-green-500 text-white"
-                v == 0 -> "bg-gray-600 text-white hover:bg-gray-500"
-                true -> "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                @selected_value == v ->
+                  "bg-traffic-green text-white"
+
+                v == 0 ->
+                  "bg-green-100 text-traffic-green border-2 border-traffic-green hover:bg-green-200"
+
+                true ->
+                  "bg-gray-200 text-text-dark hover:bg-gray-300"
               end
             ]}
           >
@@ -415,8 +421,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% end %>
       </div>
 
-      <div class="flex justify-between text-xs text-gray-500">
-        <span>-5</span> <span class="text-green-400">0 = optimal</span> <span>+5</span>
+      <div class="flex justify-between text-xs text-text-body">
+        <span>-5</span> <span class="text-traffic-green font-semibold">0 = optimal</span>
+        <span>+5</span>
       </div>
     </div>
     """
@@ -425,7 +432,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   defp render_maximal_scale(assigns) do
     ~H"""
     <div class="space-y-4">
-      <div class="flex justify-between text-sm text-gray-400"><span>Low</span> <span>High</span></div>
+      <div class="flex justify-between text-sm text-text-body">
+        <span>Low</span> <span>High</span>
+      </div>
 
       <div class="flex gap-1">
         <%= for v <- 0..10 do %>
@@ -435,11 +444,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             phx-value-score={v}
             class={[
               "flex-1 min-w-0 py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer",
-              cond do
-                @selected_value == v -> "bg-green-500 text-white"
-                v >= 7 -> "bg-gray-600 text-white hover:bg-gray-500"
-                true -> "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              end
+              if(@selected_value == v,
+                do: "bg-accent-purple text-white",
+                else: "bg-gray-200 text-text-dark hover:bg-gray-300"
+              )
             ]}
           >
             {v}
@@ -447,8 +455,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% end %>
       </div>
 
-      <div class="flex justify-between text-xs text-gray-500">
-        <span>0</span> <span class="text-green-400">10 = best</span>
+      <div class="flex justify-between text-xs text-text-body">
+        <span>0</span> <span>10</span>
       </div>
     </div>
     """

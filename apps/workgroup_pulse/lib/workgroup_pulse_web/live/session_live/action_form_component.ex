@@ -78,7 +78,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ActionFormComponent do
     <div class="mb-4">
       <form phx-submit="create_action" phx-target={@myself} class="space-y-3">
         <div>
-          <label class="block text-sm text-gray-400 mb-1">What needs to be done?</label>
+          <label class="block text-sm text-text-body mb-1">What needs to be done?</label>
           <input
             type="text"
             name="description"
@@ -87,11 +87,11 @@ defmodule WorkgroupPulseWeb.SessionLive.ActionFormComponent do
             phx-target={@myself}
             phx-debounce="300"
             placeholder="Describe the action..."
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
+            class="w-full bg-surface-wall border border-gray-300 rounded-lg px-4 py-2 text-text-dark placeholder-text-body focus:outline-none focus:border-accent-purple"
           />
         </div>
         <div>
-          <label class="block text-sm text-gray-400 mb-1">Owner (optional)</label>
+          <label class="block text-sm text-text-body mb-1">Owner (optional)</label>
           <input
             type="text"
             name="owner"
@@ -100,12 +100,12 @@ defmodule WorkgroupPulseWeb.SessionLive.ActionFormComponent do
             phx-target={@myself}
             phx-debounce="300"
             placeholder="Who will do this?"
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
+            class="w-full bg-surface-wall border border-gray-300 rounded-lg px-4 py-2 text-text-dark placeholder-text-body focus:outline-none focus:border-accent-purple"
           />
         </div>
         <button
           type="submit"
-          class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+          class="w-full px-4 py-2 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors"
         >
           Add Action
         </button>

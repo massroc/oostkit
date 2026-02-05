@@ -194,8 +194,8 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
 
       # Select a score
       view |> element("button[phx-value-score='0']") |> render_click()
-      # The score button should now be selected (green)
-      assert render(view) =~ "bg-green-500"
+      # The score button should now be selected (design system green)
+      assert render(view) =~ "bg-traffic-green"
     end
 
     test "back button is not shown on Q1 scoring", %{

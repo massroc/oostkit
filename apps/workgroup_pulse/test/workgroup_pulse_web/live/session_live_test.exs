@@ -514,11 +514,10 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
       {:ok, _view, html} = live(conn, ~p"/session/#{session.code}")
 
       # Should show Observer badge (gray background)
-      assert html =~ "bg-gray-600"
+      assert html =~ "bg-gray-200"
       assert html =~ "Observer"
-      # Should NOT show Facilitator badge (purple background) - they cannot be both
-      # The facilitator badge uses bg-purple-600 class
-      refute html =~ "bg-purple-600"
+      # Should NOT show Facilitator badge text - only Observer text when observing
+      refute html =~ ">Facilitator<"
     end
 
     test "facilitator defaults to participating (is_observer: false)", %{session: session} do
@@ -1503,7 +1502,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
 
       # When all participants have clicked ready after discussion, all are ready
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "skipped participants auto-ready, scored participants must click ready", ctx do
@@ -1538,7 +1537,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
       # Bob skipped = auto-ready, Alice clicked ready after discussion
       # All participants ready
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "facilitator can advance when skipped participant and scored participant are both ready",
@@ -1573,7 +1572,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
 
       # Bob skipped = auto-ready, Alice clicked Ready = all ready
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "facilitator can skip via UI; skipped auto-ready, scored need to click ready", ctx do
@@ -1618,7 +1617,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
 
       # Now all should be ready
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "skipped participants auto-ready immediately; scored participants must click ready",
@@ -1660,7 +1659,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
 
       # Now all should be ready
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "when only participant is skipped, facilitator can immediately advance", _ctx do
@@ -1727,7 +1726,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
       # Bob is the only eligible participant and he's skipped = auto-ready
       # Should show all ready immediately
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "Next Question button becomes enabled when all participants click ready", ctx do
@@ -1761,7 +1760,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
       # Should show all ready message now that both clicked ready
       assert html =~ "All participants ready"
       # Button should be enabled (green)
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "scored participants are NOT auto-ready; must click ready after team discussion", ctx do
@@ -1801,7 +1800,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
 
       # Now all are ready
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "observer participants are not counted in readiness", ctx do
@@ -1909,7 +1908,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
       # With no eligible participants (only facilitator), should show all ready
       assert html =~ "All participants ready"
       # Button should be enabled (green)
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
     end
 
     test "facilitator-only session can navigate back and forward and still see score input",
@@ -2035,7 +2034,7 @@ defmodule WorkgroupPulseWeb.SessionLiveTest do
       # Should be on Q1 and show all ready (since all turns were complete for Q1)
       assert html =~ "Question 1 of 2"
       assert html =~ "All participants ready"
-      assert html =~ "bg-green-600"
+      assert html =~ "bg-df-green"
 
       # Click Next Question to go forward to Q2
       html = render_click(view, "next_question")

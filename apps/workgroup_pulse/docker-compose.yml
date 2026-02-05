@@ -49,6 +49,7 @@ services:
       SECRET_KEY_BASE: dev_secret_key_base_that_is_at_least_64_characters_long_for_development
     volumes:
       - .:/app
+      - ../../shared:/shared
       - wp_deps:/app/deps
       - wp_build:/app/_build
       - wp_node_modules:/app/assets/node_modules

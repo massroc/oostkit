@@ -34,25 +34,28 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreHelpers do
 
   @doc """
   Returns CSS class for text color based on traffic light color.
+  Uses darker shades for light theme readability.
   """
-  def text_color_class(:green), do: "text-green-400"
-  def text_color_class(:amber), do: "text-yellow-400"
-  def text_color_class(:red), do: "text-red-400"
-  def text_color_class(_), do: "text-gray-400"
+  def text_color_class(:green), do: "text-traffic-green"
+  def text_color_class(:amber), do: "text-amber-600"
+  def text_color_class(:red), do: "text-traffic-red"
+  def text_color_class(_), do: "text-gray-500"
 
   @doc """
   Returns CSS classes for score box background based on traffic light color.
+  Light theme: colored backgrounds with matching borders.
   """
-  def bg_color_class(:green), do: "bg-green-900/50 border border-green-700"
-  def bg_color_class(:amber), do: "bg-yellow-900/50 border border-yellow-700"
-  def bg_color_class(:red), do: "bg-red-900/50 border border-red-700"
-  def bg_color_class(_), do: "bg-gray-700 border border-gray-600"
+  def bg_color_class(:green), do: "bg-green-100 border-2 border-traffic-green"
+  def bg_color_class(:amber), do: "bg-amber-100 border-2 border-amber-500"
+  def bg_color_class(:red), do: "bg-red-100 border-2 border-traffic-red"
+  def bg_color_class(_), do: "bg-gray-100 border-2 border-gray-300"
 
   @doc """
   Returns CSS classes for summary card background based on traffic light color.
+  Light theme: subtle tinted backgrounds.
   """
-  def card_color_class(:green), do: "bg-green-900/20 border-green-700"
-  def card_color_class(:amber), do: "bg-yellow-900/20 border-yellow-700"
-  def card_color_class(:red), do: "bg-red-900/20 border-red-700"
-  def card_color_class(_), do: "bg-gray-700 border-gray-600"
+  def card_color_class(:green), do: "bg-green-50 border-traffic-green"
+  def card_color_class(:amber), do: "bg-amber-50 border-amber-500"
+  def card_color_class(:red), do: "bg-red-50 border-traffic-red"
+  def card_color_class(_), do: "bg-gray-50 border-gray-300"
 end

@@ -13,11 +13,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
     ~H"""
     <div>
       <!-- Export Button -->
-      <div class="bg-gray-800 rounded-lg p-4 mb-6" id="export-container" phx-hook="FileDownload">
+      <div class="bg-surface-sheet rounded-lg p-4 mb-6" id="export-container" phx-hook="FileDownload">
         <button
           type="button"
           phx-click="toggle_export_modal"
-          class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+          class="w-full px-6 py-3 bg-accent-purple hover:bg-highlight text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -36,14 +36,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
           class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           phx-click-away="close_export_modal"
         >
-          <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+          <div class="bg-surface-sheet rounded-lg p-6 max-w-md w-full mx-4">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-white">Export Workshop Data</h3>
+              <h3 class="text-lg font-semibold text-text-dark">Export Workshop Data</h3>
 
               <button
                 type="button"
                 phx-click="close_export_modal"
-                class="text-gray-400 hover:text-white"
+                class="text-text-body hover:text-text-dark"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -56,14 +56,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
               </button>
             </div>
 
-            <p class="text-gray-400 text-sm mb-6">Select what to include in the export.</p>
+            <p class="text-text-body text-sm mb-6">Select what to include in the export.</p>
 
             <div class="space-y-3 mb-6">
               <label class={[
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                 if(@export_content == "all",
-                  do: "bg-blue-600/20 border border-blue-500",
-                  else: "bg-gray-700 border border-gray-600 hover:bg-gray-600"
+                  do: "bg-accent-purple/20 border border-blue-500",
+                  else: "bg-gray-100 border border-gray-600 hover:bg-gray-600"
                 )
               ]}>
                 <input
@@ -76,16 +76,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                   class="w-4 h-4 text-blue-600"
                 />
                 <div>
-                  <div class="text-white font-medium">Everything</div>
+                  <div class="text-text-dark font-medium">Everything</div>
 
-                  <div class="text-gray-400 text-sm">Results, notes, and action items</div>
+                  <div class="text-text-body text-sm">Results, notes, and action items</div>
                 </div>
               </label>
               <label class={[
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
                 if(@export_content == "results",
-                  do: "bg-blue-600/20 border border-blue-500",
-                  else: "bg-gray-700 border border-gray-600 hover:bg-gray-600"
+                  do: "bg-accent-purple/20 border border-blue-500",
+                  else: "bg-gray-100 border border-gray-600 hover:bg-gray-600"
                 )
               ]}>
                 <input
@@ -98,22 +98,22 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                   class="w-4 h-4 text-blue-600"
                 />
                 <div>
-                  <div class="text-white font-medium">Results Only</div>
+                  <div class="text-text-dark font-medium">Results Only</div>
 
-                  <div class="text-gray-400 text-sm">Scores, participants, and notes</div>
+                  <div class="text-text-body text-sm">Scores, participants, and notes</div>
                 </div>
               </label>
               <label class={[
                 "flex items-center gap-3 p-3 rounded-lg transition-colors",
                 cond do
                   @action_count == 0 ->
-                    "bg-gray-800 border border-gray-700 cursor-not-allowed opacity-50"
+                    "bg-surface-sheet border border-gray-700 cursor-not-allowed opacity-50"
 
                   @export_content == "actions" ->
-                    "bg-blue-600/20 border border-blue-500 cursor-pointer"
+                    "bg-accent-purple/20 border border-blue-500 cursor-pointer"
 
                   true ->
-                    "bg-gray-700 border border-gray-600 hover:bg-gray-600 cursor-pointer"
+                    "bg-gray-100 border border-gray-600 hover:bg-gray-600 cursor-pointer"
                 end
               ]}>
                 <input
@@ -130,12 +130,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                   <div class={
                     if @action_count == 0,
                       do: "text-gray-500 font-medium",
-                      else: "text-white font-medium"
+                      else: "text-text-dark font-medium"
                   }>
                     Actions Only
                   </div>
 
-                  <div class="text-gray-400 text-sm">
+                  <div class="text-text-body text-sm">
                     <%= if @action_count == 0 do %>
                       No action items recorded
                     <% else %>
@@ -151,7 +151,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                 type="button"
                 phx-click="export"
                 phx-value-format="csv"
-                class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                class="px-4 py-3 bg-accent-purple hover:bg-highlight text-white rounded-lg transition-colors font-medium"
               >
                 Export CSV
               </button>
@@ -159,7 +159,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                 type="button"
                 phx-click="export"
                 phx-value-format="json"
-                class="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+                class="px-4 py-3 bg-gray-100 hover:bg-gray-600 text-text-dark rounded-lg transition-colors font-medium"
               >
                 Export JSON
               </button>

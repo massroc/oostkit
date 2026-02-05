@@ -39,34 +39,34 @@ defmodule WorkgroupPulseWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-900 flex flex-col items-center justify-center px-4">
+    <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
       <div class="max-w-2xl w-full text-center">
-        <h1 class="text-4xl font-bold text-white mb-4">
+        <h1 class="text-4xl font-bold text-text-dark mb-4 font-brand">
           Productive Work Groups
         </h1>
-        <p class="text-xl text-gray-300 mb-12">
+        <p class="text-xl text-text-body mb-12">
           A self-guided workshop for exploring the Six Criteria of Productive Work
         </p>
 
-        <div class="grid md:grid-cols-2 gap-6 max-w-xl mx-auto items-stretch">
+        <div class="grid md:grid-cols-2 gap-section-gap max-w-xl mx-auto items-stretch">
           <!-- Facilitate Option -->
-          <div class="bg-gray-800 rounded-xl p-6 text-left flex flex-col">
-            <h2 class="text-xl font-semibold text-white mb-2">Facilitate</h2>
-            <p class="text-gray-400 text-sm mb-4">
+          <div class="bg-surface-sheet rounded-sheet shadow-sheet p-sheet-padding text-left flex flex-col">
+            <h2 class="text-xl font-semibold text-text-dark mb-2">Facilitate</h2>
+            <p class="text-text-body text-sm mb-4">
               Create a new workshop session and lead your team through the Six Criteria.
             </p>
             <.link
               navigate={~p"/session/new"}
-              class="block w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-center mt-auto"
+              class="block w-full px-4 py-3 bg-accent-purple hover:bg-highlight text-white font-semibold rounded-lg transition-colors text-center mt-auto"
             >
               Start New Workshop
             </.link>
           </div>
           
     <!-- Join Option -->
-          <div class="bg-gray-800 rounded-xl p-6 text-left flex flex-col">
-            <h2 class="text-xl font-semibold text-white mb-2">Join</h2>
-            <p class="text-gray-400 text-sm mb-4">
+          <div class="bg-surface-sheet rounded-sheet shadow-sheet p-sheet-padding text-left flex flex-col">
+            <h2 class="text-xl font-semibold text-text-dark mb-2">Join</h2>
+            <p class="text-text-body text-sm mb-4">
               Enter a session code to join an existing workshop as a participant.
             </p>
             <form phx-submit="join_session" class="space-y-3 mt-auto">
@@ -76,15 +76,15 @@ defmodule WorkgroupPulseWeb.HomeLive do
                 value={@join_code}
                 phx-change="update_code"
                 placeholder="Enter code (e.g. ABC123)"
-                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono uppercase"
+                class="w-full bg-surface-wall border border-gray-300 rounded-lg px-4 py-3 text-text-dark placeholder-text-body focus:ring-2 focus:ring-accent-purple focus:border-transparent font-mono uppercase"
                 maxlength="6"
               />
               <%= if @join_error do %>
-                <p class="text-red-400 text-sm">{@join_error}</p>
+                <p class="text-accent-red text-sm">{@join_error}</p>
               <% end %>
               <button
                 type="submit"
-                class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                class="w-full px-4 py-3 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors"
               >
                 Join Workshop
               </button>
@@ -92,7 +92,7 @@ defmodule WorkgroupPulseWeb.HomeLive do
           </div>
         </div>
 
-        <p class="text-gray-500 text-sm mt-8">
+        <p class="text-text-body text-sm mt-8">
           No account required. Sessions are temporary and data is not stored permanently.
         </p>
       </div>
