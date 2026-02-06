@@ -74,14 +74,50 @@ Use these terms consistently across all apps and documentation:
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Sheet Dimensions
+
+**Reference Product**: Post-it Easel Pad (635mm W × 775mm H)
+
+**Aspect Ratio**: `0.819` (width ÷ height) — portrait orientation
+
+All sheets derive from this single ratio:
+
+| Element | Height | Width | Notes |
+|---------|--------|-------|-------|
+| Main sheet | 580px | ~595px | Height × 0.819 + padding for content |
+| Side sheet (Notes) | 480px | ~393px | True 0.819 ratio |
+| Strip thumbnails | 34px | ~28px | True 0.819 ratio |
+
 ### Sheet Treatments
 
-| Sheet Type     | Size    | Shadow           | Opacity | Purpose                    |
-|----------------|---------|------------------|---------|----------------------------|
-| Current Sheet  | 100%    | None or subtle   | 100%    | Active work area           |
-| Previous Sheet | ~60-70% | Pronounced drop  | 100%    | Context from prior step    |
-| Sheet Strip    | Thumbnail | Subtle          | 100%    | Navigation & orientation   |
-| Side-sheet     | ~30% width | Subtle edge   | 100%    | Auxiliary content (drawer) |
+| Sheet Type     | Size      | Shadow           | z-index | Rotation | Purpose |
+|----------------|-----------|------------------|---------|----------|---------|
+| Current Sheet  | 580px H   | `shadow-sheet`   | 2       | -0.2deg  | Active work area |
+| Side-sheet     | 480px H   | `shadow-sheet`   | 1       | +1.2deg  | Notes, behind main |
+| Sheet Strip    | 34px H    | Subtle           | 10      | —        | Navigation |
+
+Sheets lift on hover with transition to `shadow-sheet-lifted`.
+
+### Layout Hierarchy
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Header (52px, z-index: 10)                                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  VIRTUAL WALL (bg: #E8E4DF)                                         │
+│                                                                     │
+│   ┌─────────────────────────────────┐  ┌───────────────────┐        │
+│   │                                 │  │                   │        │
+│   │      Current Sheet (z: 2)       │  │  Side-sheet (z:1) │        │
+│   │      (centred, in front)        │  │  (behind, right)  │        │
+│   │                                 │  │                   │        │
+│   └─────────────────────────────────┘  └───────────────────┘        │
+│                                                                     │
+│                                        [Floating buttons, z: 20]    │
+├─────────────────────────────────────────────────────────────────────┤
+│  Sheet Strip (44px, z-index: 10)                                    │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -91,21 +127,37 @@ See [brand-colors.md](./brand-colors.md) for the complete palette. This section 
 
 ### Theme: Light
 
-All workshop apps use a light theme with clean off-white backgrounds.
+All workshop apps use a light theme with warm off-white backgrounds.
 
 ### Color Roles
 
 | Role              | Color(s)                  | Usage                                    |
 |-------------------|---------------------------|------------------------------------------|
-| **Background**    | Off-white `#FAFAFA` or similar | Virtual Wall background            |
-| **Surface**       | White/cream               | Sheet surfaces (paper texture)           |
-| **Text Primary**  | Near black `#151515`      | Headings, important text                 |
-| **Text Secondary**| Gray `#A3A3A3`            | Supporting text, labels                  |
-| **Primary Accent**| Purple `#7245F4`          | Interactive elements, buttons, links     |
-| **Secondary Accent**| Magenta `#BC45F4`       | Highlights, hover states                 |
+| **Wall Background** | Warm taupe `#E8E4DF`    | Virtual Wall canvas                      |
+| **Sheet Surface** | Cream `#FEFDFB`           | Primary sheet (paper texture)            |
+| **Sheet Secondary** | Gray `#F5F3F0`          | Receded/background sheets                |
+| **Ink**           | Deep blue `#1a3a6b`       | Handwritten content on sheets            |
+| **UI Text**       | Dark gray `#333333`       | Chrome text (headers, buttons)           |
+| **UI Text Muted** | Medium gray `#888888`     | Secondary chrome text                    |
+| **UI Border**     | Light gray `#E0E0E0`      | Chrome borders                           |
+| **Primary Accent**| Purple `#7245F4`          | Interactive elements, active states      |
+| **Secondary Accent**| Magenta `#BC45F4`       | Highlights, gradients                    |
 | **Success/High**  | Gold `#F4B945`            | High scores, positive indicators         |
 | **Warning/Low**   | Red `#F44545`             | Low scores, alerts, warnings             |
 | **Brand**         | DF Blue `#0095FF` / Green `#42D235` | Logo, brand moments only      |
+
+### Accent Color Placement
+
+Tertiary colors (purple, magenta, gold) appear **only in UI chrome**, never as sheet backgrounds:
+
+| Location | Color | Implementation |
+|----------|-------|----------------|
+| Header bottom-left | Magenta → Purple | 200px gradient stripe, 3px tall |
+| Sheet strip top-right | Gold → Magenta | 150px gradient stripe, 3px tall |
+| Submit button | Purple → Magenta | Background gradient |
+| Active strip thumb | Gold | 6px dot at bottom |
+| Secondary strip thumbs | Magenta | 4px dot, 60% opacity |
+| App icon | Purple | With purple shadow glow |
 
 ### Color Application Guidelines
 
@@ -113,9 +165,11 @@ All workshop apps use a light theme with clean off-white backgrounds.
 
 2. **Gold and Red convey score quality** - Use consistently across all apps. Gold = good/high. Red = needs attention/low.
 
-3. **The sheet surface should feel like paper** - Subtle cream or off-white, possibly with light texture. Never stark white.
+3. **The sheet surface should feel like paper** - Subtle cream (`#FEFDFB`), with SVG noise texture. Never stark white.
 
-4. **Shadows create depth, not darkness** - Use drop shadows to show which sheet is current vs. receded. Keep shadows subtle and warm-toned.
+4. **Ink blue for on-sheet content** - All handwritten text (scores, criteria, notes) uses `#1a3a6b`, not black.
+
+5. **Shadows create depth, not darkness** - Use multi-layer drop shadows. Sheets lift on hover.
 
 ---
 
@@ -123,34 +177,37 @@ All workshop apps use a light theme with clean off-white backgrounds.
 
 ### Font Families
 
-| Purpose              | Style                        | Example Usage                     |
+| Purpose              | Font                         | Example Usage                     |
 |----------------------|------------------------------|-----------------------------------|
-| **Branding**         | Elegant, clean sans-serif    | App name, headers, navigation     |
-| **Workshop Content** | Handwritten/marker style     | Scores, participant entries, notes |
-| **UI/Body**          | Clean, readable sans-serif   | Labels, instructions, body text   |
+| **UI Chrome**        | DM Sans                      | App name, headers, buttons, labels |
+| **Workshop Content** | Caveat                       | Scores, criteria, participant names, notes |
 
-> **Note**: Specific font selections to be determined during implementation. The key is maintaining the two-font distinction: polished for branding, handwritten for workshop content.
+```css
+font-family: 'DM Sans', system-ui, sans-serif;  /* UI */
+font-family: 'Caveat', cursive;                  /* Workshop */
+```
 
-### Type Scale
+### Type Scale - On Sheet (Caveat)
 
-Use a consistent scale across all apps. Example (adjust based on chosen fonts):
+| Element | Size | Weight | Style |
+|---------|------|--------|-------|
+| Participant names | 18px | 600 | — |
+| Criterion names | 17px | 600 | UPPERCASE |
+| Parent criterion labels | 11px | 500 | UPPERCASE, 50% opacity |
+| Scores | 24px | 700 | — |
+| Empty scores | 20px | 700 | 12% opacity |
+| Sheet titles (Notes) | 20px | 700 | Underlined, centred |
+| Sheet content | 16px | 400 | 70% opacity |
 
-| Level | Size   | Weight    | Usage                          |
-|-------|--------|-----------|--------------------------------|
-| H1    | 32px   | Bold      | Page titles, app name          |
-| H2    | 24px   | Semibold  | Section headers, sheet titles  |
-| H3    | 20px   | Semibold  | Subsection headers             |
-| Body  | 16px   | Regular   | Default text                   |
-| Small | 14px   | Regular   | Labels, captions, metadata     |
-| Tiny  | 12px   | Regular   | Timestamps, fine print         |
+### Type Scale - UI Chrome (DM Sans)
 
-### Workshop Content (Handwritten Font)
-
-| Element        | Size    | Notes                              |
-|----------------|---------|-----------------------------------|
-| Scores         | 32-48px | Large, prominent, easily scannable |
-| Participant names | 16-20px | Clear but not dominant          |
-| Notes          | 16px    | Readable, casual feel              |
+| Element | Size | Weight |
+|---------|------|--------|
+| App name | 15px | 700 |
+| Session name | 14px | 500 |
+| Buttons | 13px | 600 |
+| Strip label | 11px | 500 |
+| Scale labels | 9px | 400 (UPPERCASE) |
 
 ---
 
@@ -192,10 +249,16 @@ Common UI elements used across all apps.
 
 | Type        | Appearance                           | Usage                          |
 |-------------|--------------------------------------|--------------------------------|
-| Primary     | Purple bg, white text                | Main actions (Submit, Join)    |
-| Secondary   | White bg, purple border/text         | Secondary actions (Cancel, Back) |
+| Primary     | Purple→Magenta gradient, white text, shadow | Main actions (Submit) |
+| Secondary   | White bg, light border, dark text    | Secondary actions (Skip, Continue) |
 | Ghost       | No bg, purple text                   | Tertiary actions, links        |
 | Disabled    | Gray bg, muted text                  | Unavailable actions            |
+
+Button styling:
+- Font: DM Sans, 13px, weight 600
+- Padding: 9px 18px
+- Border radius: 8px
+- Hover: lift with `translateY(-1px)` + enhanced shadow
 
 ### Score Display
 
@@ -465,10 +528,53 @@ module.exports = {
 
 ---
 
+## Paper Texture
+
+Sheets use a two-layer SVG noise texture for a tactile paper feel:
+
+```css
+/* Layer 1: Fractal noise */
+background: url("data:image/svg+xml,...feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'...") opacity 6%;
+
+/* Layer 2: Turbulence with multiply blend */
+background: url("data:image/svg+xml,...feTurbulence type='turbulence' baseFrequency='0.7' numOctaves='3'...") opacity 4.5%, multiply;
+
+/* Plus subtle gradient from top (transparent) to bottom (warm tint) */
+```
+
+Secondary sheets use the same approach with darker base color (`#F5F3F0`) and slightly reduced opacity.
+
+See mockup CSS for complete implementation: `/apps/workgroup_pulse/docs/mockups/facilitator-scoring-v8.html`
+
+---
+
+## Shadows
+
+Multi-layer shadows create depth without darkness:
+
+```css
+--shadow-sheet:
+  0 1px 1px rgba(0,0,0,0.03),
+  0 2px 4px rgba(0,0,0,0.04),
+  0 4px 8px rgba(0,0,0,0.05),
+  0 8px 16px rgba(0,0,0,0.05);
+
+--shadow-sheet-lifted:  /* On hover */
+  0 2px 2px rgba(0,0,0,0.03),
+  0 4px 8px rgba(0,0,0,0.05),
+  0 8px 16px rgba(0,0,0,0.06),
+  0 16px 32px rgba(0,0,0,0.07);
+```
+
+---
+
 ## Changelog
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-06 | Added sheet dimensions, paper texture, shadows from mockup |
+| 2026-02-06 | Finalized fonts: DM Sans (UI) + Caveat (workshop) |
+| 2026-02-06 | Updated color palette with ink-blue, UI colors |
 | 2026-02-05 | Score inputs neutral - no color hints     |
 | 2026-02-05 | Light theme applied to Pulse app          |
 | 2026-02-05 | Added Tailwind preset implementation      |
