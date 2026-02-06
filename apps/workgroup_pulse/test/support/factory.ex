@@ -21,7 +21,6 @@ defmodule WorkgroupPulse.Factory do
 
   use ExMachina.Ecto, repo: WorkgroupPulse.Repo
 
-  alias WorkgroupPulse.Facilitation.Timer
   alias WorkgroupPulse.Notes.{Action, Note}
   alias WorkgroupPulse.Scoring.Score
   alias WorkgroupPulse.Sessions.{Participant, Session}
@@ -152,13 +151,6 @@ defmodule WorkgroupPulse.Factory do
     }
   end
 
-  def general_note_factory do
-    struct!(
-      note_factory(),
-      %{question_index: nil}
-    )
-  end
-
   # Action factory
   def action_factory do
     %Action{
@@ -167,26 +159,5 @@ defmodule WorkgroupPulse.Factory do
       completed: false,
       session: build(:session)
     }
-  end
-
-  # Timer factory
-  def timer_factory do
-    %Timer{
-      phase: sequence(:timer_phase, &"phase_#{&1}"),
-      duration_seconds: 300,
-      remaining_seconds: 300,
-      status: "stopped",
-      session: build(:session)
-    }
-  end
-
-  def running_timer_factory do
-    struct!(
-      timer_factory(),
-      %{
-        status: "running",
-        started_at: DateTime.utc_now() |> DateTime.truncate(:second)
-      }
-    )
   end
 end

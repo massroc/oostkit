@@ -1,7 +1,7 @@
 # Workgroup Pulse - Solution Design
 
 ## Document Info
-- **Version:** 3.0
+- **Version:** 3.1
 - **Last Updated:** 2026-02-06
 - **Status:** Draft
 
@@ -32,10 +32,10 @@
 │                        Browser (Client)                         │
 │  ┌─────────────────────────────────────────────────────────┐   │
 │  │                 Phoenix LiveView                         │   │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │   │
-│  │  │  Lobby   │ │ Scoring  │ │ Summary  │ │ Actions  │   │   │
-│  │  │   View   │ │   View   │ │   View   │ │   View   │   │   │
-│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘   │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐               │   │
+│  │  │  Lobby   │ │ Scoring  │ │ Summary  │               │   │
+│  │  │   View   │ │   View   │ │   View   │               │   │
+│  │  └──────────┘ └──────────┘ └──────────┘               │   │
 │  └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
                               │ WebSocket
@@ -79,7 +79,7 @@ Each module has one reason to change:
 | `Workshops` | Workshop template definitions and question content |
 | `Sessions` | Session lifecycle, participant management |
 | `Scoring` | Score submission, validation, aggregation |
-| `Facilitation` | Timer management, phase transitions, prompts |
+| `Facilitation` | Timer calculations, phase transitions, prompts |
 | `Notes` | Notes and action item capture |
 | `Presence` | Real-time participant presence tracking |
 
@@ -87,20 +87,7 @@ Each module has one reason to change:
 
 **Workshop Templates are extensible without modification:**
 
-```elixir
-# New workshop types can be added as data without changing core logic
-defmodule WorkgroupPulse.Workshops.Template do
-  @callback questions() :: [Question.t()]
-  @callback introduction_screens() :: [Screen.t()]
-  @callback time_allocations() :: map()
-end
-
-# Six Criteria is one implementation
-defmodule WorkgroupPulse.Workshops.SixCriteria do
-  @behaviour WorkgroupPulse.Workshops.Template
-  # Implementation...
-end
-```
+New workshop types can be added as database records (Template + Questions) without changing core logic. The Workshops context provides read-only access to template data, and the scoring/facilitation logic adapts based on question scale types.
 
 **Scoring strategies are pluggable:**
 
@@ -136,24 +123,9 @@ end
 
 ### Interface Segregation Principle (ISP)
 
-Focused behaviours rather than monolithic interfaces:
+Focused context APIs rather than monolithic interfaces:
 
-```elixir
-# Separate concerns into focused behaviours
-defmodule WorkgroupPulse.Scoreable do
-  @callback submit_score(participant_id, question_id, score) :: {:ok, Score.t()} | {:error, term()}
-end
-
-defmodule WorkgroupPulse.Timeable do
-  @callback start_timer(section_id, duration_ms) :: {:ok, Timer.t()}
-  @callback pause_timer(timer_id) :: :ok
-  @callback resume_timer(timer_id) :: :ok
-end
-
-defmodule WorkgroupPulse.Notable do
-  @callback add_note(session_id, question_id, content) :: {:ok, Note.t()}
-end
-```
+Each Phoenix context exposes a focused public API for its bounded domain. For example, `Scoring` handles only score submission and aggregation, `Notes` handles only notes and actions, and `Facilitation` provides only timer calculation utilities. Contexts don't leak responsibilities across boundaries.
 
 ### Dependency Inversion Principle (DIP)
 
@@ -196,7 +168,7 @@ end
 │         │           ┌─────────────┐               │         │
 │         └──────────►│ Facilitation│◄──────────────┘         │
 │                     │             │                         │
-│                     │ - Timers    │                         │
+│                     │ - Calcs     │                         │
 │                     │ - Phases    │                         │
 │                     │ - Prompts   │                         │
 │                     └─────────────┘                         │
@@ -216,31 +188,29 @@ end
 
 #### 1. Workshops Context
 
-**Purpose:** Manage workshop templates and content (the "what" of workshops)
+**Purpose:** Read-only access to workshop templates and content (the "what" of workshops)
 
 ```elixir
 defmodule WorkgroupPulse.Workshops do
   @moduledoc """
-  The Workshops context manages workshop templates, questions, and content.
-  This is the domain knowledge - what questions to ask and how to present them.
+  The Workshops context provides read-only access to workshop templates,
+  questions, and content. Templates are seeded data, not user-created.
   """
 
-  # Public API
+  # Public API (read-only)
   def list_templates()
   def get_template!(id)
-  def get_questions(template)
-  def get_question!(template, question_number)
-  def get_introduction_screens(template)
-  def get_discussion_prompts(question, score_context)
-  def get_facilitator_help(phase, context)
+  def get_template_by_slug(slug)
+  def get_template_with_questions(id)
+  def list_questions(template_id)
+  def get_question(template_id, question_number)
+  def count_questions(template_id)
 end
 ```
 
 **Entities:**
 - `Template` - Workshop definition (Six Criteria, future types)
 - `Question` - Individual question with explanation, scale, prompts
-- `Scale` - Scoring scale definition (balance or maximal)
-- `Screen` - Introduction/transition screen content
 
 #### 2. Sessions Context
 
@@ -365,40 +335,28 @@ end
 
 #### 4. Facilitation Context
 
-**Purpose:** Manage workshop flow, timing, and guidance
+**Purpose:** Provide timer calculation utilities and phase metadata (the timer itself is in-process via `Process.send_after` in TimerHandler, not stored in the database)
 
 ```elixir
 defmodule WorkgroupPulse.Facilitation do
   @moduledoc """
-  The Facilitation context manages the workshop flow.
-  Handles phase transitions, timers, and contextual guidance.
+  The Facilitation context provides calculation utilities for timer
+  and phase management. No DB persistence - the timer runs in-process
+  via Process.send_after in TimerHandler.
   """
 
-  # Phase management
-  def get_current_phase(session_id)
-  def advance_phase(session_id)
-  def can_advance?(session_id)
-  def get_phase_requirements(session_id)
-
-  # Timer management
-  def start_section_timer(session_id, section)
-  def pause_timer(session_id)
-  def resume_timer(session_id)
-  def adjust_timer(session_id, new_duration)
-  def get_time_remaining(session_id)
-  def get_overall_time_remaining(session_id)
-
-  # Guidance
-  def get_discussion_prompts(session_id)
-  def get_facilitator_help(session_id, topic)
-  def is_time_exceeded?(session_id)
+  # Calculation utilities
+  def phase_name(session)
+  def calculate_segment_duration(session)
+  def current_timer_phase(session)
+  def timer_enabled?(session)
+  def warning_threshold(session)
+  def suggested_duration(session)
+  def total_suggested_duration(session)
 end
 ```
 
-**Entities:**
-- `Phase` - Current workshop phase (intro, scoring, summary, actions)
-- `Timer` - Active timer with remaining time, paused state
-- `TimeAllocation` - Budgeted time per section
+**Note:** There is no Timer schema or DB persistence for timers. The facilitator timer is purely in-process, managed by the `TimerHandler` module using `Process.send_after`.
 
 #### 5. Notes Context
 
@@ -463,18 +421,16 @@ end
 │ optimal      │              │               │ locked       │  │
 └──────────────┘              │               └──────────────┘  │
                               │                                  │
-                              ▼                                  │
-                       ┌──────────────┐       ┌──────────────┐  │
-                       │    Timer     │       │     Note     │  │
-                       ├──────────────┤       ├──────────────┤  │
-                       │ id           │       │ id           │  │
-                       │ session_id   │       │ session_id   │  │
-                       │ section      │       │ question_id  │──┘
-                       │ duration_ms  │       │ content      │
-                       │ remaining_ms │       │ author_id    │
-                       │ paused       │       │ created_at   │
-                       │ started_at   │       └──────────────┘
-                       └──────────────┘
+                              │               ┌──────────────┐  │
+                              │               │     Note     │  │
+                              │               ├──────────────┤  │
+                              │               │ id           │  │
+                              │               │ session_id   │  │
+                              │               │ question_id  │──┘
+                              │               │ content      │
+                              │               │ author_id    │
+                              │               │ created_at   │
+                              │               └──────────────┘
                                              ┌──────────────┐
                                              │    Action    │
                                              ├──────────────┤
@@ -739,28 +695,6 @@ defmodule WorkgroupPulse.Repo.Migrations.CreateNotesAndActions do
   end
 end
 
-# Migration: Create Timers
-defmodule WorkgroupPulse.Repo.Migrations.CreateTimers do
-  use Ecto.Migration
-
-  def change do
-    create table(:timers, primary_key: false) do
-      add :id, :binary_id, primary_key: true
-      add :session_id, references(:sessions, type: :binary_id, on_delete: :delete_all), null: false
-      add :section, :string, null: false  # "intro", "question_1", "summary", etc.
-      add :duration_ms, :integer, null: false
-      add :remaining_ms, :integer, null: false
-      add :paused, :boolean, default: false
-      add :started_at, :utc_datetime
-      add :paused_at, :utc_datetime
-
-      timestamps()
-    end
-
-    create unique_index(:timers, [:session_id, :section])
-  end
-end
-
 # Migration: Create Feedback
 defmodule WorkgroupPulse.Repo.Migrations.CreateFeedback do
   use Ecto.Migration
@@ -932,14 +866,12 @@ SessionLive.Show (root LiveView)
 ├── Components/ (pure functional components)
 │   ├── LobbyComponent        # Waiting room, participant list, start button
 │   ├── IntroComponent        # 4 intro screens with navigation
-│   ├── ScoringComponent      # Virtual Wall grid + score overlay + side panels
+│   ├── ScoringComponent      # Virtual Wall grid + score overlay + side panels (actions in notes side-sheet)
 │   ├── SummaryComponent      # Score summary with individual scores & notes
-│   ├── ActionsComponent      # Action item management
-│   ├── CompletedComponent    # Wrap-up: results, actions, export
+│   ├── CompletedComponent    # Wrap-up: results, action count, export
 │   └── ExportModalComponent  # Export format/content selection
 │
 ├── LiveComponents/
-│   ├── ScoreResultsComponent # Isolated re-renders for score display
 │   └── ActionFormComponent   # Local form state for action creation
 │
 ├── Shared (in CoreComponents)
@@ -983,17 +915,14 @@ The scoring phase has been redesigned as the **Virtual Wall** — a full-screen 
 - `render_balance_scale/1` / `render_maximal_scale/1` — Score button grids for each scale type
 - `render_mid_transition/1` — Scale change explanation screen (shown before Q5)
 
+**Actions in Scoring Phase:**
+Actions are managed during the scoring phase via the notes side-sheet (below notes). The ActionFormComponent (LiveComponent) provides local form state for action creation without triggering parent re-renders. The completed/wrap-up page shows action count for export purposes but does not have inline action management.
+
 **All other phase components** follow the same pure functional pattern:
 - `SummaryComponent` — Paper-textured sheet with individual score grids, team combined values, traffic lights, and notes
-- `ActionsComponent` — Action item list with inline creation
-- `CompletedComponent` — Wrap-up page with score overview, strengths/concerns, actions, and export
+- `CompletedComponent` — Wrap-up page with score overview, strengths/concerns, action count, and export
 - `LobbyComponent` — Waiting room with participant list and start button
 - `IntroComponent` — 4-screen introduction with navigation
-
-#### ScoreResultsComponent (LiveComponent)
-**File:** `lib/workgroup_pulse_web/live/session_live/score_results_component.ex`
-
-**Purpose:** Legacy component for isolated score result re-renders. May be superseded by the ScoringComponent's integrated grid approach.
 
 ### Extracted Handler Modules
 
@@ -1168,8 +1097,7 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 #### 3. LiveComponent Extraction
 Frequently updated sections have been extracted into LiveComponents to isolate re-renders:
-- **ScoreResultsComponent** - Score display, discussion prompts, notes (re-renders only when scores change)
-- **ActionFormComponent** - Manages local form state (typing doesn't trigger parent re-renders)
+- **ActionFormComponent** - Manages local form state for action creation (typing doesn't trigger parent re-renders)
 
 ---
 
@@ -1353,7 +1281,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     #   "intro"     -> IntroComponent.render(...)
     #   "scoring"   -> ScoringComponent.render(...)
     #   "summary"   -> SummaryComponent.render(...)
-    #   "actions"   -> ActionsComponent.render(...)
     #   "completed" -> CompletedComponent.render(...)
     # end
     #
@@ -1877,10 +1804,11 @@ default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
-*Document Version: 3.0*
+*Document Version: 3.1*
 *v2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
 *v2.1 - Added extracted handler modules (TimerHandler, OperationHelpers)*
 *v2.2 - Removed turn timeout (facilitator can manually skip inactive participants)*
 *v2.3 - Added navigation rules and readiness behavior documentation*
 *v3.0 - Updated for Virtual Wall redesign: new component hierarchy, DataLoaders, EventHandlers/MessageHandlers split, ScoringComponent with full grid, score overlay, and three-panel layout*
+*v3.1 - Removed Timer schema/DB persistence (timer is purely in-process), removed ScoreResultsComponent and ActionsComponent, moved actions to scoring side-sheet, updated Workshops to read-only API, removed non-existent behaviours from SOLID examples, updated state machine to reflect lobby-intro-scoring-summary-completed flow*
 *Last Updated: 2026-02-06*

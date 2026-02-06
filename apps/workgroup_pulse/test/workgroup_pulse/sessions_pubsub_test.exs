@@ -1,15 +1,18 @@
 defmodule WorkgroupPulse.SessionsPubSubTest do
   use WorkgroupPulse.DataCase, async: true
 
+  alias WorkgroupPulse.Repo
   alias WorkgroupPulse.Sessions
-  alias WorkgroupPulse.Workshops
+  alias WorkgroupPulse.Workshops.Template
 
   describe "PubSub broadcasting" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "pubsub-test-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "PubSub Test",
-          slug: "pubsub-test",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 180
         })

@@ -1,16 +1,17 @@
 defmodule WorkgroupPulse.SessionsTest do
   use WorkgroupPulse.DataCase, async: true
 
+  alias WorkgroupPulse.Repo
   alias WorkgroupPulse.Sessions
   alias WorkgroupPulse.Sessions.{Participant, Session}
-  alias WorkgroupPulse.Workshops
+  alias WorkgroupPulse.Workshops.Template
 
   describe "sessions" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      template =
+        Repo.insert!(%Template{
           name: "Test Workshop",
-          slug: "test-workshop",
+          slug: "session-test-#{System.unique_integer()}",
           version: "1.0.0",
           default_duration_minutes: 180
         })
@@ -102,24 +103,13 @@ defmodule WorkgroupPulse.SessionsTest do
       assert updated.state == "summary"
     end
 
-    test "advance_to_actions/1 transitions to actions", %{template: template} do
+    test "advance_to_completed/1 transitions to completed", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
       {:ok, session} = Sessions.advance_to_scoring(session)
       {:ok, session} = Sessions.advance_to_summary(session)
 
-      {:ok, updated} = Sessions.advance_to_actions(session)
-      assert updated.state == "actions"
-    end
-
-    test "complete_session/1 transitions to completed", %{template: template} do
-      {:ok, session} = Sessions.create_session(template)
-      {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
-      {:ok, session} = Sessions.advance_to_summary(session)
-      {:ok, session} = Sessions.advance_to_actions(session)
-
-      {:ok, updated} = Sessions.complete_session(session)
+      {:ok, updated} = Sessions.advance_to_completed(session)
       assert updated.state == "completed"
       assert updated.completed_at != nil
     end
@@ -171,13 +161,13 @@ defmodule WorkgroupPulse.SessionsTest do
       assert updated.current_question_index == 7
     end
 
-    test "go_back_to_summary/1 transitions from actions to summary", %{template: template} do
+    test "go_back_to_summary/1 transitions from completed to summary", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
       {:ok, session} = Sessions.advance_to_scoring(session)
       {:ok, session} = Sessions.advance_to_summary(session)
-      {:ok, session} = Sessions.advance_to_actions(session)
-      assert session.state == "actions"
+      {:ok, session} = Sessions.advance_to_completed(session)
+      assert session.state == "completed"
 
       {:ok, updated} = Sessions.go_back_to_summary(session)
       assert updated.state == "summary"
@@ -195,10 +185,10 @@ defmodule WorkgroupPulse.SessionsTest do
 
   describe "participants" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      template =
+        Repo.insert!(%Template{
           name: "Test Workshop",
-          slug: "test-participant-workshop",
+          slug: "participant-test-#{System.unique_integer()}",
           version: "1.0.0",
           default_duration_minutes: 180
         })
@@ -347,8 +337,8 @@ defmodule WorkgroupPulse.SessionsTest do
 
   describe "turn-based scoring" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      template =
+        Repo.insert!(%Template{
           name: "Test Workshop",
           slug: "turn-test-#{System.unique_integer()}",
           version: "1.0.0",

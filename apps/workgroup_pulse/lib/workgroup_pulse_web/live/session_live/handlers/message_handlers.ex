@@ -60,11 +60,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers do
         if p.id == participant.id, do: participant, else: p
       end)
 
-    # Update participants first
     socket = assign(socket, participants: participants)
 
     # Build score map from all_scores to check who actually scored (not skipped)
-    # Only include participants who have state :scored (not :skipped, :pending, :current)
     all_scores = socket.assigns[:all_scores] || []
 
     score_map =
@@ -72,37 +70,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers do
       |> Enum.filter(fn s -> s.state == :scored end)
       |> Map.new(fn s -> {s.participant_id, s} end)
 
-    # Check if all turns are done and if row is locked (revisiting completed question)
     session = socket.assigns.session
     all_turns_done = Sessions.all_turns_complete?(session)
     row_locked = Scoring.row_locked?(session, session.current_question_index)
 
-    # Recalculate readiness counts for non-facilitator, non-observer participants
-    eligible_participants =
-      Enum.filter(participants, fn p ->
-        p.status == "active" and not p.is_facilitator and not p.is_observer
-      end)
-
-    eligible_count = length(eligible_participants)
-
-    # If row is locked, we're revisiting a completed question - everyone is auto-ready
-    {ready_count, all_ready} =
-      if row_locked do
-        {eligible_count, true}
-      else
-        # Ready if: clicked ready, or was skipped (no score when all turns done)
-        # Note: Having a score does NOT count as ready - participants must explicitly
-        # click "I'm Ready to Continue" after team discussion
-        ready_count =
-          Enum.count(eligible_participants, fn p ->
-            was_skipped = all_turns_done and not Map.has_key?(score_map, p.id)
-            p.is_ready or was_skipped
-          end)
-
-        # When no eligible participants (only facilitator/observers), consider all ready
-        all_ready = eligible_count == 0 or ready_count == eligible_count
-        {ready_count, all_ready}
-      end
+    {ready_count, eligible_count, all_ready} =
+      DataLoaders.calculate_readiness(participants, score_map, all_turns_done, row_locked)
 
     socket
     |> assign(ready_count: ready_count)
@@ -193,7 +166,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers do
   def handle_action_updated(socket, _action_id) do
     session = socket.assigns.session
 
-    if session.state in ["summary", "actions", "completed"] do
+    if session.state in ["scoring", "summary", "completed"] do
       DataLoaders.load_actions_data(socket, session)
     else
       socket

@@ -10,7 +10,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers,
     only: [text_color_class: 1, card_color_class: 1]
 
-  alias WorkgroupPulseWeb.SessionLive.ActionFormComponent
   alias WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent
 
   attr :session, :map, required: true
@@ -18,7 +17,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   attr :scores_summary, :list, required: true
   attr :strengths, :list, required: true
   attr :concerns, :list, required: true
-  attr :all_actions, :list, required: true
   attr :action_count, :integer, required: true
   attr :show_export_modal, :boolean, required: true
   attr :export_content, :string, required: true
@@ -135,33 +133,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
             </div>
           <% end %>
           
-    <!-- Action Items Section -->
-          <div class="bg-surface-wall/50 rounded-lg p-4 mb-6">
-            <h2 class="text-sm font-semibold text-ink-blue/60 mb-3 font-brand uppercase tracking-wide">
-              Action Items
-            </h2>
-            
-    <!-- Add Action Form -->
-            <.live_component
-              module={ActionFormComponent}
-              id="action-form"
-              session={@session}
-            />
-            
-    <!-- Existing Actions -->
-            <%= if @action_count > 0 do %>
-              <ul class="space-y-2">
-                <%= for action <- @all_actions do %>
-                  {render_action_item(assigns, action)}
-                <% end %>
-              </ul>
-            <% else %>
-              <p class="text-ink-blue/60 text-center py-2 font-workshop">
-                No action items yet. Add your first action above.
-              </p>
-            <% end %>
-          </div>
-          
     <!-- Export Modal -->
           <ExportModalComponent.render
             show_export_modal={@show_export_modal}
@@ -198,32 +169,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
         </div>
       </div>
     </div>
-    """
-  end
-
-  defp render_action_item(assigns, action) do
-    assigns = Map.put(assigns, :action, action)
-
-    ~H"""
-    <li class="rounded-lg p-3 flex items-start gap-3 bg-surface-sheet border border-ink-blue/5">
-      <div class="flex-1">
-        <p class="text-ink-blue font-workshop">{@action.description}</p>
-        <%= if @action.owner_name && @action.owner_name != "" do %>
-          <p class="text-sm text-ink-blue/50 mt-1 font-brand">
-            Owner: {@action.owner_name}
-          </p>
-        <% end %>
-      </div>
-      <button
-        type="button"
-        phx-click="delete_action"
-        phx-value-id={@action.id}
-        class="text-ink-blue/40 hover:text-traffic-red transition-colors text-sm"
-        title="Delete action"
-      >
-        ✕
-      </button>
-    </li>
     """
   end
 end

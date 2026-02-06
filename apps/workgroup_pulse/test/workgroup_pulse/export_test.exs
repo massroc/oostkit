@@ -3,46 +3,49 @@ defmodule WorkgroupPulse.ExportTest do
 
   alias WorkgroupPulse.Export
   alias WorkgroupPulse.Notes
+  alias WorkgroupPulse.Repo
   alias WorkgroupPulse.Scoring
   alias WorkgroupPulse.Sessions
-  alias WorkgroupPulse.Workshops
+  alias WorkgroupPulse.Workshops.{Question, Template}
 
   describe "export/2" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "export-test-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Export Test Workshop",
-          slug: "export-test",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 120
         })
 
       # Create two questions
-      {:ok, _q1} =
-        Workshops.create_question(template, %{
-          index: 0,
-          title: "Elbow Room",
-          criterion_number: "1",
-          criterion_name: "Autonomy",
-          explanation: "Test explanation",
-          scale_type: "balance",
-          scale_min: -5,
-          scale_max: 5,
-          optimal_value: 0
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 0,
+        title: "Elbow Room",
+        criterion_number: "1",
+        criterion_name: "Autonomy",
+        explanation: "Test explanation",
+        scale_type: "balance",
+        scale_min: -5,
+        scale_max: 5,
+        optimal_value: 0
+      })
 
-      {:ok, _q2} =
-        Workshops.create_question(template, %{
-          index: 1,
-          title: "Mutual Support",
-          criterion_number: "4",
-          criterion_name: "Support",
-          explanation: "Test explanation",
-          scale_type: "maximal",
-          scale_min: 0,
-          scale_max: 10,
-          optimal_value: nil
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 1,
+        title: "Mutual Support",
+        criterion_number: "4",
+        criterion_name: "Support",
+        explanation: "Test explanation",
+        scale_type: "maximal",
+        scale_min: 0,
+        scale_max: 10,
+        optimal_value: nil
+      })
 
       {:ok, session} = Sessions.create_session(template)
       {:ok, participant1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())

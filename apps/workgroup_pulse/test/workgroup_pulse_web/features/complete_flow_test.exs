@@ -6,30 +6,34 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
   use WorkgroupPulseWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  alias WorkgroupPulse.{Sessions, Workshops}
+  alias WorkgroupPulse.Repo
+  alias WorkgroupPulse.Sessions
+  alias WorkgroupPulse.Workshops.{Question, Template}
 
   describe "workshop state transitions" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "flow-test-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Flow Test",
-          slug: "flow-test",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 60
         })
 
-      {:ok, _} =
-        Workshops.create_question(template, %{
-          index: 0,
-          title: "Test Question",
-          criterion_number: "1",
-          criterion_name: "Test",
-          explanation: "Test explanation",
-          scale_type: "balance",
-          scale_min: -5,
-          scale_max: 5,
-          optimal_value: 0
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 0,
+        title: "Test Question",
+        criterion_number: "1",
+        criterion_name: "Test",
+        explanation: "Test explanation",
+        scale_type: "balance",
+        scale_min: -5,
+        scale_max: 5,
+        optimal_value: 0
+      })
 
       %{template: template}
     end
@@ -144,26 +148,28 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
 
   describe "scoring state" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "scoring-test-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Scoring Test",
-          slug: "scoring-test",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 60
         })
 
-      {:ok, _} =
-        Workshops.create_question(template, %{
-          index: 0,
-          title: "Test Question",
-          criterion_number: "1",
-          criterion_name: "Test",
-          explanation: "Test",
-          scale_type: "balance",
-          scale_min: -5,
-          scale_max: 5,
-          optimal_value: 0
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 0,
+        title: "Test Question",
+        criterion_number: "1",
+        criterion_name: "Test",
+        explanation: "Test",
+        scale_type: "balance",
+        scale_min: -5,
+        scale_max: 5,
+        optimal_value: 0
+      })
 
       # Start session in scoring state
       {:ok, session} =

@@ -46,12 +46,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers do
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
 
-      {true, _, "actions"} ->
-        # Don't restart timer when transitioning from summary to actions - shared timer
-        socket
-        |> DataLoaders.load_summary_data(session)
-        |> DataLoaders.load_actions_data(session)
-
       {true, _, "completed"} ->
         socket
         |> DataLoaders.load_summary_data(session)

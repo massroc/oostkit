@@ -2,30 +2,32 @@ defmodule WorkgroupPulseWeb.Features.WorkshopFlowTest do
   use WorkgroupPulseWeb.FeatureCase, async: false
 
   import Wallaby.Query
-  alias WorkgroupPulse.Workshops
+  alias WorkgroupPulse.Repo
+  alias WorkgroupPulse.Workshops.{Question, Template}
 
   setup do
-    # Create the Six Criteria template
-    {:ok, template} =
-      Workshops.create_template(%{
+    slug = "six-criteria-#{System.unique_integer([:positive])}"
+
+    template =
+      Repo.insert!(%Template{
         name: "Six Criteria Test",
-        slug: "six-criteria",
+        slug: slug,
         version: "1.0.0",
         default_duration_minutes: 210
       })
 
-    {:ok, _} =
-      Workshops.create_question(template, %{
-        index: 0,
-        title: "Elbow Room",
-        criterion_number: "1",
-        criterion_name: "Elbow Room",
-        explanation: "Test explanation",
-        scale_type: "balance",
-        scale_min: -5,
-        scale_max: 5,
-        optimal_value: 0
-      })
+    Repo.insert!(%Question{
+      template_id: template.id,
+      index: 0,
+      title: "Elbow Room",
+      criterion_number: "1",
+      criterion_name: "Elbow Room",
+      explanation: "Test explanation",
+      scale_type: "balance",
+      scale_min: -5,
+      scale_max: 5,
+      optimal_value: 0
+    })
 
     %{template: template}
   end

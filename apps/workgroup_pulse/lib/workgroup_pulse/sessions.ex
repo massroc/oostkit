@@ -231,35 +231,9 @@ defmodule WorkgroupPulse.Sessions do
   end
 
   @doc """
-  Advances from summary to actions phase.
-  """
-  def advance_to_actions(%Session{state: "summary"} = session) do
-    result =
-      session
-      |> Session.transition_changeset("actions")
-      |> Repo.update()
-
-    broadcast_session_update(result)
-  end
-
-  @doc """
-  Advances from summary directly to completed state (wrap-up page).
+  Advances from summary to completed state (wrap-up page).
   """
   def advance_to_completed(%Session{state: "summary"} = session) do
-    result =
-      session
-      |> Session.transition_changeset("completed", %{
-        completed_at: Timestamps.now()
-      })
-      |> Repo.update()
-
-    broadcast_session_update(result)
-  end
-
-  @doc """
-  Completes the session.
-  """
-  def complete_session(%Session{state: "actions"} = session) do
     result =
       session
       |> Session.transition_changeset("completed", %{
@@ -317,10 +291,9 @@ defmodule WorkgroupPulse.Sessions do
   end
 
   @doc """
-  Goes back from actions or completed (wrap-up) to summary.
+  Goes back from completed (wrap-up) to summary.
   """
-  def go_back_to_summary(%Session{state: state} = session)
-      when state in ["actions", "completed"] do
+  def go_back_to_summary(%Session{state: "completed"} = session) do
     result =
       session
       |> Session.transition_changeset("summary")

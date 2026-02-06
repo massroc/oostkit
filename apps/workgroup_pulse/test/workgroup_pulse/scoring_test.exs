@@ -1,47 +1,52 @@
 defmodule WorkgroupPulse.ScoringTest do
   use WorkgroupPulse.DataCase, async: true
 
+  alias WorkgroupPulse.Repo
   alias WorkgroupPulse.Scoring
   alias WorkgroupPulse.Scoring.Score
-  alias WorkgroupPulse.{Sessions, Workshops}
+  alias WorkgroupPulse.Sessions
+  alias WorkgroupPulse.Workshops
+  alias WorkgroupPulse.Workshops.{Question, Template}
 
   describe "scores" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "test-scoring-workshop-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Test Workshop",
-          slug: "test-scoring-workshop",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 180
         })
 
       # Create balance scale question (Q1: -5 to 5, optimal 0)
-      {:ok, _q1} =
-        Workshops.create_question(template, %{
-          index: 0,
-          title: "Elbow Room",
-          criterion_number: "1",
-          criterion_name: "Autonomy",
-          explanation: "Test",
-          scale_type: "balance",
-          scale_min: -5,
-          scale_max: 5,
-          optimal_value: 0
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 0,
+        title: "Elbow Room",
+        criterion_number: "1",
+        criterion_name: "Autonomy",
+        explanation: "Test",
+        scale_type: "balance",
+        scale_min: -5,
+        scale_max: 5,
+        optimal_value: 0
+      })
 
       # Create maximal scale question (Q2: 0 to 10, more is better)
-      {:ok, _q2} =
-        Workshops.create_question(template, %{
-          index: 1,
-          title: "Mutual Support",
-          criterion_number: "4",
-          criterion_name: "Support",
-          explanation: "Test",
-          scale_type: "maximal",
-          scale_min: 0,
-          scale_max: 10,
-          optimal_value: nil
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 1,
+        title: "Mutual Support",
+        criterion_number: "4",
+        criterion_name: "Support",
+        explanation: "Test",
+        scale_type: "maximal",
+        scale_min: 0,
+        scale_max: 10,
+        optimal_value: nil
+      })
 
       {:ok, session} = Sessions.create_session(template)
       {:ok, participant} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
@@ -139,26 +144,28 @@ defmodule WorkgroupPulse.ScoringTest do
 
   describe "score aggregation" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "test-aggregation-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Aggregation Workshop",
-          slug: "test-aggregation",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 180
         })
 
-      {:ok, _q1} =
-        Workshops.create_question(template, %{
-          index: 0,
-          title: "Q1",
-          criterion_number: "1",
-          criterion_name: "C1",
-          explanation: "Test",
-          scale_type: "balance",
-          scale_min: -5,
-          scale_max: 5,
-          optimal_value: 0
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 0,
+        title: "Q1",
+        criterion_number: "1",
+        criterion_name: "C1",
+        explanation: "Test",
+        scale_type: "balance",
+        scale_min: -5,
+        scale_max: 5,
+        optimal_value: 0
+      })
 
       {:ok, session} = Sessions.create_session(template)
       {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
@@ -327,10 +334,12 @@ defmodule WorkgroupPulse.ScoringTest do
 
   describe "session score summary" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "test-summary-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Summary Workshop",
-          slug: "test-summary",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 180
         })
@@ -343,7 +352,8 @@ defmodule WorkgroupPulse.ScoringTest do
         scale_max = if i < 4, do: 5, else: 10
         optimal = if i < 4, do: 0, else: nil
 
-        Workshops.create_question(template, %{
+        Repo.insert!(%Question{
+          template_id: template.id,
           index: i,
           title: "Q#{i + 1}",
           criterion_number: Enum.at(criterion_numbers, i),
@@ -406,41 +416,43 @@ defmodule WorkgroupPulse.ScoringTest do
 
   describe "get_all_individual_scores/3" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      slug = "test-individual-scores-#{System.unique_integer([:positive])}"
+
+      template =
+        Repo.insert!(%Template{
           name: "Individual Scores Workshop",
-          slug: "test-individual-scores",
+          slug: slug,
           version: "1.0.0",
           default_duration_minutes: 180
         })
 
       # Create a balance scale question
-      {:ok, _q1} =
-        Workshops.create_question(template, %{
-          index: 0,
-          title: "Q1 Balance",
-          criterion_number: "1",
-          criterion_name: "Autonomy",
-          explanation: "Test",
-          scale_type: "balance",
-          scale_min: -5,
-          scale_max: 5,
-          optimal_value: 0
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 0,
+        title: "Q1 Balance",
+        criterion_number: "1",
+        criterion_name: "Autonomy",
+        explanation: "Test",
+        scale_type: "balance",
+        scale_min: -5,
+        scale_max: 5,
+        optimal_value: 0
+      })
 
       # Create a maximal scale question
-      {:ok, _q2} =
-        Workshops.create_question(template, %{
-          index: 1,
-          title: "Q2 Maximal",
-          criterion_number: "2",
-          criterion_name: "Learning",
-          explanation: "Test",
-          scale_type: "maximal",
-          scale_min: 0,
-          scale_max: 10,
-          optimal_value: nil
-        })
+      Repo.insert!(%Question{
+        template_id: template.id,
+        index: 1,
+        title: "Q2 Maximal",
+        criterion_number: "2",
+        criterion_name: "Learning",
+        explanation: "Test",
+        scale_type: "maximal",
+        scale_min: 0,
+        scale_max: 10,
+        optimal_value: nil
+      })
 
       {:ok, session} = Sessions.create_session(template)
 
