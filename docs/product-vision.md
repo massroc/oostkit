@@ -22,7 +22,7 @@ Tools for OST practitioners to manage and run engagements.
 
 | Name | Description | Status |
 |------|-------------|--------|
-| Workshop Referral Tool (WRT) | PDW participant selection via network referral | Planned |
+| Workshop Referral Tool (WRT) | PDW participant selection via network referral | Production |
 
 These tools support the operational aspects of running OST processes - participant selection, engagement management, and other facilitator needs.
 
