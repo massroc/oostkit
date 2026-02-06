@@ -138,138 +138,138 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             ]}
             style=""
           >
-              <!-- Header -->
-              <div class="text-center mb-3">
-                <div class="font-workshop text-xl font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
-                  Notes
-                  <%= if length(@question_notes) > 0 do %>
+            <!-- Header -->
+            <div class="text-center mb-3">
+              <div class="font-workshop text-xl font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
+                Notes
+                <%= if length(@question_notes) > 0 do %>
+                  <span class="text-sm font-normal text-ink-blue/50 ml-1">
+                    ({length(@question_notes)})
+                  </span>
+                <% end %>
+              </div>
+            </div>
+
+            <%= if @active_sheet == :notes do %>
+              <!-- Active: Show add form and full notes list -->
+              <form phx-submit="add_note" class="mb-3">
+                <input
+                  type="text"
+                  name="note"
+                  value={@note_input}
+                  phx-change="update_note_input"
+                  phx-debounce="300"
+                  placeholder="Add a note..."
+                  class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+                />
+              </form>
+
+              <div class="space-y-2 max-h-[200px] overflow-y-auto">
+                <%= if length(@question_notes) > 0 do %>
+                  <%= for note <- @question_notes do %>
+                    <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
+                      <div class="flex justify-between items-start gap-1">
+                        <p class="font-workshop text-ink-blue flex-1">{note.content}</p>
+                        <button
+                          type="button"
+                          phx-click="delete_note"
+                          phx-value-id={note.id}
+                          class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <p class="text-xs text-ink-blue/40 mt-1 font-brand">— {note.author_name}</p>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+                    No notes yet. Type above to add one.
+                  </p>
+                <% end %>
+              </div>
+              <!-- Actions divider and section -->
+              <div class="border-t border-ink-blue/10 mt-3 pt-3">
+                <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85 text-center mb-2">
+                  Actions
+                  <%= if @action_count > 0 do %>
                     <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                      ({length(@question_notes)})
+                      ({@action_count})
                     </span>
                   <% end %>
                 </div>
-              </div>
 
-              <%= if @active_sheet == :notes do %>
-                <!-- Active: Show add form and full notes list -->
-                <form phx-submit="add_note" class="mb-3">
-                  <input
-                    type="text"
-                    name="note"
-                    value={@note_input}
-                    phx-change="update_note_input"
-                    phx-debounce="300"
-                    placeholder="Add a note..."
-                    class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
-                  />
-                </form>
+                <.live_component
+                  module={ActionFormComponent}
+                  id="action-form"
+                  session={@session}
+                />
 
-                <div class="space-y-2 max-h-[200px] overflow-y-auto">
-                  <%= if length(@question_notes) > 0 do %>
-                    <%= for note <- @question_notes do %>
+                <div class="space-y-2 max-h-[150px] overflow-y-auto">
+                  <%= if @action_count > 0 do %>
+                    <%= for action <- @all_actions do %>
                       <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
                         <div class="flex justify-between items-start gap-1">
-                          <p class="font-workshop text-ink-blue flex-1">{note.content}</p>
+                          <div class="flex-1">
+                            <p class="font-workshop text-ink-blue">{action.description}</p>
+                            <%= if action.owner_name && action.owner_name != "" do %>
+                              <p class="text-xs text-ink-blue/40 mt-0.5 font-brand">
+                                Owner: {action.owner_name}
+                              </p>
+                            <% end %>
+                          </div>
                           <button
                             type="button"
-                            phx-click="delete_note"
-                            phx-value-id={note.id}
+                            phx-click="delete_action"
+                            phx-value-id={action.id}
                             class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100"
                           >
                             ✕
                           </button>
                         </div>
-                        <p class="text-xs text-ink-blue/40 mt-1 font-brand">— {note.author_name}</p>
                       </div>
                     <% end %>
                   <% else %>
                     <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
-                      No notes yet. Type above to add one.
+                      No actions yet.
                     </p>
                   <% end %>
                 </div>
-                <!-- Actions divider and section -->
-                <div class="border-t border-ink-blue/10 mt-3 pt-3">
-                  <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85 text-center mb-2">
-                    Actions
-                    <%= if @action_count > 0 do %>
-                      <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                        ({@action_count})
-                      </span>
-                    <% end %>
-                  </div>
-
-                  <.live_component
-                    module={ActionFormComponent}
-                    id="action-form"
-                    session={@session}
-                  />
-
-                  <div class="space-y-2 max-h-[150px] overflow-y-auto">
-                    <%= if @action_count > 0 do %>
-                      <%= for action <- @all_actions do %>
-                        <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
-                          <div class="flex justify-between items-start gap-1">
-                            <div class="flex-1">
-                              <p class="font-workshop text-ink-blue">{action.description}</p>
-                              <%= if action.owner_name && action.owner_name != "" do %>
-                                <p class="text-xs text-ink-blue/40 mt-0.5 font-brand">
-                                  Owner: {action.owner_name}
-                                </p>
-                              <% end %>
-                            </div>
-                            <button
-                              type="button"
-                              phx-click="delete_action"
-                              phx-value-id={action.id}
-                              class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </div>
-                      <% end %>
-                    <% else %>
-                      <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
-                        No actions yet.
-                      </p>
-                    <% end %>
-                  </div>
-                </div>
-              <% else %>
-                <!-- Inactive: Show preview -->
-                <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
-                  <%= if length(@question_notes) > 0 do %>
-                    <%= for note <- Enum.take(@question_notes, 2) do %>
-                      <p class="mb-2 relative pl-4 text-sm">
-                        <span class="absolute left-0 text-ink-blue/60">•</span>
-                        {String.slice(note.content, 0, 30)}{if String.length(note.content) > 30,
-                          do: "..."}
-                      </p>
-                    <% end %>
-                    <%= if length(@question_notes) > 2 do %>
-                      <p class="text-xs opacity-60 text-center">
-                        +{length(@question_notes) - 2} more
-                      </p>
-                    <% end %>
-                  <% else %>
-                    <p class="text-center text-ink-blue/50 italic text-sm">
-                      Click to add notes...
+              </div>
+            <% else %>
+              <!-- Inactive: Show preview -->
+              <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
+                <%= if length(@question_notes) > 0 do %>
+                  <%= for note <- Enum.take(@question_notes, 2) do %>
+                    <p class="mb-2 relative pl-4 text-sm">
+                      <span class="absolute left-0 text-ink-blue/60">•</span>
+                      {String.slice(note.content, 0, 30)}{if String.length(note.content) > 30,
+                        do: "..."}
                     </p>
                   <% end %>
-                  <%= if @action_count > 0 do %>
-                    <div class="border-t border-ink-blue/10 mt-2 pt-2">
-                      <p class="text-xs opacity-60 text-center">
-                        {@action_count} action{if @action_count != 1, do: "s"}
-                      </p>
-                    </div>
+                  <%= if length(@question_notes) > 2 do %>
+                    <p class="text-xs opacity-60 text-center">
+                      +{length(@question_notes) - 2} more
+                    </p>
                   <% end %>
-                </div>
-              <% end %>
+                <% else %>
+                  <p class="text-center text-ink-blue/50 italic text-sm">
+                    Click to add notes...
+                  </p>
+                <% end %>
+                <%= if @action_count > 0 do %>
+                  <div class="border-t border-ink-blue/10 mt-2 pt-2">
+                    <p class="text-xs opacity-60 text-center">
+                      {@action_count} action{if @action_count != 1, do: "s"}
+                    </p>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
           </.sheet>
         </div>
       </div>
-
+      
     <!-- Score Input Overlay (only for person scoring, when overlay is open) -->
       <%= if @is_my_turn and not @my_turn_locked and @show_score_overlay do %>
         {render_score_overlay(assigns)}
@@ -499,31 +499,31 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
       </div>
       <!-- Modal -->
       <.sheet class="shadow-sheet-lifted p-6 max-w-md w-full mx-4 relative">
-          <h3 class="font-workshop text-xl font-bold text-ink-blue text-center mb-2">
-            {@current_question.title}
-          </h3>
+        <h3 class="font-workshop text-xl font-bold text-ink-blue text-center mb-2">
+          {@current_question.title}
+        </h3>
 
-          <div class="text-center mb-4">
-            <div class="text-traffic-green text-lg font-semibold font-brand">
-              <%= if @has_submitted do %>
-                Discuss your score
-              <% else %>
-                Your turn to score
-              <% end %>
-            </div>
+        <div class="text-center mb-4">
+          <div class="text-traffic-green text-lg font-semibold font-brand">
+            <%= if @has_submitted do %>
+              Discuss your score
+            <% else %>
+              Your turn to score
+            <% end %>
           </div>
+        </div>
 
-          <%= if @current_question.scale_type == "balance" do %>
-            {render_balance_scale(assigns)}
-          <% else %>
-            {render_maximal_scale(assigns)}
-          <% end %>
+        <%= if @current_question.scale_type == "balance" do %>
+          {render_balance_scale(assigns)}
+        <% else %>
+          {render_maximal_scale(assigns)}
+        <% end %>
 
-          <%= if @has_submitted do %>
-            <p class="text-center text-ink-blue/60 text-sm mt-3">
-              Discuss this score, then click "Done" when ready
-            </p>
-          <% end %>
+        <%= if @has_submitted do %>
+          <p class="text-center text-ink-blue/60 text-sm mt-3">
+            Discuss this score, then click "Done" when ready
+          </p>
+        <% end %>
       </.sheet>
     </div>
     """
