@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workgroup Pulse — Facilitator View</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #7245F4;
+    --purple-light: rgba(114, 69, 244, 0.08);
+    --purple-border: rgba(114, 69, 244, 0.25);
+    --magenta: #BC45F4;
+    --gold: #F4B945;
+    --red: #F44545;
+    --wall-bg: #E8E4DF;
+    --sheet-white: #FEFDFB;
+    --sheet-secondary: #F5F3F0;
+    --ink-blue: #1a3a6b;
+    --ink-blue-light: rgba(26, 58, 107, 0.06);
+    --header-bg: #FAFAFA;
+    --ui-text: #333;
+    --ui-text-muted: #888;
+    --border-light: #E0E0E0;
+    --shadow-sheet: 
+      0 1px 1px rgba(0,0,0,0.03),
+      0 2px 4px rgba(0,0,0,0.04),
+      0 4px 8px rgba(0,0,0,0.05),
+      0 8px 16px rgba(0,0,0,0.05);
+    --shadow-sheet-lifted:
+      0 2px 2px rgba(0,0,0,0.03),
+      0 4px 8px rgba(0,0,0,0.05),
+      0 8px 16px rgba(0,0,0,0.06),
+      0 16px 32px rgba(0,0,0,0.07);
+    
+    --easel-ratio: 0.819;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--wall-bg);
+    color: var(--ui-text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── Header Bar ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+    z-index: 10;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--magenta), var(--purple) 60%, transparent);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .app-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--purple);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(114, 69, 244, 0.3);
+  }
+
+  .app-icon svg { width: 16px; height: 16px; }
+
+  .app-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ui-text);
+    letter-spacing: -0.02em;
+  }
+
+  .session-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--ui-text-muted);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .header-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ui-text-muted);
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .header-btn:hover { background: rgba(0,0,0,0.05); }
+
+  .signin-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    background: white;
+    color: var(--ui-text);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .signin-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+  /* ─── Main Content ─── */
+  .main {
+    flex: 1;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Main sheet container - centred, higher z-index */
+  .main-sheet-container {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 20px 20px 20px;
+    overflow: auto;
+    position: relative;
+    z-index: 2; /* Above side sheet */
+  }
+
+  /* Side sheet - positioned behind, peeking from right */
+  .side-sheet-container {
+    position: absolute;
+    right: 20px;
+    top: 24px;
+    z-index: 1; /* Behind main sheet */
+  }
+
+  /* ─── Paper Texture (Primary) ─── */
+  .paper-texture {
+    position: relative;
+    background: var(--sheet-white);
+  }
+
+  .paper-texture::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+      linear-gradient(180deg, rgba(255,252,245,0) 0%, rgba(248,243,232,0.4) 100%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .paper-texture::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+    mix-blend-mode: multiply;
+  }
+
+  /* ─── Paper Texture (Secondary) ─── */
+  .paper-texture-secondary {
+    position: relative;
+    background: var(--sheet-secondary);
+  }
+
+  .paper-texture-secondary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      linear-gradient(180deg, rgba(240,238,232,0) 0%, rgba(235,230,220,0.5) 100%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .paper-texture-secondary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+    mix-blend-mode: multiply;
+  }
+
+  /* ─── Main Sheet (Centred, in front) ─── */
+  .sheet {
+    border-radius: 2px;
+    box-shadow: var(--shadow-sheet);
+    padding: 20px 24px;
+    --sheet-height: 580px;
+    height: var(--sheet-height);
+    width: calc(var(--sheet-height) * 0.819 + 120px);
+    min-width: 520px;
+    flex-shrink: 0;
+    position: relative;
+    transform: rotate(-0.2deg);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sheet:hover {
+    box-shadow: var(--shadow-sheet-lifted);
+  }
+
+  /* ─── Scoring Grid ─── */
+  .grid-wrapper {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .scoring-grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+  }
+
+  .scoring-grid th,
+  .scoring-grid td {
+    padding: 8px 4px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(26, 58, 107, 0.07);
+  }
+
+  .scoring-grid thead th {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink-blue);
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(26, 58, 107, 0.12);
+    position: sticky;
+    top: 0;
+    background: var(--sheet-white);
+    z-index: 2;
+  }
+
+  .scoring-grid th.criterion-col {
+    width: 160px;
+    text-align: left;
+    padding-left: 0;
+    padding-right: 10px;
+  }
+
+  .scoring-grid th.participant-col {
+    width: auto;
+    min-width: 52px;
+    padding: 8px 3px;
+  }
+
+  .criterion {
+    font-family: 'Caveat', cursive;
+    color: var(--ink-blue);
+    text-align: left;
+    padding-left: 0;
+    line-height: 1.2;
+  }
+
+  .criterion .parent {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.5;
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  .criterion .name {
+    font-size: 17px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+
+  .score {
+    font-family: 'Caveat', cursive;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink-blue);
+    padding: 6px 3px;
+  }
+
+  .score.empty {
+    color: rgba(26, 58, 107, 0.12);
+    font-size: 20px;
+  }
+
+  /* ─── Active Highlights ─── */
+  .active-row td,
+  .active-row th {
+    background: var(--purple-light);
+  }
+
+  .active-row td.active-col {
+    background: rgba(114, 69, 244, 0.14);
+  }
+
+  .active-col-header {
+    position: relative;
+  }
+
+  .active-col-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 3px;
+    background: var(--purple);
+    border-radius: 0 0 2px 2px;
+  }
+
+  .active-row td:first-child,
+  .active-row th:first-child {
+    box-shadow: inset 3px 0 0 var(--purple);
+  }
+
+  td.active-col {
+    background: rgba(114, 69, 244, 0.03);
+  }
+
+  th.active-col-header {
+    color: var(--purple);
+  }
+
+  .turn-indicator {
+    display: none;
+  }
+
+  .scale-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    color: var(--ui-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 0 2px 0;
+    text-align: left;
+    border-bottom: none;
+  }
+
+  /* ─── Side Sheet (Behind main sheet, peeking from right) ─── */
+  .side-sheet {
+    --side-height: 480px;
+    width: calc(var(--side-height) * 0.819);
+    height: var(--side-height);
+    border-radius: 2px;
+    box-shadow: var(--shadow-sheet);
+    padding: 16px 18px;
+    position: relative;
+    transform: rotate(1.2deg);
+    margin-top: 40px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+  }
+
+  .side-sheet:hover {
+    box-shadow: var(--shadow-sheet-lifted);
+  }
+
+  .side-sheet-title {
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink-blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    text-decoration-color: rgba(26, 58, 107, 0.2);
+    margin-bottom: 14px;
+    opacity: 0.85;
+    text-align: center;
+  }
+
+  .side-sheet-content {
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--ink-blue);
+    line-height: 1.55;
+    opacity: 0.7;
+  }
+
+  .side-sheet-content p {
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 16px;
+  }
+
+  .side-sheet-content p::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--ink-blue);
+    opacity: 0.6;
+  }
+
+  /* ─── Floating Buttons ─── */
+  .floating-actions {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 20;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), var(--magenta));
+    color: white;
+    box-shadow: 0 2px 8px rgba(114, 69, 244, 0.35);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(114, 69, 244, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--ui-text);
+    border: 1px solid var(--border-light);
+  }
+  .btn-secondary:hover {
+    border-color: #bbb;
+    background: #FAFAFA;
+    transform: translateY(-1px);
+  }
+
+  /* ─── Sheet Strip ─── */
+  .sheet-strip {
+    height: 44px;
+    background: var(--header-bg);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 6px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .sheet-strip::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 3px;
+    background: linear-gradient(270deg, var(--gold), var(--magenta) 70%, transparent);
+  }
+
+  .strip-thumb {
+    --thumb-height: 34px;
+    width: calc(var(--thumb-height) * 0.819);
+    height: var(--thumb-height);
+    border-radius: 2px;
+    border: 2px solid transparent;
+    background: var(--sheet-white);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .strip-thumb:hover {
+    transform: translateY(-2px);
+  }
+
+  .strip-thumb.active {
+    border-color: var(--purple);
+    box-shadow: 0 2px 8px rgba(114, 69, 244, 0.25);
+  }
+
+  .strip-thumb.active::before {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  .strip-thumb.secondary {
+    background: var(--sheet-secondary);
+  }
+
+  .strip-thumb.secondary::before {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: var(--magenta);
+    border-radius: 50%;
+    z-index: 2;
+    opacity: 0.6;
+  }
+
+  .strip-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: repeating-linear-gradient(
+      0deg,
+      var(--ink-blue-light),
+      var(--ink-blue-light) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    border-radius: 1px;
+    opacity: 0.5;
+  }
+
+  .strip-label {
+    font-size: 11px;
+    color: var(--ui-text-muted);
+    margin-left: 10px;
+    font-weight: 500;
+  }
+
+  .strip-label::before {
+    content: '●';
+    color: var(--gold);
+    margin-right: 6px;
+    font-size: 8px;
+    vertical-align: middle;
+  }
+
+  /* ─── Dimension Reference ─── */
+  .dimension-ref {
+    position: fixed;
+    bottom: 60px;
+    left: 12px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 10px;
+    color: var(--ui-text-muted);
+    max-width: 200px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    z-index: 15;
+    line-height: 1.5;
+  }
+
+  .dimension-ref strong {
+    color: var(--ui-text);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+
+  .dimension-ref code {
+    background: #f3f3f3;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─── -->
+<header class="header">
+  <div class="header-left">
+    <div class="app-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <path d="M3 6h18M3 12h18M3 18h18"/>
+        <circle cx="7" cy="6" r="1.5" fill="white" stroke="none"/>
+        <circle cx="12" cy="12" r="1.5" fill="white" stroke="none"/>
+        <circle cx="16" cy="18" r="1.5" fill="white" stroke="none"/>
+      </svg>
+    </div>
+    <span class="app-name">Workgroup Pulse</span>
+  </div>
+  <span class="session-name">Team Alpha — Six Criteria Assessment</span>
+  <div class="header-right">
+    <button class="header-btn" title="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+    <button class="signin-btn">Sign In</button>
+  </div>
+</header>
+
+<!-- ─── Main ─── -->
+<div class="main">
+  <!-- Side sheet - BEHIND, peeking from right -->
+  <div class="side-sheet-container">
+    <div class="side-sheet paper-texture-secondary">
+      <div class="side-sheet-title">Notes</div>
+      <div class="side-sheet-content">
+        <p>Good discussion on elbow room — team feels micromanaged</p>
+        <p>Mary raised concerns about feedback loops</p>
+        <p>Action: schedule 1:1s with team leads</p>
+        <p>Review variety scores next quarter</p>
+        <p>Peter suggests job rotation trial</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main sheet - IN FRONT, centred -->
+  <div class="main-sheet-container">
+    <div class="sheet paper-texture">
+      <div class="grid-wrapper">
+        <table class="scoring-grid">
+          <thead>
+            <tr>
+              <th class="criterion-col"></th>
+              <th class="participant-col">Mary</th>
+              <th class="participant-col active-col-header">Jo<div class="turn-indicator">Scoring</div></th>
+              <th class="participant-col">Peter</th>
+              <th class="participant-col">Jane</th>
+              <th class="participant-col">Kate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="scale-label" colspan="6">Balance Scale (−5 to +5)</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="name">Elbow Room</span></td>
+              <td class="score">+2</td>
+              <td class="score active-col">−1</td>
+              <td class="score">+3</td>
+              <td class="score">0</td>
+              <td class="score">+1</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="parent">Continual Learning</span><span class="name">Setting Goals</span></td>
+              <td class="score">+1</td>
+              <td class="score active-col">+2</td>
+              <td class="score">−2</td>
+              <td class="score">+3</td>
+              <td class="score">0</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="parent">Continual Learning</span><span class="name">Getting Feedback</span></td>
+              <td class="score">−3</td>
+              <td class="score active-col">0</td>
+              <td class="score">+1</td>
+              <td class="score">−1</td>
+              <td class="score">+2</td>
+            </tr>
+            <tr class="active-row">
+              <td class="criterion"><span class="name">Variety</span></td>
+              <td class="score">+1</td>
+              <td class="score active-col empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+            </tr>
+
+            <tr>
+              <td class="scale-label" colspan="6">Maximal Scale (0 to 10)</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="name">Mutual Support & Respect</span></td>
+              <td class="score empty">—</td>
+              <td class="score active-col empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="parent">Meaningfulness</span><span class="name">Socially Useful</span></td>
+              <td class="score empty">—</td>
+              <td class="score active-col empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="parent">Meaningfulness</span><span class="name">See Whole Product</span></td>
+              <td class="score empty">—</td>
+              <td class="score active-col empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+            </tr>
+            <tr>
+              <td class="criterion"><span class="name">Desirable Future</span></td>
+              <td class="score empty">—</td>
+              <td class="score active-col empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+              <td class="score empty">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Buttons -->
+<div class="floating-actions">
+  <button class="btn btn-secondary">Skip Turn</button>
+  <button class="btn btn-secondary">Continue</button>
+  <button class="btn btn-primary">Submit</button>
+</div>
+
+<!-- Dimension Reference -->
+<div class="dimension-ref">
+  <strong>Post-it Easel Pad</strong>
+  <code>635mm × 775mm</code><br>
+  Ratio: <code>0.819</code> (W:H)<br><br>
+  Main sheet: z-index 2 (front)<br>
+  Notes sheet: z-index 1 (behind)
+</div>
+
+<!-- Sheet Strip -->
+<div class="sheet-strip">
+  <div class="strip-thumb active"></div>
+  <div class="strip-thumb secondary"></div>
+  <div class="strip-thumb secondary"></div>
+  <span class="strip-label">Sheet 1 of 3</span>
+</div>
+
+</body>
+</html>

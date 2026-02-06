@@ -304,18 +304,158 @@ From any LiveView, you can track custom events:
 
 ---
 
-## 7. Questions for Design
+## 7. Questions for Design (RESOLVED)
 
-1. **Sheet metaphor scope**: Just main content area + sidesheet for notes? Or more elaborate?
+All questions below have been resolved through the mockup session. See Section 8 for decisions.
 
-2. **Mobile**: Single sheet view? How does sidesheet work on mobile?
+1. ~~**Sheet metaphor scope**~~ → Main sheet + side-sheet (Notes), z-index layering
+2. ~~**Mobile**~~ → TBD (desktop-first for facilitator view)
+3. ~~**Score input**~~ → Grid-based, current turn highlighted
+4. ~~**Participant grid**~~ → Table with participant columns, criterion rows
+5. ~~**Progress**~~ → Sheet Strip at bottom showing sheet navigation
+6. ~~**Notes**~~ → Side-sheet behind main, click to swap focus
+7. ~~**Facilitator chrome**~~ → Header bar, floating buttons bottom-right
 
-3. **Score input**: Keep the current button row or redesign?
+---
 
-4. **Participant grid**: Current boxes or different visualization?
+## 8. Design Decisions (Resolved)
 
-5. **Progress**: Current progress bar style or different approach?
+**Reference Mockup**: `/apps/workgroup_pulse/docs/mockups/facilitator-scoring-v8.html`
 
-6. **Notes**: Sidesheet drawer or inline expand?
+### Layout Architecture
 
-7. **Facilitator chrome**: Timer position, skip button styling, navigation controls?
+| Element | Height | Position | z-index |
+|---------|--------|----------|---------|
+| Header bar | 52px | Top, fixed | 10 |
+| Main sheet | 580px | Centred | 2 (front) |
+| Side-sheet (Notes) | 480px | Right, offset | 1 (behind) |
+| Floating buttons | Auto | Bottom-right, 60px up | 20 |
+| Sheet strip | 44px | Bottom, fixed | 10 |
+
+### Sheet Dimensions
+
+**Reference**: Post-it Easel Pad (635mm × 775mm) = **0.819 aspect ratio** (W:H)
+
+All sheets use this ratio:
+- Main sheet: 580px height × ~595px width (+ content padding)
+- Side-sheet: 480px height × ~393px width
+- Strip thumbnails: 34px height × ~28px width
+
+Sheets have subtle rotation for organic feel:
+- Main: `rotate(-0.2deg)`
+- Notes: `rotate(1.2deg)`
+
+### Single-Sheet Scoring Grid
+
+**Decision**: Display ALL 8 questions on a single sheet simultaneously.
+
+**Grid Structure**:
+- Table with `border-collapse: separate`
+- Sticky header row for scrolling
+- Criterion column: 160px width, left-aligned
+- Participant columns: auto width, min 52px, centre-aligned
+
+**Row Labels** (Caveat font, 17px, UPPERCASE):
+```
+ELBOW ROOM
+[parent: CONTINUAL LEARNING] SETTING GOALS
+[parent: CONTINUAL LEARNING] GETTING FEEDBACK
+VARIETY
+MUTUAL SUPPORT & RESPECT
+[parent: MEANINGFULNESS] SOCIALLY USEFUL
+[parent: MEANINGFULNESS] SEE WHOLE PRODUCT
+DESIRABLE FUTURE
+```
+
+Parent labels shown at 11px, 50% opacity above the criterion name.
+
+### Active State Indicators
+
+**Key Decision**: No text badges or triangles. Active states indicated purely through colour and borders.
+
+| State | Treatment |
+|-------|-----------|
+| Active row | 3px purple left border (inset box-shadow) + purple-light background |
+| Active column | 3px purple bar at top of header (70% width, centred) + subtle tint on cells |
+| Active cell | Stronger purple background at row/column intersection |
+
+### Side-Sheet Behaviour
+
+**Decision**: Sheets swap focus (not overlay drawer).
+
+- Notes sheet sits behind main sheet, partially visible on right
+- Click Notes → main sheet recedes left, Notes expands to main position
+- Click to swap back
+- Both sheets remain visible, just repositioned
+
+### Buttons
+
+**Floating buttons** (bottom-right, 60px from bottom, 20px from right):
+
+| Button | Style | Visibility |
+|--------|-------|------------|
+| Skip Turn | Secondary (white, border) | Facilitator only |
+| Continue | Secondary (white, border) | Facilitator only |
+| Submit | Primary (purple→magenta gradient) | Active participant only |
+
+**Styling**:
+- Font: DM Sans, 13px, weight 600
+- Padding: 9px 18px
+- Border-radius: 8px
+- Hover: translateY(-1px) + enhanced shadow
+
+### Sheet Strip
+
+- Shows thumbnail previews of all sheets
+- Maintains 0.819 aspect ratio
+- Active sheet: purple border + gold dot (6px)
+- Secondary sheets: gray background + magenta dot (4px, 60% opacity)
+- Faux "lines" texture inside thumbnails
+
+### Chrome Accents
+
+Gradient stripes add brand colour to chrome:
+- Header bottom-left: Magenta → Purple (200px wide, 3px tall)
+- Strip top-right: Gold → Magenta (150px wide, 3px tall)
+
+---
+
+## 9. Implementation Checklist
+
+- [ ] Add Google Fonts: DM Sans + Caveat to root layout
+- [ ] Update Tailwind preset with new tokens (DONE - see `/shared/tailwind.preset.js`)
+- [ ] Extract paper texture CSS to reusable component/class
+- [ ] Build sheet component with aspect ratio + rotation
+- [ ] Build scoring grid table with sticky headers
+- [ ] Implement active row/column highlighting
+- [ ] Build side-sheet component with z-index layering
+- [ ] Build sheet strip with thumbnail generation
+- [ ] Add gradient accent stripes to header/strip
+- [ ] Create floating button container component
+- [ ] Wire up sheet focus swap (main ↔ notes)
+- [ ] Test scroll behaviour within main sheet
+- [ ] Implement responsive fallbacks for mobile
+
+---
+
+## 10. Animation Notes (for LiveView)
+
+### Recommended Approach
+- CSS transforms + `phx-hook` for basic transitions
+- FLIP technique for sheet position swaps
+- Avoid 60fps drag — LiveView round-trips make this impractical
+- "Click to swap sheets" is the target interaction model
+
+### Transition Properties
+```css
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+```
+
+---
+
+## Related Documents
+
+- **Mockup**: `/apps/workgroup_pulse/docs/mockups/facilitator-scoring-v8.html`
+- **Design System**: `/docs/design-system.md`
+- **Tailwind Preset**: `/shared/tailwind.preset.js`
+- **Canva Prompts**: `/docs/design-prompts-canva.md` (prompt #10)
