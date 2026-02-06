@@ -382,41 +382,35 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     """
   end
 
-  defp render_score_cell_value(assigns, score_data, participant_id) do
-    cond do
-      # Future questions - show dash
-      assigns.is_future ->
-        "—"
+  # Future questions - show dash
+  defp render_score_cell_value(%{is_future: true}, _score_data, _participant_id), do: "—"
 
-      # Past questions - show actual score or "?" for skipped
-      assigns.is_past ->
-        if score_data && score_data.has_score do
-          format_score_value(assigns.question.scale_type, score_data.value)
-        else
-          "?"
-        end
-
-      # Current question
-      assigns.is_current ->
-        cond do
-          # Has a score - show it
-          score_data && score_data.has_score ->
-            format_score_value(assigns.question.scale_type, score_data.value)
-
-          # Current turn participant who hasn't scored yet
-          participant_id == assigns.current_turn_participant_id ->
-            "..."
-
-          # Hasn't had their turn yet
-          true ->
-            "—"
-        end
-
-      # Fallback
-      true ->
-        "—"
-    end
+  # Past questions - show actual score or "?" for skipped
+  defp render_score_cell_value(%{is_past: true} = assigns, %{has_score: true, value: value}, _) do
+    format_score_value(assigns.question.scale_type, value)
   end
+
+  defp render_score_cell_value(%{is_past: true}, _score_data, _participant_id), do: "?"
+
+  # Current question with score - show it
+  defp render_score_cell_value(%{is_current: true} = assigns, %{has_score: true, value: value}, _) do
+    format_score_value(assigns.question.scale_type, value)
+  end
+
+  # Current question, current turn participant hasn't scored yet
+  defp render_score_cell_value(
+         %{is_current: true, current_turn_participant_id: turn_id},
+         _score_data,
+         participant_id
+       )
+       when participant_id == turn_id,
+       do: "..."
+
+  # Current question, hasn't had their turn yet
+  defp render_score_cell_value(%{is_current: true}, _score_data, _participant_id), do: "—"
+
+  # Fallback
+  defp render_score_cell_value(_assigns, _score_data, _participant_id), do: "—"
 
   defp format_score_value("balance", value) when value > 0, do: "+#{value}"
   defp format_score_value(_, value), do: "#{value}"
