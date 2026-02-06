@@ -165,10 +165,18 @@ module.exports = {
       // ===================
       zIndex: {
         'wall': '0',
-        'sheet-secondary': '1',      // Behind main sheet
-        'sheet-current': '2',        // Main sheet (in front)
+        'sheet-previous': '1',       // Previous phase sheet (scaled, background)
+        'sheet-side': '2',           // Side-sheet (notes/actions)
+        'sheet-current': '5',        // Current phase sheet (in front)
         'floating': '20',            // Floating buttons
         'modal': '50',
+      },
+
+      // ===================
+      // Scale (for previous sheet sizing)
+      // ===================
+      scale: {
+        '60': '0.60',
       },
 
       // ===================

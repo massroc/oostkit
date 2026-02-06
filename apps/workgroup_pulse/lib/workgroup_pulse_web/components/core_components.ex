@@ -328,4 +328,70 @@ defmodule WorkgroupPulseWeb.CoreComponents do
     </div>
     """
   end
+
+  @doc """
+  Renders the Virtual Wall layout — positions previous, current, and side sheets.
+
+  The Virtual Wall is a layout component that manages sheet stacking and positioning.
+  It knows nothing about workshop phases — it simply positions slots.
+
+  ## Slots
+
+    * `:previous_sheet` - Content for the sheet behind current (scaled down, non-interactive)
+    * `:inner_block` - Current sheet content (full size, centered)
+    * `:side_sheet` - Right-side auxiliary panel (notes/actions)
+
+  ## Examples
+
+      <.virtual_wall current_index={2} total_count={5}>
+        <:previous_sheet>
+          <.sheet>Previous content</.sheet>
+        </:previous_sheet>
+
+        <.sheet>Current content</.sheet>
+
+        <:side_sheet>
+          <.sheet variant={:secondary}>Notes</.sheet>
+        </:side_sheet>
+      </.virtual_wall>
+  """
+  attr :current_index, :integer, required: true
+  attr :total_count, :integer, required: true
+  attr :active_sheet, :atom, default: :main
+  attr :class, :string, default: nil
+
+  slot :previous_sheet
+  slot :inner_block, required: true
+  slot :side_sheet
+
+  def virtual_wall(assigns) do
+    ~H"""
+    <div class={["wall-container", @class]}>
+      <div
+        :if={@previous_sheet != [] && @current_index > 0}
+        class="wall-sheet-previous"
+        aria-hidden="true"
+      >
+        {render_slot(@previous_sheet)}
+      </div>
+
+      <div class={[
+        "wall-sheet-current",
+        @active_sheet != :main && "wall-focus-background"
+      ]}>
+        {render_slot(@inner_block)}
+      </div>
+
+      <div
+        :if={@side_sheet != []}
+        class={[
+          "wall-sheet-side",
+          @active_sheet != :main && "wall-focus-foreground"
+        ]}
+      >
+        {render_slot(@side_sheet)}
+      </div>
+    </div>
+    """
+  end
 end

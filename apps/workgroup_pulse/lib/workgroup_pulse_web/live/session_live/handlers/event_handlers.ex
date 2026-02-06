@@ -212,10 +212,17 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   # UI toggle events
 
   @doc """
-  Handles toggle_facilitator_tips event.
+  Handles show_criterion_info event - opens the criterion info popup for a question.
   """
-  def handle_toggle_facilitator_tips(socket) do
-    {:noreply, assign(socket, show_facilitator_tips: !socket.assigns.show_facilitator_tips)}
+  def handle_show_criterion_info(socket, question_index) do
+    {:noreply, assign(socket, show_criterion_popup: question_index)}
+  end
+
+  @doc """
+  Handles close_criterion_info event - closes the criterion info popup.
+  """
+  def handle_close_criterion_info(socket) do
+    {:noreply, assign(socket, show_criterion_popup: nil)}
   end
 
   @doc """
@@ -334,6 +341,42 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   # Action events
+
+  @doc """
+  Handles update_action_input event.
+  """
+  def handle_update_action_input(socket, value) do
+    {:noreply, assign(socket, action_input: value)}
+  end
+
+  @doc """
+  Handles add_action event.
+  Creates a new action for the session.
+  """
+  def handle_add_action(socket) do
+    description = String.trim(socket.assigns.action_input)
+
+    if description == "" do
+      {:noreply, socket}
+    else
+      session = socket.assigns.session
+
+      attrs = %{description: description, owner_name: ""}
+
+      case Notes.create_action(session, attrs) do
+        {:ok, action} ->
+          broadcast(session, {:action_updated, action.id})
+
+          {:noreply,
+           socket
+           |> assign(action_input: "")
+           |> DataLoaders.load_actions_data(session)}
+
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Failed to add action")}
+      end
+    end
+  end
 
   @doc """
   Handles delete_action event.
