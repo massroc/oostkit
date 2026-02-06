@@ -53,16 +53,6 @@ defmodule WorkgroupPulse.Notes do
   end
 
   @doc """
-  Lists general (non-question-specific) notes for a session.
-  """
-  def list_general_notes(%Session{} = session) do
-    Note
-    |> where([n], n.session_id == ^session.id and is_nil(n.question_index))
-    |> order_by([n], n.inserted_at)
-    |> Repo.all()
-  end
-
-  @doc """
   Lists all notes for a session.
   """
   def list_all_notes(%Session{} = session) do

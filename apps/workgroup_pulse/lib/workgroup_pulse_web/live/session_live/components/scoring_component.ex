@@ -9,6 +9,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers
 
+  alias WorkgroupPulseWeb.SessionLive.ActionFormComponent
+
   attr :session, :map, required: true
   attr :participant, :map, required: true
   attr :participants, :list, required: true
@@ -37,6 +39,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   attr :all_questions, :list, required: true
   attr :all_questions_scores, :map, required: true
   attr :show_score_overlay, :boolean, required: true
+  attr :all_actions, :list, required: true
+  attr :action_count, :integer, required: true
 
   def render(assigns) do
     ~H"""
@@ -164,7 +168,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                   />
                 </form>
 
-                <div class="space-y-2 max-h-[300px] overflow-y-auto">
+                <div class="space-y-2 max-h-[200px] overflow-y-auto">
                   <%= if length(@question_notes) > 0 do %>
                     <%= for note <- @question_notes do %>
                       <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
@@ -188,6 +192,54 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     </p>
                   <% end %>
                 </div>
+                <!-- Actions divider and section -->
+                <div class="border-t border-ink-blue/10 mt-3 pt-3">
+                  <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85 text-center mb-2">
+                    Actions
+                    <%= if @action_count > 0 do %>
+                      <span class="text-sm font-normal text-ink-blue/50 ml-1">
+                        ({@action_count})
+                      </span>
+                    <% end %>
+                  </div>
+
+                  <.live_component
+                    module={ActionFormComponent}
+                    id="action-form"
+                    session={@session}
+                  />
+
+                  <div class="space-y-2 max-h-[150px] overflow-y-auto">
+                    <%= if @action_count > 0 do %>
+                      <%= for action <- @all_actions do %>
+                        <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
+                          <div class="flex justify-between items-start gap-1">
+                            <div class="flex-1">
+                              <p class="font-workshop text-ink-blue">{action.description}</p>
+                              <%= if action.owner_name && action.owner_name != "" do %>
+                                <p class="text-xs text-ink-blue/40 mt-0.5 font-brand">
+                                  Owner: {action.owner_name}
+                                </p>
+                              <% end %>
+                            </div>
+                            <button
+                              type="button"
+                              phx-click="delete_action"
+                              phx-value-id={action.id}
+                              class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+                        No actions yet.
+                      </p>
+                    <% end %>
+                  </div>
+                </div>
               <% else %>
                 <!-- Inactive: Show preview -->
                 <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
@@ -208,6 +260,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     <p class="text-center text-ink-blue/50 italic text-sm">
                       Click to add notes...
                     </p>
+                  <% end %>
+                  <%= if @action_count > 0 do %>
+                    <div class="border-t border-ink-blue/10 mt-2 pt-2">
+                      <p class="text-xs opacity-60 text-center">
+                        {@action_count} action{if @action_count != 1, do: "s"}
+                      </p>
+                    </div>
                   <% end %>
                 </div>
               <% end %>

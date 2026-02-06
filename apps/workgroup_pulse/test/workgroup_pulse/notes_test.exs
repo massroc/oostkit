@@ -3,14 +3,16 @@ defmodule WorkgroupPulse.NotesTest do
 
   alias WorkgroupPulse.Notes
   alias WorkgroupPulse.Notes.{Action, Note}
-  alias WorkgroupPulse.{Sessions, Workshops}
+  alias WorkgroupPulse.Repo
+  alias WorkgroupPulse.Sessions
+  alias WorkgroupPulse.Workshops.Template
 
   describe "notes" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      template =
+        Repo.insert!(%Template{
           name: "Notes Test Workshop",
-          slug: "test-notes",
+          slug: "notes-test-#{System.unique_integer()}",
           version: "1.0.0",
           default_duration_minutes: 180
         })
@@ -60,16 +62,6 @@ defmodule WorkgroupPulse.NotesTest do
       assert Enum.all?(notes, fn n -> n.question_index == 0 end)
     end
 
-    test "list_general_notes/1 returns session-wide notes", %{session: session} do
-      {:ok, _n1} = Notes.create_note(session, nil, %{content: "General note 1"})
-      {:ok, _n2} = Notes.create_note(session, nil, %{content: "General note 2"})
-      {:ok, _n3} = Notes.create_note(session, 0, %{content: "Question note"})
-
-      notes = Notes.list_general_notes(session)
-      assert length(notes) == 2
-      assert Enum.all?(notes, fn n -> n.question_index == nil end)
-    end
-
     test "list_all_notes/1 returns all session notes", %{session: session} do
       {:ok, _} = Notes.create_note(session, nil, %{content: "General"})
       {:ok, _} = Notes.create_note(session, 0, %{content: "Q1"})
@@ -105,10 +97,10 @@ defmodule WorkgroupPulse.NotesTest do
 
   describe "actions" do
     setup do
-      {:ok, template} =
-        Workshops.create_template(%{
+      template =
+        Repo.insert!(%Template{
           name: "Actions Test Workshop",
-          slug: "test-actions",
+          slug: "actions-test-#{System.unique_integer()}",
           version: "1.0.0",
           default_duration_minutes: 180
         })

@@ -5,7 +5,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   use WorkgroupPulseWeb, :live_view
 
   alias WorkgroupPulse.Sessions
-  alias WorkgroupPulseWeb.SessionLive.Components.ActionsComponent
   alias WorkgroupPulseWeb.SessionLive.Components.CompletedComponent
   alias WorkgroupPulseWeb.SessionLive.Components.IntroComponent
   alias WorkgroupPulseWeb.SessionLive.Components.LobbyComponent
@@ -249,11 +248,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_event("continue_to_actions", _params, socket) do
-    EventHandlers.handle_continue_to_actions(socket)
-  end
-
-  @impl true
   def handle_event("continue_to_wrapup", _params, socket) do
     EventHandlers.handle_continue_to_wrapup(socket)
   end
@@ -300,7 +294,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       {render_facilitator_timer(assigns)}
       <!-- App Header (no session name during workshop phases) -->
       <.app_header session_name={
-        if @session.state in ["scoring", "summary", "actions", "completed"],
+        if @session.state in ["scoring", "summary", "completed"],
           do: nil,
           else: session_display_name(@session)
       } />
@@ -348,6 +342,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               all_questions={(@template && @template.questions) || []}
               all_questions_scores={@all_questions_scores || %{}}
               show_score_overlay={@show_score_overlay || false}
+              all_actions={@all_actions}
+              action_count={@action_count}
             />
           <% "summary" -> %>
             <SummaryComponent.render
@@ -358,13 +354,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               individual_scores={@individual_scores}
               notes_by_question={@notes_by_question}
             />
-          <% "actions" -> %>
-            <ActionsComponent.render
-              session={@session}
-              participant={@participant}
-              all_actions={@all_actions}
-              action_count={@action_count}
-            />
           <% "completed" -> %>
             <CompletedComponent.render
               session={@session}
@@ -372,7 +361,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               scores_summary={@scores_summary}
               strengths={@strengths}
               concerns={@concerns}
-              all_actions={@all_actions}
               action_count={@action_count}
               show_export_modal={@show_export_modal}
               export_content={@export_content}
@@ -386,7 +374,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
         <% end %>
       </div>
       <!-- Sheet Strip (only show during scoring and later phases) -->
-      <%= if @session.state in ["scoring", "summary", "actions", "completed"] do %>
+      <%= if @session.state in ["scoring", "summary", "completed"] do %>
         <.sheet_strip
           current={sheet_index(@session)}
           total={sheet_total(@session, assigns)}
@@ -504,7 +492,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     case session.state do
       "scoring" -> session.current_question_index
       "summary" -> 0
-      "actions" -> 0
       "completed" -> 0
       _ -> 0
     end

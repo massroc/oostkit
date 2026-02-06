@@ -52,6 +52,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
     |> load_all_questions_scores(session, template)
+    |> load_actions_data(session)
   end
 
   def load_scoring_data(socket, _session, _participant) do
@@ -218,7 +219,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     end
   end
 
-  defp calculate_readiness(all_participants, score_map, all_turns_done, row_locked) do
+  @doc """
+  Calculates readiness counts for eligible participants.
+
+  Returns `{ready_count, eligible_count, all_ready}`.
+  """
+  def calculate_readiness(all_participants, score_map, all_turns_done, row_locked) do
     eligible_participants =
       Enum.filter(all_participants, fn p ->
         p.status == "active" and not p.is_facilitator and not p.is_observer
@@ -297,7 +303,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
   Loads summary data for summary, actions, and completed states.
   """
   def load_summary_data(socket, session) do
-    if session.state in ["summary", "actions", "completed"] do
+    if session.state in ["summary", "completed"] do
       # Reuse cached template if available, otherwise load it
       template = get_or_load_template(socket, session.template_id)
       scores_summary = Scoring.get_all_scores_summary(session, template)
@@ -352,7 +358,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
   Loads actions data for summary, actions, and completed states.
   """
   def load_actions_data(socket, session) do
-    if session.state in ["summary", "actions", "completed"] do
+    if session.state in ["scoring", "summary", "completed"] do
       actions = Notes.list_all_actions(session)
 
       socket

@@ -309,30 +309,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   @doc """
-  Handles continue_to_actions event.
-  Only facilitator can advance to actions.
-  """
-  def handle_continue_to_actions(socket) do
-    session = socket.assigns.session
-    participant = socket.assigns.participant
-
-    if participant.is_facilitator do
-      handle_operation(
-        socket,
-        Sessions.advance_to_actions(session),
-        "Failed to advance to actions",
-        fn socket, updated_session ->
-          socket
-          |> assign(session: updated_session)
-          |> DataLoaders.load_actions_data(updated_session)
-        end
-      )
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @doc """
   Handles continue_to_wrapup event.
   Only facilitator can advance to wrap-up/completed.
   """
@@ -349,7 +325,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
           socket
           |> assign(session: updated_session)
           |> DataLoaders.load_summary_data(updated_session)
-          |> DataLoaders.load_actions_data(updated_session)
           |> TimerHandler.stop_timer()
         end
       )
@@ -466,19 +441,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   # Private helper functions
 
   defp do_finish_workshop(socket) do
-    session = socket.assigns.session
-
-    if session.state == "completed" do
-      {:noreply, push_navigate(socket, to: "/")}
-    else
-      case Sessions.complete_session(session) do
-        {:ok, _updated_session} ->
-          {:noreply, push_navigate(socket, to: "/")}
-
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Failed to complete workshop")}
-      end
-    end
+    {:noreply, push_navigate(socket, to: "/")}
   end
 
   defp do_go_back(socket) do
@@ -509,21 +472,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
         socket
         |> assign(session: updated_session)
         |> DataLoaders.load_scoring_data(updated_session, socket.assigns.participant)
-      end
-    )
-  end
-
-  defp do_go_back_from_state(socket, session, "actions") do
-    Sessions.reset_all_ready(session)
-
-    handle_operation(
-      socket,
-      Sessions.go_back_to_summary(session),
-      "Failed to go back",
-      fn socket, updated_session ->
-        socket
-        |> assign(session: updated_session)
-        |> DataLoaders.load_summary_data(updated_session)
       end
     )
   end

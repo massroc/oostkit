@@ -157,7 +157,7 @@ Set via Fly.io secrets:
 │   │   ├── scoring.ex                # Score submission, validation, aggregation
 │   │   ├── notes.ex                  # Notes & action items
 │   │   ├── workshops/                # Workshop templates & questions
-│   │   ├── facilitation/             # Timer & phase management
+│   │   ├── facilitation.ex            # Calculation utilities
 │   │   ├── export.ex                 # Export functionality
 │   │   └── repo.ex
 │   └── workgroup_pulse_web/          # Web layer
@@ -171,7 +171,6 @@ Set via Fly.io secrets:
 │       │   ├── components/
 │       │   │   ├── scoring_component.ex    # Virtual Wall grid + overlay
 │       │   │   ├── summary_component.ex    # Score summary view
-│       │   │   ├── actions_component.ex    # Action management
 │       │   │   ├── completed_component.ex  # Wrap-up/export
 │       │   │   ├── intro_component.ex      # Introduction screens
 │       │   │   ├── lobby_component.ex      # Waiting room
@@ -185,7 +184,6 @@ Set via Fly.io secrets:
 │       │   │   ├── operation_helpers.ex    # Standardised error handling
 │       │   │   └── score_helpers.ex        # Score color/formatting
 │       │   ├── timer_handler.ex            # Facilitator timer logic
-│       │   ├── score_results_component.ex  # LiveComponent for score display
 │       │   └── action_form_component.ex    # LiveComponent for action form
 │       ├── endpoint.ex
 │       ├── router.ex
@@ -230,7 +228,7 @@ Set via Fly.io secrets:
 - [x] Traffic light color coding (green/amber/red)
 - [x] Combined team value calculation
 - [x] Facilitator tips on left panel (expandable via "More tips" button)
-- [x] Notes side-sheet with focus-based expand/collapse and real-time sync
+- [x] Notes side-sheet with focus-based expand/collapse, real-time sync, and action item management
 - [x] "Done" button to pass turn, floating action buttons (bottom-right)
 - [x] "I'm Ready" button for non-facilitator participants to signal readiness
 - [x] Facilitator "Skip Turn" button
@@ -245,14 +243,6 @@ Set via Fly.io secrets:
 - [x] Combined team values (out of 10)
 - [x] Pattern highlighting (strengths vs concerns)
 - [x] Notes displayed from scoring phase (only if notes were taken)
-
-#### Actions Phase (Complete)
-- [x] Action item creation with inline form
-- [x] Owner assignment per action
-- [x] Link actions to specific questions (optional)
-- [x] Toggle action completion status
-- [x] Delete actions
-- [x] Real-time sync across participants
 
 #### Completed Phase (Complete)
 - [x] Final summary with score overview and strengths/concerns
