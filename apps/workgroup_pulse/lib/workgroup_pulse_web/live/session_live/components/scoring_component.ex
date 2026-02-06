@@ -1,7 +1,8 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   @moduledoc """
   Renders the scoring phase of a workshop session.
-  Includes turn-based scoring input, score grid, and discussion results.
+  Features the Virtual Wall design with paper-textured sheets,
+  grid-based scoring view, and side-sheet for notes.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
@@ -41,228 +42,332 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     <%= if @show_mid_transition do %>
       {render_mid_transition(assigns)}
     <% else %>
-      <div class="flex flex-col items-center min-h-screen px-4 py-8">
-        <div class="max-w-2xl w-full">
-          <!-- Progress indicator -->
-          <div class="mb-6">
-            <div class="flex justify-between items-center text-sm text-text-body mb-2">
-              <span>Question {@session.current_question_index + 1} of {@total_questions}</span>
-              <span>{@score_count}/{@active_participant_count} submitted</span>
-            </div>
+      <div class="flex h-full">
+        <!-- Main Content Area -->
+        <div class="flex-1 flex items-start justify-center p-6 overflow-auto relative z-[2]">
+          <!-- Main Sheet -->
+          <div
+            class="paper-texture rounded-sheet shadow-sheet p-5 min-w-[520px] max-w-[700px] w-full relative flex flex-col"
+            style="transform: rotate(-0.2deg)"
+          >
+            <div class="relative z-[1] flex-1 flex flex-col">
+              <!-- Sheet Header: Question info + Progress -->
+              <div class="mb-4 pb-3 border-b-2 border-ink-blue/10">
+                <div class="flex justify-between items-center text-sm mb-2">
+                  <span class="text-ui-text-muted">
+                    Question {@session.current_question_index + 1} of {@total_questions}
+                  </span>
+                  <span class="text-ui-text-muted">
+                    {@score_count}/{@active_participant_count} scored
+                  </span>
+                </div>
 
-            <div class="w-full bg-gray-100 rounded-full h-2">
-              <div
-                class="bg-traffic-green h-2 rounded-full transition-all duration-300"
-                style={"width: #{(@session.current_question_index + 1) / @total_questions * 100}%"}
-              />
-            </div>
-          </div>
-          <!-- Question card -->
-          <div class="bg-surface-sheet rounded-lg p-6 mb-6">
-            <div class="text-sm text-traffic-green mb-2">{@current_question.criterion_name}</div>
+                <h2 class="font-workshop text-2xl font-bold text-ink-blue">
+                  {@current_question.title}
+                </h2>
 
-            <h1 class="text-2xl font-bold text-text-dark mb-4">{@current_question.title}</h1>
+                <p class="text-ink-blue/70 text-sm mt-1 whitespace-pre-line">
+                  {format_description(@current_question.explanation)}
+                </p>
 
-            <p class="text-text-body whitespace-pre-line">
-              {format_description(@current_question.explanation)}
-            </p>
-
-            <%= if length(@current_question.discussion_prompts) > 0 do %>
-              <%= if @show_facilitator_tips do %>
-                <!-- Expanded tips section -->
-                <div class="mt-4 pt-4 border-t border-gray-700">
-                  <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-semibold text-purple-400">Facilitator Tips</h3>
-
+                <%= if length(@current_question.discussion_prompts) > 0 do %>
+                  <%= if @show_facilitator_tips do %>
+                    <div class="mt-3 pt-3 border-t border-ink-blue/10">
+                      <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-semibold text-accent-purple uppercase tracking-wide">
+                          Facilitator Tips
+                        </h3>
+                        <button
+                          type="button"
+                          phx-click="toggle_facilitator_tips"
+                          class="text-xs text-ui-text-muted hover:text-ui-text transition-colors"
+                        >
+                          Hide
+                        </button>
+                      </div>
+                      <ul class="space-y-1">
+                        <%= for prompt <- @current_question.discussion_prompts do %>
+                          <li class="flex gap-2 text-ink-blue/60 text-sm">
+                            <span class="text-accent-purple">•</span>
+                            <span>{prompt}</span>
+                          </li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  <% else %>
                     <button
                       type="button"
                       phx-click="toggle_facilitator_tips"
-                      class="text-sm text-text-body hover:text-text-dark transition-colors"
+                      class="mt-2 text-sm text-accent-purple hover:text-highlight transition-colors flex items-center gap-1"
                     >
-                      Hide tips
+                      <span>More tips</span>
+                      <span class="text-xs">+</span>
+                    </button>
+                  <% end %>
+                <% end %>
+              </div>
+              
+    <!-- Grid-based Score Display -->
+              <%= if length(@all_scores) > 0 and not @scores_revealed do %>
+                <div class="flex-1 overflow-y-auto overflow-x-hidden mb-4">
+                  {render_scoring_grid(assigns)}
+                </div>
+              <% end %>
+              
+    <!-- Score Results (after reveal) -->
+              <%= if @scores_revealed and not (@is_my_turn and not @my_turn_locked) do %>
+                <.live_component
+                  module={ScoreResultsComponent}
+                  id="score-results"
+                  all_scores={@all_scores}
+                  current_question={@current_question}
+                  total_questions={@total_questions}
+                  show_notes={@show_notes}
+                  question_notes={@question_notes}
+                  note_input={@note_input}
+                  participant={@participant}
+                  session={@session}
+                  ready_count={@ready_count}
+                  eligible_participant_count={@eligible_participant_count}
+                  all_ready={@all_ready}
+                  participant_was_skipped={@participant_was_skipped}
+                />
+              <% else %>
+                <!-- Score Input Area -->
+                {render_score_input(assigns)}
+              <% end %>
+              
+    <!-- Facilitator Navigation (during scoring entry) -->
+              <%= if @participant.is_facilitator and not @scores_revealed do %>
+                <div class="mt-4 pt-4 border-t border-ink-blue/10">
+                  <div class="flex gap-3">
+                    <%= if @session.current_question_index > 0 do %>
+                      <button
+                        phx-click="go_back"
+                        class="btn-workshop btn-workshop-secondary"
+                      >
+                        ← Back
+                      </button>
+                    <% end %>
+                    <button
+                      disabled
+                      class="flex-1 btn-workshop btn-workshop-secondary opacity-50 cursor-not-allowed"
+                    >
+                      <%= if @session.current_question_index + 1 >= @total_questions do %>
+                        Continue to Summary →
+                      <% else %>
+                        Next Question →
+                      <% end %>
                     </button>
                   </div>
-
-                  <ul class="space-y-2">
-                    <%= for prompt <- @current_question.discussion_prompts do %>
-                      <li class="flex gap-2 text-text-body text-sm">
-                        <span class="text-purple-400">•</span> <span>{prompt}</span>
-                      </li>
-                    <% end %>
-                  </ul>
+                  <p class="text-center text-ui-text-muted text-xs mt-2">
+                    Waiting for all scores to be submitted...
+                  </p>
                 </div>
-              <% else %>
-                <!-- Collapsed state - show More tips button -->
-                <button
-                  type="button"
-                  phx-click="toggle_facilitator_tips"
-                  class="mt-4 text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1"
-                >
-                  <span>More tips</span> <span class="text-xs">+</span>
-                </button>
               <% end %>
-            <% end %>
+            </div>
           </div>
-          <!-- Score grid showing all participants (butcher paper model) - only during scoring, not after reveal -->
-          <%= if length(@all_scores) > 0 and not @scores_revealed do %>
-            <div class="bg-surface-sheet rounded-lg p-4 mb-4">
-              <div class="flex flex-wrap gap-2 justify-center">
-                <%= for s <- @all_scores do %>
-                  <div class={[
-                    "rounded p-2 text-center min-w-[60px] transition-all",
-                    case s.state do
-                      :scored -> bg_color_class(s.color)
-                      :current -> "bg-blue-900/30 border-2 border-blue-500 animate-pulse"
-                      :skipped -> "bg-gray-100 border border-gray-300"
-                      :pending -> "bg-gray-50 border border-gray-200"
-                      _ -> "bg-gray-100 border border-gray-300"
-                    end
-                  ]}>
-                    <div class={[
-                      "text-lg font-bold",
-                      case s.state do
-                        :scored -> text_color_class(s.color)
-                        :current -> "text-blue-400"
-                        :skipped -> "text-gray-500"
-                        :pending -> "text-gray-600"
-                        _ -> "text-text-body"
-                      end
-                    ]}>
-                      <%= case s.state do %>
-                        <% :scored -> %>
-                          <%= if @current_question.scale_type == "balance" and s.value > 0 do %>
-                            +{s.value}
-                          <% else %>
-                            {s.value}
-                          <% end %>
-                        <% :current -> %>
-                          ...
-                        <% :skipped -> %>
-                          ?
-                        <% :pending -> %>
-                          —
-                        <% _ -> %>
-                          —
-                      <% end %>
-                    </div>
-
-                    <div
-                      class={[
-                        "text-xs truncate",
-                        if(s.state == :scored, do: "text-text-body", else: "text-gray-500")
-                      ]}
-                      title={s.participant_name}
-                    >
-                      {s.participant_name}
-                    </div>
-                  </div>
+        </div>
+        
+    <!-- Side Sheet (Notes) - positioned behind main sheet -->
+        <div class="absolute right-5 top-6 z-[1]">
+          <div
+            class="paper-texture-secondary rounded-sheet shadow-sheet p-4 w-[300px] cursor-pointer transition-shadow duration-300 hover:shadow-sheet-lifted overflow-hidden"
+            style="transform: rotate(1.2deg); margin-top: 40px;"
+            phx-click="toggle_notes"
+          >
+            <div class="relative z-[1]">
+              <div class="font-workshop text-xl font-bold text-ink-blue text-center underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 mb-3.5 opacity-85">
+                Notes
+              </div>
+              <div class="font-workshop text-base text-ink-blue leading-relaxed opacity-70">
+                <%= if length(@question_notes) > 0 do %>
+                  <%= for note <- Enum.take(@question_notes, 3) do %>
+                    <p class="mb-2.5 relative pl-4">
+                      <span class="absolute left-0 text-ink-blue/60">•</span>
+                      {String.slice(note.content, 0, 50)}{if String.length(note.content) > 50,
+                        do: "..."}
+                    </p>
+                  <% end %>
+                  <%= if length(@question_notes) > 3 do %>
+                    <p class="text-sm opacity-60 text-center mt-2">
+                      +{length(@question_notes) - 3} more...
+                    </p>
+                  <% end %>
+                <% else %>
+                  <p class="text-center text-ink-blue/50 italic">
+                    Click to add notes...
+                  </p>
                 <% end %>
               </div>
             </div>
-          <% end %>
-
-          <%= if @scores_revealed and not (@is_my_turn and not @my_turn_locked) do %>
-            <.live_component
-              module={ScoreResultsComponent}
-              id="score-results"
-              all_scores={@all_scores}
-              current_question={@current_question}
-              total_questions={@total_questions}
-              show_notes={@show_notes}
-              question_notes={@question_notes}
-              note_input={@note_input}
-              participant={@participant}
-              session={@session}
-              ready_count={@ready_count}
-              eligible_participant_count={@eligible_participant_count}
-              all_ready={@all_ready}
-              participant_was_skipped={@participant_was_skipped}
-            />
-          <% else %>
-            {render_score_input(assigns)}
-            <!-- Facilitator navigation bar during scoring entry -->
-            <%= if @participant.is_facilitator do %>
-              <div class="bg-surface-sheet rounded-lg p-6">
-                <div class="flex gap-3">
-                  <%= if @session.current_question_index > 0 do %>
-                    <button
-                      phx-click="go_back"
-                      class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <span>←</span> <span>Back</span>
-                    </button>
-                  <% end %>
-                  <button
-                    disabled
-                    class="flex-1 px-6 py-3 bg-gray-200 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
-                  >
-                    <%= if @session.current_question_index + 1 >= @total_questions do %>
-                      Continue to Summary →
-                    <% else %>
-                      Next Question →
-                    <% end %>
-                  </button>
-                </div>
-
-                <p class="text-center text-gray-500 text-sm mt-2">
-                  Waiting for all scores to be submitted...
-                </p>
-              </div>
-            <% end %>
-          <% end %>
+          </div>
         </div>
       </div>
+      
+    <!-- Floating Action Buttons -->
+      <%= if @is_my_turn and not @my_turn_locked and not @scores_revealed do %>
+        <div class="fixed bottom-[60px] right-5 flex gap-2 z-floating">
+          <button
+            phx-click="submit_score"
+            disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
+            class={[
+              "btn-workshop",
+              if(@selected_value != nil and (not @has_submitted or @selected_value != @my_score),
+                do: "btn-workshop-primary",
+                else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+              )
+            ]}
+          >
+            <%= if @has_submitted do %>
+              Change Score
+            <% else %>
+              Share Score
+            <% end %>
+          </button>
+          <button
+            phx-click="complete_turn"
+            disabled={not @has_submitted}
+            class={[
+              "btn-workshop",
+              if(@has_submitted,
+                do: "btn-workshop-primary",
+                else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+              )
+            ]}
+          >
+            Done →
+          </button>
+        </div>
+      <% end %>
     <% end %>
     """
   end
 
   defp render_mid_transition(assigns) do
     ~H"""
-    <div class="flex flex-col items-center justify-center min-h-screen px-4">
-      <div class="max-w-2xl w-full text-center">
-        <div class="bg-surface-sheet rounded-lg p-8">
+    <div class="flex items-center justify-center h-full p-6">
+      <div
+        class="paper-texture rounded-sheet shadow-sheet p-8 max-w-2xl w-full"
+        style="transform: rotate(-0.2deg)"
+      >
+        <div class="relative z-[1] text-center">
           <div class="text-6xl mb-4">🔄</div>
 
-          <h1 class="text-3xl font-bold text-text-dark mb-6">New Scoring Scale Ahead</h1>
+          <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
+            New Scoring Scale Ahead
+          </h1>
 
-          <div class="text-text-body space-y-4 text-lg text-left">
+          <div class="text-ink-blue/80 space-y-4 text-lg text-left">
             <p class="text-center">Great progress! You've completed the first four questions.</p>
 
-            <div class="bg-gray-100 rounded-lg p-6 my-6">
-              <p class="text-text-dark font-semibold mb-3">
+            <div class="bg-surface-wall rounded-lg p-6 my-6">
+              <p class="text-ink-blue font-semibold mb-3">
                 The next four questions use a different scale:
               </p>
 
               <div class="flex justify-between items-center mb-4">
-                <span class="text-text-body">0</span>
+                <span class="text-ink-blue/60">0</span>
                 <span class="text-traffic-green font-semibold text-xl">→</span>
                 <span class="text-traffic-green font-semibold">10</span>
               </div>
 
-              <ul class="space-y-2 text-text-body">
+              <ul class="space-y-2 text-ink-blue/70">
                 <li>
                   • For these,
                   <span class="text-traffic-green font-semibold">more is always better</span>
                 </li>
-
                 <li>• <span class="text-traffic-green font-semibold">10 is optimal</span></li>
               </ul>
             </div>
 
-            <p class="text-text-body text-center">
+            <p class="text-ink-blue/60 text-center">
               These measure aspects of work where you can never have too much.
             </p>
           </div>
 
           <button
             phx-click="continue_past_transition"
-            class="mt-8 px-8 py-3 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors text-lg"
+            class="mt-8 btn-workshop btn-workshop-primary text-lg px-8 py-3"
           >
             Continue to Question 5 →
           </button>
         </div>
       </div>
     </div>
+    """
+  end
+
+  defp render_scoring_grid(assigns) do
+    # Get active (non-observer) participants for the grid
+    active_participants =
+      Enum.filter(assigns.participants, fn p -> not p.is_observer end)
+
+    # Build scores map for quick lookup
+    scores_by_participant =
+      assigns.all_scores
+      |> Enum.map(fn s -> {s.participant_id, s} end)
+      |> Map.new()
+
+    assigns =
+      assigns
+      |> assign(:active_participants, active_participants)
+      |> assign(:scores_by_participant, scores_by_participant)
+
+    ~H"""
+    <table class="scoring-grid">
+      <thead>
+        <tr>
+          <th class="criterion-col"></th>
+          <%= for p <- @active_participants do %>
+            <th class={[
+              "participant-col",
+              p.id == @current_turn_participant_id && "active-col-header"
+            ]}>
+              {p.name}
+            </th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Current question row (active) -->
+        <tr class="active-row">
+          <td class="criterion">
+            <%= if @current_question.criterion_name && @current_question.criterion_name != @current_question.title do %>
+              <span class="parent">{@current_question.criterion_name}</span>
+            <% end %>
+            <span class="name">{@current_question.title}</span>
+          </td>
+          <%= for p <- @active_participants do %>
+            <% score = Map.get(@scores_by_participant, p.id) %>
+            <td class={[
+              "score-cell",
+              score && score.state == :empty && "empty",
+              p.id == @current_turn_participant_id && "active-col"
+            ]}>
+              <%= if score do %>
+                <%= case score.state do %>
+                  <% :scored -> %>
+                    <%= if @current_question.scale_type == "balance" and score.value > 0 do %>
+                      +{score.value}
+                    <% else %>
+                      {score.value}
+                    <% end %>
+                  <% :current -> %>
+                    ...
+                  <% :skipped -> %>
+                    ?
+                  <% _ -> %>
+                    —
+                <% end %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      </tbody>
+    </table>
     """
   end
 
@@ -280,16 +385,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     assigns = assign(assigns, :current_turn_name, current_turn_name)
 
     ~H"""
-    <div class="bg-surface-sheet rounded-lg p-6 mb-6">
+    <div class="bg-surface-wall/50 rounded-lg p-4">
       <%= if @participant.is_observer do %>
         <div class="text-center">
-          <div class="text-purple-400 text-lg font-semibold mb-2">Observer Mode</div>
-
-          <p class="text-text-body">You are observing this session.</p>
-
+          <div class="text-accent-purple text-lg font-semibold mb-2 font-brand">Observer Mode</div>
+          <p class="text-ink-blue/70">You are observing this session.</p>
           <%= if @current_turn_name do %>
-            <p class="text-gray-500 mt-2">
-              <span class="text-text-dark">{@current_turn_name}</span> is scoring
+            <p class="text-ink-blue/50 mt-2">
+              <span class="text-ink-blue">{@current_turn_name}</span> is scoring
             </p>
           <% end %>
         </div>
@@ -297,7 +400,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <%= if @is_my_turn and not @my_turn_locked do %>
           <!-- It's this participant's turn -->
           <div class="text-center mb-4">
-            <div class="text-traffic-green text-lg font-semibold">
+            <div class="text-traffic-green text-lg font-semibold font-brand">
               <%= if @has_submitted do %>
                 Discuss your score
               <% else %>
@@ -312,71 +415,36 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             {render_maximal_scale(assigns)}
           <% end %>
 
-          <div class="flex gap-3 mt-6">
-            <button
-              phx-click="submit_score"
-              disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
-              class={[
-                "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
-                if(
-                  @selected_value != nil and
-                    (not @has_submitted or @selected_value != @my_score),
-                  do: "bg-accent-purple hover:bg-highlight text-white",
-                  else: "bg-gray-200 text-gray-400 cursor-not-allowed"
-                )
-              ]}
-            >
-              <%= if @has_submitted do %>
-                Change Score
-              <% else %>
-                Share Score
-              <% end %>
-            </button>
-            <button
-              phx-click="complete_turn"
-              disabled={not @has_submitted}
-              class={[
-                "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
-                if(@has_submitted,
-                  do: "bg-df-green hover:bg-secondary-green-light text-white",
-                  else: "bg-gray-200 text-gray-400 cursor-not-allowed"
-                )
-              ]}
-            >
-              Done →
-            </button>
-          </div>
-
           <%= if @has_submitted do %>
-            <p class="text-center text-text-body text-sm mt-2">
+            <p class="text-center text-ink-blue/60 text-sm mt-3">
               Discuss this score, then click "Done" when ready
             </p>
           <% end %>
         <% else %>
-          <!-- Not this participant's turn, or they've completed their turn -->
+          <!-- Not this participant's turn -->
           <div class="text-center">
             <%= if @current_turn_name do %>
-              <p class="text-text-body">
+              <p class="text-ink-blue/70">
                 <%= if @current_turn_has_score do %>
-                  Discuss <span class="text-text-dark">{@current_turn_name}</span>'s score
+                  Discuss <span class="text-ink-blue font-semibold">{@current_turn_name}</span>'s score
                 <% else %>
-                  Waiting for <span class="text-text-dark">{@current_turn_name}</span> to score
+                  Waiting for <span class="text-ink-blue font-semibold">{@current_turn_name}</span>
+                  to score
                 <% end %>
               </p>
-              <!-- Skip button - facilitator only, only when current turn hasn't placed a score -->
+              <!-- Skip button - facilitator only -->
               <%= if @participant.is_facilitator and not @current_turn_has_score do %>
-                <div class="mt-4">
+                <div class="mt-3">
                   <button
                     phx-click="skip_turn"
-                    class="text-sm text-gray-500 hover:text-text-body transition-colors"
+                    class="text-sm text-ui-text-muted hover:text-ink-blue transition-colors"
                   >
                     Skip {String.split(@current_turn_name) |> List.first()}'s turn
                   </button>
                 </div>
               <% end %>
             <% else %>
-              <!-- No current turn - all done or between turns -->
-              <p class="text-text-body">Waiting for next turn...</p>
+              <p class="text-ink-blue/60">Waiting for next turn...</p>
             <% end %>
           </div>
         <% end %>
@@ -387,9 +455,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_balance_scale(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <div class="flex justify-between text-sm text-text-body">
-        <span>Too little</span> <span>Just right</span> <span>Too much</span>
+    <div class="space-y-3">
+      <div class="flex justify-between text-sm text-ink-blue/60">
+        <span>Too little</span>
+        <span>Just right</span>
+        <span>Too much</span>
       </div>
 
       <div class="flex gap-1">
@@ -399,16 +469,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             phx-click="select_score"
             phx-value-score={v}
             class={[
-              "flex-1 min-w-0 py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer",
+              "flex-1 min-w-0 py-2.5 rounded-lg font-semibold text-sm transition-all cursor-pointer font-workshop",
               cond do
                 @selected_value == v ->
-                  "bg-traffic-green text-white"
+                  "bg-traffic-green text-white shadow-md"
 
                 v == 0 ->
                   "bg-green-100 text-traffic-green border-2 border-traffic-green hover:bg-green-200"
 
                 true ->
-                  "bg-gray-200 text-text-dark hover:bg-gray-300"
+                  "bg-surface-sheet text-ink-blue hover:bg-surface-sheet-secondary border border-ink-blue/10"
               end
             ]}
           >
@@ -421,8 +491,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% end %>
       </div>
 
-      <div class="flex justify-between text-xs text-text-body">
-        <span>-5</span> <span class="text-traffic-green font-semibold">0 = optimal</span>
+      <div class="flex justify-between text-xs text-ink-blue/50">
+        <span>-5</span>
+        <span class="text-traffic-green font-semibold">0 = optimal</span>
         <span>+5</span>
       </div>
     </div>
@@ -431,9 +502,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_maximal_scale(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <div class="flex justify-between text-sm text-text-body">
-        <span>Low</span> <span>High</span>
+    <div class="space-y-3">
+      <div class="flex justify-between text-sm text-ink-blue/60">
+        <span>Low</span>
+        <span>High</span>
       </div>
 
       <div class="flex gap-1">
@@ -443,10 +515,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             phx-click="select_score"
             phx-value-score={v}
             class={[
-              "flex-1 min-w-0 py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer",
+              "flex-1 min-w-0 py-2.5 rounded-lg font-semibold text-sm transition-all cursor-pointer font-workshop",
               if(@selected_value == v,
-                do: "bg-accent-purple text-white",
-                else: "bg-gray-200 text-text-dark hover:bg-gray-300"
+                do: "bg-accent-purple text-white shadow-md",
+                else:
+                  "bg-surface-sheet text-ink-blue hover:bg-surface-sheet-secondary border border-ink-blue/10"
               )
             ]}
           >
@@ -455,8 +528,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% end %>
       </div>
 
-      <div class="flex justify-between text-xs text-text-body">
-        <span>0</span> <span>10</span>
+      <div class="flex justify-between text-xs text-ink-blue/50">
+        <span>0</span>
+        <span>10</span>
       </div>
     </div>
     """

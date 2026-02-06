@@ -2,6 +2,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
   @moduledoc """
   LiveComponent for displaying score results and notes capture.
   Isolates re-renders to just this section when scores change.
+  Uses Virtual Wall design with paper-textured styling.
 
   Note: Facilitator tips (discussion prompts) are displayed on the question card
   during the scoring phase, not on this results component.
@@ -22,56 +23,60 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-6">
+    <div class="space-y-4">
       <!-- Results summary with team discussion prompt -->
-      <div class="bg-surface-sheet rounded-lg p-6">
-        <!-- Team discussion prompt - at top, matching individual turn prompts -->
+      <div class="bg-surface-wall/50 rounded-lg p-4">
+        <!-- Team discussion prompt -->
         <div class="text-center mb-4">
-          <div class="text-traffic-green text-lg font-semibold">
+          <div class="text-traffic-green text-lg font-semibold font-brand">
             Discuss as a team
           </div>
-          <p class="text-text-body text-sm mt-1">
+          <p class="text-ink-blue/60 text-sm mt-1">
             Look for variance across the group
           </p>
         </div>
-        <!-- Individual scores - horizontal boxes -->
+        
+    <!-- Individual scores - horizontal boxes -->
         <div class="flex flex-wrap gap-2 justify-center">
           <%= for score <- @all_scores do %>
             <div
               class={[
-                "rounded-lg p-2 text-center min-w-[4rem] flex-shrink-0",
+                "rounded-lg p-2 text-center min-w-[4rem] flex-shrink-0 border",
                 bg_color_class(score.color)
               ]}
               title={score.participant_name}
             >
-              <div class={["text-xl font-bold", text_color_class(score.color)]}>
+              <div class={["text-xl font-bold font-workshop", text_color_class(score.color)]}>
                 <%= if @current_question.scale_type == "balance" and score.value > 0 do %>
                   +
                 <% end %>
                 {score.value}
               </div>
-              <div class="text-xs text-text-body truncate max-w-[4rem]">{score.participant_name}</div>
+              <div class="text-xs text-ink-blue/60 truncate max-w-[4rem] font-workshop">
+                {score.participant_name}
+              </div>
             </div>
           <% end %>
         </div>
       </div>
       
-    <!-- Toggle button for notes - events go to parent -->
+    <!-- Toggle button for notes -->
       <div>
         <button
           type="button"
           phx-click="toggle_notes"
           class={[
-            "w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2",
+            "w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 font-brand",
             if(@show_notes,
               do: "bg-accent-purple text-white",
-              else: "bg-gray-200 text-text-dark hover:bg-gray-300"
+              else:
+                "bg-surface-sheet text-ink-blue hover:bg-surface-sheet-secondary border border-ink-blue/10"
             )
           ]}
         >
           <span>{if @show_notes, do: "Hide", else: "Add"} Notes</span>
           <%= if length(@question_notes) > 0 do %>
-            <span class="bg-gray-300 text-text-dark text-xs px-2 py-0.5 rounded-full">
+            <span class="bg-surface-wall text-ink-blue text-xs px-2 py-0.5 rounded-full">
               {length(@question_notes)}
             </span>
           <% end %>
@@ -80,31 +85,31 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
       
     <!-- Notes capture (collapsible) -->
       <%= if @show_notes do %>
-        <div class="bg-surface-sheet rounded-lg p-6 border border-blue-600/50">
+        <div class="bg-surface-wall/50 rounded-lg p-4 border border-accent-purple/30">
           <!-- Existing notes -->
           <%= if length(@question_notes) > 0 do %>
             <ul class="space-y-3 mb-4">
               <%= for note <- @question_notes do %>
-                <li class="bg-gray-100 rounded-lg p-3">
+                <li class="bg-surface-sheet rounded-lg p-3 border border-ink-blue/5">
                   <div class="flex justify-between items-start gap-2">
-                    <p class="text-text-body flex-1">{note.content}</p>
+                    <p class="text-ink-blue flex-1 font-workshop">{note.content}</p>
                     <button
                       type="button"
                       phx-click="delete_note"
                       phx-value-id={note.id}
-                      class="text-gray-500 hover:text-traffic-red transition-colors text-sm"
+                      class="text-ink-blue/40 hover:text-accent-red transition-colors text-sm"
                       title="Delete note"
                     >
                       ✕
                     </button>
                   </div>
-                  <p class="text-xs text-gray-500 mt-1">— {note.author_name}</p>
+                  <p class="text-xs text-ink-blue/50 mt-1 font-brand">— {note.author_name}</p>
                 </li>
               <% end %>
             </ul>
           <% end %>
           
-    <!-- Add note form - events go to parent LiveView for test compatibility -->
+    <!-- Add note form -->
           <form phx-submit="add_note" class="flex gap-2">
             <input
               type="text"
@@ -113,42 +118,41 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
               phx-change="update_note_input"
               phx-debounce="300"
               placeholder="Capture a key discussion point..."
-              class="flex-1 bg-gray-100 border border-gray-600 rounded-lg px-4 py-2 text-text-dark placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              class="flex-1 bg-surface-sheet border border-ink-blue/10 rounded-lg px-4 py-2 text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple"
             />
             <button
               type="submit"
-              class="px-4 py-2 bg-accent-purple hover:bg-highlight text-white font-semibold rounded-lg transition-colors"
+              class="btn-workshop btn-workshop-primary"
             >
               Add
             </button>
           </form>
-          <p class="text-xs text-gray-500 mt-2">
+          <p class="text-xs text-ink-blue/50 mt-2 font-brand">
             Notes are visible to all participants and saved with the session.
           </p>
         </div>
       <% end %>
       
     <!-- Ready / Next controls -->
-      <div class="bg-surface-sheet rounded-lg p-6">
+      <div class="bg-surface-wall/50 rounded-lg p-4">
         <%= if @participant.is_facilitator do %>
           <div class="flex gap-3">
             <%= if @session.current_question_index > 0 do %>
               <button
                 phx-click="go_back"
-                class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark font-medium rounded-lg transition-colors flex items-center gap-2"
+                class="btn-workshop btn-workshop-secondary"
               >
-                <span>←</span>
-                <span>Back</span>
+                ← Back
               </button>
             <% end %>
             <button
               phx-click="next_question"
               disabled={not @all_ready}
               class={[
-                "flex-1 px-6 py-3 font-semibold rounded-lg transition-colors",
+                "flex-1 btn-workshop",
                 if(@all_ready,
-                  do: "bg-df-green hover:bg-secondary-green-light text-white",
-                  else: "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  do: "btn-workshop-primary",
+                  else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
                 )
               ]}
             >
@@ -159,7 +163,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
               <% end %>
             </button>
           </div>
-          <p class="text-center text-gray-500 text-sm mt-2">
+          <p class="text-center text-ink-blue/50 text-sm mt-2 font-brand">
             <%= if @all_ready do %>
               All participants ready
             <% else %>
@@ -168,25 +172,27 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
           </p>
         <% else %>
           <%= if @participant_was_skipped do %>
-            <!-- Skipped participant - automatically ready, greyed out -->
+            <!-- Skipped participant -->
             <div class="text-center">
               <button
                 disabled
-                class="w-full px-6 py-3 bg-gray-200 text-gray-400 font-semibold rounded-lg cursor-not-allowed"
+                class="w-full btn-workshop btn-workshop-secondary opacity-50 cursor-not-allowed"
               >
                 Ready to Continue
               </button>
-              <p class="text-gray-500 text-sm mt-2">You were skipped for this question</p>
+              <p class="text-ink-blue/50 text-sm mt-2 font-brand">
+                You were skipped for this question
+              </p>
             </div>
           <% else %>
             <%= if @participant.is_ready do %>
-              <div class="text-center text-text-body">
+              <div class="text-center text-ink-blue/70 font-brand">
                 <span class="text-traffic-green">✓</span> You're ready. Waiting for facilitator...
               </div>
             <% else %>
               <button
                 phx-click="mark_ready"
-                class="w-full px-6 py-3 bg-accent-purple hover:bg-highlight text-white font-semibold rounded-lg transition-colors"
+                class="w-full btn-workshop btn-workshop-primary"
               >
                 I'm Ready to Continue
               </button>
