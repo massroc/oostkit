@@ -444,7 +444,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     ~H"""
     <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter">
       <!-- Backdrop -->
-      <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay"></div>
+      <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay">
+      </div>
       <!-- Modal -->
       <div class="relative paper-texture rounded-sheet shadow-sheet-lifted p-6 max-w-md w-full mx-4">
         <div class="relative z-[1]">
