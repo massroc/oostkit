@@ -250,7 +250,8 @@ input[type="range"]::-moz-range-thumb {
 
 /* ─── Scoring Grid ─── */
 .scoring-grid {
-  width: auto;
+  width: 100%;
+  max-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -356,16 +357,6 @@ th.active-col-header {
   max-width: 160px;
 }
 
-.scoring-grid .criterion .parent {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  opacity: 0.5;
-  display: block;
-  margin-bottom: 1px;
-}
-
 .scoring-grid .criterion .name {
   font-size: 17px;
   font-weight: 600;
@@ -373,9 +364,22 @@ th.active-col-header {
   letter-spacing: 0.01em;
 }
 
-/* Indent sub-criteria (a/b) that have a parent criterion label */
-.scoring-grid .criterion .parent + .name {
-  padding-left: 12px;
+/* Indented sub-criteria (a/b rows under a group header) */
+.scoring-grid .criterion.criterion-indented {
+  padding-left: 10px;
+}
+
+/* Group header row for paired criteria (Continual Learning, Meaningfulness) */
+.scoring-grid .criterion-group-header {
+  font-family: 'Caveat', cursive;
+  font-size: 17px;
+  font-weight: 600;
+  color: theme('colors.ink.blue');
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  padding: 10px 0 2px 0;
+  border-bottom: none;
 }
 
 /* Score cell styling */
@@ -428,6 +432,65 @@ th.active-col-header {
   border-color: #bbb;
   background: #FAFAFA;
   transform: translateY(-1px);
+}
+
+/* ─── Virtual Wall Layout ─── */
+.wall-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wall-sheet-previous {
+  position: absolute;
+  left: 3%;
+  top: 50%;
+  transform: translateY(-50%) scale(0.60);
+  transform-origin: left center;
+  pointer-events: none;
+  opacity: 0.70;
+  z-index: 1;
+  transition: all 300ms ease;
+}
+
+.wall-sheet-previous-deeper {
+  position: absolute;
+  left: 1%;
+  top: 50%;
+  transform: translateY(-50%) scale(0.45);
+  transform-origin: left center;
+  pointer-events: none;
+  opacity: 0.40;
+  z-index: 0;
+  transition: all 300ms ease;
+}
+
+.wall-sheet-current {
+  position: relative;
+  z-index: 5;
+  max-height: 95%;
+  overflow: hidden;
+}
+
+.wall-sheet-side {
+  position: absolute;
+  right: 1rem;
+  top: 4rem;
+  z-index: 2;
+  transition: all 300ms ease;
+}
+
+/* When side sheet is focused, swap z-indexes */
+.wall-sheet-current.wall-focus-background {
+  z-index: 2;
+}
+
+.wall-sheet-side.wall-focus-foreground {
+  z-index: 10;
 }
 
 /* ─── Score Overlay Animation ─── */
