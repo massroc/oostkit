@@ -192,10 +192,11 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       # Should see scoring UI with Test Question
       assert render(view) =~ "Test Question"
 
-      # Select a score
+      # Select a score (auto-submits and closes overlay)
       view |> element("button[phx-value-score='0']") |> render_click()
-      # The score button should now be selected (design system green)
-      assert render(view) =~ "bg-traffic-green"
+      # The score should now appear in the grid and Done button should be visible
+      html = render(view)
+      assert html =~ "Done"
     end
 
     test "back button is not shown on Q1 scoring", %{

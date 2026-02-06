@@ -184,6 +184,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
+  def handle_event("edit_my_score", _params, socket) do
+    EventHandlers.handle_edit_my_score(socket)
+  end
+
+  @impl true
   def handle_event("submit_score", _params, socket) do
     EventHandlers.handle_submit_score(socket)
   end
@@ -335,6 +340,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               eligible_participant_count={@eligible_participant_count}
               all_ready={@all_ready}
               participant_was_skipped={@participant_was_skipped}
+              all_questions={(@template && @template.questions) || []}
+              all_questions_scores={@all_questions_scores || %{}}
+              show_score_overlay={@show_score_overlay || false}
             />
           <% "summary" -> %>
             <SummaryComponent.render
@@ -409,35 +417,21 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               </button>
             <% end %>
             
-    <!-- Score buttons (only during my turn) -->
-            <%= if @is_my_turn and not @my_turn_locked do %>
+    <!-- Skip button (facilitator only, when someone else is scoring and hasn't submitted) -->
+            <%= if @participant.is_facilitator and not @scores_revealed and not @current_turn_has_score and not (@is_my_turn and not @my_turn_locked) do %>
               <button
-                phx-click="submit_score"
-                disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
-                class={[
-                  "btn-workshop",
-                  if(@selected_value != nil and (not @has_submitted or @selected_value != @my_score),
-                    do: "btn-workshop-primary",
-                    else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
-                  )
-                ]}
+                phx-click="skip_turn"
+                class="btn-workshop btn-workshop-secondary"
               >
-                <%= if @has_submitted do %>
-                  Change Score
-                <% else %>
-                  Share Score
-                <% end %>
+                Skip Turn
               </button>
+            <% end %>
+            
+    <!-- Done button (only during my turn, after score submitted) -->
+            <%= if @is_my_turn and not @my_turn_locked and @has_submitted do %>
               <button
                 phx-click="complete_turn"
-                disabled={not @has_submitted}
-                class={[
-                  "btn-workshop",
-                  if(@has_submitted,
-                    do: "btn-workshop-primary",
-                    else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
-                  )
-                ]}
+                class="btn-workshop btn-workshop-primary"
               >
                 Done →
               </button>

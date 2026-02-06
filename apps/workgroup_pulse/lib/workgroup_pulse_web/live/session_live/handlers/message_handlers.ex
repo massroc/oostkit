@@ -162,7 +162,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers do
     session = socket.assigns.session
 
     if session.state == "scoring" and session.current_question_index == question_index do
-      DataLoaders.load_scores(socket, session, question_index)
+      template = socket.assigns[:template]
+
+      socket
+      |> DataLoaders.load_scores(session, question_index)
+      |> DataLoaders.load_all_questions_scores(session, template)
     else
       socket
     end
