@@ -715,7 +715,7 @@ The tool follows the **Virtual Wall** design system (see `docs/design-system.md`
 | Panel | Width | Content | Behaviour |
 |-------|-------|---------|-----------|
 | Left (Question Info) | ~220px | Title, explanation, facilitator tips | Always visible, absolutely positioned |
-| Main Sheet (Grid) | 580-780px | Full 8-question scoring grid | Centred, paper texture, clickable to focus |
+| Main Sheet (Grid) | 720px (fixed) | Full 8-question scoring grid | Always centred, fixed dimensions, paper texture, clickable to focus |
 | Right (Notes) | 280-320px | Notes list + add form | Click to expand/collapse, shows preview when collapsed |
 
 **Floating Action Buttons (bottom-right):**

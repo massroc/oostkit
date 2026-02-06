@@ -139,6 +139,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   @doc """
+  Handles close_score_overlay event.
+  Closes the score overlay when clicking outside it.
+  """
+  def handle_close_score_overlay(socket) do
+    {:noreply, assign(socket, show_score_overlay: false)}
+  end
+
+  @doc """
   Handles complete_turn event.
   Locks the current participant's turn and advances to the next.
   """

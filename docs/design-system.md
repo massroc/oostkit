@@ -84,7 +84,7 @@ All sheets derive from this single ratio:
 
 | Element | Height | Width | Notes |
 |---------|--------|-------|-------|
-| Main sheet | 580px | ~595px | Height × 0.819 + padding for content |
+| Main sheet | 580px | 720px (fixed) | Fixed width, always centred — does not resize with content |
 | Side sheet (Notes) | 480px | ~393px | True 0.819 ratio |
 | Strip thumbnails | 34px | ~28px | True 0.819 ratio |
 
@@ -92,7 +92,7 @@ All sheets derive from this single ratio:
 
 | Sheet Type     | Size      | Shadow           | z-index | Rotation | Purpose |
 |----------------|-----------|------------------|---------|----------|---------|
-| Current Sheet  | 580px H   | `shadow-sheet`   | 2       | -0.2deg  | Active work area |
+| Current Sheet  | 580px H, 720px W (fixed) | `shadow-sheet`   | 2       | -0.2deg  | Active work area, always centred |
 | Side-sheet     | 480px H   | `shadow-sheet`   | 1       | +1.2deg  | Notes, behind main |
 | Sheet Strip    | 34px H    | Subtle           | 10      | —        | Navigation |
 

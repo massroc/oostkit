@@ -86,16 +86,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
                   </button>
                 </div>
               <% else %>
-                <%= if @participant.is_facilitator do %>
-                  <button
-                    phx-click="continue_to_scoring"
-                    class="btn-workshop btn-workshop-primary"
-                  >
-                    Begin Scoring →
-                  </button>
-                <% else %>
-                  <span class="text-ink-blue/60 text-sm font-brand">Waiting for facilitator...</span>
-                <% end %>
+                <div></div>
               <% end %>
             </div>
           </div>
@@ -109,7 +100,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <div class="text-center min-h-[340px]">
       <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
-        Welcome to the Six Criteria Workshop
+        Welcome to the Workshop
       </h1>
 
       <div class="text-ink-blue/80 space-y-6 text-lg leading-relaxed">
@@ -233,11 +224,19 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
           <li>• Your individual scores are visible only to this team</li>
         </ul>
 
-        <div class="bg-surface-wall rounded-lg p-4 mt-6 text-center">
-          <p class="text-ink-blue font-semibold">Ready?</p>
-          <p class="text-ink-blue/60 text-sm mt-1">
-            When everyone is ready, the facilitator will begin scoring.
-          </p>
+        <div class="mt-8 text-center">
+          <%= if @participant.is_facilitator do %>
+            <button
+              phx-click="continue_to_scoring"
+              class="btn-workshop bg-traffic-green text-white text-xl px-12 py-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            >
+              Ready
+            </button>
+          <% else %>
+            <p class="text-ink-blue/60 text-sm font-brand">
+              Waiting for facilitator to start...
+            </p>
+          <% end %>
         </div>
       </div>
     </div>

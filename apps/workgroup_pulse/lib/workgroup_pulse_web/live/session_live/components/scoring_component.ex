@@ -43,11 +43,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     <%= if @show_mid_transition do %>
       {render_mid_transition(assigns)}
     <% else %>
-      <div class="flex items-center justify-center h-full w-full relative">
+      <div class="flex items-start justify-center h-full w-full relative pt-8">
         <!-- Main Sheet - centered -->
         <div
           class={[
-            "paper-texture rounded-sheet p-5 min-w-[580px] max-w-[780px] cursor-pointer transition-all duration-300",
+            "paper-texture rounded-sheet p-5 w-[720px] cursor-pointer transition-all duration-300",
             if(@active_sheet == :main,
               do: "shadow-sheet-lifted z-[10]",
               else: "shadow-sheet z-[1]"
@@ -68,7 +68,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         </div>
         
     <!-- Left Panel: Question Info - absolutely positioned -->
-        <div class="absolute left-4 top-4 z-[5] w-[220px]">
+        <div class="absolute left-4 top-1/2 -translate-y-1/2 z-[5] w-[220px]">
           <div
             class="paper-texture-secondary rounded-sheet p-4 shadow-sheet"
             style="transform: rotate(0.3deg)"
@@ -124,14 +124,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     <!-- Side Sheet (Notes) - absolutely positioned -->
         <div
           class={[
-            "absolute right-4 top-4 transition-all duration-300",
+            "absolute right-4 top-16 transition-all duration-300",
             if(@active_sheet == :notes, do: "z-[20]", else: "z-[5]")
           ]}
           phx-click="focus_sheet"
           phx-value-sheet="notes"
         >
           <div class={[
-            "paper-texture-secondary rounded-sheet p-4 overflow-hidden cursor-pointer transition-all duration-300",
+            "paper-texture-secondary rounded-sheet p-4 overflow-hidden cursor-pointer transition-all duration-300 min-h-[360px]",
             if(@active_sheet == :notes,
               do: "w-[320px] shadow-sheet-lifted",
               else: "w-[280px] shadow-sheet hover:shadow-sheet-lifted"
@@ -139,7 +139,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
           ]}>
             <div class="relative z-[1]">
               <!-- Header -->
-              <div class="flex items-center justify-between mb-3">
+              <div class="text-center mb-3">
                 <div class="font-workshop text-xl font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
                   Notes
                   <%= if length(@question_notes) > 0 do %>
@@ -278,6 +278,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     """
   end
 
+  # Fixed number of participant column slots to maintain consistent grid width
+  @grid_participant_slots 7
+
   defp render_full_scoring_grid(assigns) do
     # Get active (non-observer) participants for the grid
     active_participants =
@@ -287,11 +290,15 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     balance_questions = Enum.filter(assigns.all_questions, &(&1.scale_type == "balance"))
     maximal_questions = Enum.filter(assigns.all_questions, &(&1.scale_type == "maximal"))
 
+    # Calculate empty padding slots to maintain fixed grid width
+    empty_slots = max(@grid_participant_slots - length(active_participants), 0)
+
     assigns =
       assigns
       |> assign(:active_participants, active_participants)
       |> assign(:balance_questions, balance_questions)
       |> assign(:maximal_questions, maximal_questions)
+      |> assign(:empty_slots, empty_slots)
 
     ~H"""
     <table class="scoring-grid">
@@ -306,12 +313,15 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
               {p.name}
             </th>
           <% end %>
+          <%= for _ <- 1..@empty_slots//1 do %>
+            <th class="participant-col"></th>
+          <% end %>
         </tr>
       </thead>
       <tbody>
         <!-- Scale label: Balance -->
         <tr>
-          <td class="scale-label" colspan={length(@active_participants) + 1}>
+          <td class="scale-label" colspan={length(@active_participants) + @empty_slots + 1}>
             Balance Scale (-5 to +5)
           </td>
         </tr>
@@ -321,7 +331,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% end %>
         <!-- Scale label: Maximal -->
         <tr>
-          <td class="scale-label" colspan={length(@active_participants) + 1}>
+          <td class="scale-label" colspan={length(@active_participants) + @empty_slots + 1}>
             Maximal Scale (0 to 10)
           </td>
         </tr>
@@ -359,24 +369,33 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <%= if @question.criterion_name && @question.criterion_name != @question.title do %>
           <span class="parent">{@question.criterion_name}</span>
         <% end %>
-        <span class="name">{@question.title}</span>
+        <span class="name">{format_criterion_title(@question.title)}</span>
       </td>
       <%= for p <- @active_participants do %>
         <% score_data = Map.get(@question_scores_by_participant, p.id) %>
-        <% can_edit =
-          @is_current and p.id == @participant.id and @is_my_turn and not @my_turn_locked and
-            @has_submitted %>
+        <% can_interact =
+          @is_current and p.id == @participant.id and @is_my_turn and not @my_turn_locked %>
         <td
           class={[
             "score-cell",
             @is_current && p.id == @current_turn_participant_id && "active-col",
             not @is_current && p.id == @current_turn_participant_id && "active-col",
-            can_edit && "cursor-pointer hover:bg-accent-purple-light"
+            can_interact && "cursor-pointer hover:bg-accent-purple-light",
+            can_interact && not @has_submitted && "outline outline-2 outline-accent-purple rounded"
           ]}
-          phx-click={can_edit && "edit_my_score"}
+          phx-click={can_interact && "edit_my_score"}
         >
-          {render_score_cell_value(assigns, score_data, p.id)}
+          <%= if can_interact and not @has_submitted do %>
+            <span class="text-[11px] leading-tight text-accent-purple font-workshop block">
+              Click to<br />score
+            </span>
+          <% else %>
+            {render_score_cell_value(assigns, score_data, p.id)}
+          <% end %>
         </td>
+      <% end %>
+      <%= for _ <- 1..@empty_slots//1 do %>
+        <td class="score-cell"></td>
       <% end %>
     </tr>
     """
@@ -415,11 +434,17 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   defp format_score_value("balance", value) when value > 0, do: "+#{value}"
   defp format_score_value(_, value), do: "#{value}"
 
+  defp format_criterion_title("Mutual Support and Respect") do
+    Phoenix.HTML.raw("Mutual Support<br/><span style=\"padding-left:8px\">and Respect</span>")
+  end
+
+  defp format_criterion_title(title), do: title
+
   defp render_score_overlay(assigns) do
     ~H"""
     <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter">
       <!-- Backdrop -->
-      <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay"></div>
       <!-- Modal -->
       <div class="relative paper-texture rounded-sheet shadow-sheet-lifted p-6 max-w-md w-full mx-4">
         <div class="relative z-[1]">
