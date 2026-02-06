@@ -176,3 +176,305 @@ input[type="range"]::-moz-range-thumb {
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+/* ─── Virtual Wall Design System ─── */
+
+/* Paper Texture (Primary - Main Sheet) */
+.paper-texture {
+  position: relative;
+  background: theme('colors.surface.sheet');
+}
+
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(255,252,245,0) 0%, rgba(248,243,232,0.4) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.paper-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: multiply;
+}
+
+/* Paper Texture (Secondary - Notes/Side Sheet) */
+.paper-texture-secondary {
+  position: relative;
+  background: theme('colors.surface.sheet-secondary');
+}
+
+.paper-texture-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(240,238,232,0) 0%, rgba(235,230,220,0.5) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.paper-texture-secondary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: multiply;
+}
+
+/* Gradient Stripes */
+.gradient-stripe-header {
+  position: relative;
+}
+
+.gradient-stripe-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200px;
+  height: 3px;
+  background: linear-gradient(90deg, theme('colors.accent.magenta'), theme('colors.accent.purple') 60%, transparent);
+}
+
+.gradient-stripe-strip {
+  position: relative;
+}
+
+.gradient-stripe-strip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 3px;
+  background: linear-gradient(270deg, theme('colors.accent.gold'), theme('colors.accent.magenta') 70%, transparent);
+}
+
+/* ─── Sheet Thumbnails ─── */
+.strip-thumb {
+  position: relative;
+  overflow: hidden;
+}
+
+.strip-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: repeating-linear-gradient(
+    0deg,
+    theme('colors.ink.blue-light'),
+    theme('colors.ink.blue-light') 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+.strip-thumb.active::before {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: theme('colors.accent.gold');
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.strip-thumb.secondary::before {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: theme('colors.accent.magenta');
+  border-radius: 50%;
+  z-index: 2;
+  opacity: 0.6;
+}
+
+/* ─── Scoring Grid ─── */
+.scoring-grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.scoring-grid th,
+.scoring-grid td {
+  padding: 8px 4px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid theme('colors.ink.blue-light');
+}
+
+.scoring-grid thead th {
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  font-weight: 600;
+  color: theme('colors.ink.blue');
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(26, 58, 107, 0.12);
+  position: sticky;
+  top: 0;
+  background: theme('colors.surface.sheet');
+  z-index: 2;
+}
+
+.scoring-grid th.criterion-col {
+  width: 160px;
+  text-align: left;
+  padding-left: 0;
+  padding-right: 10px;
+}
+
+.scoring-grid th.participant-col {
+  width: auto;
+  min-width: 52px;
+  padding: 8px 3px;
+}
+
+/* Active row/column highlighting */
+.active-row td,
+.active-row th {
+  background: theme('colors.accent.purple-light');
+}
+
+.active-row td.active-col {
+  background: rgba(114, 69, 244, 0.14);
+}
+
+.active-col-header {
+  position: relative;
+}
+
+.active-col-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 3px;
+  background: theme('colors.accent.purple');
+  border-radius: 0 0 2px 2px;
+}
+
+.active-row td:first-child,
+.active-row th:first-child {
+  box-shadow: inset 3px 0 0 theme('colors.accent.purple');
+}
+
+td.active-col {
+  background: rgba(114, 69, 244, 0.03);
+}
+
+th.active-col-header {
+  color: theme('colors.accent.purple');
+}
+
+/* Scale label rows */
+.scale-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  color: theme('colors.ui.text-muted');
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 6px 0 2px 0;
+  text-align: left;
+  border-bottom: none;
+}
+
+/* Criterion cell styling */
+.criterion {
+  font-family: 'Caveat', cursive;
+  color: theme('colors.ink.blue');
+  text-align: left;
+  padding-left: 0;
+  line-height: 1.2;
+}
+
+.criterion .parent {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.5;
+  display: block;
+  margin-bottom: 1px;
+}
+
+.criterion .name {
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+/* Score cell styling */
+.score-cell {
+  font-family: 'Caveat', cursive;
+  font-size: 24px;
+  font-weight: 700;
+  color: theme('colors.ink.blue');
+  padding: 6px 3px;
+}
+
+.score-cell.empty {
+  color: rgba(26, 58, 107, 0.12);
+  font-size: 20px;
+}
+
+/* ─── Button Styles ─── */
+.btn-workshop {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.btn-workshop-primary {
+  background: linear-gradient(135deg, theme('colors.accent.purple'), theme('colors.accent.magenta'));
+  color: white;
+  box-shadow: 0 2px 8px rgba(114, 69, 244, 0.35);
+}
+
+.btn-workshop-primary:hover {
+  box-shadow: 0 4px 12px rgba(114, 69, 244, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-workshop-secondary {
+  background: white;
+  color: theme('colors.ui.text');
+  border: 1px solid theme('colors.ui.border');
+}
+
+.btn-workshop-secondary:hover {
+  border-color: #bbb;
+  background: #FAFAFA;
+  transform: translateY(-1px);
+}

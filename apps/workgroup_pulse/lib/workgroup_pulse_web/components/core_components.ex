@@ -744,4 +744,348 @@ defmodule WorkgroupPulseWeb.CoreComponents do
     secs = rem(seconds, 60)
     "#{mins}:#{String.pad_leading(Integer.to_string(secs), 2, "0")}"
   end
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Virtual Wall Design System Components
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  @doc """
+  Renders the app header bar (52px) with logo, session name, and actions.
+
+  ## Examples
+
+      <.app_header session_name="Team Alpha — Six Criteria" />
+  """
+  attr :session_name, :string, default: nil
+  attr :show_settings, :boolean, default: false
+  attr :show_signin, :boolean, default: false
+
+  def app_header(assigns) do
+    ~H"""
+    <header class="flex items-center justify-between px-6 h-header bg-ui-header-bg border-b border-ui-border flex-shrink-0 z-10 relative gradient-stripe-header">
+      <div class="flex items-center gap-2.5">
+        <div class="w-[30px] h-[30px] bg-accent-purple rounded-icon flex items-center justify-center shadow-md">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            class="w-4 h-4"
+          >
+            <path d="M3 6h18M3 12h18M3 18h18" />
+            <circle cx="7" cy="6" r="1.5" fill="white" stroke="none" />
+            <circle cx="12" cy="12" r="1.5" fill="white" stroke="none" />
+            <circle cx="16" cy="18" r="1.5" fill="white" stroke="none" />
+          </svg>
+        </div>
+        <span class="font-bold text-[15px] text-ui-text tracking-tight font-brand">
+          Workgroup Pulse
+        </span>
+      </div>
+
+      <span
+        :if={@session_name}
+        class="font-medium text-sm text-ui-text-muted absolute left-1/2 -translate-x-1/2"
+      >
+        {@session_name}
+      </span>
+
+      <div class="flex items-center gap-3.5">
+        <button
+          :if={@show_settings}
+          type="button"
+          class="p-1.5 rounded-md text-ui-text-muted hover:bg-black/5 transition-colors"
+          title="Settings"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+        </button>
+        <button
+          :if={@show_signin}
+          type="button"
+          class="font-brand text-xs font-semibold px-3.5 py-1.5 rounded-md border border-ui-border bg-white text-ui-text hover:border-accent-purple hover:text-accent-purple transition-colors"
+        >
+          Sign In
+        </button>
+      </div>
+    </header>
+    """
+  end
+
+  @doc """
+  Renders a paper sheet container with texture, shadow, and optional rotation.
+
+  ## Examples
+
+      <.sheet>
+        Content goes here
+      </.sheet>
+
+      <.sheet rotation={-0.2} class="min-h-[400px]">
+        Content with custom rotation
+      </.sheet>
+  """
+  attr :rotation, :float, default: -0.2, doc: "Sheet rotation in degrees"
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :inner_block, required: true
+
+  def sheet(assigns) do
+    ~H"""
+    <div
+      class={[
+        "paper-texture rounded-sheet shadow-sheet p-5 relative flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-sheet-lifted",
+        @class
+      ]}
+      style={"transform: rotate(#{@rotation}deg)"}
+      {@rest}
+    >
+      <div class="relative z-[1] flex-1 flex flex-col">
+        {render_slot(@inner_block)}
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a secondary/side sheet for notes, positioned to peek from behind the main sheet.
+
+  ## Examples
+
+      <.side_sheet title="Notes">
+        <p>Note content here</p>
+      </.side_sheet>
+  """
+  attr :title, :string, default: "Notes"
+  attr :rotation, :float, default: 1.2, doc: "Sheet rotation in degrees"
+  attr :class, :string, default: nil
+
+  slot :inner_block, required: true
+
+  def side_sheet(assigns) do
+    ~H"""
+    <div
+      class={[
+        "paper-texture-secondary rounded-sheet shadow-sheet p-4 relative cursor-pointer transition-shadow duration-300 hover:shadow-sheet-lifted overflow-hidden",
+        @class
+      ]}
+      style={"transform: rotate(#{@rotation}deg)"}
+    >
+      <div class="relative z-[1]">
+        <div class="font-workshop text-xl font-bold text-ink-blue text-center underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 mb-3.5 opacity-85">
+          {@title}
+        </div>
+        <div class="font-workshop text-base text-ink-blue leading-relaxed opacity-70">
+          {render_slot(@inner_block)}
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders the sheet strip navigation bar at the bottom.
+
+  ## Examples
+
+      <.sheet_strip current={0} total={3} />
+  """
+  attr :current, :integer, default: 0, doc: "Current sheet index (0-based)"
+  attr :total, :integer, default: 1, doc: "Total number of sheets"
+  attr :has_notes, :boolean, default: true, doc: "Whether to show notes thumbnail"
+
+  def sheet_strip(assigns) do
+    ~H"""
+    <div class="h-strip bg-ui-header-bg border-t border-ui-border flex items-center px-6 gap-strip-gap flex-shrink-0 relative gradient-stripe-strip">
+      <%= for i <- 0..(@total - 1) do %>
+        <div class={[
+          "w-strip-thumb h-strip-thumb rounded-sheet border-2 bg-surface-sheet shadow-sm cursor-pointer transition-all duration-150 hover:-translate-y-0.5 strip-thumb",
+          if(i == @current, do: "border-accent-purple shadow-md active", else: "border-transparent")
+        ]} />
+      <% end %>
+
+      <div
+        :if={@has_notes}
+        class="w-strip-thumb h-strip-thumb rounded-sheet border-2 border-transparent bg-surface-sheet-secondary shadow-sm cursor-pointer transition-all duration-150 hover:-translate-y-0.5 strip-thumb secondary"
+      />
+
+      <span class="text-[11px] text-ui-text-muted ml-2.5 font-medium">
+        <span class="text-accent-gold mr-1.5 text-[8px] align-middle">●</span>
+        Sheet {@current + 1} of {@total}
+      </span>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a container for floating action buttons.
+
+  ## Examples
+
+      <.floating_buttons>
+        <.btn variant="secondary">Skip</.btn>
+        <.btn variant="primary">Submit</.btn>
+      </.floating_buttons>
+  """
+  slot :inner_block, required: true
+
+  def floating_buttons(assigns) do
+    ~H"""
+    <div class="fixed bottom-[60px] right-5 flex gap-2 z-floating">
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a workshop-style button.
+
+  ## Examples
+
+      <.btn>Default button</.btn>
+      <.btn variant="primary">Primary action</.btn>
+      <.btn variant="secondary">Secondary action</.btn>
+  """
+  attr :type, :string, default: "button"
+  attr :variant, :string, default: "secondary", values: ["primary", "secondary"]
+  attr :disabled, :boolean, default: false
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(phx-click phx-value-score name value form)
+
+  slot :inner_block, required: true
+
+  def btn(assigns) do
+    ~H"""
+    <button
+      type={@type}
+      disabled={@disabled}
+      class={[
+        "btn-workshop",
+        @variant == "primary" && "btn-workshop-primary",
+        @variant == "secondary" && "btn-workshop-secondary",
+        @disabled && "opacity-50 cursor-not-allowed",
+        @class
+      ]}
+      {@rest}
+    >
+      {render_slot(@inner_block)}
+    </button>
+    """
+  end
+
+  @doc """
+  Renders a scoring grid table header row with participant names.
+
+  ## Examples
+
+      <.scoring_grid_header participants={@participants} current_turn_id={@current_turn_participant_id} />
+  """
+  attr :participants, :list, required: true, doc: "List of participant maps with :id and :name"
+  attr :current_turn_id, :any, default: nil, doc: "ID of participant whose turn it is"
+
+  def scoring_grid_header(assigns) do
+    ~H"""
+    <thead>
+      <tr>
+        <th class="criterion-col"></th>
+        <%= for p <- @participants do %>
+          <th class={[
+            "participant-col font-workshop text-participant text-ink-blue",
+            p.id == @current_turn_id && "active-col-header"
+          ]}>
+            {p.name}
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    """
+  end
+
+  @doc """
+  Renders a scale label row in the scoring grid.
+
+  ## Examples
+
+      <.scoring_grid_scale_label label="Balance Scale (−5 to +5)" colspan={6} />
+  """
+  attr :label, :string, required: true
+  attr :colspan, :integer, required: true
+
+  def scoring_grid_scale_label(assigns) do
+    ~H"""
+    <tr>
+      <td class="scale-label" colspan={@colspan}>{@label}</td>
+    </tr>
+    """
+  end
+
+  @doc """
+  Renders a criterion row in the scoring grid.
+
+  ## Examples
+
+      <.scoring_grid_row
+        criterion_name="Elbow Room"
+        parent_name={nil}
+        scores={@scores}
+        is_active={true}
+        current_turn_id={@current_turn_id}
+        scale_type="balance"
+      />
+  """
+  attr :criterion_name, :string, required: true
+  attr :parent_name, :string, default: nil
+
+  attr :scores, :list,
+    required: true,
+    doc: "List of score maps with :participant_id, :value, :state"
+
+  attr :is_active, :boolean, default: false, doc: "Whether this is the currently active row"
+  attr :current_turn_id, :any, default: nil
+  attr :scale_type, :string, default: "balance"
+
+  def scoring_grid_row(assigns) do
+    ~H"""
+    <tr class={@is_active && "active-row"}>
+      <td class="criterion">
+        <span :if={@parent_name} class="parent">{@parent_name}</span>
+        <span class="name">{@criterion_name}</span>
+      </td>
+      <%= for score <- @scores do %>
+        <td class={[
+          "score-cell",
+          score.state == :empty && "empty",
+          score.participant_id == @current_turn_id && "active-col"
+        ]}>
+          <%= case score.state do %>
+            <% :scored -> %>
+              <%= if @scale_type == "balance" and score.value > 0 do %>
+                +{score.value}
+              <% else %>
+                {score.value}
+              <% end %>
+            <% :current -> %>
+              ...
+            <% :skipped -> %>
+              ?
+            <% _ -> %>
+              —
+          <% end %>
+        </td>
+      <% end %>
+    </tr>
+    """
+  end
 end

@@ -286,85 +286,130 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="session-analytics" phx-hook="PostHogTracker" class="min-h-screen bg-surface-wall">
+    <div id="session-analytics" phx-hook="PostHogTracker" class="flex flex-col h-full">
       {render_facilitator_timer(assigns)}
-      <%= case @session.state do %>
-        <% "lobby" -> %>
-          <LobbyComponent.render
-            session={@session}
-            participant={@participant}
-            participants={@participants}
-          />
-        <% "intro" -> %>
-          <IntroComponent.render
-            intro_step={@intro_step}
-            participant={@participant}
-          />
-        <% "scoring" -> %>
-          <ScoringComponent.render
-            session={@session}
-            participant={@participant}
-            participants={@participants}
-            current_question={@current_question}
-            total_questions={@total_questions}
-            all_scores={@all_scores}
-            selected_value={@selected_value}
-            my_score={@my_score}
-            has_submitted={@has_submitted}
-            is_my_turn={@is_my_turn}
-            current_turn_participant_id={@current_turn_participant_id}
-            current_turn_has_score={@current_turn_has_score}
-            my_turn_locked={@my_turn_locked}
-            scores_revealed={@scores_revealed}
-            score_count={@score_count}
-            active_participant_count={@active_participant_count}
-            show_mid_transition={@show_mid_transition}
-            show_facilitator_tips={@show_facilitator_tips}
-            question_notes={@question_notes}
-            show_notes={@show_notes}
-            note_input={@note_input}
-            ready_count={@ready_count}
-            eligible_participant_count={@eligible_participant_count}
-            all_ready={@all_ready}
-            participant_was_skipped={@participant_was_skipped}
-          />
-        <% "summary" -> %>
-          <SummaryComponent.render
-            session={@session}
-            participant={@participant}
-            participants={@participants}
-            scores_summary={@scores_summary}
-            individual_scores={@individual_scores}
-            notes_by_question={@notes_by_question}
-          />
-        <% "actions" -> %>
-          <ActionsComponent.render
-            session={@session}
-            participant={@participant}
-            all_actions={@all_actions}
-            action_count={@action_count}
-          />
-        <% "completed" -> %>
-          <CompletedComponent.render
-            session={@session}
-            participant={@participant}
-            scores_summary={@scores_summary}
-            strengths={@strengths}
-            concerns={@concerns}
-            all_actions={@all_actions}
-            action_count={@action_count}
-            show_export_modal={@show_export_modal}
-            export_content={@export_content}
-          />
-        <% _ -> %>
-          <LobbyComponent.render
-            session={@session}
-            participant={@participant}
-            participants={@participants}
-          />
+      <!-- App Header -->
+      <.app_header session_name={session_display_name(@session)} />
+      <!-- Main Content Area -->
+      <div class="flex-1 overflow-hidden relative">
+        <%= case @session.state do %>
+          <% "lobby" -> %>
+            <LobbyComponent.render
+              session={@session}
+              participant={@participant}
+              participants={@participants}
+            />
+          <% "intro" -> %>
+            <IntroComponent.render
+              intro_step={@intro_step}
+              participant={@participant}
+            />
+          <% "scoring" -> %>
+            <ScoringComponent.render
+              session={@session}
+              participant={@participant}
+              participants={@participants}
+              current_question={@current_question}
+              total_questions={@total_questions}
+              all_scores={@all_scores}
+              selected_value={@selected_value}
+              my_score={@my_score}
+              has_submitted={@has_submitted}
+              is_my_turn={@is_my_turn}
+              current_turn_participant_id={@current_turn_participant_id}
+              current_turn_has_score={@current_turn_has_score}
+              my_turn_locked={@my_turn_locked}
+              scores_revealed={@scores_revealed}
+              score_count={@score_count}
+              active_participant_count={@active_participant_count}
+              show_mid_transition={@show_mid_transition}
+              show_facilitator_tips={@show_facilitator_tips}
+              question_notes={@question_notes}
+              show_notes={@show_notes}
+              note_input={@note_input}
+              ready_count={@ready_count}
+              eligible_participant_count={@eligible_participant_count}
+              all_ready={@all_ready}
+              participant_was_skipped={@participant_was_skipped}
+            />
+          <% "summary" -> %>
+            <SummaryComponent.render
+              session={@session}
+              participant={@participant}
+              participants={@participants}
+              scores_summary={@scores_summary}
+              individual_scores={@individual_scores}
+              notes_by_question={@notes_by_question}
+            />
+          <% "actions" -> %>
+            <ActionsComponent.render
+              session={@session}
+              participant={@participant}
+              all_actions={@all_actions}
+              action_count={@action_count}
+            />
+          <% "completed" -> %>
+            <CompletedComponent.render
+              session={@session}
+              participant={@participant}
+              scores_summary={@scores_summary}
+              strengths={@strengths}
+              concerns={@concerns}
+              all_actions={@all_actions}
+              action_count={@action_count}
+              show_export_modal={@show_export_modal}
+              export_content={@export_content}
+            />
+          <% _ -> %>
+            <LobbyComponent.render
+              session={@session}
+              participant={@participant}
+              participants={@participants}
+            />
+        <% end %>
+      </div>
+      <!-- Sheet Strip (only show during scoring and later phases) -->
+      <%= if @session.state in ["scoring", "summary", "actions", "completed"] do %>
+        <.sheet_strip
+          current={sheet_index(@session)}
+          total={sheet_total(@session, assigns)}
+          has_notes={@session.state == "scoring"}
+        />
       <% end %>
     </div>
     """
+  end
+
+  defp session_display_name(session) do
+    # Session name comes from the template, if loaded
+    template_name =
+      case session.template do
+        %{name: name} when is_binary(name) and name != "" -> name
+        _ -> nil
+      end
+
+    if template_name do
+      "#{template_name}"
+    else
+      "Six Criteria Assessment"
+    end
+  end
+
+  defp sheet_index(session) do
+    case session.state do
+      "scoring" -> session.current_question_index
+      "summary" -> 0
+      "actions" -> 0
+      "completed" -> 0
+      _ -> 0
+    end
+  end
+
+  defp sheet_total(session, assigns) do
+    case session.state do
+      "scoring" -> assigns[:total_questions] || 8
+      _ -> 1
+    end
   end
 
   defp render_facilitator_timer(assigns) do
