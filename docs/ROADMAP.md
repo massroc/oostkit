@@ -49,10 +49,13 @@ Core features working:
 
 **Test coverage**: 241 test cases - excellent TDD coverage
 
-**Current work**: UX redesign preparation
+**Current work**: UX redesign (Virtual Wall) — in progress
 - PostHog analytics integration added
-- Component audit documented
-- Design system defined (see `docs/design-system.md`)
+- Design system defined and applied (see `docs/design-system.md`)
+- Virtual Wall scoring screen implemented: full 8-question grid, floating score overlay, three-panel layout
+- Light theme with paper texture, handwritten fonts, warm colour palette
+- Sheet strip navigation, focus system for panels
+- Auto-submit scoring (no separate Submit button), click-to-edit
 
 **Deferred to Phase 2**:
 - Export (CSV/PDF)

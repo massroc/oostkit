@@ -152,19 +152,47 @@ Set via Fly.io secrets:
 
 ```
 ├── lib/
-│   ├── workgroup_pulse/        # Business logic (contexts)
-│   │   ├── application.ex
+│   ├── workgroup_pulse/              # Business logic (contexts)
+│   │   ├── sessions/                 # Session & participant management
+│   │   ├── scoring.ex                # Score submission, validation, aggregation
+│   │   ├── notes.ex                  # Notes & action items
+│   │   ├── workshops/                # Workshop templates & questions
+│   │   ├── facilitation/             # Timer & phase management
+│   │   ├── export.ex                 # Export functionality
 │   │   └── repo.ex
-│   └── workgroup_pulse_web/    # Web layer
-│       ├── components/               # UI components
-│       ├── controllers/              # Error handlers
-│       ├── live/                     # LiveView modules
+│   └── workgroup_pulse_web/          # Web layer
+│       ├── components/
+│       │   ├── core_components.ex    # Shared: app_header, sheet_strip, timer, etc.
+│       │   └── layouts.ex
+│       ├── live/session_live/
+│       │   ├── show.ex               # Root LiveView (thin dispatcher)
+│       │   ├── new.ex                # Create session
+│       │   ├── join.ex               # Join session
+│       │   ├── components/
+│       │   │   ├── scoring_component.ex    # Virtual Wall grid + overlay
+│       │   │   ├── summary_component.ex    # Score summary view
+│       │   │   ├── actions_component.ex    # Action management
+│       │   │   ├── completed_component.ex  # Wrap-up/export
+│       │   │   ├── intro_component.ex      # Introduction screens
+│       │   │   ├── lobby_component.ex      # Waiting room
+│       │   │   └── export_modal_component.ex
+│       │   ├── handlers/
+│       │   │   ├── event_handlers.ex       # All handle_event callbacks
+│       │   │   └── message_handlers.ex     # All handle_info (PubSub)
+│       │   ├── helpers/
+│       │   │   ├── data_loaders.ex         # Data loading & state hydration
+│       │   │   ├── state_helpers.ex        # State transition helpers
+│       │   │   ├── operation_helpers.ex    # Standardised error handling
+│       │   │   └── score_helpers.ex        # Score color/formatting
+│       │   ├── timer_handler.ex            # Facilitator timer logic
+│       │   ├── score_results_component.ex  # LiveComponent for score display
+│       │   └── action_form_component.ex    # LiveComponent for action form
 │       ├── endpoint.ex
 │       ├── router.ex
 │       └── telemetry.ex
 ├── test/
 │   ├── support/                      # Test helpers & factories
-│   └── workgroup_pulse_web/    # Web tests
+│   └── workgroup_pulse_web/          # Web tests
 ├── priv/
 │   ├── repo/migrations/              # Database migrations
 │   └── static/                       # Static assets
@@ -189,29 +217,37 @@ Set via Fly.io secrets:
 - [x] Real-time participant sync via PubSub
 - [x] Database seeding for Six Criteria template
 - [x] Error handling for missing template
+- [x] PostHog analytics integration
 
-#### Scoring Phase (Complete)
-- [x] Display current question with explanation and scoring guidance
-- [x] Scoring input (buttons) for balance scale (-5 to +5)
-- [x] Scoring input for maximal scale (0 to 10)
-- [x] Hide individual scores until all participants submit
-- [x] "Submit" button to lock in score
-- [x] Score reveal with participant names
+#### Scoring Phase (Complete — Virtual Wall Design)
+- [x] Full 8-question grid displayed at all times (Virtual Wall)
+- [x] Three-panel layout: left (question info), centre (grid), right (notes side-sheet)
+- [x] Scoring input (buttons) for balance scale (-5 to +5) and maximal scale (0 to 10)
+- [x] Floating score overlay — auto-submits on selection
+- [x] Click-to-edit: reopen overlay to change score during your turn
+- [x] Scores visible immediately in grid (butcher paper principle — no hidden state)
+- [x] Turn-based sequential scoring with highlighted active row and column
 - [x] Traffic light color coding (green/amber/red)
-- [x] Team average visualization
-- [x] Facilitator tips on question screen (expandable via "More tips" button)
-- [x] Notes capture per question (collapsible, hidden by default, real-time sync)
-- [x] "Ready" button for all participants to advance
+- [x] Combined team value calculation
+- [x] Facilitator tips on left panel (expandable via "More tips" button)
+- [x] Notes side-sheet with focus-based expand/collapse and real-time sync
+- [x] "Done" button to pass turn, floating action buttons (bottom-right)
+- [x] "I'm Ready" button for non-facilitator participants to signal readiness
+- [x] Facilitator "Skip Turn" button
+- [x] Facilitator "Next Question" / "Continue to Summary" navigation
+- [x] Facilitator "Back" navigation (after Q1)
 - [x] Mid-workshop transition screen (before question 5)
+- [x] Sheet strip navigation (question thumbnails)
 
 #### Summary Phase (Complete)
-- [x] Overview of all 8 questions with scores
+- [x] Overview of all 8 questions with individual scores per participant
 - [x] Traffic light indicators for each criterion
+- [x] Combined team values (out of 10)
 - [x] Pattern highlighting (strengths vs concerns)
 - [x] Notes displayed from scoring phase (only if notes were taken)
 
 #### Actions Phase (Complete)
-- [x] Action item creation
+- [x] Action item creation with inline form
 - [x] Owner assignment per action
 - [x] Link actions to specific questions (optional)
 - [x] Toggle action completion status
@@ -219,31 +255,32 @@ Set via Fly.io secrets:
 - [x] Real-time sync across participants
 
 #### Completed Phase (Complete)
-- [x] Final summary with notes and actions
-- [x] Results overview with quick stats
-- [x] Participants list
-- [x] Next steps guidance
-- [ ] Export options (CSV, PDF) - deferred to Phase 2
+- [x] Final summary with score overview and strengths/concerns
+- [x] Actions list
+- [x] Export modal UI (format selection)
+- [ ] Export implementation (CSV, PDF) - deferred to Phase 2
 
 #### Performance Optimizations (Complete)
 - [x] Input debouncing (300ms) on text fields to reduce server round-trips
-- [x] Optimized score loading to use cached participant data
-- [x] Extracted ScoreResultsComponent for isolated re-renders
+- [x] Template caching in DataLoaders (avoids repeated DB queries)
+- [x] Optimized score loading using cached participant data
+- [x] Extracted handler modules (EventHandlers, MessageHandlers, DataLoaders)
 - [x] Extracted ActionFormComponent for local form state management
 
 ### Outstanding Work
 
 #### Timer System
 - [x] Optional timer setup at session creation (No timer, 2hr, 3.5hr, Custom)
-- [ ] Countdown timer display per section
+- [x] Countdown timer display per section (facilitator-only, top-right)
+- [x] Warning state at 10% remaining
+- [x] Timer auto-starts on phase entry, restarts on question advance
 - [ ] Pacing indicator (on track/behind)
-- [ ] Time exceeded warnings
 - [ ] Pause/resume controls
 
 #### Additional Features
-- [ ] Facilitator Assistance button (contextual help)
+- [ ] Facilitator Assistance button (contextual help beyond tips)
 - [ ] Feedback button
-- [ ] Participant dropout handling (greyed out)
+- [ ] Participant dropout handling (greyed out visual)
 - [x] Observer mode (facilitator can observe without scoring)
 
 ## Documentation

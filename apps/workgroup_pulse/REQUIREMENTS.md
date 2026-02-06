@@ -135,35 +135,42 @@ The tool behaves like butcher paper on a wall: **visible, permanent within each 
 
 ### 3. Scoring Phase (repeated for each criterion)
 
+**Virtual Wall Design:**
+
+The scoring screen displays all 8 questions as a grid (the "Virtual Wall"), with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
+
+**Three-Panel Layout:**
+- **Main Sheet (centre)** — The full 8-question scoring grid, always visible
+- **Left Panel** — Current question info: title, explanation, and expandable facilitator tips
+- **Right Panel (Side-sheet)** — Notes for the current question (click to expand, shows preview when collapsed)
+
 **Turn-Based Sequential Scoring:**
 
 For each of the 8 questions (one row at a time):
 
-1. **Present the criterion** - explanation, what it means, scoring guidance
-2. **Individual turns** - participants score one at a time, in join order:
-   - Current participant is highlighted (it's their turn)
-   - They select a score and click "Share" to make it visible
-   - **Individual discussion phase**: Team discusses THIS person's score
-   - When discussion is complete, they click "Done" to pass the turn
-   - They can edit their score while it's still their turn (before clicking Done)
-   - Facilitator can skip an inactive participant if needed
-3. **Team discussion phase** - after all turns are complete:
-   - All scores are visible; team discusses variance across the group
-   - Any participant can add notes to capture key discussion points
-   - Each participant clicks "Ready to Continue" when they're done discussing
+1. **Present the criterion** — the left panel shows explanation, scoring guidance, and discussion tips
+2. **Individual turns** — participants score one at a time, in join order:
+   - A **floating score overlay** appears for the current turn participant
+   - They select a score — it **auto-submits immediately** (no separate Share/Submit button)
+   - The overlay closes and their score appears in the grid
+   - **Click-to-edit**: While it's still their turn, they can click their score cell to reopen the overlay and change their score
+   - After discussing, they click **"Done"** to pass the turn
+   - Facilitator can **skip** an inactive participant via a floating button in the bottom-right
+3. **Ready to advance** — after all turns are complete:
+   - All scores are visible in the grid
+   - Any participant can add notes via the side-sheet
+   - Each non-facilitator participant clicks **"I'm Ready"** when done discussing
    - Skipped participants are automatically marked as ready
-4. **Ready to advance** - once all participants are ready, facilitator advances to next question
-5. **Row locks permanently** - once the group advances, scores for that row cannot be changed
+   - Facilitator advances to next question once all participants are ready
+4. **Row locks permanently** — once the group advances, scores for that row cannot be changed
 
-**Two Discussion Phases:**
-- **During each turn (Individual)**: "Discuss [Name]'s score" - focus on one person's perspective
-- **After all turns (Team)**: "Discuss as a team" - compare all scores, look for variance
-
-**Key Differences from Traditional Planning Poker:**
-- No hidden scores - everything is visible immediately
-- No "reveal" moment - discussion happens during scoring, not after
-- Sequential rather than simultaneous
-- Scores lock per row, not per question reveal
+**Key UX Principles:**
+- No hidden scores — everything is visible immediately in the grid
+- No "reveal" moment — discussion happens during scoring, not after
+- Sequential turns, but the full grid provides context across all questions
+- Auto-submit reduces friction — select a score and it's placed instantly
+- Click-to-edit allows score changes without extra UI (during your turn only)
+- Floating action buttons in bottom-right keep the grid uncluttered
 
 ### 4. Summary & Review
 - Overview of all 8 questions with individual scores and notes
@@ -402,13 +409,15 @@ Prompts should be observational and open-ended:
 
 ## Results Visualization
 
-### During Workshop (per question)
-- **Grid display** - criteria as rows, participants as columns (like butcher paper on a wall)
-- **Active row highlighted** - the current criterion being scored is visually distinct
-- **Scores appear immediately** when placed - visible to all participants
-- **Current turn indicator** - shows whose turn it is to score
-- **Team average** indicator (updates as scores are placed)
-- **Completed rows** - visible as a permanent record, locked once group advances
+### During Workshop (Virtual Wall Grid)
+- **Full 8-question grid** displayed at all times — criteria as rows, participants as columns
+- **Two scale sections** — Balance Scale (-5 to +5) and Maximal Scale (0 to 10) with section labels
+- **Active row highlighted** — the current criterion being scored is visually distinct
+- **Active column highlighted** — the current turn participant's column header is marked
+- **Scores appear immediately** when placed — visible to all participants in the grid
+- **Cell states** — `...` (current turn, waiting), `?` (skipped), `—` (pending/future), or actual score value
+- **Balance scores formatted** — positive values show `+` prefix (e.g., `+3`)
+- **Completed rows** — visible as a permanent record, locked once group advances
 
 ### Traffic Light Color Coding
 
@@ -464,32 +473,36 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 
 ## MVP Scope (Phase 1)
 
-### Included in MVP
-- [ ] Session creation with shareable link
-- [ ] Time allocation setup at session creation
-- [ ] Join session via link (name entry only, no account)
-- [ ] Waiting room showing participants (join order determines scoring order)
-- [ ] Introduction/overview screen
-- [ ] Turn-based sequential scoring interface for all 8 questions
-- [ ] Section timers with countdown and warnings (facilitator-only)
-- [ ] Immediate score visibility (no hidden state)
-- [ ] Turn progression with "Done" button
-- [ ] Score editing until turn passes
-- [ ] Row locking when group advances
-- [ ] Skipped participants auto-marked as ready
-- [ ] Discussion prompts per criterion
-- [ ] Basic notes capture per criterion
-- [ ] "Ready" confirmation from all to advance rows
-- [ ] Summary view at end
-- [ ] Action planning capture
-- [ ] Real-time sync via Phoenix LiveView
+### Included in MVP (all complete)
+- [x] Session creation with shareable link
+- [x] Time allocation setup at session creation
+- [x] Join session via link (name entry only, no account)
+- [x] Waiting room showing participants (join order determines scoring order)
+- [x] Introduction/overview screen (4 screens, skippable)
+- [x] Turn-based sequential scoring interface for all 8 questions
+- [x] Section timers with countdown and warnings (facilitator-only)
+- [x] Immediate score visibility — no hidden state (butcher paper principle)
+- [x] Auto-submit scoring with floating overlay
+- [x] Click-to-edit score during turn
+- [x] Turn progression with "Done" button
+- [x] Row locking when group advances
+- [x] Skipped participants auto-marked as ready
+- [x] Discussion prompts per criterion (expandable tips)
+- [x] Notes capture per criterion (side-sheet panel)
+- [x] "Ready" confirmation from all to advance rows
+- [x] Summary view with individual scores and traffic lights
+- [x] Action planning with owner assignment
+- [x] Real-time sync via Phoenix LiveView + PubSub
+- [x] Virtual Wall design with full 8-question grid
+- [x] PostHog analytics integration
+- [x] Observer mode for facilitator
 - [ ] Feedback button
 
 ### Deferred to Later Phases
 - [ ] User accounts and authentication
 - [ ] Persistent teams
 - [ ] Historical comparison
-- [ ] Export (CSV, PDF)
+- [ ] Export (CSV, PDF) — modal UI exists, full implementation pending
 - [ ] Previous score comparison
 - [ ] Advanced visualizations
 - [ ] Usage analytics (aggregated, anonymized)
@@ -650,105 +663,107 @@ The following explanations will be shown to participants when scoring each quest
 
 ## UI/UX Design Guidelines
 
-The tool should look professional, feel intuitive, and support the butcher paper principle. These guidelines ensure a consistent, high-quality user experience.
+The tool follows the **Virtual Wall** design system (see `docs/design-system.md` for full specification). These guidelines describe how the design system applies to the Pulse workshop.
 
 ### Core Principles
 
 **1. Content First, Chrome Last**
-- The scoring grid is the star of the show - it should dominate the screen
-- UI elements (buttons, navigation, controls) should be minimal and unobtrusive
-- Avoid competing elements fighting for attention
+- The scoring grid is the star of the show — it dominates the screen as a paper-textured sheet
+- UI elements (buttons, navigation, controls) float above the grid as overlays
 - The accumulating scores *are* the interface
 
-**2. Consistent Spatial Layout**
-- Primary actions (Next, Done, Submit) always appear in the same location
-- Never move buttons between screens - users build muscle memory
-- Bottom-right corner for primary forward actions (standard convention)
-- Top-right for secondary controls (timer, settings, help)
+**2. Virtual Wall Metaphor**
+- The screen evokes a wall with sheets of butcher paper
+- Paper texture, subtle shadows, and slight rotation give a physical feel
+- Sheets can be focused/brought forward by clicking
+- See `docs/design-system.md` for the complete vocabulary (Sheet, Side-sheet, Sheet Strip, etc.)
 
 **3. Clear Visual Hierarchy**
 - Use size, weight, and color to indicate importance
-- Most important element largest and most prominent
-- Secondary information smaller and more subdued
+- Most important element (the grid) is largest and centred
+- Side panels provide context without competing for attention
 - Disabled/inactive states clearly differentiated
 
 **4. Progressive Disclosure**
 - Show only what's needed at each moment
-- Hide advanced options behind expandable sections
-- Don't overwhelm new users; let them discover depth
+- Facilitator tips hidden behind expandable "More tips" button
+- Notes panel shows preview when unfocused, full form when clicked
+- Score overlay only appears when it's your turn
 
-### Layout Guidelines
+### Layout: Virtual Wall (Scoring Phase)
 
-**Grid as Primary Element (Phase 2)**
-- The scoring grid should occupy 60-70% of screen real estate
-- Scores are the visual record - make them large and legible
-- Participant names clearly associated with their column
-- Active row visually distinct from completed/upcoming rows
-
-**Consistent Button Placement**
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ [Logo/Session Code]              [Timer] [Notes] [Help] [?] │  <- Header (fixed)
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│                                                             │
-│                   Main Content Area                         │
-│                   (Grid / Question / Scores)                │
-│                                                             │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│ [Secondary Action]                       [Primary Action →] │  <- Footer (fixed)
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Header (app name, gradient accent)                              │
+├─────────────────────────────────────────────────────────────────┤
+│  VIRTUAL WALL (bg: warm taupe #E8E4DF)                           │
+│                                                                   │
+│   ┌──────────┐   ┌─────────────────────────────┐  ┌──────────┐  │
+│   │  Left     │   │                             │  │  Right   │  │
+│   │  Panel    │   │    Main Sheet (scoring grid) │  │  Panel   │  │
+│   │ (question │   │    (paper texture, centred)  │  │  (notes  │  │
+│   │  info)    │   │                             │  │  sheet)  │  │
+│   └──────────┘   └─────────────────────────────┘  └──────────┘  │
+│                                                                   │
+│                     [Floating action buttons, bottom-right]       │
+├─────────────────────────────────────────────────────────────────┤
+│  Sheet Strip (question thumbnails with active indicator)          │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Button Hierarchy**
-| Type | Style | Position | Example |
-|------|-------|----------|---------|
-| Primary | Filled, accent color | Bottom-right | "Done", "Next", "Ready" |
-| Secondary | Outlined or subtle | Bottom-left | "Go Back", "Skip" |
-| Tertiary | Text only or icon | Header | "Notes", "Help" |
-| Destructive | Red, requires confirmation | Context-dependent | "Delete" |
+**Panel Details:**
+| Panel | Width | Content | Behaviour |
+|-------|-------|---------|-----------|
+| Left (Question Info) | ~220px | Title, explanation, facilitator tips | Always visible, absolutely positioned |
+| Main Sheet (Grid) | 580-780px | Full 8-question scoring grid | Centred, paper texture, clickable to focus |
+| Right (Notes) | 280-320px | Notes list + add form | Click to expand/collapse, shows preview when collapsed |
+
+**Floating Action Buttons (bottom-right):**
+| Button | Shown When | Style |
+|--------|-----------|-------|
+| Done → | Current turn participant, after scoring | Primary (gradient) |
+| Skip Turn | Facilitator, when another participant hasn't scored | Secondary |
+| ← Back | Facilitator, after Q1 | Secondary |
+| Next Question → | Facilitator, all participants ready | Primary |
+| I'm Ready | Non-facilitator, after all turns complete | Primary |
+
+### Score Input: Floating Overlay
+
+When it's a participant's turn, a **floating overlay** appears centred on screen:
+
+- **Backdrop**: Semi-transparent with blur effect
+- **Modal**: Paper-textured sheet with score buttons
+- **Balance scale** (-5 to +5): 11 buttons in a row, 0 highlighted as optimal
+- **Maximal scale** (0 to 10): 11 buttons in a row
+- **Auto-submit**: Selecting a score immediately submits it and closes the overlay
+- **Click-to-edit**: After submitting, clicking your cell in the grid reopens the overlay
+- **Entrance animation**: Overlay fades/slides in for polish
+
+### Sheet Focus System
+
+Panels use a focus/z-index system to manage overlapping:
+- **Clicking the main sheet** brings it to front (`z-[10]`, lifted shadow)
+- **Clicking the notes panel** brings it to front (`z-[20]`, expanded width)
+- The unfocused panel recedes (lower z-index, standard shadow)
 
 ### Interaction Patterns
 
 **Feedback & States**
-- Every action should have immediate visual feedback
+- Scores auto-submit with immediate visual feedback in the grid
 - Loading states for async operations (avoid spinners where possible)
-- Success/error states clearly communicated
+- Success/error states communicated via flash messages
 - Hover and focus states for all interactive elements
 
 **Transitions**
-- Use subtle animations (200-300ms) for state changes
-- Avoid jarring jumps - smooth transitions between phases
-- Animate elements entering/leaving the DOM
+- Score overlay entrance animation (`score-overlay-enter` keyframe)
+- Panel focus transitions (300ms duration)
+- Sheet lift on hover with shadow transition
 - Never animate in a way that delays user action
 
 **Touch & Click Targets**
 - Minimum 44x44px touch targets (WCAG recommendation)
-- Adequate spacing between clickable elements
-- Entire row/card clickable where appropriate (not just small text)
-
-### Turn-Based Scoring Specific UX
-
-**Current Turn Indicator**
-- Clearly highlight whose turn it is
-- Use color, animation, or prominent placement
-- "Your turn" messaging should be unmissable
-
-**Score Input**
-- Large, easy-to-tap score buttons or slider
-- Current selection clearly highlighted
-- Ability to change selection before confirming
-
-**Done Button**
-- Only appears for current turn participant
-- Prominent but not accidentally tappable
-- Clear label: "Done" or "Pass Turn"
-
-**Ready State**
-- Visual indication of who has marked ready
-- Clear progress toward all-ready state
-- Disable advance until all ready (unless override available)
+- Score buttons are full-width flex items for easy tapping
+- Entire note cards and sheet panels are clickable
 
 ### Responsive Design
 
@@ -757,85 +772,76 @@ The tool should look professional, feel intuitive, and support the butcher paper
 |------|--------|----------------|
 | Mobile (< 640px) | Phones | Single column, larger touch targets |
 | Tablet (640-1024px) | iPads, small laptops | Comfortable grid view |
-| Desktop (> 1024px) | Primary use case | Full grid, all features visible |
+| Desktop (> 1024px) | Primary use case | Full grid with side panels |
 
 **Mobile Considerations**
 - Grid may need horizontal scroll or condensed view
-- Score input should be thumb-friendly
-- Consider landscape mode for better grid visibility
+- Score overlay is full-width on mobile (mx-4 margin)
+- Side panels may stack or become drawers
 
 ### Error Prevention & Recovery
 
 **Prevent Errors**
-- Disable invalid actions rather than allowing then rejecting
-- Confirm destructive actions (delete, skip, leave session)
-- Auto-save where possible (scores saved immediately)
+- Disable "Next Question" until all participants are ready
+- Auto-save scores immediately on selection
+- Confirm destructive actions (delete notes, skip turn)
 
 **Recover from Errors**
-- Clear error messages explaining what went wrong
-- Actionable guidance on how to fix
-- Easy path back to a valid state
+- Clear error messages via flash
+- Easy path back (facilitator Back button)
 - Never lose user work due to errors
-
-### Performance Perception
-
-**Optimistic Updates**
-- Update UI immediately on user action
-- Sync to server in background
-- Handle conflicts gracefully
-
-**Loading States**
-- Skeleton screens preferred over spinners
-- Progressive loading (show content as it arrives)
-- Never block the entire UI for loading
 
 ---
 
 ## Visual Design
 
-### Brand Alignment
-The app will follow the **Desirable Futures Group** visual design language.
+### Design System
+The app follows the shared **Desirable Futures Workshop Design System** documented in `docs/design-system.md`. Key decisions are summarised here; refer to the design system for implementation details and Tailwind classes.
 
 **Reference:** https://www.desirablefutures.group/
 
-### Color Palette (Primary)
+### Theme: Light
 
-| Role | Color | Approx Value |
-|------|-------|--------------|
-| Background | Near-black | rgb(21, 21, 21) |
-| Primary text | White | rgb(255, 255, 255) |
-| Accent (primary) | Vibrant green | rgb(66, 210, 53) |
-| Accent (secondary) | Electric blue/cyan | rgb(63, 169, 245) |
-| Subdued text | Light gray | rgb(176, 176, 176) |
-| Dividers/borders | Dark grays | rgb(50-87, 50-87, 50-87) |
+All workshop apps use a **light theme** with warm off-white backgrounds, replacing the earlier dark theme concept.
 
-**Secondary palette:** To be provided - exact values TBD
+### Color Palette
+
+| Role | Color | Value |
+|------|-------|-------|
+| Wall Background | Warm taupe | `#E8E4DF` |
+| Sheet Surface | Cream (paper texture) | `#FEFDFB` |
+| Sheet Secondary | Light gray | `#F5F3F0` |
+| Ink (on-sheet content) | Deep blue | `#1a3a6b` |
+| UI Text | Dark gray | `#333333` |
+| Primary Accent | Purple | `#7245F4` |
+| Secondary Accent | Magenta | `#BC45F4` |
+| Score High / Success | Gold | `#F4B945` |
+| Score Low / Warning | Red | `#F44545` |
+| Traffic Green | Green | `#22c55e` |
+| Traffic Amber | Amber | `#f59e0b` |
+| Traffic Red | Red | `#ef4444` |
+
+See `docs/brand-colors.md` for the complete palette.
 
 ### Typography
 
-| Use | Font |
-|-----|------|
-| Primary | Poppins |
-| Secondary/body | Inter |
-| Weights | 300 (light) to 900 (heavy) for hierarchy |
+| Use | Font | Notes |
+|-----|------|-------|
+| UI Chrome | DM Sans | Headers, buttons, labels |
+| Workshop Content | Caveat | Scores, criteria names, notes (handwritten feel) |
 
 ### Style Direction
 
-- **Modern & minimalist** - clean, contemporary aesthetic
-- **Dark mode** - dark backgrounds with bright accents
-- **High contrast** - ensures readability and WCAG compliance
-- **Generous whitespace** - breathing room, not cramped
-- **Subtle animations** - spring-based transitions for polish
-- **Card-based layouts** - consistent spacing and structure
+- **Light, warm, physical** — evokes paper and markers on a wall
+- **Paper texture** — SVG noise overlays on sheet surfaces for tactile feel
+- **Multi-layer shadows** — sheets lift on hover, creating depth
+- **Subtle rotation** — sheets have slight CSS rotation for a natural, pinned-to-wall feel
+- **High contrast** — ink-blue text on cream paper for readability
+- **Generous whitespace** — breathing room within sheets
 
 ### Traffic Light Colors
 
-The traffic light visualization needs to work within the dark theme:
-- **Green**: May align with brand accent green (rgb 66, 210, 53)
-- **Amber**: TBD - needs to contrast well on dark background
-- **Red**: TBD - needs to contrast well on dark background
-
-*Note: Exact color values to be finalized to ensure accessibility and brand consistency.*
+Traffic lights use semantic Tailwind classes (`text-traffic-green`, `text-traffic-amber`, `text-traffic-red`) for consistent application across scores, summaries, and indicators.
 
 ---
 
@@ -991,5 +997,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 2.1 - Clarified two-phase discussion model (individual + team)*
-*Last Updated: 2026-02-03*
+*Document Version: 3.0 - Updated for Virtual Wall redesign (auto-submit, floating overlay, full grid, three-panel layout)*
+*Last Updated: 2026-02-06*
