@@ -953,6 +953,10 @@ select {
   top: 1rem;
 }
 
+.bottom-5 {
+  bottom: 1.25rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -1206,8 +1210,32 @@ select {
   height: 34px;
 }
 
+.h-\[500px\] {
+  height: 500px;
+}
+
 .max-h-\[300px\] {
   max-height: 300px;
+}
+
+.max-h-\[150px\] {
+  max-height: 150px;
+}
+
+.max-h-\[200px\] {
+  max-height: 200px;
+}
+
+.max-h-\[80vh\] {
+  max-height: 80vh;
+}
+
+.max-h-\[calc\(min\(90vh\2c 1020px\)-3rem\)\] {
+  max-height: calc(min(90vh,1020px) - 3rem);
+}
+
+.max-h-\[min\(90vh\2c 1020px\)\] {
+  max-height: min(90vh,1020px);
 }
 
 .min-h-\[340px\] {
@@ -1232,6 +1260,14 @@ select {
 
 .min-h-screen {
   min-height: 100vh;
+}
+
+.min-h-0 {
+  min-height: 0px;
+}
+
+.min-h-\[200px\] {
+  min-height: 200px;
 }
 
 .w-1\.5 {
@@ -1318,6 +1354,10 @@ select {
   min-width: 4rem;
 }
 
+.min-w-\[580px\] {
+  min-width: 580px;
+}
+
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -1346,6 +1386,10 @@ select {
   max-width: 36rem;
 }
 
+.max-w-\[780px\] {
+  max-width: 780px;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -1355,6 +1399,10 @@ select {
 }
 
 .flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.shrink-0 {
   flex-shrink: 0;
 }
 
@@ -2011,6 +2059,10 @@ select {
   padding-top: 2rem;
 }
 
+.pt-2 {
+  padding-top: 0.5rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -2098,6 +2150,10 @@ select {
   line-height: 1rem;
 }
 
+.text-\[15px\] {
+  font-size: 15px;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -2116,6 +2172,10 @@ select {
 
 .uppercase {
   text-transform: uppercase;
+}
+
+.lowercase {
+  text-transform: lowercase;
 }
 
 .italic {
@@ -2942,73 +3002,11 @@ input[type="range"]::-moz-range-thumb {
   background: linear-gradient(90deg, #BC45F4, #7245F4 60%, transparent);
 }
 
-.gradient-stripe-strip {
-  position: relative;
-}
-
-.gradient-stripe-strip::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 150px;
-  height: 3px;
-  background: linear-gradient(270deg, #F4B945, #BC45F4 70%, transparent);
-}
-
-/* ─── Sheet Thumbnails ─── */
-
-.strip-thumb {
-  position: relative;
-  overflow: hidden;
-}
-
-.strip-thumb::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(26, 58, 107, 0.06),
-    rgba(26, 58, 107, 0.06) 2px,
-    transparent 2px,
-    transparent 4px
-  );
-  border-radius: 1px;
-  opacity: 0.5;
-}
-
-.strip-thumb.active::before {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background: #F4B945;
-  border-radius: 50%;
-  z-index: 2;
-}
-
-.strip-thumb.secondary::before {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background: #BC45F4;
-  border-radius: 50%;
-  z-index: 2;
-  opacity: 0.6;
-}
-
 /* ─── Scoring Grid ─── */
 
 .scoring-grid {
-  width: auto;
+  width: 100%;
+  max-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -3117,16 +3115,6 @@ th.active-col-header {
   max-width: 160px;
 }
 
-.scoring-grid .criterion .parent {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  opacity: 0.5;
-  display: block;
-  margin-bottom: 1px;
-}
-
 .scoring-grid .criterion .name {
   font-size: 17px;
   font-weight: 600;
@@ -3134,10 +3122,24 @@ th.active-col-header {
   letter-spacing: 0.01em;
 }
 
-/* Indent sub-criteria (a/b) that have a parent criterion label */
+/* Indented sub-criteria (a/b rows under a group header) */
 
-.scoring-grid .criterion .parent + .name {
-  padding-left: 12px;
+.scoring-grid .criterion.criterion-indented {
+  padding-left: 10px;
+}
+
+/* Group header row for paired criteria (Continual Learning, Meaningfulness) */
+
+.scoring-grid .criterion-group-header {
+  font-family: 'Caveat', cursive;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a3a6b;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  padding: 10px 0 2px 0;
+  border-bottom: none;
 }
 
 /* Score cell styling */
@@ -3192,6 +3194,67 @@ th.active-col-header {
   border-color: #bbb;
   background: #FAFAFA;
   transform: translateY(-1px);
+}
+
+/* ─── Virtual Wall Layout ─── */
+
+.wall-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wall-sheet-previous {
+  position: absolute;
+  left: 3%;
+  top: 50%;
+  transform: translateY(-50%) scale(0.60);
+  transform-origin: left center;
+  pointer-events: none;
+  opacity: 0.70;
+  z-index: 1;
+  transition: all 300ms ease;
+}
+
+.wall-sheet-previous-deeper {
+  position: absolute;
+  left: 1%;
+  top: 50%;
+  transform: translateY(-50%) scale(0.45);
+  transform-origin: left center;
+  pointer-events: none;
+  opacity: 0.40;
+  z-index: 0;
+  transition: all 300ms ease;
+}
+
+.wall-sheet-current {
+  position: relative;
+  z-index: 5;
+  max-height: 95%;
+  overflow: hidden;
+}
+
+.wall-sheet-side {
+  position: absolute;
+  right: 1rem;
+  top: 4rem;
+  z-index: 2;
+  transition: all 300ms ease;
+}
+
+/* When side sheet is focused, swap z-indexes */
+
+.wall-sheet-current.wall-focus-background {
+  z-index: 2;
+}
+
+.wall-sheet-side.wall-focus-foreground {
+  z-index: 10;
 }
 
 /* ─── Score Overlay Animation ─── */
@@ -3277,6 +3340,10 @@ th.active-col-header {
 .hover\:bg-zinc-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(63 63 70 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-accent-purple-light\/50:hover {
+  background-color: rgba(114, 69, 244, 0.5);
 }
 
 .hover\:text-accent-purple:hover {
