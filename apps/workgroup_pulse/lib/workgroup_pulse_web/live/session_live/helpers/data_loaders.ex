@@ -48,8 +48,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_facilitator_tips: false)
     |> assign(active_sheet: :main)
+    |> assign(show_score_overlay: turn_state.is_my_turn and my_score == nil)
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
+    |> load_all_questions_scores(session, template)
   end
 
   def load_scoring_data(socket, _session, _participant) do
@@ -112,6 +114,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(ready_count: 0)
     |> assign(eligible_participant_count: 0)
     |> assign(all_ready: false)
+    |> assign(all_questions: [])
+    |> assign(all_questions_scores: %{})
+    |> assign(show_score_overlay: false)
   end
 
   @doc """
@@ -249,6 +254,43 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
   def load_notes(socket, session, question_index) do
     notes = Notes.list_notes_for_question(session, question_index)
     assign(socket, question_notes: notes)
+  end
+
+  @doc """
+  Loads scores for all questions to display in the full scoring grid.
+  """
+  def load_all_questions_scores(socket, session, template) do
+    participants = socket.assigns[:participants] || Sessions.list_participants(session)
+    all_questions_scores = build_all_questions_scores(session, template, participants)
+
+    assign(socket,
+      all_questions: template.questions,
+      all_questions_scores: all_questions_scores
+    )
+  end
+
+  defp build_all_questions_scores(session, template, participants) do
+    # Get participants in turn order (active, non-observers)
+    participants_in_order =
+      Enum.filter(participants, &(&1.status == "active" and not &1.is_observer))
+
+    for question <- template.questions, into: %{} do
+      scores = Scoring.list_scores_for_question(session, question.index)
+      score_map = Map.new(scores, &{&1.participant_id, &1})
+
+      participant_scores =
+        for p <- participants_in_order do
+          score = Map.get(score_map, p.id)
+
+          %{
+            participant_id: p.id,
+            value: score && score.value,
+            has_score: score != nil
+          }
+        end
+
+      {question.index, participant_scores}
+    end
   end
 
   @doc """

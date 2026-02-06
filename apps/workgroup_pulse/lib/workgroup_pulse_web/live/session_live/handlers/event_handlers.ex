@@ -97,7 +97,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
 
   @doc """
   Handles select_score event.
-  Parses and assigns the selected score value.
+  Parses the score value and immediately submits it.
   """
   def handle_select_score(socket, params) do
     score = params["score"] || params["value"]
@@ -110,7 +110,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       end
 
     if int_value do
-      {:noreply, assign(socket, selected_value: int_value)}
+      socket = assign(socket, selected_value: int_value)
+      do_submit_score(socket, int_value)
     else
       {:noreply, socket}
     end
@@ -122,6 +123,19 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   """
   def handle_submit_score(socket) do
     do_submit_score(socket, socket.assigns.selected_value)
+  end
+
+  @doc """
+  Handles edit_my_score event.
+  Reopens the score overlay so the participant can change their score.
+  Only works during their turn before it's locked.
+  """
+  def handle_edit_my_score(socket) do
+    if socket.assigns.is_my_turn and not socket.assigns.my_turn_locked do
+      {:noreply, assign(socket, show_score_overlay: true)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @doc """
@@ -549,6 +563,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
     session = socket.assigns.session
     participant = socket.assigns.participant
     question_index = session.current_question_index
+    template = socket.assigns[:template]
 
     case Scoring.submit_score(session, participant, question_index, selected_value) do
       {:ok, _score} ->
@@ -558,7 +573,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
          socket
          |> assign(my_score: selected_value)
          |> assign(has_submitted: true)
-         |> DataLoaders.load_scores(session, question_index)}
+         |> assign(show_score_overlay: false)
+         |> DataLoaders.load_scores(session, question_index)
+         |> DataLoaders.load_all_questions_scores(session, template)}
 
       {:error, reason} ->
         Logger.error("Failed to submit score: #{inspect(reason)}")
