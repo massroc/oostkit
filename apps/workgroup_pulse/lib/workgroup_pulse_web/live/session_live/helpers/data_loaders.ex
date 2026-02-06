@@ -47,7 +47,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(current_turn_has_score: turn_state.current_turn_has_score)
     |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_facilitator_tips: false)
-    |> assign(show_notes: false)
+    |> assign(active_sheet: :main)
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
   end
@@ -108,7 +108,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(active_participant_count: 0)
     |> assign(question_notes: [])
     |> assign(show_facilitator_tips: false)
-    |> assign(show_notes: false)
+    |> assign(active_sheet: :main)
     |> assign(ready_count: 0)
     |> assign(eligible_participant_count: 0)
     |> assign(all_ready: false)

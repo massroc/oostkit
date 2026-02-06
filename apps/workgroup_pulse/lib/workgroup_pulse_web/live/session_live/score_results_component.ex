@@ -1,11 +1,10 @@
 defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
   @moduledoc """
-  LiveComponent for displaying score results and notes capture.
+  LiveComponent for displaying score results after reveal.
   Isolates re-renders to just this section when scores change.
   Uses Virtual Wall design with paper-textured styling.
 
-  Note: Facilitator tips (discussion prompts) are displayed on the question card
-  during the scoring phase, not on this results component.
+  Notes are now handled by the side sheet in ScoringComponent.
   """
   use WorkgroupPulseWeb, :live_component
 
@@ -59,79 +58,6 @@ defmodule WorkgroupPulseWeb.SessionLive.ScoreResultsComponent do
           <% end %>
         </div>
       </div>
-      
-    <!-- Toggle button for notes -->
-      <div>
-        <button
-          type="button"
-          phx-click="toggle_notes"
-          class={[
-            "w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 font-brand",
-            if(@show_notes,
-              do: "bg-accent-purple text-white",
-              else:
-                "bg-surface-sheet text-ink-blue hover:bg-surface-sheet-secondary border border-ink-blue/10"
-            )
-          ]}
-        >
-          <span>{if @show_notes, do: "Hide", else: "Add"} Notes</span>
-          <%= if length(@question_notes) > 0 do %>
-            <span class="bg-surface-wall text-ink-blue text-xs px-2 py-0.5 rounded-full">
-              {length(@question_notes)}
-            </span>
-          <% end %>
-        </button>
-      </div>
-      
-    <!-- Notes capture (collapsible) -->
-      <%= if @show_notes do %>
-        <div class="bg-surface-wall/50 rounded-lg p-4 border border-accent-purple/30">
-          <!-- Existing notes -->
-          <%= if length(@question_notes) > 0 do %>
-            <ul class="space-y-3 mb-4">
-              <%= for note <- @question_notes do %>
-                <li class="bg-surface-sheet rounded-lg p-3 border border-ink-blue/5">
-                  <div class="flex justify-between items-start gap-2">
-                    <p class="text-ink-blue flex-1 font-workshop">{note.content}</p>
-                    <button
-                      type="button"
-                      phx-click="delete_note"
-                      phx-value-id={note.id}
-                      class="text-ink-blue/40 hover:text-accent-red transition-colors text-sm"
-                      title="Delete note"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <p class="text-xs text-ink-blue/50 mt-1 font-brand">— {note.author_name}</p>
-                </li>
-              <% end %>
-            </ul>
-          <% end %>
-          
-    <!-- Add note form -->
-          <form phx-submit="add_note" class="flex gap-2">
-            <input
-              type="text"
-              name="note"
-              value={@note_input}
-              phx-change="update_note_input"
-              phx-debounce="300"
-              placeholder="Capture a key discussion point..."
-              class="flex-1 bg-surface-sheet border border-ink-blue/10 rounded-lg px-4 py-2 text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple"
-            />
-            <button
-              type="submit"
-              class="btn-workshop btn-workshop-primary"
-            >
-              Add
-            </button>
-          </form>
-          <p class="text-xs text-ink-blue/50 mt-2 font-brand">
-            Notes are visible to all participants and saved with the session.
-          </p>
-        </div>
-      <% end %>
       
     <!-- Ready / Next controls -->
       <div class="bg-surface-wall/50 rounded-lg p-4">

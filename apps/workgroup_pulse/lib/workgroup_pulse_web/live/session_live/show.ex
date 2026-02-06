@@ -61,7 +61,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(intro_step: 1)
      |> assign(show_mid_transition: false)
      |> assign(show_facilitator_tips: false)
-     |> assign(show_notes: false)
+     |> assign(active_sheet: :main)
      |> assign(note_input: "")
      |> assign(show_export_modal: false)
      |> assign(export_content: "all")
@@ -209,8 +209,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_event("toggle_notes", _params, socket) do
-    EventHandlers.handle_toggle_notes(socket)
+  def handle_event("focus_sheet", %{"sheet" => sheet}, socket) do
+    EventHandlers.handle_focus_sheet(socket, String.to_existing_atom(sheet))
   end
 
   @impl true
@@ -325,7 +325,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               show_mid_transition={@show_mid_transition}
               show_facilitator_tips={@show_facilitator_tips}
               question_notes={@question_notes}
-              show_notes={@show_notes}
+              active_sheet={@active_sheet}
               note_input={@note_input}
               ready_count={@ready_count}
               eligible_participant_count={@eligible_participant_count}
@@ -375,6 +375,41 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           total={sheet_total(@session, assigns)}
           has_notes={@session.state == "scoring"}
         />
+      <% end %>
+      <!-- Floating Action Buttons (scoring phase) -->
+      <%= if @session.state == "scoring" and @is_my_turn and not @my_turn_locked and not @show_mid_transition do %>
+        <div class="fixed bottom-[60px] right-5 flex gap-2 z-50">
+          <button
+            phx-click="submit_score"
+            disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
+            class={[
+              "btn-workshop",
+              if(@selected_value != nil and (not @has_submitted or @selected_value != @my_score),
+                do: "btn-workshop-primary",
+                else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+              )
+            ]}
+          >
+            <%= if @has_submitted do %>
+              Change Score
+            <% else %>
+              Share Score
+            <% end %>
+          </button>
+          <button
+            phx-click="complete_turn"
+            disabled={not @has_submitted}
+            class={[
+              "btn-workshop",
+              if(@has_submitted,
+                do: "btn-workshop-primary",
+                else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+              )
+            ]}
+          >
+            Done →
+          </button>
+        </div>
       <% end %>
     </div>
     """
