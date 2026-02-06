@@ -1,8 +1,8 @@
 # Workgroup Pulse - Solution Design
 
 ## Document Info
-- **Version:** 1.2
-- **Last Updated:** 2026-02-02
+- **Version:** 3.0
+- **Last Updated:** 2026-02-06
 - **Status:** Draft
 
 ---
@@ -916,53 +916,41 @@ end
 ### Component Hierarchy
 
 ```
-WorkshopLive (root)
-├── Components/
-│   ├── Header
-│   │   ├── SessionCode
-│   │   ├── TimerDisplay
-│   │   └── FacilitatorHelpButton
-│   │
-│   ├── ParticipantList
-│   │   └── ParticipantCard (× n)
-│   │
-│   ├── Phases/
-│   │   ├── LobbyPhase
-│   │   │   ├── JoinForm
-│   │   │   └── WaitingRoom
-│   │   │
-│   │   ├── IntroPhase
-│   │   │   ├── IntroScreen
-│   │   │   └── SkipIntroButton
-│   │   │
-│   │   ├── ScoringPhase
-│   │   │   ├── QuestionCard
-│   │   │   │   └── FacilitatorTips (expandable)
-│   │   │   ├── ScoreInput (balance or maximal)
-│   │   │   ├── ScoreReveal
-│   │   │   └── NotesCapture
-│   │   │
-│   │   ├── SummaryPhase
-│   │   │   ├── ScoreSummaryGrid
-│   │   │   └── PatternHighlights
-│   │   │
-│   │   └── ActionsPhase
-│   │       ├── ActionsList
-│   │       ├── ActionForm
-│   │       └── ActionCard
-│   │
-│   ├── Shared/
-│   │   ├── TrafficLight
-│   │   ├── ProgressBar
-│   │   ├── ReadyButton
-│   │   ├── Modal
-│   │   └── Toast
-│   │
-│   └── FeedbackButton
+SessionLive.Show (root LiveView)
+├── Handlers/
+│   ├── EventHandlers         # All handle_event callbacks
+│   └── MessageHandlers       # All handle_info callbacks (PubSub)
 │
-└── Modals/
-    ├── FacilitatorHelpModal
-    └── FeedbackModal
+├── Helpers/
+│   ├── DataLoaders           # Data loading & state hydration
+│   ├── StateHelpers          # State transition helpers
+│   ├── OperationHelpers      # Standardised error handling
+│   └── ScoreHelpers          # Score color/formatting utilities
+│
+├── TimerHandler              # Facilitator timer logic
+│
+├── Components/ (pure functional components)
+│   ├── LobbyComponent        # Waiting room, participant list, start button
+│   ├── IntroComponent        # 4 intro screens with navigation
+│   ├── ScoringComponent      # Virtual Wall grid + score overlay + side panels
+│   ├── SummaryComponent      # Score summary with individual scores & notes
+│   ├── ActionsComponent      # Action item management
+│   ├── CompletedComponent    # Wrap-up: results, actions, export
+│   └── ExportModalComponent  # Export format/content selection
+│
+├── LiveComponents/
+│   ├── ScoreResultsComponent # Isolated re-renders for score display
+│   └── ActionFormComponent   # Local form state for action creation
+│
+├── Shared (in CoreComponents)
+│   ├── .app_header           # App header with gradient accent
+│   ├── .sheet_strip          # Question thumbnail navigation bar
+│   ├── .facilitator_timer    # Timer display (facilitator-only)
+│   └── .score_indicator      # Traffic light score display
+│
+└── Other LiveViews
+    ├── SessionLive.New        # Create new session
+    └── SessionLive.Join       # Join existing session
 ```
 
 ### Component Design Principles
@@ -972,31 +960,99 @@ WorkshopLive (root)
 3. **Consistent styling API** - Common props like `class`, `variant`, `size`
 4. **Render isolation** - Extract LiveComponents to limit re-render scope for frequently updated sections
 
-### Extracted LiveComponents
+### Phase Components (Functional Components)
 
-The following LiveComponents have been extracted from the main SessionLive to optimize performance:
+The scoring phase has been redesigned as the **Virtual Wall** — a full-screen three-panel layout:
 
-#### ScoreResultsComponent
+#### ScoringComponent
+**File:** `lib/workgroup_pulse_web/live/session_live/components/scoring_component.ex`
+
+**Purpose:** Renders the entire scoring phase UI including the full 8-question grid, floating score overlay, left question info panel, and right notes side-sheet. Pure functional component — all events bubble to the parent LiveView.
+
+**Layout:**
+- **Main Sheet (centre)** — `render_full_scoring_grid/1` renders all 8 questions as a `<table>` with participant columns. Questions are grouped by scale type (Balance, Maximal) with section labels.
+- **Left Panel** — Question title, explanation, and expandable facilitator tips ("More tips" toggle).
+- **Right Panel (Side-sheet)** — Notes with focus-based expand/collapse. Shows preview (2 notes max) when unfocused, full list + add form when focused.
+- **Score Overlay** — `render_score_overlay/1` shows a floating modal with score buttons. Auto-submits on selection. Only visible when `is_my_turn and not my_turn_locked and show_score_overlay`.
+
+**Key Render Functions:**
+- `render_full_scoring_grid/1` — Builds the complete 8-question × N-participant grid
+- `render_question_row/2` — Renders a single question row with per-participant score cells
+- `render_score_cell_value/3` — Pattern-matched function for cell display states (future `—`, past `?`, current `...`, scored value)
+- `render_score_overlay/1` — Floating score input modal
+- `render_balance_scale/1` / `render_maximal_scale/1` — Score button grids for each scale type
+- `render_mid_transition/1` — Scale change explanation screen (shown before Q5)
+
+**All other phase components** follow the same pure functional pattern:
+- `SummaryComponent` — Paper-textured sheet with individual score grids, team combined values, traffic lights, and notes
+- `ActionsComponent` — Action item list with inline creation
+- `CompletedComponent` — Wrap-up page with score overview, strengths/concerns, actions, and export
+- `LobbyComponent` — Waiting room with participant list and start button
+- `IntroComponent` — 4-screen introduction with navigation
+
+#### ScoreResultsComponent (LiveComponent)
 **File:** `lib/workgroup_pulse_web/live/session_live/score_results_component.ex`
 
-**Purpose:** Displays score results and notes capture after scores are revealed. Isolates re-renders to just this section when scores change.
-
-**Assigns:**
-- `all_scores` - List of participant scores with colors
-- `current_question` - Current question being scored
-- `show_notes` - Toggle state for notes section
-- `question_notes` - Notes for the current question
-- `note_input` - Current note input value
-- `participant` - Current participant
-- `session` - Current session
-
-**Note:** Events (toggle_notes, add_note, delete_note) are handled by the parent LiveView for test compatibility.
-
-**Facilitator Tips:** Discussion prompts (facilitator tips) are displayed on the question screen during the scoring phase, not on the results screen. This allows facilitators to access tips before and during scoring. Tips are shown via an expandable "More tips" button on the question card.
+**Purpose:** Legacy component for isolated score result re-renders. May be superseded by the ScoringComponent's integrated grid approach.
 
 ### Extracted Handler Modules
 
 The following handler modules have been extracted from SessionLive.Show to improve maintainability and separation of concerns:
+
+#### EventHandlers
+**File:** `lib/workgroup_pulse_web/live/session_live/handlers/event_handlers.ex`
+
+**Purpose:** All `handle_event` callbacks extracted from the root LiveView. Each function receives the socket and returns `{:noreply, socket}`.
+
+**Key Functions:**
+- `handle_select_score/2` — Parses score value and auto-submits immediately (no separate submit step)
+- `handle_edit_my_score/1` — Reopens the score overlay for click-to-edit
+- `handle_complete_turn/1` — Locks turn and advances to next participant
+- `handle_skip_turn/1` — Facilitator skips current participant
+- `handle_mark_ready/1` — Marks participant as ready to continue
+- `handle_focus_sheet/2` — Brings specified sheet panel to front (`:main` or `:notes`)
+- `handle_next_question/1` — Advances to next question (facilitator only)
+- `handle_go_back/1` — Navigate back (facilitator only, context-aware)
+- Note, action, intro, transition, and export handlers
+
+#### MessageHandlers
+**File:** `lib/workgroup_pulse_web/live/session_live/handlers/message_handlers.ex`
+
+**Purpose:** All `handle_info` callbacks for PubSub events. Handles real-time updates from other participants.
+
+**Key Events Handled:**
+- `:participant_joined`, `:participant_left`, `:participant_updated`, `:participant_ready`
+- `:session_started`, `:session_updated`
+- `:score_submitted` — Reloads score data for the affected question
+- `:turn_advanced`, `:row_locked`
+- `:note_updated`, `:action_updated`
+- `:participants_ready_reset`
+
+#### DataLoaders
+**File:** `lib/workgroup_pulse_web/live/session_live/helpers/data_loaders.ex`
+
+**Purpose:** Centralised data loading functions that hydrate the socket with data for each phase. Uses smart caching to avoid redundant DB queries.
+
+**Key Functions:**
+- `load_scoring_data/3` — Loads all scoring state: template, current question, scores, turn state, score overlay visibility, all-questions grid data, notes
+- `load_scores/3` — Loads scores for a specific question, builds participant score grid, calculates readiness
+- `load_all_questions_scores/3` — Loads scores for all 8 questions (for the full grid display)
+- `load_notes/3` — Loads notes for a specific question
+- `load_summary_data/2` — Loads summary state: scores summary, individual scores, notes by question, strengths/concerns
+- `load_actions_data/2` — Loads actions for wrap-up phase
+- `get_or_load_template/2` — Template caching (reuses from socket assigns)
+- `reset_scoring_assigns/1` — Resets all scoring-related assigns to defaults
+
+**Score Overlay Logic:**
+```elixir
+# Overlay shows only when it's your turn AND you haven't submitted yet
+show_score_overlay: turn_state.is_my_turn and my_score == nil
+```
+
+**Readiness Calculation:**
+- Skipped participants (no score when all turns done) auto-counted as ready
+- Row-locked questions (revisiting completed): all participants auto-ready
+- Otherwise: explicit "I'm Ready" click required from non-facilitator, non-observer participants
 
 #### TimerHandler
 **File:** `lib/workgroup_pulse_web/live/session_live/timer_handler.ex`
@@ -1052,101 +1108,48 @@ handle_operation(
 
 **Communication:** Notifies parent via `send(self(), :reload_actions)` after successful action creation.
 
-### Example Components
+### Score Input Design
+
+Score input uses **button grids inside a floating overlay**, not sliders. Each score value is a separate button that auto-submits on click via `phx-click="select_score"`.
+
+**Balance Scale (-5 to +5):** 11 buttons in a row. The `0` button has special styling (green border) to indicate it's optimal. Selected button gets green background.
+
+**Maximal Scale (0 to 10):** 11 buttons in a row. Selected button gets purple background.
+
+Both scales show contextual labels ("Too little / Just right / Too much" for balance, "Low / High" for maximal).
+
+### Design System Components (CoreComponents)
+
+Shared components in `lib/workgroup_pulse_web/components/core_components.ex`:
 
 ```elixir
-defmodule WorkgroupPulseWeb.Components.TrafficLight do
-  use Phoenix.Component
+# App header with gradient accent stripe
+<.app_header session_name="Six Criteria Assessment" />
 
-  @doc """
-  Renders a traffic light indicator for a score.
+# Sheet strip navigation (question thumbnails)
+<.sheet_strip current={3} total={8} has_notes={true} />
 
-  ## Examples
-
-      <.traffic_light color={:green} />
-      <.traffic_light color={:amber} size={:lg} />
-  """
-
-  attr :color, :atom, required: true, values: [:green, :amber, :red]
-  attr :size, :atom, default: :md, values: [:sm, :md, :lg]
-  attr :class, :string, default: nil
-
-  def traffic_light(assigns) do
-    ~H"""
-    <span class={[
-      "inline-block rounded-full",
-      size_class(@size),
-      color_class(@color),
-      @class
-    ]} />
-    """
-  end
-
-  defp size_class(:sm), do: "w-3 h-3"
-  defp size_class(:md), do: "w-4 h-4"
-  defp size_class(:lg), do: "w-6 h-6"
-
-  defp color_class(:green), do: "bg-green-500"
-  defp color_class(:amber), do: "bg-amber-500"
-  defp color_class(:red), do: "bg-red-500"
-end
-
-defmodule WorkgroupPulseWeb.Components.ScoreInput do
-  use Phoenix.Component
-
-  @doc """
-  Renders a score input appropriate for the scale type.
-  Balance scale: -5 to +5 slider with 0 highlighted
-  Maximal scale: 0 to 10 slider
-  """
-
-  attr :scale_type, :atom, required: true, values: [:balance, :maximal]
-  attr :value, :integer, default: nil
-  attr :disabled, :boolean, default: false
-  attr :on_change, :any, required: true
-
-  def score_input(%{scale_type: :balance} = assigns) do
-    ~H"""
-    <div class="score-input balance-scale">
-      <input
-        type="range"
-        min="-5"
-        max="5"
-        value={@value}
-        disabled={@disabled}
-        phx-change={@on_change}
-        class="w-full"
-      />
-      <div class="flex justify-between text-sm text-gray-400">
-        <span>-5</span>
-        <span class="text-green-400">0</span>
-        <span>+5</span>
-      </div>
-    </div>
-    """
-  end
-
-  def score_input(%{scale_type: :maximal} = assigns) do
-    ~H"""
-    <div class="score-input maximal-scale">
-      <input
-        type="range"
-        min="0"
-        max="10"
-        value={@value}
-        disabled={@disabled}
-        phx-change={@on_change}
-        class="w-full"
-      />
-      <div class="flex justify-between text-sm text-gray-400">
-        <span>0</span>
-        <span class="text-green-400">10</span>
-      </div>
-    </div>
-    """
-  end
-end
+# Facilitator timer (top-right, facilitator-only)
+<.facilitator_timer
+  remaining_seconds={540}
+  total_seconds={600}
+  phase_name="Question 3"
+  warning_threshold={60}
+/>
 ```
+
+### Score Cell Display States
+
+The scoring grid uses pattern-matched render functions for cell content:
+
+| Cell State | Display | When |
+|------------|---------|------|
+| Future question | `—` | Question hasn't been reached yet |
+| Past, scored | Actual value (`+3`, `7`) | Question completed, participant scored |
+| Past, skipped | `?` | Question completed, participant was skipped |
+| Current, scored | Actual value | Current question, participant already scored |
+| Current, active turn | `...` | Current question, this participant is scoring now |
+| Current, pending | `—` | Current question, participant's turn hasn't come yet |
 
 ### Performance Optimizations
 
@@ -1282,66 +1285,88 @@ When navigating back to a row-locked (completed) question:
 
 ### LiveView State Structure
 
+The root LiveView (`SessionLive.Show`) delegates to handler modules and DataLoaders for state management:
+
 ```elixir
-defmodule WorkgroupPulseWeb.WorkshopLive do
+defmodule WorkgroupPulseWeb.SessionLive.Show do
   use WorkgroupPulseWeb, :live_view
 
-  @impl true
-  def mount(%{"code" => code}, _session, socket) do
-    if connected?(socket) do
-      # Subscribe to real-time updates
-      Phoenix.PubSub.subscribe(WorkgroupPulse.PubSub, "session:#{session.id}")
-      Phoenix.PubSub.subscribe(WorkgroupPulse.PubSub, "timer:#{session.id}")
-
-      # Track presence
-      WorkgroupPulseWeb.Presence.track_participant(socket, session.id, participant)
-    end
+  # Mount: load session, participant, subscribe, hydrate all phase data
+  def mount(%{"code" => code}, session, socket) do
+    # ... session/participant lookup, redirect if not found ...
 
     {:ok,
      socket
-     |> assign(:session, session)
-     |> assign(:participant, participant)
-     |> assign(:participants, participants)  # Ordered by join order (turn order)
-     |> assign(:current_phase, session.state)
-     |> assign(:current_question, current_question)
-     |> assign(:current_turn_participant_id, current_turn_participant_id)
-     |> assign(:is_my_turn, is_my_turn)
-     |> assign(:my_score, nil)
-     |> assign(:my_turn_locked, false)       # Whether I've clicked "Done"
-     |> assign(:all_scores, [])              # All scores for current question (visible immediately)
-     |> assign(:time_status, time_status)
-     |> assign(:notes, [])
-     |> assign(:actions, [])
-     |> assign(:show_facilitator_help, false)}
+     # Core state
+     |> assign(session: workshop_session)
+     |> assign(participant: participant)
+     |> assign(participants: participants)        # Ordered by join order
+
+     # UI state
+     |> assign(intro_step: 1)
+     |> assign(show_mid_transition: false)
+     |> assign(show_facilitator_tips: false)
+     |> assign(active_sheet: :main)               # Focus system: :main or :notes
+     |> assign(note_input: "")
+     |> assign(show_export_modal: false)
+     |> assign(export_content: "all")
+
+     # Timer state (via TimerHandler.init_timer_assigns/1)
+     # timer_enabled, timer_remaining, segment_duration,
+     # timer_phase_name, timer_warning_threshold, timer_ref
+
+     # Scoring state (via DataLoaders.load_scoring_data/3)
+     # template, total_questions, current_question,
+     # selected_value, my_score, has_submitted,
+     # is_my_turn, current_turn_participant_id, current_turn_has_score,
+     # my_turn_locked, participant_was_skipped,
+     # all_scores, scores_revealed, score_count, active_participant_count,
+     # question_notes, show_score_overlay,
+     # all_questions, all_questions_scores,    # Full grid data
+     # ready_count, eligible_participant_count, all_ready
+
+     # Summary state (via DataLoaders.load_summary_data/2)
+     # summary_template, scores_summary, all_notes, individual_scores,
+     # notes_by_question, strengths, concerns, neutral
+
+     # Actions state (via DataLoaders.load_actions_data/2)
+     # all_actions, action_count
+    }
   end
 
-  # State is updated via handle_info callbacks from PubSub
-  @impl true
-  def handle_info({:participant_joined, participant}, socket) do
-    {:noreply, update(socket, :participants, &(&1 ++ [participant]))}  # Append to preserve order
-  end
+  # Events delegate to EventHandlers
+  def handle_event("select_score", params, socket),
+    do: EventHandlers.handle_select_score(socket, params)
 
-  def handle_info({:score_placed, %{participant_id: pid, value: value}}, socket) do
-    # Score is immediately visible to all - update the scores list
-    {:noreply, update_score_in_list(socket, pid, value)}
-  end
+  # PubSub messages delegate to MessageHandlers
+  def handle_info({:score_submitted, pid, qi}, socket),
+    do: {:noreply, MessageHandlers.handle_score_submitted(socket, pid, qi)}
 
-  def handle_info({:turn_completed, %{next_participant_id: next_pid}}, socket) do
-    {:noreply,
-     socket
-     |> assign(:current_turn_participant_id, next_pid)
-     |> assign(:is_my_turn, next_pid == socket.assigns.participant.id)}
-  end
+  # Timer ticks handled by TimerHandler
+  def handle_info(:timer_tick, socket),
+    do: TimerHandler.handle_timer_tick(socket)
 
-  def handle_info({:row_locked, %{question_index: qidx}}, socket) do
-    {:noreply, mark_row_locked(socket, qidx)}
-  end
-
-  def handle_info({:timer_tick, time_status}, socket) do
-    {:noreply, assign(socket, :time_status, time_status)}
+  # Render dispatches to phase components based on session.state
+  def render(assigns) do
+    # case @session.state do
+    #   "lobby"     -> LobbyComponent.render(...)
+    #   "intro"     -> IntroComponent.render(...)
+    #   "scoring"   -> ScoringComponent.render(...)
+    #   "summary"   -> SummaryComponent.render(...)
+    #   "actions"   -> ActionsComponent.render(...)
+    #   "completed" -> CompletedComponent.render(...)
+    # end
+    #
+    # Plus: facilitator timer, sheet strip, floating action buttons
   end
 end
 ```
+
+**Key Design Decisions:**
+- `show.ex` is a thin dispatcher — all logic lives in handler/helper modules
+- DataLoaders hydrate socket assigns in bulk, avoiding piecemeal loading
+- Template caching (`get_or_load_template/2`) avoids repeated DB queries
+- Floating action buttons are rendered directly in `show.ex` (not in ScoringComponent) to keep the component pure
 
 ---
 
@@ -1852,9 +1877,10 @@ default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
-*Document Version: 2.3*
+*Document Version: 3.0*
 *v2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
 *v2.1 - Added extracted handler modules (TimerHandler, OperationHelpers)*
 *v2.2 - Removed turn timeout (facilitator can manually skip inactive participants)*
 *v2.3 - Added navigation rules and readiness behavior documentation*
-*Last Updated: 2026-02-04*
+*v3.0 - Updated for Virtual Wall redesign: new component hierarchy, DataLoaders, EventHandlers/MessageHandlers split, ScoringComponent with full grid, score overlay, and three-panel layout*
+*Last Updated: 2026-02-06*
