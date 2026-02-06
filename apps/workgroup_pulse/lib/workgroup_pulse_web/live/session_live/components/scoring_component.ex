@@ -42,36 +42,21 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     <%= if @show_mid_transition do %>
       {render_mid_transition(assigns)}
     <% else %>
-      <div class="flex h-full relative">
-        <!-- Main Content Area -->
-        <div class="flex-1 flex items-start justify-center p-6 overflow-auto relative">
-          <!-- Main Sheet -->
-          <div
-            class={[
-              "paper-texture rounded-sheet p-5 min-w-[520px] max-w-[700px] w-full relative flex flex-col cursor-pointer transition-all duration-300",
-              if(@active_sheet == :main, do: "shadow-sheet-lifted z-[10]", else: "shadow-sheet z-[1]")
-            ]}
-            style="transform: rotate(-0.2deg)"
-            phx-click="focus_sheet"
-            phx-value-sheet="main"
-          >
-            <div class="relative z-[1] flex-1 flex flex-col">
-              <!-- Sheet Header: Question info + Progress -->
-              <div class="mb-4 pb-3 border-b-2 border-ink-blue/10">
-                <div class="flex justify-between items-center text-sm mb-2">
-                  <span class="text-ui-text-muted">
-                    Question {@session.current_question_index + 1} of {@total_questions}
-                  </span>
-                  <span class="text-ui-text-muted">
-                    {@score_count}/{@active_participant_count} scored
-                  </span>
-                </div>
-
-                <h2 class="font-workshop text-2xl font-bold text-ink-blue">
+      <div class="flex flex-col h-full">
+        <!-- Main Content Row -->
+        <div class="flex-1 flex relative overflow-hidden">
+          <!-- Left Panel: Question Info -->
+          <div class="w-[220px] flex-shrink-0 p-4 overflow-y-auto">
+            <div
+              class="paper-texture-secondary rounded-sheet p-4 shadow-sheet"
+              style="transform: rotate(0.3deg)"
+            >
+              <div class="relative z-[1]">
+                <h2 class="font-workshop text-xl font-bold text-ink-blue leading-tight">
                   {@current_question.title}
                 </h2>
 
-                <p class="text-ink-blue/70 text-sm mt-1 whitespace-pre-line">
+                <p class="text-ink-blue/70 text-sm mt-2 whitespace-pre-line">
                   {format_description(@current_question.explanation)}
                 </p>
 
@@ -80,7 +65,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     <div class="mt-3 pt-3 border-t border-ink-blue/10">
                       <div class="flex items-center justify-between mb-2">
                         <h3 class="text-xs font-semibold text-accent-purple uppercase tracking-wide">
-                          Facilitator Tips
+                          Tips
                         </h3>
                         <button
                           type="button"
@@ -103,7 +88,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                     <button
                       type="button"
                       phx-click="toggle_facilitator_tips"
-                      class="mt-2 text-sm text-accent-purple hover:text-highlight transition-colors flex items-center gap-1"
+                      class="mt-3 text-sm text-accent-purple hover:text-highlight transition-colors flex items-center gap-1"
                     >
                       <span>More tips</span>
                       <span class="text-xs">+</span>
@@ -111,157 +96,138 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                   <% end %>
                 <% end %>
               </div>
-              
-    <!-- Grid-based Score Display -->
-              <%= if length(@all_scores) > 0 and not @scores_revealed do %>
-                <div class="flex-1 overflow-y-auto overflow-x-hidden mb-4">
-                  {render_scoring_grid(assigns)}
-                </div>
-              <% end %>
-              
-    <!-- Score Results (after reveal) -->
-              <%= if @scores_revealed and not (@is_my_turn and not @my_turn_locked) do %>
-                <.live_component
-                  module={ScoreResultsComponent}
-                  id="score-results"
-                  all_scores={@all_scores}
-                  current_question={@current_question}
-                  total_questions={@total_questions}
-                  participant={@participant}
-                  session={@session}
-                  ready_count={@ready_count}
-                  eligible_participant_count={@eligible_participant_count}
-                  all_ready={@all_ready}
-                  participant_was_skipped={@participant_was_skipped}
-                />
-              <% else %>
-                <!-- Score Input Area -->
-                {render_score_input(assigns)}
-              <% end %>
-              
-    <!-- Facilitator Navigation (during scoring entry) -->
-              <%= if @participant.is_facilitator and not @scores_revealed do %>
-                <div class="mt-4 pt-4 border-t border-ink-blue/10">
-                  <div class="flex gap-3">
-                    <%= if @session.current_question_index > 0 do %>
-                      <button
-                        phx-click="go_back"
-                        class="btn-workshop btn-workshop-secondary"
-                      >
-                        ← Back
-                      </button>
-                    <% end %>
-                    <button
-                      disabled
-                      class="flex-1 btn-workshop btn-workshop-secondary opacity-50 cursor-not-allowed"
-                    >
-                      <%= if @session.current_question_index + 1 >= @total_questions do %>
-                        Continue to Summary →
-                      <% else %>
-                        Next Question →
-                      <% end %>
-                    </button>
-                  </div>
-                  <p class="text-center text-ui-text-muted text-xs mt-2">
-                    Waiting for all scores to be submitted...
-                  </p>
-                </div>
-              <% end %>
             </div>
           </div>
-        </div>
-        
-    <!-- Side Sheet (Notes) -->
-        <div
-          class={[
-            "absolute right-5 top-6 transition-all duration-300",
-            if(@active_sheet == :notes, do: "z-[20]", else: "z-[5]")
-          ]}
-          style="margin-top: 40px;"
-          phx-click="focus_sheet"
-          phx-value-sheet="notes"
-        >
-          <div class={[
-            "paper-texture-secondary rounded-sheet p-4 overflow-hidden cursor-pointer transition-all duration-300",
-            if(@active_sheet == :notes,
-              do: "w-[320px] shadow-sheet-lifted",
-              else: "w-[280px] shadow-sheet hover:shadow-sheet-lifted"
-            )
-          ]}>
-            <div class="relative z-[1]">
-              <!-- Header -->
-              <div class="flex items-center justify-between mb-3">
-                <div class="font-workshop text-xl font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
-                  Notes
-                  <%= if length(@question_notes) > 0 do %>
-                    <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                      ({length(@question_notes)})
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-
-              <%= if @active_sheet == :notes do %>
-                <!-- Active: Show add form and full notes list -->
-                <form phx-submit="add_note" class="mb-3">
-                  <input
-                    type="text"
-                    name="note"
-                    value={@note_input}
-                    phx-change="update_note_input"
-                    phx-debounce="300"
-                    placeholder="Add a note..."
-                    class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+          
+    <!-- Center: Main Sheet -->
+          <div class="flex-1 flex items-start justify-center p-6 overflow-auto relative">
+            <div
+              class={[
+                "paper-texture rounded-sheet p-5 min-w-[480px] max-w-[640px] w-full relative flex flex-col cursor-pointer transition-all duration-300",
+                if(@active_sheet == :main,
+                  do: "shadow-sheet-lifted z-[10]",
+                  else: "shadow-sheet z-[1]"
+                )
+              ]}
+              style="transform: rotate(-0.2deg)"
+              phx-click="focus_sheet"
+              phx-value-sheet="main"
+            >
+              <div class="relative z-[1] flex-1 flex flex-col">
+                <!-- Grid-based Score Display -->
+                <%= if length(@all_scores) > 0 and not @scores_revealed do %>
+                  <div class="flex-1 overflow-y-auto overflow-x-hidden mb-4">
+                    {render_scoring_grid(assigns)}
+                  </div>
+                <% end %>
+                
+    <!-- Score Results (after reveal) -->
+                <%= if @scores_revealed and not (@is_my_turn and not @my_turn_locked) do %>
+                  <.live_component
+                    module={ScoreResultsComponent}
+                    id="score-results"
+                    all_scores={@all_scores}
+                    current_question={@current_question}
+                    participant={@participant}
+                    participant_was_skipped={@participant_was_skipped}
                   />
-                </form>
+                <% else %>
+                  <!-- Score Input Area -->
+                  {render_score_input(assigns)}
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+    <!-- Right Panel: Notes -->
+          <div class="w-[280px] flex-shrink-0 p-4 overflow-y-auto">
+            <div
+              class={[
+                "paper-texture-secondary rounded-sheet p-4 cursor-pointer transition-all duration-300",
+                if(@active_sheet == :notes,
+                  do: "shadow-sheet-lifted",
+                  else: "shadow-sheet hover:shadow-sheet-lifted"
+                )
+              ]}
+              style="transform: rotate(-0.4deg)"
+              phx-click="focus_sheet"
+              phx-value-sheet="notes"
+            >
+              <div class="relative z-[1]">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="font-workshop text-xl font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
+                    Notes
+                    <%= if length(@question_notes) > 0 do %>
+                      <span class="text-sm font-normal text-ink-blue/50 ml-1">
+                        ({length(@question_notes)})
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
 
-                <div class="space-y-2 max-h-[300px] overflow-y-auto">
-                  <%= if length(@question_notes) > 0 do %>
-                    <%= for note <- @question_notes do %>
-                      <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
-                        <div class="flex justify-between items-start gap-1">
-                          <p class="font-workshop text-ink-blue flex-1">{note.content}</p>
-                          <button
-                            type="button"
-                            phx-click="delete_note"
-                            phx-value-id={note.id}
-                            class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100"
-                          >
-                            ✕
-                          </button>
+                <%= if @active_sheet == :notes do %>
+                  <!-- Active: Show add form and full notes list -->
+                  <form phx-submit="add_note" class="mb-3">
+                    <input
+                      type="text"
+                      name="note"
+                      value={@note_input}
+                      phx-change="update_note_input"
+                      phx-debounce="300"
+                      placeholder="Add a note..."
+                      class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+                    />
+                  </form>
+
+                  <div class="space-y-2 max-h-[300px] overflow-y-auto">
+                    <%= if length(@question_notes) > 0 do %>
+                      <%= for note <- @question_notes do %>
+                        <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
+                          <div class="flex justify-between items-start gap-1">
+                            <p class="font-workshop text-ink-blue flex-1">{note.content}</p>
+                            <button
+                              type="button"
+                              phx-click="delete_note"
+                              phx-value-id={note.id}
+                              class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <p class="text-xs text-ink-blue/40 mt-1 font-brand">— {note.author_name}</p>
                         </div>
-                        <p class="text-xs text-ink-blue/40 mt-1 font-brand">— {note.author_name}</p>
-                      </div>
-                    <% end %>
-                  <% else %>
-                    <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
-                      No notes yet. Type above to add one.
-                    </p>
-                  <% end %>
-                </div>
-              <% else %>
-                <!-- Inactive: Show preview -->
-                <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
-                  <%= if length(@question_notes) > 0 do %>
-                    <%= for note <- Enum.take(@question_notes, 2) do %>
-                      <p class="mb-2 relative pl-4 text-sm">
-                        <span class="absolute left-0 text-ink-blue/60">•</span>
-                        {String.slice(note.content, 0, 30)}{if String.length(note.content) > 30,
-                          do: "..."}
+                      <% end %>
+                    <% else %>
+                      <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+                        No notes yet. Type above to add one.
                       </p>
                     <% end %>
-                    <%= if length(@question_notes) > 2 do %>
-                      <p class="text-xs opacity-60 text-center">
-                        +{length(@question_notes) - 2} more
+                  </div>
+                <% else %>
+                  <!-- Inactive: Show preview -->
+                  <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
+                    <%= if length(@question_notes) > 0 do %>
+                      <%= for note <- Enum.take(@question_notes, 2) do %>
+                        <p class="mb-2 relative pl-4 text-sm">
+                          <span class="absolute left-0 text-ink-blue/60">•</span>
+                          {String.slice(note.content, 0, 30)}{if String.length(note.content) > 30,
+                            do: "..."}
+                        </p>
+                      <% end %>
+                      <%= if length(@question_notes) > 2 do %>
+                        <p class="text-xs opacity-60 text-center">
+                          +{length(@question_notes) - 2} more
+                        </p>
+                      <% end %>
+                    <% else %>
+                      <p class="text-center text-ink-blue/50 italic text-sm">
+                        Click to add notes...
                       </p>
                     <% end %>
-                  <% else %>
-                    <p class="text-center text-ink-blue/50 italic text-sm">
-                      Click to add notes...
-                    </p>
-                  <% end %>
-                </div>
-              <% end %>
+                  </div>
+                <% end %>
+              </div>
             </div>
           </div>
         </div>
