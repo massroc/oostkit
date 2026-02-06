@@ -1,11 +1,12 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   @moduledoc """
-  Renders the introduction phase of a workshop session.
+  Renders the introduction phase as a sheet on the Virtual Wall.
   Includes 4 intro steps: welcome, how it works, balance scale, and safe space.
-  Uses Virtual Wall design with paper-textured sheet.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
+
+  import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   attr :intro_step, :integer, required: true
   attr :participant, :map, required: true
@@ -14,11 +15,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <div class="flex items-center justify-center h-full p-6 overflow-auto">
       <!-- Main Sheet -->
-      <div
-        class="paper-texture rounded-sheet shadow-sheet p-6 max-w-2xl w-full"
-        style="transform: rotate(-0.2deg)"
-      >
-        <div class="relative z-[1]">
+      <.sheet class="shadow-sheet p-6 max-w-2xl w-full">
           <%= case @intro_step do %>
             <% 1 -> %>
               {render_intro_welcome(assigns)}
@@ -47,7 +44,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
               <% end %>
             </div>
             
-    <!-- Step indicators (sheet-strip style) -->
+    <!-- Step indicators -->
             <div class="flex items-center gap-1.5">
               <%= for step <- 1..4 do %>
                 <div class={[
@@ -90,8 +87,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
               <% end %>
             </div>
           </div>
-        </div>
-      </div>
+      </.sheet>
     </div>
     """
   end

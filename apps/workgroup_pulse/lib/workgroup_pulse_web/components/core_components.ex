@@ -292,35 +292,39 @@ defmodule WorkgroupPulseWeb.CoreComponents do
   end
 
   @doc """
-  Renders the sheet strip navigation bar at the bottom.
+  Renders a sheet - the core UI primitive of the Virtual Wall design.
 
   ## Examples
 
-      <.sheet_strip current={0} total={3} />
+      <.sheet class="shadow-sheet p-6 max-w-2xl w-full">
+        <h1>Content</h1>
+      </.sheet>
+
+      <.sheet variant={:secondary} class="shadow-sheet p-4 w-[280px]">
+        <h2>Notes</h2>
+      </.sheet>
   """
-  attr :current, :integer, default: 0, doc: "Current sheet index (0-based)"
-  attr :total, :integer, default: 1, doc: "Total number of sheets"
-  attr :has_notes, :boolean, default: true, doc: "Whether to show notes thumbnail"
+  attr :variant, :atom, values: [:primary, :secondary], default: :primary
+  attr :class, :any, default: nil
+  attr :style, :string, default: "transform: rotate(-0.2deg)"
+  attr :rest, :global
 
-  def sheet_strip(assigns) do
+  slot :inner_block, required: true
+
+  def sheet(assigns) do
     ~H"""
-    <div class="h-strip bg-ui-header-bg border-t border-ui-border flex items-center px-6 gap-strip-gap flex-shrink-0 relative gradient-stripe-strip">
-      <%= for i <- 0..(@total - 1) do %>
-        <div class={[
-          "w-strip-thumb h-strip-thumb rounded-sheet border-2 bg-surface-sheet shadow-sm cursor-pointer transition-all duration-150 hover:-translate-y-0.5 strip-thumb",
-          if(i == @current, do: "border-accent-purple shadow-md active", else: "border-transparent")
-        ]} />
-      <% end %>
-
-      <div
-        :if={@has_notes}
-        class="w-strip-thumb h-strip-thumb rounded-sheet border-2 border-transparent bg-surface-sheet-secondary shadow-sm cursor-pointer transition-all duration-150 hover:-translate-y-0.5 strip-thumb secondary"
-      />
-
-      <span class="text-[11px] text-ui-text-muted ml-2.5 font-medium">
-        <span class="text-accent-gold mr-1.5 text-[8px] align-middle">●</span>
-        Sheet {@current + 1} of {@total}
-      </span>
+    <div
+      class={[
+        if(@variant == :primary, do: "paper-texture", else: "paper-texture-secondary"),
+        "rounded-sheet",
+        @class
+      ]}
+      style={@style}
+      {@rest}
+    >
+      <div class="relative z-[1]">
+        {render_slot(@inner_block)}
+      </div>
     </div>
     """
   end

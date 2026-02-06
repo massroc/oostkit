@@ -1,10 +1,11 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
   @moduledoc """
-  Renders the lobby/waiting room phase of a workshop session.
-  Uses Virtual Wall design with paper-textured sheet.
+  Renders the lobby phase as a sheet on the Virtual Wall.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
+
+  import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   alias Phoenix.LiveView.JS
 
@@ -19,11 +20,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
     ~H"""
     <div class="flex items-center justify-center h-full p-6 overflow-auto">
       <!-- Main Sheet -->
-      <div
-        class="paper-texture rounded-sheet shadow-sheet p-6 max-w-lg w-full"
-        style="transform: rotate(-0.2deg)"
-      >
-        <div class="relative z-[1] text-center">
+      <.sheet class="shadow-sheet p-6 max-w-lg w-full">
+        <div class="text-center">
           <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
             Waiting Room
           </h1>
@@ -98,7 +96,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
             </p>
           <% end %>
         </div>
-      </div>
+      </.sheet>
     </div>
     """
   end

@@ -1,12 +1,13 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   @moduledoc """
-  Renders the scoring phase of a workshop session.
-  Features the Virtual Wall design with full 8-question grid,
-  floating score input overlay, and side-sheet for notes.
+  Renders the scoring phase as sheets on the Virtual Wall.
+  Features the full 8-question grid, floating score input overlay,
+  and side-sheet for notes.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
 
+  import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers
 
   alias WorkgroupPulseWeb.SessionLive.ActionFormComponent
@@ -49,80 +50,72 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     <% else %>
       <div class="flex items-start justify-center h-full w-full relative pt-8">
         <!-- Main Sheet - centered -->
-        <div
+        <.sheet
           class={[
-            "paper-texture rounded-sheet p-5 w-[720px] cursor-pointer transition-all duration-300",
+            "p-5 w-[720px] cursor-pointer transition-all duration-300",
             if(@active_sheet == :main,
               do: "shadow-sheet-lifted z-[10]",
               else: "shadow-sheet z-[1]"
             )
           ]}
-          style="transform: rotate(-0.2deg)"
           phx-click="focus_sheet"
           phx-value-sheet="main"
         >
-          <div class="relative z-[1]">
-            <!-- Full Scoring Grid -->
-            <%= if length(@all_questions) > 0 do %>
-              <div class="overflow-y-auto overflow-x-hidden">
-                {render_full_scoring_grid(assigns)}
-              </div>
-            <% end %>
-          </div>
-        </div>
+          <!-- Full Scoring Grid -->
+          <%= if length(@all_questions) > 0 do %>
+            <div class="overflow-y-auto overflow-x-hidden">
+              {render_full_scoring_grid(assigns)}
+            </div>
+          <% end %>
+        </.sheet>
         
     <!-- Left Panel: Question Info - absolutely positioned -->
         <div class="absolute left-4 top-1/2 -translate-y-1/2 z-[5] w-[220px]">
-          <div
-            class="paper-texture-secondary rounded-sheet p-4 shadow-sheet"
-            style="transform: rotate(0.3deg)"
-          >
-            <div class="relative z-[1]">
-              <h2 class="font-workshop text-xl font-bold text-ink-blue leading-tight">
-                {@current_question.title}
-              </h2>
+          <.sheet variant={:secondary} class="p-4 shadow-sheet" style="transform: rotate(0.3deg)">
+            <h2 class="font-workshop text-xl font-bold text-ink-blue leading-tight">
+              {@current_question.title}
+            </h2>
 
-              <p class="text-ink-blue/70 text-sm mt-2 whitespace-pre-line">
-                {format_description(@current_question.explanation)}
-              </p>
+            <p class="text-ink-blue/70 text-sm mt-2 whitespace-pre-line">
+              {format_description(@current_question.explanation)}
+            </p>
 
-              <%= if length(@current_question.discussion_prompts) > 0 do %>
-                <%= if @show_facilitator_tips do %>
-                  <div class="mt-3 pt-3 border-t border-ink-blue/10">
-                    <div class="flex items-center justify-between mb-2">
-                      <h3 class="text-xs font-semibold text-accent-purple uppercase tracking-wide">
-                        Tips
-                      </h3>
-                      <button
-                        type="button"
-                        phx-click="toggle_facilitator_tips"
-                        class="text-xs text-ui-text-muted hover:text-ui-text transition-colors"
-                      >
-                        Hide
-                      </button>
-                    </div>
-                    <ul class="space-y-1">
-                      <%= for prompt <- @current_question.discussion_prompts do %>
-                        <li class="flex gap-2 text-ink-blue/60 text-sm">
-                          <span class="text-accent-purple">•</span>
-                          <span>{prompt}</span>
-                        </li>
-                      <% end %>
-                    </ul>
+            <%= if length(@current_question.discussion_prompts) > 0 do %>
+              <%= if @show_facilitator_tips do %>
+                <div class="mt-3 pt-3 border-t border-ink-blue/10">
+                  <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-semibold text-accent-purple uppercase tracking-wide">
+                      Tips
+                    </h3>
+                    <button
+                      type="button"
+                      phx-click="toggle_facilitator_tips"
+                      class="text-xs text-ui-text-muted hover:text-ui-text transition-colors"
+                    >
+                      Hide
+                    </button>
                   </div>
-                <% else %>
-                  <button
-                    type="button"
-                    phx-click="toggle_facilitator_tips"
-                    class="mt-3 text-sm text-accent-purple hover:text-highlight transition-colors flex items-center gap-1"
-                  >
-                    <span>More tips</span>
-                    <span class="text-xs">+</span>
-                  </button>
-                <% end %>
+                  <ul class="space-y-1">
+                    <%= for prompt <- @current_question.discussion_prompts do %>
+                      <li class="flex gap-2 text-ink-blue/60 text-sm">
+                        <span class="text-accent-purple">•</span>
+                        <span>{prompt}</span>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% else %>
+                <button
+                  type="button"
+                  phx-click="toggle_facilitator_tips"
+                  class="mt-3 text-sm text-accent-purple hover:text-highlight transition-colors flex items-center gap-1"
+                >
+                  <span>More tips</span>
+                  <span class="text-xs">+</span>
+                </button>
               <% end %>
-            </div>
-          </div>
+            <% end %>
+          </.sheet>
         </div>
         
     <!-- Side Sheet (Notes) - absolutely positioned -->
@@ -134,14 +127,17 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
           phx-click="focus_sheet"
           phx-value-sheet="notes"
         >
-          <div class={[
-            "paper-texture-secondary rounded-sheet p-4 overflow-hidden cursor-pointer transition-all duration-300 min-h-[360px]",
-            if(@active_sheet == :notes,
-              do: "w-[320px] shadow-sheet-lifted",
-              else: "w-[280px] shadow-sheet hover:shadow-sheet-lifted"
-            )
-          ]}>
-            <div class="relative z-[1]">
+          <.sheet
+            variant={:secondary}
+            class={[
+              "p-4 overflow-hidden cursor-pointer transition-all duration-300 min-h-[360px]",
+              if(@active_sheet == :notes,
+                do: "w-[320px] shadow-sheet-lifted",
+                else: "w-[280px] shadow-sheet hover:shadow-sheet-lifted"
+              )
+            ]}
+            style=""
+          >
               <!-- Header -->
               <div class="text-center mb-3">
                 <div class="font-workshop text-xl font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
@@ -270,11 +266,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
                   <% end %>
                 </div>
               <% end %>
-            </div>
-          </div>
+          </.sheet>
         </div>
       </div>
-      
+
     <!-- Score Input Overlay (only for person scoring, when overlay is open) -->
       <%= if @is_my_turn and not @my_turn_locked and @show_score_overlay do %>
         {render_score_overlay(assigns)}
@@ -286,11 +281,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   defp render_mid_transition(assigns) do
     ~H"""
     <div class="flex items-center justify-center h-full p-6">
-      <div
-        class="paper-texture rounded-sheet shadow-sheet p-8 max-w-2xl w-full"
-        style="transform: rotate(-0.2deg)"
-      >
-        <div class="relative z-[1] text-center">
+      <.sheet class="shadow-sheet p-8 max-w-2xl w-full">
+        <div class="text-center">
           <div class="text-6xl mb-4">🔄</div>
 
           <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
@@ -332,7 +324,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
             Continue to Question 5 →
           </button>
         </div>
-      </div>
+      </.sheet>
     </div>
     """
   end
@@ -506,8 +498,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
       <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay">
       </div>
       <!-- Modal -->
-      <div class="relative paper-texture rounded-sheet shadow-sheet-lifted p-6 max-w-md w-full mx-4">
-        <div class="relative z-[1]">
+      <.sheet class="shadow-sheet-lifted p-6 max-w-md w-full mx-4 relative">
           <h3 class="font-workshop text-xl font-bold text-ink-blue text-center mb-2">
             {@current_question.title}
           </h3>
@@ -533,8 +524,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
               Discuss this score, then click "Done" when ready
             </p>
           <% end %>
-        </div>
-      </div>
+      </.sheet>
     </div>
     """
   end

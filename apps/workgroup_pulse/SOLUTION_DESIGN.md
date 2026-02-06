@@ -876,7 +876,7 @@ SessionLive.Show (root LiveView)
 │
 ├── Shared (in CoreComponents)
 │   ├── .app_header           # App header with gradient accent
-│   ├── .sheet_strip          # Question thumbnail navigation bar
+│   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
 │   └── .score_indicator      # Traffic light score display
 │
@@ -1055,8 +1055,10 @@ Shared components in `lib/workgroup_pulse_web/components/core_components.ex`:
 # App header with gradient accent stripe
 <.app_header session_name="Six Criteria Assessment" />
 
-# Sheet strip navigation (question thumbnails)
-<.sheet_strip current={3} total={8} has_notes={true} />
+# Sheet - core UI primitive (paper-textured surface)
+<.sheet class="shadow-sheet p-6 max-w-2xl w-full">
+  <h1>Content</h1>
+</.sheet>
 
 # Facilitator timer (top-right, facilitator-only)
 <.facilitator_timer

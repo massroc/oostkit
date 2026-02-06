@@ -1,11 +1,12 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   @moduledoc """
-  Renders the summary phase of a workshop session.
+  Renders the summary phase as a sheet on the Virtual Wall.
   Shows all scores with analysis and notes in a grid layout.
-  Uses Virtual Wall design with paper-textured sheet.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
+
+  import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers,
     only: [text_color_class: 1, bg_color_class: 1, card_color_class: 1]
@@ -21,11 +22,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
     ~H"""
     <div class="flex items-start justify-center h-full p-6 overflow-auto">
       <!-- Main Sheet -->
-      <div
-        class="paper-texture rounded-sheet shadow-sheet p-6 max-w-4xl w-full"
-        style="transform: rotate(-0.2deg)"
-      >
-        <div class="relative z-[1]">
+      <.sheet class="shadow-sheet p-6 max-w-4xl w-full">
           <!-- Header -->
           <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
             <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
@@ -183,8 +180,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
               </div>
             <% end %>
           </div>
-        </div>
-      </div>
+      </.sheet>
     </div>
     """
   end

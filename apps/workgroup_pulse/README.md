@@ -235,7 +235,7 @@ Set via Fly.io secrets:
 - [x] Facilitator "Next Question" / "Continue to Summary" navigation
 - [x] Facilitator "Back" navigation (after Q1)
 - [x] Mid-workshop transition screen (before question 5)
-- [x] Sheet strip navigation (question thumbnails)
+- [x] Reusable `<.sheet>` component for all phase screens
 
 #### Summary Phase (Complete)
 - [x] Overview of all 8 questions with individual scores per participant

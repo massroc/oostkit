@@ -373,17 +373,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             />
         <% end %>
       </div>
-      <!-- Sheet Strip (only show during scoring and later phases) -->
-      <%= if @session.state in ["scoring", "summary", "completed"] do %>
-        <.sheet_strip
-          current={sheet_index(@session)}
-          total={sheet_total(@session, assigns)}
-          has_notes={@session.state == "scoring"}
-        />
-      <% end %>
       <!-- Floating Action Buttons (scoring phase) -->
       <%= if @session.state == "scoring" and not @show_mid_transition do %>
-        <div class="fixed bottom-[60px] right-5 z-50 flex flex-col items-end gap-2">
+        <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
           <!-- Ready count message (facilitator only, after scores revealed) -->
           <%= if @participant.is_facilitator and @scores_revealed do %>
             <div class="bg-surface-sheet rounded-lg px-3 py-2 shadow-md text-sm font-brand">
@@ -485,22 +477,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       "#{template_name}"
     else
       "Six Criteria Assessment"
-    end
-  end
-
-  defp sheet_index(session) do
-    case session.state do
-      "scoring" -> session.current_question_index
-      "summary" -> 0
-      "completed" -> 0
-      _ -> 0
-    end
-  end
-
-  defp sheet_total(session, assigns) do
-    case session.state do
-      "scoring" -> assigns[:total_questions] || 8
-      _ -> 1
     end
   end
 
