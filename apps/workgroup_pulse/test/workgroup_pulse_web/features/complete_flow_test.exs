@@ -206,8 +206,8 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       fac_conn = Plug.Test.init_test_session(conn, %{browser_token: fac_token})
       {:ok, _view, html} = live(fac_conn, ~p"/session/#{session.code}")
 
-      # Should be on Q1 scoring
-      assert html =~ "Question 1"
+      # Should be on scoring with Test Question visible
+      assert html =~ "Test Question"
 
       # Back button should not be present on Q1
       refute html =~ "go_back"

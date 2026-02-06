@@ -288,8 +288,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     ~H"""
     <div id="session-analytics" phx-hook="PostHogTracker" class="flex flex-col h-full">
       {render_facilitator_timer(assigns)}
-      <!-- App Header -->
-      <.app_header session_name={session_display_name(@session)} />
+      <!-- App Header (no session name during workshop phases) -->
+      <.app_header session_name={
+        if @session.state in ["scoring", "summary", "actions", "completed"],
+          do: nil,
+          else: session_display_name(@session)
+      } />
       <!-- Main Content Area -->
       <div class="flex-1 overflow-hidden relative">
         <%= case @session.state do %>
@@ -377,38 +381,105 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
         />
       <% end %>
       <!-- Floating Action Buttons (scoring phase) -->
-      <%= if @session.state == "scoring" and @is_my_turn and not @my_turn_locked and not @show_mid_transition do %>
-        <div class="fixed bottom-[60px] right-5 flex gap-2 z-50">
-          <button
-            phx-click="submit_score"
-            disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
-            class={[
-              "btn-workshop",
-              if(@selected_value != nil and (not @has_submitted or @selected_value != @my_score),
-                do: "btn-workshop-primary",
-                else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
-              )
-            ]}
-          >
-            <%= if @has_submitted do %>
-              Change Score
-            <% else %>
-              Share Score
+      <%= if @session.state == "scoring" and not @show_mid_transition do %>
+        <div class="fixed bottom-[60px] right-5 z-50 flex flex-col items-end gap-2">
+          <!-- Ready count message (facilitator only, after scores revealed) -->
+          <%= if @participant.is_facilitator and @scores_revealed do %>
+            <div class="bg-surface-sheet rounded-lg px-3 py-2 shadow-md text-sm font-brand">
+              <%= if @all_ready do %>
+                <span class="text-traffic-green">✓</span>
+                <span class="text-ink-blue/70">All participants ready</span>
+              <% else %>
+                <span class="text-ink-blue/70">
+                  {@ready_count}/{@eligible_participant_count} ready
+                </span>
+              <% end %>
+            </div>
+          <% end %>
+          
+    <!-- Button row -->
+          <div class="flex gap-2">
+            <!-- Back button (facilitator only, after Q1) -->
+            <%= if @participant.is_facilitator and @session.current_question_index > 0 do %>
+              <button
+                phx-click="go_back"
+                class="btn-workshop btn-workshop-secondary"
+              >
+                ← Back
+              </button>
             <% end %>
-          </button>
-          <button
-            phx-click="complete_turn"
-            disabled={not @has_submitted}
-            class={[
-              "btn-workshop",
-              if(@has_submitted,
-                do: "btn-workshop-primary",
-                else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
-              )
-            ]}
-          >
-            Done →
-          </button>
+            
+    <!-- Score buttons (only during my turn) -->
+            <%= if @is_my_turn and not @my_turn_locked do %>
+              <button
+                phx-click="submit_score"
+                disabled={@selected_value == nil or (@has_submitted and @selected_value == @my_score)}
+                class={[
+                  "btn-workshop",
+                  if(@selected_value != nil and (not @has_submitted or @selected_value != @my_score),
+                    do: "btn-workshop-primary",
+                    else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+                  )
+                ]}
+              >
+                <%= if @has_submitted do %>
+                  Change Score
+                <% else %>
+                  Share Score
+                <% end %>
+              </button>
+              <button
+                phx-click="complete_turn"
+                disabled={not @has_submitted}
+                class={[
+                  "btn-workshop",
+                  if(@has_submitted,
+                    do: "btn-workshop-primary",
+                    else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+                  )
+                ]}
+              >
+                Done →
+              </button>
+            <% end %>
+            
+    <!-- Next/Continue button (facilitator only, after scores revealed) -->
+            <%= if @participant.is_facilitator and @scores_revealed do %>
+              <button
+                phx-click="next_question"
+                disabled={not @all_ready}
+                class={[
+                  "btn-workshop",
+                  if(@all_ready,
+                    do: "btn-workshop-primary",
+                    else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+                  )
+                ]}
+              >
+                <%= if @session.current_question_index + 1 >= @total_questions do %>
+                  Continue to Summary →
+                <% else %>
+                  Next Question →
+                <% end %>
+              </button>
+            <% end %>
+            
+    <!-- Ready button (non-facilitator, after scores revealed) -->
+            <%= if not @participant.is_facilitator and @scores_revealed and not @participant_was_skipped do %>
+              <%= if @participant.is_ready do %>
+                <div class="btn-workshop btn-workshop-secondary opacity-70 cursor-default">
+                  <span class="text-traffic-green">✓</span> Ready
+                </div>
+              <% else %>
+                <button
+                  phx-click="mark_ready"
+                  class="btn-workshop btn-workshop-primary"
+                >
+                  I'm Ready
+                </button>
+              <% end %>
+            <% end %>
+          </div>
         </div>
       <% end %>
     </div>
