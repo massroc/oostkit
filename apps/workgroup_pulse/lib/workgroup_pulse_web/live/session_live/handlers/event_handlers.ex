@@ -197,10 +197,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   @doc """
-  Handles toggle_notes event.
+  Handles focus_sheet event - brings specified sheet to front.
+  Valid sheets: :main, :notes
   """
-  def handle_toggle_notes(socket) do
-    {:noreply, assign(socket, show_notes: !socket.assigns.show_notes)}
+  def handle_focus_sheet(socket, sheet) when sheet in [:main, :notes] do
+    {:noreply, assign(socket, active_sheet: sheet)}
   end
 
   # Note events
