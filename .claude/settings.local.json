@@ -83,7 +83,8 @@
       "Bash(chmod:*)",
       "Bash(/home/rossm/.fly/bin/flyctl machine update:*)",
       "Bash(tee:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(git ls-tree:*)"
     ]
   }
 }
