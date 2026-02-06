@@ -53,17 +53,13 @@ Use these terms consistently across all apps and documentation:
 | **Current Sheet**  | The active sheet in focus, full size, where work happens |
 | **Previous Sheet** | Visible alongside current, smaller with drop shadow, provides context |
 | **Side-sheet**     | Drawer/toggle panel for auxiliary content (notes, questions, actions) |
-| **Sheet Strip**    | Navigation filmstrip showing all sheets in miniature |
+| **Sheet Component** | Reusable `<.sheet>` component that renders paper-textured surfaces |
 
 ### Visual Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  VIRTUAL WALL                                                       │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │ Sheet Strip (thumbnails)                                     │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-│                                                                     │
 │   ┌─────────────┐   ┌───────────────────────────┐   ┌──────────┐   │
 │   │  Previous   │   │                           │   │  Side-   │   │
 │   │   Sheet     │   │      Current Sheet        │   │  sheet   │   │
@@ -94,7 +90,6 @@ All sheets derive from this single ratio:
 |----------------|-----------|------------------|---------|----------|---------|
 | Current Sheet  | 580px H, 720px W (fixed) | `shadow-sheet`   | 2       | -0.2deg  | Active work area, always centred |
 | Side-sheet     | 480px H   | `shadow-sheet`   | 1       | +1.2deg  | Notes, behind main |
-| Sheet Strip    | 34px H    | Subtle           | 10      | —        | Navigation |
 
 Sheets lift on hover with transition to `shadow-sheet-lifted`.
 
@@ -114,8 +109,6 @@ Sheets lift on hover with transition to `shadow-sheet-lifted`.
 │   └─────────────────────────────────┘  └───────────────────┘        │
 │                                                                     │
 │                                        [Floating buttons, z: 20]    │
-├─────────────────────────────────────────────────────────────────────┤
-│  Sheet Strip (44px, z-index: 10)                                    │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -153,10 +146,7 @@ Tertiary colors (purple, magenta, gold) appear **only in UI chrome**, never as s
 | Location | Color | Implementation |
 |----------|-------|----------------|
 | Header bottom-left | Magenta → Purple | 200px gradient stripe, 3px tall |
-| Sheet strip top-right | Gold → Magenta | 150px gradient stripe, 3px tall |
 | Submit button | Purple → Magenta | Background gradient |
-| Active strip thumb | Gold | 6px dot at bottom |
-| Secondary strip thumbs | Magenta | 4px dot, 60% opacity |
 | App icon | Purple | With purple shadow glow |
 
 ### Color Application Guidelines
@@ -237,7 +227,7 @@ Use multiples of 4px (or 0.25rem if using rem units):
 
 3. **Side-sheet is a drawer** - ~30% width, slides in from the right. Has its own internal padding.
 
-4. **Sheet Strip is compact** - Thumbnails are small (80-120px wide), with `sm` gaps between them.
+4. **All phase screens use the `<.sheet>` component** - This formalizes the paper-textured surface as the core UI primitive.
 
 ---
 
@@ -365,7 +355,6 @@ Design for everyone. These are minimum requirements.
 | Element         | Mobile                        | Desktop                      |
 |-----------------|-------------------------------|------------------------------|
 | Virtual Wall    | Single sheet view, no Previous | Full layout with Previous    |
-| Sheet Strip     | Hidden or bottom drawer       | Always visible               |
 | Side-sheet      | Full-screen overlay           | Slide-in drawer              |
 | Scoring grid    | Scroll horizontal or stack    | Full grid visible            |
 
@@ -472,13 +461,6 @@ The design system is implemented as a shared Tailwind preset that all apps impor
 ```html
 <!-- Virtual Wall container -->
 <div class="bg-surface-wall min-h-screen p-section-gap">
-
-  <!-- Sheet Strip -->
-  <div class="flex gap-strip-gap z-sheet-strip">
-    <div class="w-24 h-16 bg-surface-sheet rounded-sheet shadow-sheet"></div>
-    <div class="w-24 h-16 bg-surface-sheet rounded-sheet shadow-sheet border-2 border-accent-purple"></div>
-    <div class="w-24 h-16 bg-surface-sheet rounded-sheet shadow-sheet"></div>
-  </div>
 
   <!-- Main area -->
   <div class="flex gap-section-gap mt-section-gap">

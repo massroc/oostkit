@@ -1,11 +1,12 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   @moduledoc """
-  Renders the introduction phase of a workshop session.
+  Renders the introduction phase as a sheet on the Virtual Wall.
   Includes 4 intro steps: welcome, how it works, balance scale, and safe space.
-  Uses Virtual Wall design with paper-textured sheet.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
+
+  import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   attr :intro_step, :integer, required: true
   attr :participant, :map, required: true
@@ -14,84 +15,79 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <div class="flex items-center justify-center h-full p-6 overflow-auto">
       <!-- Main Sheet -->
-      <div
-        class="paper-texture rounded-sheet shadow-sheet p-6 max-w-2xl w-full"
-        style="transform: rotate(-0.2deg)"
-      >
-        <div class="relative z-[1]">
-          <%= case @intro_step do %>
-            <% 1 -> %>
-              {render_intro_welcome(assigns)}
-            <% 2 -> %>
-              {render_intro_how_it_works(assigns)}
-            <% 3 -> %>
-              {render_intro_balance_scale(assigns)}
-            <% 4 -> %>
-              {render_intro_safe_space(assigns)}
-            <% _ -> %>
-              {render_intro_welcome(assigns)}
-          <% end %>
-          
+      <.sheet class="shadow-sheet p-6 max-w-2xl w-full">
+        <%= case @intro_step do %>
+          <% 1 -> %>
+            {render_intro_welcome(assigns)}
+          <% 2 -> %>
+            {render_intro_how_it_works(assigns)}
+          <% 3 -> %>
+            {render_intro_balance_scale(assigns)}
+          <% 4 -> %>
+            {render_intro_safe_space(assigns)}
+          <% _ -> %>
+            {render_intro_welcome(assigns)}
+        <% end %>
+        
     <!-- Navigation -->
-          <div class="flex items-center justify-between mt-8 pt-4 border-t border-ink-blue/10">
-            <div>
-              <%= if @intro_step > 1 do %>
-                <button
-                  phx-click="intro_prev"
-                  class="text-ink-blue/60 hover:text-ink-blue transition-colors font-brand text-sm"
-                >
-                  ← Back
-                </button>
-              <% else %>
-                <div></div>
-              <% end %>
-            </div>
-            
-    <!-- Step indicators (sheet-strip style) -->
-            <div class="flex items-center gap-1.5">
-              <%= for step <- 1..4 do %>
-                <div class={[
-                  "w-6 h-5 rounded-sm border transition-all",
-                  if(step == @intro_step,
-                    do: "border-accent-purple bg-surface-sheet shadow-sm",
-                    else: "border-ink-blue/10 bg-surface-sheet-secondary"
-                  )
-                ]}>
-                  <%= if step == @intro_step do %>
-                    <div class="w-full h-full flex items-end justify-center pb-0.5">
-                      <div class="w-1.5 h-1.5 rounded-full bg-accent-gold"></div>
-                    </div>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
+        <div class="flex items-center justify-between mt-8 pt-4 border-t border-ink-blue/10">
+          <div>
+            <%= if @intro_step > 1 do %>
+              <button
+                phx-click="intro_prev"
+                class="text-ink-blue/60 hover:text-ink-blue transition-colors font-brand text-sm"
+              >
+                ← Back
+              </button>
+            <% else %>
+              <div></div>
+            <% end %>
+          </div>
+          
+    <!-- Step indicators -->
+          <div class="flex items-center gap-1.5">
+            <%= for step <- 1..4 do %>
+              <div class={[
+                "w-6 h-5 rounded-sm border transition-all",
+                if(step == @intro_step,
+                  do: "border-accent-purple bg-surface-sheet shadow-sm",
+                  else: "border-ink-blue/10 bg-surface-sheet-secondary"
+                )
+              ]}>
+                <%= if step == @intro_step do %>
+                  <div class="w-full h-full flex items-end justify-center pb-0.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-accent-gold"></div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
 
-            <div>
-              <%= if @intro_step < 4 do %>
-                <div class="flex items-center gap-4">
-                  <%= if @intro_step == 1 do %>
-                    <button
-                      phx-click="skip_intro"
-                      class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
-                    >
-                      Skip intro
-                    </button>
-                  <% end %>
-
+          <div>
+            <%= if @intro_step < 4 do %>
+              <div class="flex items-center gap-4">
+                <%= if @intro_step == 1 do %>
                   <button
-                    phx-click="intro_next"
-                    class="btn-workshop btn-workshop-primary"
+                    phx-click="skip_intro"
+                    class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
                   >
-                    Next →
+                    Skip intro
                   </button>
-                </div>
-              <% else %>
-                <div></div>
-              <% end %>
-            </div>
+                <% end %>
+
+                <button
+                  phx-click="intro_next"
+                  class="btn-workshop btn-workshop-primary"
+                >
+                  Next →
+                </button>
+              </div>
+            <% else %>
+              <div></div>
+            <% end %>
           </div>
         </div>
-      </div>
+      </.sheet>
     </div>
     """
   end

@@ -248,68 +248,6 @@ input[type="range"]::-moz-range-thumb {
   background: linear-gradient(90deg, theme('colors.accent.magenta'), theme('colors.accent.purple') 60%, transparent);
 }
 
-.gradient-stripe-strip {
-  position: relative;
-}
-
-.gradient-stripe-strip::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 150px;
-  height: 3px;
-  background: linear-gradient(270deg, theme('colors.accent.gold'), theme('colors.accent.magenta') 70%, transparent);
-}
-
-/* ─── Sheet Thumbnails ─── */
-.strip-thumb {
-  position: relative;
-  overflow: hidden;
-}
-
-.strip-thumb::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  background: repeating-linear-gradient(
-    0deg,
-    theme('colors.ink.blue-light'),
-    theme('colors.ink.blue-light') 2px,
-    transparent 2px,
-    transparent 4px
-  );
-  border-radius: 1px;
-  opacity: 0.5;
-}
-
-.strip-thumb.active::before {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 6px;
-  height: 6px;
-  background: theme('colors.accent.gold');
-  border-radius: 50%;
-  z-index: 2;
-}
-
-.strip-thumb.secondary::before {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background: theme('colors.accent.magenta');
-  border-radius: 50%;
-  z-index: 2;
-  opacity: 0.6;
-}
-
 /* ─── Scoring Grid ─── */
 .scoring-grid {
   width: auto;

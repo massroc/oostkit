@@ -28,7 +28,7 @@ module.exports = {
           'text': '#333333',         // Primary UI text
           'text-muted': '#888888',   // Secondary UI text
           'border': '#E0E0E0',       // Light borders
-          'header-bg': '#FAFAFA',    // Header and strip background
+          'header-bg': '#FAFAFA',    // Header background
         },
 
         // ===================
@@ -95,7 +95,6 @@ module.exports = {
         'sheet-padding': '1.5rem',   // 24px - internal sheet padding
         'sheet-padding-sm': '1.25rem', // 20px - compact sheet padding
         'section-gap': '2rem',       // 32px - between major sections
-        'strip-gap': '0.375rem',     // 6px - between sheet thumbnails
       },
 
       // ===================
@@ -168,7 +167,6 @@ module.exports = {
         'wall': '0',
         'sheet-secondary': '1',      // Behind main sheet
         'sheet-current': '2',        // Main sheet (in front)
-        'sheet-strip': '10',
         'floating': '20',            // Floating buttons
         'modal': '50',
       },
@@ -184,11 +182,6 @@ module.exports = {
       // Chrome heights
       height: {
         'header': '52px',
-        'strip': '44px',
-        'strip-thumb': '34px',
-      },
-      width: {
-        'strip-thumb': '28px',       // 34px × 0.819
       },
     },
   },
