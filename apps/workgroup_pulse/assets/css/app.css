@@ -312,7 +312,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* ─── Scoring Grid ─── */
 .scoring-grid {
-  width: 100%;
+  width: auto;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -341,15 +341,19 @@ input[type="range"]::-moz-range-thumb {
 
 .scoring-grid th.criterion-col {
   width: 160px;
+  max-width: 160px;
   text-align: left;
   padding-left: 0;
-  padding-right: 10px;
+  padding-right: 6px;
 }
 
 .scoring-grid th.participant-col {
-  width: auto;
-  min-width: 52px;
-  padding: 8px 3px;
+  width: 72px;
+  max-width: 72px;
+  padding: 8px 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Active row/column highlighting */
@@ -399,20 +403,22 @@ th.active-col-header {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 6px 0 2px 0;
-  text-align: left;
+  text-align: center;
   border-bottom: none;
 }
 
 /* Criterion cell styling */
-.criterion {
+.scoring-grid .criterion {
   font-family: 'Caveat', cursive;
   color: theme('colors.ink.blue');
   text-align: left;
   padding-left: 0;
   line-height: 1.2;
+  width: 160px;
+  max-width: 160px;
 }
 
-.criterion .parent {
+.scoring-grid .criterion .parent {
   font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
@@ -422,11 +428,16 @@ th.active-col-header {
   margin-bottom: 1px;
 }
 
-.criterion .name {
+.scoring-grid .criterion .name {
   font-size: 17px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.01em;
+}
+
+/* Indent sub-criteria (a/b) that have a parent criterion label */
+.scoring-grid .criterion .parent + .name {
+  padding-left: 12px;
 }
 
 /* Score cell styling */
@@ -435,7 +446,9 @@ th.active-col-header {
   font-size: 24px;
   font-weight: 700;
   color: theme('colors.ink.blue');
-  padding: 6px 3px;
+  padding: 6px 1px;
+  width: 72px;
+  max-width: 72px;
 }
 
 .score-cell.empty {

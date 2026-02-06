@@ -53,7 +53,7 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
 
       # Start workshop
       view |> element("button", "Start Workshop") |> render_click()
-      assert render(view) =~ "Welcome to the Six Criteria Workshop"
+      assert render(view) =~ "Welcome to the Workshop"
 
       # Navigate through intro steps
       view |> element("button[phx-click='intro_next']") |> render_click()
@@ -85,7 +85,7 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
 
       # Start workshop and go to intro
       view |> element("button", "Start Workshop") |> render_click()
-      assert render(view) =~ "Welcome to the Six Criteria Workshop"
+      assert render(view) =~ "Welcome to the Workshop"
 
       # Go to step 2
       view |> element("button[phx-click='intro_next']") |> render_click()
@@ -93,7 +93,7 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
 
       # Go back
       view |> element("button[phx-click='intro_prev']") |> render_click()
-      assert render(view) =~ "Welcome to the Six Criteria Workshop"
+      assert render(view) =~ "Welcome to the Workshop"
     end
 
     test "facilitator can skip intro", %{conn: conn, template: template} do
@@ -111,12 +111,12 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
 
       # Start workshop
       view |> element("button", "Start Workshop") |> render_click()
-      assert render(view) =~ "Welcome to the Six Criteria Workshop"
+      assert render(view) =~ "Welcome to the Workshop"
 
       # Skip intro goes to step 4
       view |> element("button[phx-click='skip_intro']") |> render_click()
-      # Should be on last step with "Begin Scoring" button
-      assert render(view) =~ "Begin Scoring"
+      # Should be on last step with "Ready" button
+      assert render(view) =~ "Ready"
     end
 
     test "participant joins and sees lobby correctly", %{conn: conn, template: template} do
@@ -192,7 +192,8 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       # Should see scoring UI with Test Question
       assert render(view) =~ "Test Question"
 
-      # Select a score (auto-submits and closes overlay)
+      # Click "Click to score" to open overlay, then select a score
+      view |> element("[phx-click='edit_my_score']") |> render_click()
       view |> element("button[phx-value-score='0']") |> render_click()
       # The score should now appear in the grid and Done button should be visible
       html = render(view)

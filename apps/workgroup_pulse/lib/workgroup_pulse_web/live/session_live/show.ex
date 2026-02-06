@@ -189,6 +189,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
+  def handle_event("close_score_overlay", _params, socket) do
+    EventHandlers.handle_close_score_overlay(socket)
+  end
+
+  @impl true
   def handle_event("submit_score", _params, socket) do
     EventHandlers.handle_submit_score(socket)
   end

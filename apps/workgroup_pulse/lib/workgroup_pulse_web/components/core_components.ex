@@ -779,7 +779,7 @@ defmodule WorkgroupPulseWeb.CoreComponents do
             <circle cx="16" cy="18" r="1.5" fill="white" stroke="none" />
           </svg>
         </div>
-        <span class="font-bold text-[15px] text-ui-text tracking-tight font-brand">
+        <span class="font-bold text-lg text-ui-text tracking-tight font-brand">
           Workgroup Pulse
         </span>
       </div>
