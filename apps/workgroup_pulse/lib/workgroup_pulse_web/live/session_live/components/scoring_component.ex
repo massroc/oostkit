@@ -83,7 +83,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
           phx-click="continue_past_transition"
           class="mt-8 btn-workshop btn-workshop-primary text-lg px-8 py-3"
         >
-          Continue to Question 5 →
+          Continue to Question {@session.current_question_index + 1} →
         </button>
       </div>
     </.sheet>

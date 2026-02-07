@@ -93,7 +93,7 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 - `render_full_scoring_grid/1` — Builds the complete 8-question x N-participant grid
 - `render_question_row/2` — Renders a single question row with per-participant score cells
 - `render_score_cell_value/3` — Pattern-matched function for cell display states (future `—`, past `?`, current `...`, scored value)
-- `render_mid_transition/1` — Scale change explanation screen (shown before Q5)
+- `render_mid_transition/1` — Scale change explanation screen (shown when scale type changes between questions; button text dynamically shows the next question number)
 
 ### ScoreOverlayComponent
 
