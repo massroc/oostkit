@@ -11,6 +11,14 @@ defmodule Portal.MixProject do
       aliases: aliases(),
       deps: deps(),
       releases: releases(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.json": :test,
+        "coveralls.html": :test
+      ],
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
         plt_add_apps: [:mix, :ex_unit]
@@ -70,6 +78,7 @@ defmodule Portal.MixProject do
       {:bcrypt_elixir, "~> 3.1"},
 
       # Testing
+      {:excoveralls, "~> 0.18", only: :test},
       {:floki, "~> 0.38", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
 
