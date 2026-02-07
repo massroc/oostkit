@@ -936,6 +936,7 @@ end
 Note: The "actions" state still exists in the schema for backwards compatibility
 but the default UI flow now goes directly from "summary" to "completed".
 The "completed" state serves as the wrap-up page where actions are created.
+The wrap-up page displays all captured action items inline (beneath strengths/concerns).
 
 ### Navigation Rules
 

@@ -18,6 +18,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   attr :scores_summary, :list, required: true
   attr :strengths, :list, required: true
   attr :concerns, :list, required: true
+  attr :all_actions, :list, required: true
   attr :action_count, :integer, required: true
   attr :show_export_modal, :boolean, required: true
   attr :export_content, :string, required: true
@@ -125,6 +126,28 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
               </ul>
             </div>
           <% end %>
+        </div>
+      <% end %>
+
+      <%!-- Actions --%>
+      <%= if length(@all_actions) > 0 do %>
+        <div class="bg-accent-purple/5 border border-accent-purple/30 rounded-lg p-3 mb-5">
+          <h3 class="text-sm font-semibold text-accent-purple mb-2 font-brand">
+            Action Items ({length(@all_actions)})
+          </h3>
+          <ul class="space-y-1.5">
+            <%= for action <- @all_actions do %>
+              <li class="flex items-start gap-2 text-sm text-ink-blue/70">
+                <span class="text-accent-purple text-xs mt-0.5">→</span>
+                <span class="font-workshop flex-1">{action.description}</span>
+                <%= if action.owner_name do %>
+                  <span class="text-[10px] text-ink-blue/40 font-brand whitespace-nowrap">
+                    {action.owner_name}
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
         </div>
       <% end %>
 
