@@ -9,7 +9,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers,
-    only: [text_color_class: 1, bg_color_class: 1]
+    only: [text_color_class: 1]
 
   attr :session, :map, required: true
   attr :participant, :map, required: true
@@ -159,7 +159,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
         <% score_data = Map.get(@scores_by_participant, p.id) %>
         <td class={[
           "score-cell",
-          score_data && bg_color_class(score_data.color)
+          score_data && cell_color_class(score_data.color)
         ]}>
           <%= if score_data do %>
             <span class={["font-bold font-workshop", text_color_class(score_data.color)]}>
@@ -176,6 +176,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
     </tr>
     """
   end
+
+  # Inset colour for table cells — ring-inset uses box-shadow so it doesn't
+  # expand the cell or clip neighbouring borders.
+  defp cell_color_class(:green), do: "bg-green-100 ring-2 ring-inset ring-traffic-green"
+  defp cell_color_class(:amber), do: "bg-amber-100 ring-2 ring-inset ring-amber-500"
+  defp cell_color_class(:red), do: "bg-red-100 ring-2 ring-inset ring-traffic-red"
+  defp cell_color_class(_), do: "bg-gray-100 ring-2 ring-inset ring-gray-300"
 
   defp format_score_value("balance", value) when value > 0, do: "+#{value}"
   defp format_score_value(_, value), do: "#{value}"

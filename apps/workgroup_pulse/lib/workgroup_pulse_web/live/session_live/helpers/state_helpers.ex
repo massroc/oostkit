@@ -56,5 +56,4 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers do
         socket
     end
   end
-
 end
