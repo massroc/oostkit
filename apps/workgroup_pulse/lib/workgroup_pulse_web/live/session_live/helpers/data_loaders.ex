@@ -4,7 +4,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
   Handles loading scoring data, summary data, notes, and actions.
   """
 
-  import Phoenix.Component, only: [assign: 2]
+  import Phoenix.Component, only: [assign: 2, assign: 3]
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers
 
   alias WorkgroupPulse.Notes
@@ -47,8 +47,17 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(current_turn_has_score: turn_state.current_turn_has_score)
     |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_criterion_popup: nil)
-    |> assign(active_slide_index: 4)
-    |> assign(show_score_overlay: false)
+    |> assign(
+      show_score_overlay:
+        turn_state.is_my_turn and not turn_state.my_turn_locked and my_score == nil
+    )
+    |> then(fn socket ->
+      if turn_state.is_my_turn and my_score == nil do
+        assign(socket, :carousel_index, 4)
+      else
+        socket
+      end
+    end)
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
     |> load_all_questions_scores(session, template)
@@ -111,7 +120,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(active_participant_count: 0)
     |> assign(question_notes: [])
     |> assign(show_criterion_popup: nil)
-    |> assign(active_slide_index: 4)
     |> assign(ready_count: 0)
     |> assign(eligible_participant_count: 0)
     |> assign(all_ready: false)

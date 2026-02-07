@@ -73,11 +73,10 @@ SessionLive.Show (root LiveView)
 All phases use the **Sheet Carousel** layout. See [docs/ux-implementation.md](docs/ux-implementation.md) for the full carousel specification (CSS classes, JS hook, slide index map).
 
 **Layout orchestration** lives in `show.ex` via `render_phase_carousel/1`:
-- **Single-slide phases** (lobby, summary, completed) — carousel container with one `.active` slide, no JS hook
-- **Intro** — delegates to `IntroComponent.render` (4 slides with `SheetCarousel` hook)
-- **Scoring** — 6 slides: 4 intro context (480px, read-only) + main scoring grid + notes/actions sheet, uses `SheetCarousel` hook with `data-index` from `@active_slide_index` (default 4), click-only mode (`data-click-only` + `sheet-carousel-locked`)
+- **Lobby** — standalone single-slide wrapper with one `.active` slide, no JS hook
+- **All other phases** — unified `workshop-carousel` with `SheetCarousel` hook, `data-index` from `@carousel_index`, click-only mode (`data-click-only` + `sheet-carousel-locked`). Slides 0-3 (intro) are always rendered; slides 4-7 (scoring, notes, summary, wrap-up) are conditionally rendered based on session state.
 
-The `SheetCarousel` JS hook sends `carousel_navigate` events with the carousel's `id`, allowing the server to dispatch to the correct handler (intro vs scoring).
+The `SheetCarousel` JS hook sends `carousel_navigate` events with `carousel: "workshop-carousel"`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide.
 
 ### ScoringComponent
 
@@ -253,10 +252,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(participants: participants)        # Ordered by join order
 
      # UI state
-     |> assign(intro_step: 1)
+     |> assign(carousel_index: initial_carousel_index(session.state))  # Unified carousel index
      |> assign(show_mid_transition: false)
      |> assign(show_facilitator_tips: false)
-     |> assign(active_slide_index: 4)              # Unified carousel index (4=scoring, 5=notes)
      |> assign(note_input: "")
      |> assign(show_export_modal: false)
      |> assign(export_content: "all")

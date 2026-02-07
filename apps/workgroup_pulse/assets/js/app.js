@@ -4,6 +4,7 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import EmblaCarousel from "../vendor/embla-carousel.esm"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
@@ -243,92 +244,80 @@ Hooks.PostHogTracker = {
   }
 }
 
-// Sheet carousel hook for scroll-snap navigation (intro) and click-only (scoring)
+// Sheet carousel powered by Embla Carousel
 Hooks.SheetCarousel = {
   mounted() {
-    this.slides = this.el.querySelectorAll('.carousel-slide')
-    this.index = parseInt(this.el.dataset.index) || 0
-    this.clickOnly = this.el.hasAttribute('data-click-only')
+    this._initEmbla()
 
-    this.updateActive()
-    this.scrollToIndex(this.index, false)
-
-    // Only register scroll listener for non-click-only carousels
-    if (!this.clickOnly) {
-      this.scrollTimer = null
-      this.el.addEventListener('scroll', () => {
-        clearTimeout(this.scrollTimer)
-        this.scrollTimer = setTimeout(() => this.onScrollEnd(), 100)
-      })
-    }
-
-    // Click non-active slide to navigate
-    this.slides.forEach((slide, i) => {
-      slide.addEventListener('click', () => {
-        if (i !== this.index) {
-          this.pushEvent('carousel_navigate', { index: i, carousel: this.el.id })
-        }
-      })
+    // Event delegation for click-to-navigate (survives reInit)
+    this.el.addEventListener('click', (e) => {
+      if (!this.embla) return
+      const slide = e.target.closest('.carousel-slide')
+      if (!slide) return
+      const i = this.embla.slideNodes().indexOf(slide)
+      if (i !== -1 && i !== this.embla.selectedScrollSnap()) {
+        this.embla.scrollTo(i)
+      }
     })
   },
 
   updated() {
     const newIndex = parseInt(this.el.dataset.index) || 0
-    if (newIndex !== this.index) {
-      this.index = newIndex
-      this.updateActive()
-      this.scrollToIndex(this.index, true)
+    const container = this.el.querySelector('.embla__container')
+    const domSlideCount = container ? container.children.length : 0
+    const emblaSlideCount = this.embla ? this.embla.slideNodes().length : 0
+
+    if (!this.embla || domSlideCount !== emblaSlideCount) {
+      // Slides added/removed by LiveView — full reinit
+      if (this.embla) this.embla.destroy()
+      this._initEmbla(newIndex)
+    } else if (newIndex !== this.embla.selectedScrollSnap()) {
+      this.embla.scrollTo(newIndex)
     }
   },
 
   destroyed() {
-    clearTimeout(this.scrollTimer)
-  },
-
-  scrollToIndex(index, smooth) {
-    const slide = this.slides[index]
-    if (!slide) return
-
-    if (this.clickOnly) {
-      // For overflow-x:hidden containers, use scrollTo with computed offset
-      const containerRect = this.el.getBoundingClientRect()
-      const slideRect = slide.getBoundingClientRect()
-      const offset = slideRect.left - containerRect.left + this.el.scrollLeft
-        - (containerRect.width / 2) + (slideRect.width / 2)
-      this.el.scrollTo({
-        left: offset,
-        behavior: smooth ? 'smooth' : 'instant'
-      })
-    } else {
-      slide.scrollIntoView({
-        behavior: smooth ? 'smooth' : 'instant',
-        inline: 'center',
-        block: 'nearest'
-      })
+    if (this.embla) {
+      this.embla.destroy()
+      this.embla = null
     }
   },
 
-  onScrollEnd() {
-    const rect = this.el.getBoundingClientRect()
-    const center = rect.left + rect.width / 2
-    let closest = 0
-    let minDist = Infinity
-    this.slides.forEach((slide, i) => {
-      const sr = slide.getBoundingClientRect()
-      const sc = sr.left + sr.width / 2
-      const dist = Math.abs(center - sc)
-      if (dist < minDist) { minDist = dist; closest = i }
+  _initEmbla(startIndex) {
+    const viewport = this.el.querySelector('.embla__viewport')
+    if (!viewport) return
+
+    const index = startIndex ?? (parseInt(this.el.dataset.index) || 0)
+
+    this.embla = EmblaCarousel(viewport, {
+      align: 'center',
+      containScroll: false,
+      loop: false,
+      startIndex: index,
+      watchDrag: false,
+      duration: 20,
     })
-    if (closest !== this.index) {
-      this.index = closest
-      this.updateActive()
-      this.pushEvent('carousel_navigate', { index: closest, carousel: this.el.id })
-    }
+
+    this.embla.on('select', () => {
+      this._updateActive()
+      const selected = this.embla.selectedScrollSnap()
+      const serverIndex = parseInt(this.el.dataset.index) || 0
+      if (selected !== serverIndex) {
+        this.pushEvent('carousel_navigate', {
+          index: selected,
+          carousel: this.el.id
+        })
+      }
+    })
+
+    this._updateActive()
   },
 
-  updateActive() {
-    this.slides.forEach((slide, i) => {
-      slide.classList.toggle('active', i === this.index)
+  _updateActive() {
+    if (!this.embla) return
+    const selected = this.embla.selectedScrollSnap()
+    this.embla.slideNodes().forEach((node, i) => {
+      node.classList.toggle('active', i === selected)
     })
   }
 }

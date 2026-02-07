@@ -939,18 +939,23 @@ The "completed" state serves as the wrap-up page where actions are created.
 
 ### Navigation Rules
 
-**Back Button Availability:**
-| Screen | Facilitator | Participants |
-|--------|-------------|--------------|
-| Question phase (Q1) | Hidden (can't go further back) | Hidden |
-| Question phase (Q2+) | Back to previous question | Hidden |
-| Summary screen | Back to last question | Hidden |
-| Wrap-up screen | Back to summary | Hidden |
+**Unified carousel navigation:**
+
+All workshop phases (except lobby) share a single unified carousel (`workshop-carousel`) powered by [Embla Carousel](https://www.embla-carousel.com/) v8.6.0 (vendored ESM). Embla handles slide positioning, centering (`align: 'center'`), and smooth scroll animation. Drag/swipe is disabled (`watchDrag: false`) — navigation is click-only. Slides are progressively appended as the workshop advances. FABs drive backend state changes (synced via PubSub); clicking carousel slides is local-only navigation for reference.
+
+**Back Button Availability (FABs, facilitator only):**
+| Screen | Carousel Index | Facilitator | Participants |
+|--------|---------------|-------------|--------------|
+| Scoring (Q1) | 4 | Hidden (can't go further back) | Hidden |
+| Scoring (Q2+) | 4 | Back to previous question | Hidden |
+| Summary | 6 | Back to last question | Hidden |
+| Wrap-up | 7 | Back to summary | Hidden |
 
 **Navigation Constraints:**
 - Back button cannot navigate earlier than Q1 (no return to intro from scoring)
-- Only facilitator can navigate - participants follow the session state
+- Only facilitator can navigate backwards — participants follow the session state via PubSub
 - Going back resets participants' ready state for the current question
+- FABs are hidden when browsing slides outside the current phase (e.g., reviewing intro slides during scoring)
 
 ### Readiness Rules
 

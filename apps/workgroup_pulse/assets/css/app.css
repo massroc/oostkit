@@ -434,39 +434,45 @@ th.active-col-header {
   transform: translateY(-1px);
 }
 
-/* ─── Sheet Carousel (scroll-snap horizontal) ─── */
+/* ─── Sheet Carousel (Embla-powered) ─── */
 
 .sheet-carousel {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  /* Padding lets first/last slides center: 50% minus half of 720px sheet */
-  padding-left: calc(50% - 360px);
-  padding-right: calc(50% - 360px);
-  gap: 2rem;
+  /* Centers single-slide layouts (lobby) that don't use Embla */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-.sheet-carousel::-webkit-scrollbar {
-  display: none;
+.embla__viewport {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.embla__container {
+  display: flex;
+  height: 100%;
 }
 
 .carousel-slide {
   flex: 0 0 auto;
-  scroll-snap-align: center;
-  transition: opacity 300ms ease;
+  min-width: 0;
   position: relative;
   z-index: 1;
   height: calc(100vh - 52px - 3rem); /* viewport - header(52px) - padding(1.5rem×2) */
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  transition: opacity 300ms ease;
+  margin-right: 2rem;
+}
+
+.carousel-slide:last-child {
+  margin-right: 0;
 }
 
 /* Standard sheets fill their slide */
@@ -490,11 +496,6 @@ th.active-col-header {
 .carousel-slide:not(.active) {
   opacity: 0.3;
   cursor: pointer;
-}
-
-/* Click-only carousels: no scroll/swipe navigation */
-.sheet-carousel-locked {
-  overflow-x: hidden;
 }
 
 .carousel-slide:not(.active) * {

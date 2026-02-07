@@ -1,45 +1,14 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   @moduledoc """
-  Renders the introduction phase as a scroll-snap carousel.
-  All 4 intro sheets are laid out side-by-side; the SheetCarousel JS hook
-  syncs the current step with scroll position.
-  Pure functional component - all events bubble to parent LiveView.
+  Intro slide components for the unified workshop carousel.
+  Pure functional components - all events bubble to parent LiveView.
 
-  Individual slide functions (slide_welcome/1, slide_how_it_works/1, etc.)
-  are public so the scoring carousel can reuse them as read-only context slides.
+  Each slide function (slide_welcome/1, slide_how_it_works/1, etc.)
+  is public and rendered directly in the unified carousel in show.ex.
   """
   use Phoenix.Component
 
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
-
-  attr :intro_step, :integer, required: true
-
-  def render(assigns) do
-    ~H"""
-    <div
-      id="intro-carousel"
-      phx-hook="SheetCarousel"
-      data-index={@intro_step - 1}
-      class="sheet-carousel"
-    >
-      <div class="carousel-slide">
-        <.slide_welcome />
-      </div>
-
-      <div class="carousel-slide">
-        <.slide_how_it_works />
-      </div>
-
-      <div class="carousel-slide">
-        <.slide_balance_scale />
-      </div>
-
-      <div class="carousel-slide">
-        <.slide_safe_space />
-      </div>
-    </div>
-    """
-  end
 
   def slide_welcome(assigns) do
     assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[720px] h-full" end)

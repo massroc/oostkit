@@ -96,7 +96,9 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       assert render(view) =~ "How This Workshop Works"
 
       # Go back via carousel navigate (click on non-active slide fires this event)
-      view |> render_click("carousel_navigate", %{"index" => 0, "carousel" => "intro-carousel"})
+      view
+      |> render_click("carousel_navigate", %{"index" => 0, "carousel" => "workshop-carousel"})
+
       assert render(view) =~ "Welcome to the Workshop"
     end
 
