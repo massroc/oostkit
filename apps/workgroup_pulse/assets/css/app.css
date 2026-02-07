@@ -19,155 +19,9 @@
   --color-text-muted: #9ca3af;
 }
 
-/* Score visualization styles */
-.traffic-light-green {
-  @apply bg-green-500 text-white;
-}
-
-.traffic-light-amber {
-  @apply bg-amber-500 text-white;
-}
-
-.traffic-light-red {
-  @apply bg-red-500 text-white;
-}
-
-/* Balance scale visualization (-5 to +5) */
-.balance-scale {
-  @apply flex items-center justify-center;
-}
-
-.balance-scale-marker {
-  @apply w-2 h-8 mx-0.5 rounded-sm transition-all duration-200;
-}
-
-.balance-scale-marker.active {
-  @apply ring-2 ring-white ring-offset-2 ring-offset-gray-900;
-}
-
-/* Maximal scale visualization (0 to 10) */
-.maximal-scale {
-  @apply flex items-center;
-}
-
-.maximal-scale-segment {
-  @apply h-4 flex-1 transition-all duration-200;
-}
-
-/* Participant presence indicators */
-.presence-indicator {
-  @apply w-3 h-3 rounded-full;
-}
-
-.presence-online {
-  @apply bg-green-500 animate-pulse;
-}
-
-.presence-away {
-  @apply bg-amber-500;
-}
-
-.presence-offline {
-  @apply bg-gray-500;
-}
-
-/* Timer styles */
-.timer {
-  @apply font-mono text-2xl;
-}
-
-.timer-warning {
-  @apply text-amber-500;
-}
-
-.timer-exceeded {
-  @apply text-red-500 animate-pulse;
-}
-
-/* Ready button states */
-.ready-button {
-  @apply transition-all duration-200;
-}
-
-.ready-button-waiting {
-  @apply bg-gray-200 hover:bg-gray-300;
-}
-
-.ready-button-ready {
-  @apply bg-green-600 hover:bg-green-500;
-}
-
-/* Score input slider */
-input[type="range"] {
-  @apply w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-6 h-6 bg-blue-500 rounded-full cursor-pointer;
-  -webkit-appearance: none;
-}
-
-input[type="range"]::-moz-range-thumb {
-  @apply w-6 h-6 bg-blue-500 rounded-full cursor-pointer border-0;
-}
-
-/* Phase transition animations */
-.phase-enter {
-  @apply opacity-0 translate-y-4;
-}
-
-.phase-enter-active {
-  @apply opacity-100 translate-y-0 transition-all duration-300;
-}
-
-.phase-exit {
-  @apply opacity-100 translate-y-0;
-}
-
-.phase-exit-active {
-  @apply opacity-0 -translate-y-4 transition-all duration-300;
-}
-
-/* Score reveal animation */
-@keyframes score-reveal {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.score-reveal {
-  animation: score-reveal 0.5s ease-out forwards;
-}
-
-/* Card styles for content sections */
-.card {
-  @apply bg-gray-800 rounded-xl p-6 shadow-lg;
-}
-
-.card-header {
-  @apply text-xl font-semibold text-white mb-4;
-}
-
-.card-body {
-  @apply text-gray-300;
-}
-
 /* Accessibility - focus states */
 *:focus-visible {
   @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900;
-}
-
-/* Skip link for keyboard navigation */
-.skip-link {
-  @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded;
 }
 
 /* Heroicons overrides for dark theme */
@@ -393,11 +247,6 @@ th.active-col-header {
   max-width: 72px;
 }
 
-.score-cell.empty {
-  color: rgba(26, 58, 107, 0.12);
-  font-size: 20px;
-}
-
 /* ─── Button Styles ─── */
 .btn-workshop {
   font-family: 'DM Sans', sans-serif;
@@ -434,61 +283,58 @@ th.active-col-header {
   transform: translateY(-1px);
 }
 
-/* ─── Sheet Carousel (Embla-powered) ─── */
+/* ─── Sheet Stack ─── */
 
-.sheet-carousel {
+.sheet-stack {
   width: 100%;
   height: 100%;
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
-  /* Centers single-slide layouts (lobby) that don't use Embla */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.embla__viewport {
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-}
-
-.embla__container {
-  display: flex;
-  height: 100%;
-}
-
-.carousel-slide {
-  flex: 0 0 auto;
-  min-width: 0;
   position: relative;
-  height: calc(100vh - 52px - 3rem); /* viewport - header(52px) - padding(1.5rem×2) */
+  /* Centers single-slide layouts (lobby) that don't use the hook */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.sheet-stack-slide {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 0;
+  height: calc(100vh - 52px - 3rem);
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  /* z-index, opacity, transform all driven by JS coverflow */
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+/* Active slide: fully interactive */
+.sheet-stack-slide.stack-active {
+  cursor: default;
+}
+
+/* Inactive slide: clickable, children non-interactive */
+.sheet-stack-slide.stack-inactive {
+  cursor: pointer;
+}
+
+.sheet-stack-slide.stack-inactive * {
+  pointer-events: none;
 }
 
 /* Standard sheets fill their slide */
-.carousel-slide .paper-texture,
-.carousel-slide .paper-texture-secondary {
+.sheet-stack-slide .paper-texture,
+.sheet-stack-slide .paper-texture-secondary {
   height: 100%;
 }
 
 /* Inner wrapper fills sheet and scrolls overflow */
-.carousel-slide .paper-texture > div,
-.carousel-slide .paper-texture-secondary > div {
+.sheet-stack-slide .paper-texture > div,
+.sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
-}
-
-/* Non-active slides: not interactive */
-.carousel-slide:not(.active) {
-  cursor: pointer;
-}
-
-.carousel-slide:not(.active) * {
-  pointer-events: none;
 }
 
 /* ─── Notes Side Panel ─── */

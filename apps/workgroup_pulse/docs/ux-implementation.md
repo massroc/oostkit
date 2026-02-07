@@ -7,32 +7,26 @@ For the **design rationale** behind these decisions (principles, visual design, 
 
 ---
 
-## 1. Sheet Carousel System
+## 1. Sheet Stack System
 
-The sheet carousel is the universal layout system for all Pulse workshop phases. Every phase renders its content inside one or more carousel slides, providing consistent centering, transitions, and navigation.
+The sheet stack is the universal layout system for all Pulse workshop phases. Every phase renders its content inside one or more stack slides, providing consistent centering, coverflow transforms, and navigation.
 
 ### CSS Classes
 
 | Class | Purpose |
 |-------|---------|
-| `.sheet-carousel` | Outer container — flex, centres single-slide layouts (lobby) |
-| `.embla__viewport` | Embla viewport — `overflow: hidden`, full width/height |
-| `.embla__container` | Embla flex container — holds slides |
-| `.carousel-slide` | Individual slide — fixed height, coverflow transforms driven by JS |
-| `.carousel-slide.active` | Active slide — full opacity/scale, highest z-index |
-| `.carousel-slide:not(.active)` | Inactive — dimmed, scaled down, clickable |
+| `.sheet-stack` | Outer container — flex, centres single-slide layouts (lobby) |
+| `.sheet-stack-slide` | Individual slide — absolutely positioned, centred via `left:50%; translateX(-50%)` |
+| `.sheet-stack-slide.stack-active` | Active slide — full opacity/scale, highest z-index, interactive |
+| `.sheet-stack-slide.stack-inactive` | Inactive — dimmed, scaled, clickable (children `pointer-events: none`) |
 
-### JS Hook: `SheetCarousel` (Embla Carousel)
+### JS Hook: `SheetStack` (CSS-driven coverflow)
 
-Powered by [Embla Carousel](https://www.embla-carousel.com/) v8.6.0 (vendored ESM, ~6KB gzipped). Mounted on the unified `workshop-carousel` container. Reads `data-index` to set the initial active slide and syncs on `updated()`.
+Pure CSS-driven positioning with no external library dependency. The server (LiveView) is the sole authority on stack position via `data-index`. The hook reads it on every `updated()` call and applies coverflow transforms. No internal state, nothing to fight LiveView DOM patches.
 
-**Embla options:** `align: 'center'`, `containScroll: false`, `watchDrag: false` (click-only), `duration: 20`.
+**Coverflow effect:** The `_applyPositions()` method applies per-slide transforms based on distance from the active slide: `perspective(800px)`, `rotateY` (±12°/slide, max ±20°), `scale` (−6%/slide, min 0.8), `translateX` (200px overlap toward centre), and `opacity` (−35%/slide, min 0.25). Z-index decreases with distance so the active slide renders on top. All parameters are grouped as named constants for easy tuning.
 
-**Event delegation:** Click listeners use event delegation on the container element (not per-slide binding), so dynamically added slides are handled automatically without rebinding. Elements with `[data-no-navigate]` are excluded from click-to-navigate (used by score overlay).
-
-**Coverflow effect:** The `_applyCoverflow()` method runs on every Embla `scroll` tick, applying per-slide transforms based on distance from the active slide: `perspective(800px)`, `rotateY` (±12°/slide, max ±20°), `scale` (−6%/slide, min 0.8), `translateX` (200px overlap toward centre), and `opacity` (−35%/slide, min 0.25). Z-index decreases with distance so the active slide renders on top. All parameters are grouped as named constants for easy tuning.
-
-**Dynamic slides:** On `updated()`, the hook compares DOM slide count against Embla's known slides. If they differ (LiveView added/removed slides), it destroys and reinitialises Embla with the new slides and correct `startIndex`.
+**Event delegation:** Click listeners use event delegation on the container element. Clicking an inactive slide pushes `carousel_navigate` with `{ index, carousel }` to the server.
 
 **Events pushed to server:**
 - `carousel_navigate` with `{ index: <number>, carousel: "workshop-carousel" }`
@@ -44,7 +38,7 @@ All workshop phases (except lobby) share a single carousel element:
 | ID | Element | Hook? | Click-only? |
 |----|---------|-------|-------------|
 | (none) | Lobby — standalone single slide, no hook | No | N/A |
-| `workshop-carousel` | All other phases — unified 7-slide carousel | Yes | Yes |
+| `workshop-carousel` | All other phases — unified 7-slide stack | Yes (`SheetStack`) | Yes |
 
 ### Unified Slide Index Map
 
@@ -113,7 +107,8 @@ During scoring, the intro slides appear as deep stacked peeks to the left of the
 Content scrolls within the sheet when it exceeds the available height; no scrollbar when it fits:
 
 ```css
-.carousel-slide .paper-texture > div {
+.sheet-stack-slide .paper-texture > div,
+.sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
 }
@@ -133,7 +128,7 @@ The container uses `pointer-events-none` with `pointer-events-auto` on the inner
 
 ### Rendering
 
-Floating action buttons are rendered by `render_floating_buttons/1` in `show.ex` — not inside phase components. This ensures they're always visible without scrolling, positioned at the bottom-right of the sheet's visual area. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline).
+Floating action buttons are rendered by `FloatingButtonsComponent` — a pure functional component called from `show.ex`'s `render/1`. This ensures they're always visible without scrolling, positioned at the bottom-right of the sheet's visual area. Each phase renders its own set of buttons via phase-specific private functions; lobby has no floating buttons (Start Workshop is inline).
 
 ### Per-Phase Button Inventory
 
@@ -238,17 +233,16 @@ Traffic light score display with colour coding.
 - Score overlay is full-width on mobile (mx-4 margin)
 - Side panels may stack or become drawers
 
-### Carousel Navigation
+### Stack Navigation
 
-The unified carousel uses **click-only navigation** for all phases. No scroll/swipe.
+The unified stack uses **click-only navigation** for all phases. No scroll/swipe.
 
 | Mode | Behaviour |
 |------|-----------|
-| Click inactive slide | Navigates to that slide (local-only, no backend state change) |
+| Click inactive slide | Navigates to that slide (pushes `carousel_navigate` event) |
 | Server-driven `data-index` | Phase transitions and FAB buttons update `@carousel_index` |
-| Scroll/swipe | Disabled (`overflow-x: hidden` via `sheet-carousel-locked`) |
 
-Non-active slides are scaled to 68%, dimmed to 30% opacity, with -7rem overlap margins and `pointer-events: none` on children.
+Non-active slides get coverflow transforms: `rotateY` (±12-20°), `scale` (0.8-0.94), `translateX` (200px overlap toward centre), reduced opacity (0.25-0.65), and `pointer-events: none` on children.
 
 ---
 

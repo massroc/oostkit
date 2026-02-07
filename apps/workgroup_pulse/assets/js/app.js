@@ -4,62 +4,11 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import EmblaCarousel from "../vendor/embla-carousel.esm"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 // LiveView hooks for custom JavaScript functionality
 let Hooks = {}
-
-// Example: Timer hook for smooth countdown display
-Hooks.Timer = {
-  mounted() {
-    this.handleEvent("tick", ({remaining}) => {
-      this.el.innerText = this.formatTime(remaining)
-    })
-  },
-  formatTime(seconds) {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-}
-
-// Example: Score slider hook for smooth input
-Hooks.ScoreSlider = {
-  mounted() {
-    this.slider = this.el.querySelector('input[type="range"]')
-    this.display = this.el.querySelector('[data-score-display]')
-
-    if (this.slider && this.display) {
-      this.inputHandler = (e) => {
-        this.display.innerText = e.target.value
-      }
-      this.slider.addEventListener('input', this.inputHandler)
-    }
-  },
-  destroyed() {
-    if (this.slider && this.inputHandler) {
-      this.slider.removeEventListener('input', this.inputHandler)
-    }
-  }
-}
-
-// Example: Copy to clipboard hook
-Hooks.CopyToClipboard = {
-  mounted() {
-    this.clickHandler = () => {
-      const text = this.el.dataset.copyText
-      navigator.clipboard.writeText(text).then(() => {
-        this.pushEvent("copied", {})
-      })
-    }
-    this.el.addEventListener("click", this.clickHandler)
-  },
-  destroyed() {
-    this.el.removeEventListener("click", this.clickHandler)
-  }
-}
 
 // Facilitator timer hook for smooth client-side countdown
 Hooks.FacilitatorTimer = {
@@ -244,127 +193,72 @@ Hooks.PostHogTracker = {
   }
 }
 
-// Sheet carousel powered by Embla Carousel
-Hooks.SheetCarousel = {
+// Sheet stack — CSS-driven coverflow positioning (no scroll container)
+//
+// Architecture: the server (LiveView) is the sole authority on stack
+// position via data-index. The hook reads it on every updated() call
+// and applies coverflow transforms. No internal state, nothing to fight
+// LiveView DOM patches.
+Hooks.SheetStack = {
   mounted() {
-    this._initEmbla()
+    this._applyPositions()
 
-    // Event delegation for click-to-navigate (survives reInit)
+    // Event delegation: click inactive slide to navigate
     this.el.addEventListener('click', (e) => {
-      if (!this.embla) return
-      // Skip clicks from overlays/popups that cover the carousel
-      if (e.target.closest('[data-no-navigate]')) return
-      const slide = e.target.closest('.carousel-slide')
-      if (!slide) return
-      const i = this.embla.slideNodes().indexOf(slide)
-      if (i !== -1 && i !== this.embla.selectedScrollSnap()) {
-        this.embla.scrollTo(i)
-      }
+      const slide = e.target.closest('[data-slide]')
+      if (!slide || slide.classList.contains('stack-active')) return
+      this.pushEvent('carousel_navigate', {
+        index: parseInt(slide.dataset.slide),
+        carousel: this.el.id
+      })
     })
   },
 
   updated() {
-    const newIndex = parseInt(this.el.dataset.index) || 0
-    const container = this.el.querySelector('.embla__container')
-    const domSlideCount = container ? container.children.length : 0
-    const emblaSlideCount = this.embla ? this.embla.slideNodes().length : 0
-
-    if (!this.embla || domSlideCount !== emblaSlideCount) {
-      // Slides added/removed by LiveView — full reinit
-      if (this.embla) this.embla.destroy()
-      this._initEmbla(newIndex)
-    } else if (newIndex !== this.embla.selectedScrollSnap()) {
-      this.embla.scrollTo(newIndex)
-    }
+    this._applyPositions()
   },
 
-  destroyed() {
-    if (this.embla) {
-      this.embla.destroy()
-      this.embla = null
-    }
-  },
+  // No destroyed() needed — event delegation on this.el auto-removed
 
-  _initEmbla(startIndex) {
-    const viewport = this.el.querySelector('.embla__viewport')
-    if (!viewport) return
+  _applyPositions() {
+    const active = parseInt(this.el.dataset.index) || 0
+    const slides = this.el.querySelectorAll(':scope > [data-slide]')
 
-    const index = startIndex ?? (parseInt(this.el.dataset.index) || 0)
+    const ROTATE  = 12    // degrees per slide of distance
+    const MAX_ROT = 20    // cap rotation
+    const SCALE   = 0.06  // scale reduction per slide
+    const MIN_SC  = 0.8
+    const OVERLAP = 200   // px each slide tucks toward centre
+    const OPAC    = 0.35  // opacity reduction per slide
+    const MIN_OP  = 0.25
 
-    this.embla = EmblaCarousel(viewport, {
-      align: 'center',
-      containScroll: false,
-      loop: false,
-      startIndex: index,
-      watchDrag: false,
-      duration: 20,
-    })
-
-    this.embla.on('select', () => {
-      this._updateActive()
-      const selected = this.embla.selectedScrollSnap()
-      const serverIndex = parseInt(this.el.dataset.index) || 0
-      if (selected !== serverIndex) {
-        this.pushEvent('carousel_navigate', {
-          index: selected,
-          carousel: this.el.id
-        })
-      }
-    })
-
-    this.embla.on('scroll', () => this._applyCoverflow())
-    this.embla.on('reInit', () => this._applyCoverflow())
-
-    this._updateActive()
-    this._applyCoverflow()
-  },
-
-  _updateActive() {
-    if (!this.embla) return
-    const selected = this.embla.selectedScrollSnap()
-    this.embla.slideNodes().forEach((node, i) => {
-      node.classList.toggle('active', i === selected)
-    })
-  },
-
-  _applyCoverflow() {
-    if (!this.embla) return
-    const slides = this.embla.slideNodes()
-    const snapList = this.embla.scrollSnapList()
-    const progress = this.embla.scrollProgress()
-
-    if (snapList.length <= 1) {
-      slides.forEach(s => { s.style.transform = ''; s.style.opacity = ''; s.style.zIndex = '' })
-      return
-    }
-
-    // Average step between snaps to normalise distance into "slide units"
-    const step = (snapList[snapList.length - 1] - snapList[0]) / (snapList.length - 1) || 1
-
-    // Tuneable coverflow parameters
-    const ROTATE_PER_SLIDE = 12   // degrees per slide of distance
-    const MAX_ROTATE       = 20   // cap rotation
-    const SCALE_PER_SLIDE  = 0.06 // scale reduction per slide
-    const MIN_SCALE        = 0.8
-    const OVERLAP_PX       = 200  // px each slide tucks toward centre
-    const OPACITY_PER_SLIDE = 0.35
-    const MIN_OPACITY      = 0.25
-
-    slides.forEach((slide, index) => {
-      // Distance in "number of slides" — 0 = centred, ±1 = adjacent, etc.
-      const dist = (snapList[index] - progress) / step
+    slides.forEach((slide) => {
+      const i = parseInt(slide.dataset.slide)
+      const dist = i - active
       const absDist = Math.abs(dist)
 
-      const scale   = Math.max(MIN_SCALE, 1 - absDist * SCALE_PER_SLIDE)
-      const rotateY = -Math.max(-MAX_ROTATE, Math.min(MAX_ROTATE, dist * ROTATE_PER_SLIDE))
-      const tx      = -dist * OVERLAP_PX
-      const opacity = Math.max(MIN_OPACITY, 1 - absDist * OPACITY_PER_SLIDE)
-      const zIndex  = 100 - Math.round(absDist * 10)
+      if (dist === 0) {
+        // Active: no transform, fully interactive
+        slide.style.transform = ''
+        slide.style.opacity = '1'
+        slide.style.zIndex = '100'
+        slide.classList.add('stack-active')
+        slide.classList.remove('stack-inactive')
+      } else {
+        // Inactive: coverflow visual, click-to-navigate
+        const sc = Math.max(MIN_SC, 1 - absDist * SCALE)
+        const ry = -Math.max(-MAX_ROT, Math.min(MAX_ROT, dist * ROTATE))
+        const tx = -dist * OVERLAP
+        const op = Math.max(MIN_OP, 1 - absDist * OPAC)
+        const z  = 100 - Math.round(absDist * 10)
 
-      slide.style.transform =
-        `translateX(${tx}px) perspective(800px) rotateY(${rotateY}deg) scale(${scale})`
-      slide.style.opacity = opacity
-      slide.style.zIndex  = zIndex
+        slide.style.transform =
+          `translateX(${tx}px) perspective(800px) rotateY(${ry}deg) scale(${sc})`
+        slide.style.opacity = op
+        slide.style.zIndex = z
+        slide.classList.remove('stack-active')
+        slide.classList.add('stack-inactive')
+      }
     })
   }
 }
