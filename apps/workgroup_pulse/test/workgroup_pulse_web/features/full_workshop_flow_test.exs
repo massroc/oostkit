@@ -172,24 +172,11 @@ defmodule WorkgroupPulseWeb.Features.FullWorkshopFlowTest do
       assert fac_html =~ "All participants ready" or fac_html =~ "1/1 ready"
 
       # ─── Phase 7: Advance to Q2 → Mid-transition ───────────────────
-      # Since Q1 is balance and Q2 is maximal, mid-transition should show
+      # Advance to Q2 (maximal scale)
       fac_view |> element("button", "Next Question") |> render_click()
 
       # Flush PubSub to Alice
       render(alice_view)
-
-      fac_html = render(fac_view)
-      alice_html = render(alice_view)
-
-      assert fac_html =~ "New Scoring Scale Ahead"
-      assert alice_html =~ "New Scoring Scale Ahead"
-
-      # Dynamic question number (not hardcoded "Question 5")
-      assert fac_html =~ "Continue to Question 2"
-
-      # ─── Phase 8: Dismiss transition ────────────────────────────────
-      fac_view |> render_click("continue_past_transition")
-      alice_view |> render_click("continue_past_transition")
 
       fac_html = render(fac_view)
       alice_html = render(alice_view)

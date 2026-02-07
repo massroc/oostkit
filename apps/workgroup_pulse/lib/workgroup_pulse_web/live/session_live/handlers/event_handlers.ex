@@ -11,7 +11,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   alias WorkgroupPulse.Scoring
   alias WorkgroupPulse.Sessions
   alias WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders
-  alias WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers
+
   alias WorkgroupPulseWeb.SessionLive.TimerHandler
 
   import WorkgroupPulseWeb.SessionLive.OperationHelpers
@@ -649,10 +649,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
 
   defp do_advance(socket, session, false) do
     participant = socket.assigns.participant
-    current_index = session.current_question_index
-    template = DataLoaders.get_or_load_template(socket, session.template_id)
-
-    show_transition = StateHelpers.scale_type_changes_at?(template, current_index)
 
     handle_operation(
       socket,
@@ -661,7 +657,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
-        |> assign(show_mid_transition: show_transition)
+        |> assign(show_mid_transition: false)
         |> DataLoaders.load_scoring_data(updated_session, participant)
         |> TimerHandler.start_phase_timer(updated_session)
       end

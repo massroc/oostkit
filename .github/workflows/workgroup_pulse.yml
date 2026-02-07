@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - 'apps/workgroup_pulse/**'
+      - 'shared/**'
       - '.github/workflows/workgroup_pulse.yml'
       - '.github/workflows/_elixir-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'apps/workgroup_pulse/**'
+      - 'shared/**'
       - '.github/workflows/workgroup_pulse.yml'
       - '.github/workflows/_elixir-ci.yml'
 

@@ -1,45 +1,45 @@
-# Git
+# Dockerignore for Workgroup Pulse production builds
+# Paths relative to monorepo root (the build context)
+
+# Version control
 .git
 .gitignore
 
+# Other apps (not needed for Pulse build)
+apps/portal/
+apps/wrt/
+
 # Build artifacts
-_build/
-deps/
-.elixir_ls/
+**/_build/
+**/deps/
+**/.elixir_ls/
 
 # Test artifacts
-cover/
-tmp/
+**/cover/
+**/tmp/
 
-# Node modules (will be installed in container)
-assets/node_modules/
+# Node modules
+**/node_modules/
 
 # IDE
 .idea/
 .vscode/
-*.swp
-*.swo
+**/*.swp
+**/*.swo
 
 # OS
-.DS_Store
-Thumbs.db
+**/.DS_Store
+**/Thumbs.db
 
 # Local env files
-.env
-.env.local
-*.local
+**/.env
+**/.env.local
 
-# Documentation
-doc/
-*.md
-!README.md
+# Documentation (root level)
+docs/
+Makefile
 
-# Docker
-docker-compose*.yml
-Dockerfile.dev
-
-# CI/CD
+# Docker / CI
+**/docker-compose*.yml
+**/Dockerfile.dev
 .github/
-
-# Fly.io (only needed at deploy time)
-fly.toml

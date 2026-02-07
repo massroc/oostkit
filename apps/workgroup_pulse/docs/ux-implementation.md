@@ -16,20 +16,15 @@ The sheet stack is the universal layout system for all Pulse workshop phases. Ev
 | Class | Purpose |
 |-------|---------|
 | `.sheet-stack` | Outer container — flex, centres single-slide layouts (lobby) |
-| `.sheet-stack-slide` | Individual slide — absolutely positioned, centred via `left:50%; translateX(-50%)` |
-| `.sheet-stack-slide.stack-active` | Active slide — full opacity/scale, highest z-index, interactive |
-| `.sheet-stack-slide.stack-inactive` | Inactive — dimmed, scaled, clickable (children `pointer-events: none`) |
+| `.sheet-stack-slide` | Individual slide — `display: none` by default, flex when active |
+| `.sheet-stack-slide.stack-active` | Active slide — `display: flex`, visible and interactive |
+| `.sheet-stack-slide.stack-inactive` | Inactive — `display: none`, hidden |
 
-### JS Hook: `SheetStack` (CSS-driven coverflow)
+### JS Hook: `SheetStack` (simple show/hide)
 
-Pure CSS-driven positioning with no external library dependency. The server (LiveView) is the sole authority on stack position via `data-index`. The hook reads it on every `updated()` call and applies coverflow transforms. No internal state, nothing to fight LiveView DOM patches.
+Minimal JS hook — the server (LiveView) is the sole authority on stack position via `data-index`. The hook reads it on every `updated()` call and toggles `stack-active` / `stack-inactive` classes. Only the active slide is visible (`display: flex`); all others are hidden (`display: none`). No transforms, no click-to-navigate on inactive slides.
 
-**Coverflow effect:** The `_applyPositions()` method applies per-slide transforms based on distance from the active slide: `perspective(800px)`, `rotateY` (±12°/slide, max ±20°), `scale` (−6%/slide, min 0.8), `translateX` (200px overlap toward centre), and `opacity` (−35%/slide, min 0.25). Z-index decreases with distance so the active slide renders on top. All parameters are grouped as named constants for easy tuning.
-
-**Event delegation:** Click listeners use event delegation on the container element. Clicking an inactive slide pushes `carousel_navigate` with `{ index, carousel }` to the server.
-
-**Events pushed to server:**
-- `carousel_navigate` with `{ index: <number>, carousel: "workshop-carousel" }`
+**`_applyPositions()`:** Clears any leftover inline styles and applies `stack-active` to the current slide, `stack-inactive` to all others.
 
 ### Unified Carousel
 
@@ -88,9 +83,9 @@ The notes/actions panel is **not** a carousel slide. It is a fixed-position pane
 - **Dismiss:** Clicking outside the panel (transparent backdrop at z-10) fires `hide_notes`, setting `notes_revealed: false`
 - `handle_focus_sheet(:notes)` sets `notes_revealed: true` instead of changing the carousel index
 
-### Intro Context Slides
+### Intro Slides in Later Phases
 
-During scoring, the intro slides appear as deep stacked peeks to the left of the active scoring grid, providing visual continuity between phases. Users can click them for reference without triggering any backend state change.
+During scoring and later phases, the intro slides are hidden (not visible as stacked peeks). Only the active slide is shown.
 
 ---
 
@@ -111,10 +106,11 @@ Content scrolls within the sheet when it exceeds the available height; no scroll
 .sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  padding-bottom: 5rem;
 }
 ```
 
-This is CSS-driven — no JS intervention needed. The sheet is the scroll container, not the page.
+This is CSS-driven — no JS intervention needed. The sheet is the scroll container, not the page. The `padding-bottom: 5rem` ensures content isn't hidden behind the fixed floating action buttons.
 
 ---
 
@@ -134,8 +130,11 @@ Floating action buttons are rendered by `FloatingButtonsComponent` — a pure fu
 
 | Button | Phase | Shown When | Style |
 |--------|-------|-----------|-------|
-| Skip intro | Intro (slide 1 only) | Always on first intro slide | Text link |
-| Next | Intro | All slides | Primary (gradient) |
+| Skip intro | Intro (slide 0 only) | First intro slide only | Text link |
+| ← Back | Intro (slides 1-3) | Not on first intro slide | Secondary |
+| Next → | Intro (slides 0-2) | Before last intro slide | Primary (gradient) |
+| Start Scoring → | Intro (slide 3) | Last intro slide | Primary (gradient) |
+| Progress dots | Intro | All intro slides | 4 dots, active = accent-purple |
 | Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
 | Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
 | Back | Scoring, Summary | Facilitator (scoring: after Q1) | Secondary |
@@ -235,14 +234,12 @@ Traffic light score display with colour coding.
 
 ### Stack Navigation
 
-The unified stack uses **click-only navigation** for all phases. No scroll/swipe.
+The unified stack uses **server-driven navigation** only. Non-active slides are hidden (`display: none`). No scroll, swipe, or click-to-navigate.
 
 | Mode | Behaviour |
 |------|-----------|
-| Click inactive slide | Navigates to that slide (pushes `carousel_navigate` event) |
 | Server-driven `data-index` | Phase transitions and FAB buttons update `@carousel_index` |
-
-Non-active slides get coverflow transforms: `rotateY` (±12-20°), `scale` (0.8-0.94), `translateX` (200px overlap toward centre), reduced opacity (0.25-0.65), and `pointer-events: none` on children.
+| Inactive slides | Hidden via `display: none` — no visual stacking or transforms |
 
 ---
 

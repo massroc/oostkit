@@ -193,69 +193,37 @@ Hooks.PostHogTracker = {
   }
 }
 
-// Sheet stack — CSS-driven coverflow positioning (no scroll container)
+// Sheet stack — simple single-slide navigation (show/hide)
 //
 // Architecture: the server (LiveView) is the sole authority on stack
 // position via data-index. The hook reads it on every updated() call
-// and applies coverflow transforms. No internal state, nothing to fight
+// and shows only the active slide. No internal state, nothing to fight
 // LiveView DOM patches.
 Hooks.SheetStack = {
   mounted() {
     this._applyPositions()
-
-    // Event delegation: click inactive slide to navigate
-    this.el.addEventListener('click', (e) => {
-      const slide = e.target.closest('[data-slide]')
-      if (!slide || slide.classList.contains('stack-active')) return
-      this.pushEvent('carousel_navigate', {
-        index: parseInt(slide.dataset.slide),
-        carousel: this.el.id
-      })
-    })
   },
 
   updated() {
     this._applyPositions()
   },
 
-  // No destroyed() needed — event delegation on this.el auto-removed
-
   _applyPositions() {
     const active = parseInt(this.el.dataset.index) || 0
     const slides = this.el.querySelectorAll(':scope > [data-slide]')
 
-    const ROTATE  = 12    // degrees per slide of distance
-    const MAX_ROT = 20    // cap rotation
-    const SCALE   = 0.06  // scale reduction per slide
-    const MIN_SC  = 0.8
-    const OVERLAP = 200   // px each slide tucks toward centre
-    const OPAC    = 0.35  // opacity reduction per slide
-    const MIN_OP  = 0.25
-
     slides.forEach((slide) => {
       const i = parseInt(slide.dataset.slide)
-      const dist = i - active
-      const absDist = Math.abs(dist)
 
-      if (dist === 0) {
-        // Active: no transform, fully interactive
-        slide.style.transform = ''
-        slide.style.opacity = '1'
-        slide.style.zIndex = '100'
+      // Clear any leftover coverflow inline styles
+      slide.style.transform = ''
+      slide.style.opacity = ''
+      slide.style.zIndex = ''
+
+      if (i === active) {
         slide.classList.add('stack-active')
         slide.classList.remove('stack-inactive')
       } else {
-        // Inactive: coverflow visual, click-to-navigate
-        const sc = Math.max(MIN_SC, 1 - absDist * SCALE)
-        const ry = -Math.max(-MAX_ROT, Math.min(MAX_ROT, dist * ROTATE))
-        const tx = -dist * OVERLAP
-        const op = Math.max(MIN_OP, 1 - absDist * OPAC)
-        const z  = 100 - Math.round(absDist * 10)
-
-        slide.style.transform =
-          `translateX(${tx}px) perspective(800px) rotateY(${ry}deg) scale(${sc})`
-        slide.style.opacity = op
-        slide.style.zIndex = z
         slide.classList.remove('stack-active')
         slide.classList.add('stack-inactive')
       }

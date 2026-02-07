@@ -87,13 +87,12 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 
 **Purpose:** Renders the scoring grid table. Pure functional component — all events bubble to the parent LiveView. Score overlays, floating buttons, and the notes panel are separate components.
 
-**Attrs (11):** `session`, `participant`, `participants`, `current_question`, `has_submitted`, `is_my_turn`, `current_turn_participant_id`, `my_turn_locked`, `show_mid_transition`, `all_questions`, `all_questions_scores`
+**Attrs (10):** `session`, `participant`, `participants`, `current_question`, `has_submitted`, `is_my_turn`, `current_turn_participant_id`, `my_turn_locked`, `all_questions`, `all_questions_scores`
 
 **Key Render Functions:**
 - `render_full_scoring_grid/1` — Builds the complete 8-question x N-participant grid
 - `render_question_row/2` — Renders a single question row with per-participant score cells
 - `render_score_cell_value/3` — Pattern-matched function for cell display states (future `—`, past `?`, current `...`, scored value)
-- `render_mid_transition/1` — Scale change explanation screen (shown when scale type changes between questions; button text dynamically shows the next question number)
 
 ### ScoreOverlayComponent
 
@@ -132,7 +131,7 @@ Actions are managed during the scoring phase via the notes/actions side panel (b
 ### Other Phase Components
 
 All follow the same pure functional pattern:
-- **SummaryComponent** — Paper-textured sheet with individual score grids, team combined values, traffic lights, and notes
+- **SummaryComponent** — Read-only scoring grid table with traffic-light coloured cells (same grid layout as scoring phase, grouped by scale type)
 - **CompletedComponent** — Wrap-up page with score overview, strengths/concerns, action count, and export
 - **LobbyComponent** — Waiting room with participant list and start button
 - **IntroComponent** — 4-screen introduction with navigation
