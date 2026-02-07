@@ -243,6 +243,81 @@ Hooks.PostHogTracker = {
   }
 }
 
+// Sheet carousel hook for intro phase scroll-snap navigation
+Hooks.SheetCarousel = {
+  mounted() {
+    this.slides = this.el.querySelectorAll('.carousel-slide')
+    this.index = parseInt(this.el.dataset.index) || 0
+
+    this.scrollToIndex(this.index, false)
+    this.updateActive()
+
+    // Debounced scroll-end detection
+    this.scrollTimer = null
+    this.el.addEventListener('scroll', () => {
+      clearTimeout(this.scrollTimer)
+      this.scrollTimer = setTimeout(() => this.onScrollEnd(), 100)
+    })
+
+    // Click non-active slide to navigate
+    this.slides.forEach((slide, i) => {
+      slide.addEventListener('click', () => {
+        if (i !== this.index) {
+          this.pushEvent('carousel_navigate', { index: i, carousel: this.el.id })
+        }
+      })
+    })
+  },
+
+  updated() {
+    const newIndex = parseInt(this.el.dataset.index) || 0
+    if (newIndex !== this.index) {
+      this.index = newIndex
+      this.scrollToIndex(this.index, true)
+      this.updateActive()
+    }
+  },
+
+  destroyed() {
+    clearTimeout(this.scrollTimer)
+  },
+
+  scrollToIndex(index, smooth) {
+    const slide = this.slides[index]
+    if (slide) {
+      slide.scrollIntoView({
+        behavior: smooth ? 'smooth' : 'instant',
+        inline: 'center',
+        block: 'nearest'
+      })
+    }
+  },
+
+  onScrollEnd() {
+    const rect = this.el.getBoundingClientRect()
+    const center = rect.left + rect.width / 2
+    let closest = 0
+    let minDist = Infinity
+    this.slides.forEach((slide, i) => {
+      const sr = slide.getBoundingClientRect()
+      const sc = sr.left + sr.width / 2
+      const dist = Math.abs(center - sc)
+      if (dist < minDist) { minDist = dist; closest = i }
+    })
+    if (closest !== this.index) {
+      this.index = closest
+      this.updateActive()
+      this.pushEvent('carousel_navigate', { index: closest, carousel: this.el.id })
+    }
+  },
+
+  updateActive() {
+    this.slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === this.index)
+    })
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},

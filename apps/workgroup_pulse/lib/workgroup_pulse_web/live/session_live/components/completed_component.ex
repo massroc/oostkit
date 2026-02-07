@@ -1,6 +1,6 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   @moduledoc """
-  Renders the completed/wrap-up phase as a sheet on the Virtual Wall.
+  Renders the completed/wrap-up phase as a sheet in the carousel.
   Shows final scores, strengths, concerns, action items, and export options.
   Pure functional component - all events bubble to parent LiveView.
   """
@@ -24,7 +24,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-6 max-w-4xl w-full">
+    <.sheet class="shadow-sheet p-6 w-[720px]">
       <!-- Header -->
       <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">

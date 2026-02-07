@@ -69,6 +69,24 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   @doc """
+  Handles carousel_navigate event.
+  Dispatches based on which carousel sent the event.
+  """
+  def handle_carousel_navigate(socket, "intro-carousel", index) do
+    step = max(1, min(index + 1, 4))
+    {:noreply, assign(socket, intro_step: step)}
+  end
+
+  def handle_carousel_navigate(socket, "scoring-carousel", index) do
+    sheet = if index == 1, do: :notes, else: :main
+    {:noreply, assign(socket, active_sheet: sheet)}
+  end
+
+  def handle_carousel_navigate(socket, _carousel, _index) do
+    {:noreply, socket}
+  end
+
+  @doc """
   Handles continue_to_scoring event.
   Only facilitator can advance to scoring.
   """

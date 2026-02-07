@@ -1,9 +1,9 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
   @moduledoc """
-  Renders the scoring phase as a sheet on the Virtual Wall.
+  Renders the scoring phase as a sheet in the carousel.
   Features the full 8-question grid, floating score input overlay,
   and criterion info popup.
-  The notes/actions side-sheet is managed by the virtual wall in show.ex.
+  The notes/actions slide is managed by the scoring carousel in show.ex.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
@@ -71,7 +71,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_mid_transition(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-8 max-w-2xl w-full">
+    <.sheet class="shadow-sheet p-8 w-[720px]">
       <div class="text-center">
         <div class="text-6xl mb-4">🔄</div>
 

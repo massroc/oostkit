@@ -59,18 +59,18 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       view |> element("button", "Start Workshop") |> render_click()
       assert render(view) =~ "Welcome to the Workshop"
 
-      # Navigate through intro steps
-      view |> element("button[phx-click='intro_next']") |> render_click()
+      # Navigate through intro steps (use events directly since carousel renders all slides)
+      view |> render_click("intro_next")
       assert render(view) =~ "How This Workshop Works"
 
-      view |> element("button[phx-click='intro_next']") |> render_click()
+      view |> render_click("intro_next")
       assert render(view) =~ "balance"
 
-      view |> element("button[phx-click='intro_next']") |> render_click()
+      view |> render_click("intro_next")
       assert render(view) =~ "Safe Space" or render(view) =~ "honest"
 
       # Continue to scoring
-      view |> element("button[phx-click='continue_to_scoring']") |> render_click()
+      view |> render_click("continue_to_scoring")
       assert render(view) =~ "Test Question"
     end
 
@@ -92,11 +92,11 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       assert render(view) =~ "Welcome to the Workshop"
 
       # Go to step 2
-      view |> element("button[phx-click='intro_next']") |> render_click()
+      view |> render_click("intro_next")
       assert render(view) =~ "How This Workshop Works"
 
-      # Go back
-      view |> element("button[phx-click='intro_prev']") |> render_click()
+      # Go back via carousel navigate (click on non-active slide fires this event)
+      view |> render_click("carousel_navigate", %{"index" => 0, "carousel" => "intro-carousel"})
       assert render(view) =~ "Welcome to the Workshop"
     end
 

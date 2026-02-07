@@ -135,14 +135,15 @@ The tool behaves like butcher paper on a wall: **visible, permanent within each 
 
 ### 3. Scoring Phase (repeated for each criterion)
 
-**Virtual Wall Design:**
+**Sheet Carousel Layout:**
 
-The scoring screen displays all 8 questions as a grid (the "Virtual Wall"), with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
+All phases use a **sheet carousel** — a scroll-snap horizontal layout where the active sheet is centred and prominent, with adjacent sheets peeking from behind (scaled down, dimmed, non-interactive).
 
-**Three-Panel Layout:**
-- **Main Sheet (centre)** — The full 8-question scoring grid, always visible
-- **Left Panel** — Current question info: title, explanation, and expandable facilitator tips
-- **Right Panel (Side-sheet)** — Notes for the current question (click to expand, shows preview when collapsed)
+The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
+
+**Scoring Carousel (2 slides):**
+- **Slide 1: Main Sheet (centre)** — The full 8-question scoring grid, always visible
+- **Slide 2: Notes/Actions Sheet** — Notes and actions for the current question, navigable via carousel swipe or click
 
 **Turn-Based Sequential Scoring:**
 
@@ -409,7 +410,7 @@ Prompts should be observational and open-ended:
 
 ## Results Visualization
 
-### During Workshop (Virtual Wall Grid)
+### During Workshop (Scoring Grid)
 - **Full 8-question grid** displayed at all times — criteria as rows, participants as columns
 - **Two scale sections** — Balance Scale (-5 to +5) and Maximal Scale (0 to 10) with section labels
 - **Active row highlighted** — the current criterion being scored is visually distinct
@@ -493,7 +494,7 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 - [x] Summary view with individual scores and traffic lights
 - [x] Action planning with owner assignment
 - [x] Real-time sync via Phoenix LiveView + PubSub
-- [x] Virtual Wall design with full 8-question grid
+- [x] Sheet carousel layout with full 8-question grid
 - [x] PostHog analytics integration
 - [x] Observer mode for facilitator
 - [ ] Feedback button
@@ -663,7 +664,7 @@ The following explanations will be shown to participants when scoring each quest
 
 ## UI/UX Design Guidelines
 
-The tool follows the **Virtual Wall** design system (see `docs/design-system.md` for full specification). These guidelines describe how the design system applies to the Pulse workshop.
+The tool follows the **Sheet Carousel** design system (see `docs/carousel-layout.md` for full specification). These guidelines describe how the design system applies to the Pulse workshop.
 
 ### Core Principles
 
@@ -672,11 +673,11 @@ The tool follows the **Virtual Wall** design system (see `docs/design-system.md`
 - UI elements (buttons, navigation, controls) float above the grid as overlays
 - The accumulating scores *are* the interface
 
-**2. Virtual Wall Metaphor**
-- The screen evokes a wall with sheets of butcher paper
+**2. Sheet Carousel Metaphor**
+- The screen evokes sheets of butcher paper arranged on a table
 - Paper texture, subtle shadows, and slight rotation give a physical feel
-- Sheets can be focused/brought forward by clicking
-- See `docs/design-system.md` for the complete vocabulary (Sheet, Side-sheet, Sheet Strip, etc.)
+- Adjacent sheets peek from behind — clickable to navigate
+- See `docs/carousel-layout.md` for the complete vocabulary (Sheet, Carousel Slide, Reference View, etc.)
 
 **3. Clear Visual Hierarchy**
 - Use size, weight, and color to indicate importance
@@ -690,33 +691,34 @@ The tool follows the **Virtual Wall** design system (see `docs/design-system.md`
 - Notes panel shows preview when unfocused, full form when clicked
 - Score overlay only appears when it's your turn
 
-### Layout: Virtual Wall (Scoring Phase)
+### Layout: Sheet Carousel
+
+All phases use the same **sheet carousel** layout — a scroll-snap horizontal container centring the active slide with adjacent slides peeking:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  Header (app name, gradient accent)                              │
 ├─────────────────────────────────────────────────────────────────┤
-│  VIRTUAL WALL (bg: warm taupe #E8E4DF)                           │
+│  SHEET CAROUSEL (bg: warm taupe #E8E4DF)                         │
 │                                                                   │
-│   ┌──────────┐   ┌─────────────────────────────┐  ┌──────────┐  │
-│   │  Left     │   │                             │  │  Right   │  │
-│   │  Panel    │   │    Main Sheet (scoring grid) │  │  Panel   │  │
-│   │ (question │   │    (paper texture, centred)  │  │  (notes  │  │
-│   │  info)    │   │                             │  │  sheet)  │  │
-│   └──────────┘   └─────────────────────────────┘  └──────────┘  │
+│  ┌─────┐   ┌──────────────────────────────┐   ┌─────┐           │
+│  │dim  │   │                              │   │dim  │           │
+│  │prev │   │  Active Sheet (paper texture) │   │next │           │
+│  │slide│   │  (centred, full size)         │   │slide│           │
+│  └─────┘   └──────────────────────────────┘   └─────┘           │
 │                                                                   │
 │                     [Floating action buttons, bottom-right]       │
-├─────────────────────────────────────────────────────────────────┤
-│  Sheet Strip (question thumbnails with active indicator)          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Panel Details:**
-| Panel | Width | Content | Behaviour |
-|-------|-------|---------|-----------|
-| Left (Question Info) | ~220px | Title, explanation, facilitator tips | Always visible, absolutely positioned |
-| Main Sheet (Grid) | 720px (fixed) | Full 8-question scoring grid | Always centred, fixed dimensions, paper texture, clickable to focus |
-| Right (Notes) | 280-320px | Notes list + add form | Click to expand/collapse, shows preview when collapsed |
+**Phase Slide Counts:**
+| Phase | Slides | Notes |
+|-------|--------|-------|
+| Lobby | 1 | Single slide, no hook |
+| Intro | 4 | SheetCarousel hook, `data-index` from intro_step |
+| Scoring | 2 | Main grid + notes/actions sheet |
+| Summary | 1 | Single slide, no hook |
+| Completed | 1 | Single slide, no hook |
 
 **Floating Action Buttons (bottom-right):**
 | Button | Shown When | Style |
@@ -739,12 +741,13 @@ When it's a participant's turn, a **floating overlay** appears centred on screen
 - **Click-to-edit**: After submitting, clicking your cell in the grid reopens the overlay
 - **Entrance animation**: Overlay fades/slides in for polish
 
-### Sheet Focus System
+### Carousel Navigation
 
-Panels use a focus/z-index system to manage overlapping:
-- **Clicking the main sheet** brings it to front (`z-[10]`, lifted shadow)
-- **Clicking the notes panel** brings it to front (`z-[20]`, expanded width)
-- The unfocused panel recedes (lower z-index, standard shadow)
+Slides navigate via scroll-snap or click:
+- **Click a dimmed slide** to navigate to it (scroll-snap centres it)
+- **Scroll/swipe** horizontally within the carousel container
+- **Server-driven**: `data-index` attribute on the carousel container controls the active slide
+- **Non-active slides** are scaled to 82%, dimmed to 45% opacity, and have `pointer-events: none` on children
 
 ### Interaction Patterns
 
@@ -997,5 +1000,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 3.0 - Updated for Virtual Wall redesign (auto-submit, floating overlay, full grid, three-panel layout)*
-*Last Updated: 2026-02-06*
+*Document Version: 3.1 - Sheet carousel layout system replaces Virtual Wall (universal carousel for all phases, notes as carousel slide)*
+*Last Updated: 2026-02-07*
