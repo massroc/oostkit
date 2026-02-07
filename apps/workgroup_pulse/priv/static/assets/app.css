@@ -1143,6 +1143,10 @@ select {
   height: 2.25rem;
 }
 
+.h-2 {
+  height: 0.5rem;
+}
+
 .max-h-\[80vh\] {
   max-height: 80vh;
 }
@@ -1221,6 +1225,10 @@ select {
 
 .w-\[40px\] {
   width: 40px;
+}
+
+.w-2 {
+  width: 0.5rem;
 }
 
 .min-w-0 {
@@ -1485,6 +1493,10 @@ select {
   border-radius: 2px;
 }
 
+.rounded-full {
+  border-radius: 9999px;
+}
+
 .border {
   border-width: 1px;
 }
@@ -1726,6 +1738,10 @@ select {
   background-color: rgb(232 228 223 / 0.4);
 }
 
+.bg-ink-blue\/20 {
+  background-color: rgb(26 58 107 / 0.2);
+}
+
 .fill-cyan-900 {
   fill: #164e63;
 }
@@ -1885,6 +1901,10 @@ select {
 
 .pt-2 {
   padding-top: 0.5rem;
+}
+
+.pb-24 {
+  padding-bottom: 6rem;
 }
 
 .text-left {
@@ -2490,16 +2510,16 @@ select {
 }
 
 .scoring-grid th.criterion-col {
-  width: 160px;
-  max-width: 160px;
+  width: 200px;
+  max-width: 200px;
   text-align: left;
-  padding-left: 0;
+  padding-left: 8px;
   padding-right: 6px;
 }
 
 .scoring-grid th.participant-col {
-  width: 72px;
-  max-width: 72px;
+  width: 68px;
+  max-width: 68px;
   padding: 8px 2px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2565,10 +2585,10 @@ th.active-col-header {
   font-family: 'Caveat', cursive;
   color: #1a3a6b;
   text-align: left;
-  padding-left: 0;
+  padding-left: 8px;
   line-height: 1.2;
-  width: 160px;
-  max-width: 160px;
+  width: 200px;
+  max-width: 200px;
 }
 
 .scoring-grid .criterion .name {
@@ -2581,7 +2601,7 @@ th.active-col-header {
 /* Indented sub-criteria (a/b rows under a group header) */
 
 .scoring-grid .criterion.criterion-indented {
-  padding-left: 10px;
+  padding-left: 28px;
 }
 
 /* Group header row for paired criteria (Continual Learning, Meaningfulness) */
@@ -2594,7 +2614,7 @@ th.active-col-header {
   text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  padding: 10px 0 2px 0;
+  padding: 10px 0 2px 8px;
   border-bottom: none;
 }
 
@@ -2606,8 +2626,8 @@ th.active-col-header {
   font-weight: 700;
   color: #1a3a6b;
   padding: 6px 1px;
-  width: 72px;
-  max-width: 72px;
+  width: 68px;
+  max-width: 68px;
 }
 
 /* ─── Button Styles ─── */
@@ -2655,39 +2675,30 @@ th.active-col-header {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
   position: relative;
-  /* Centers single-slide layouts (lobby) that don't use the hook */
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
 .sheet-stack-slide {
-  position: absolute;
-  top: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  display: none;
   min-width: 0;
+  width: 100%;
   height: calc(100vh - 52px - 3rem);
-  display: flex;
   align-items: flex-start;
   justify-content: center;
-  transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
-/* Active slide: fully interactive */
+/* Active slide: visible */
 
 .sheet-stack-slide.stack-active {
-  cursor: default;
+  display: flex;
 }
 
-/* Inactive slide: clickable, children non-interactive */
+/* Inactive slide: hidden */
 
 .sheet-stack-slide.stack-inactive {
-  cursor: pointer;
-}
-
-.sheet-stack-slide.stack-inactive * {
-  pointer-events: none;
+  display: none;
 }
 
 /* Standard sheets fill their slide */
@@ -2703,6 +2714,7 @@ th.active-col-header {
 .sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  padding-bottom: 5rem;
 }
 
 /* ─── Notes Side Panel ─── */

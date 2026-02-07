@@ -1,7 +1,7 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   @moduledoc """
   Renders the summary phase as a sheet in the carousel.
-  Shows all scores with analysis and notes in a grid layout.
+  Shows a read-only scoring grid with traffic-light coloured cells.
   Pure functional component - all events bubble to parent LiveView.
   """
   use Phoenix.Component
@@ -9,7 +9,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers,
-    only: [text_color_class: 1, bg_color_class: 1, card_color_class: 1]
+    only: [text_color_class: 1, bg_color_class: 1]
 
   attr :session, :map, required: true
   attr :participant, :map, required: true
@@ -17,6 +17,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   attr :scores_summary, :list, required: true
   attr :individual_scores, :map, required: true
   attr :notes_by_question, :map, required: true
+  attr :all_questions, :list, required: true
 
   def render(assigns) do
     ~H"""
@@ -31,130 +32,157 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
         </p>
       </div>
 
-      <%!-- Participants --%>
-      <div class="bg-surface-wall/50 rounded-lg p-3 mb-5">
-        <h2 class="text-xs font-semibold text-ink-blue/50 mb-2 font-brand uppercase tracking-wide">
-          Participants
-        </h2>
-        <div class="flex flex-wrap gap-1.5">
-          <%= for p <- @participants do %>
-            <div class="bg-surface-sheet rounded-md px-2.5 py-1 flex items-center gap-1.5 text-sm border border-ink-blue/5">
-              <span class="font-workshop text-ink-blue">{p.name}</span>
-              <%= cond do %>
-                <% p.is_observer -> %>
-                  <span class="text-[10px] bg-surface-wall text-ink-blue/50 px-1.5 py-0.5 rounded font-brand">
-                    Observer
-                  </span>
-                <% p.is_facilitator -> %>
-                  <span class="text-[10px] bg-accent-purple text-white px-1.5 py-0.5 rounded font-brand">
-                    Facilitator
-                  </span>
-                <% true -> %>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
-      </div>
-
-      <%!-- Questions Grid --%>
-      <div class="space-y-3">
-        <%= for score <- @scores_summary do %>
-          <% question_notes = Map.get(@notes_by_question, score.question_index, []) %>
-          <% question_scores = Map.get(@individual_scores, score.question_index, []) %>
-          <div class={["rounded-lg p-3 border", card_color_class(score.color)]}>
-            <%!-- Question header --%>
-            <div class="flex items-start justify-between mb-2">
-              <div class="flex-1">
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs text-ink-blue/40 font-brand">
-                    Q{score.question_index + 1}
-                  </span>
-                  <h3 class="font-workshop font-semibold text-ink-blue">{score.title}</h3>
-                </div>
-                <div class="text-[10px] text-ink-blue/35 mt-0.5 font-brand">
-                  <%= if score.scale_type == "balance" do %>
-                    -5 to +5, optimal at 0
-                  <% else %>
-                    0 to 10, higher is better
-                  <% end %>
-                </div>
-              </div>
-
-              <div class="text-right">
-                <%= if score.combined_team_value do %>
-                  <div class={["text-xl font-bold font-workshop", text_color_class(score.color)]}>
-                    {round(score.combined_team_value)}/10
-                  </div>
-                  <div class="flex items-center justify-end gap-1 text-[10px] text-ink-blue/35 font-brand">
-                    <span>team</span>
-                    <span
-                      class="cursor-help"
-                      title="Combined Team Value: A team rating out of 10 for this criterion. Each person's score is graded (green=2, amber=1, red=0), then averaged and scaled. 10 = everyone scored well, 0 = everyone scored poorly."
-                    >
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-                <% else %>
-                  <div class="text-ink-blue/40 text-xs font-brand">No scores</div>
-                <% end %>
-              </div>
-            </div>
-
-            <%!-- Individual Scores --%>
-            <%= if length(question_scores) > 0 do %>
-              <div class="flex flex-wrap gap-1.5 justify-center">
-                <%= for s <- question_scores do %>
-                  <div class={[
-                    "rounded-md px-2 py-1.5 text-center min-w-[3.5rem] border",
-                    bg_color_class(s.color)
-                  ]}>
-                    <div class={["text-base font-bold font-workshop", text_color_class(s.color)]}>
-                      <%= if score.scale_type == "balance" and s.value > 0 do %>
-                        +{s.value}
-                      <% else %>
-                        {s.value}
-                      <% end %>
-                    </div>
-                    <div
-                      class="text-[10px] text-ink-blue/50 truncate font-workshop"
-                      title={s.participant_name}
-                    >
-                      {s.participant_name}
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-
-            <%!-- Notes --%>
-            <%= if length(question_notes) > 0 do %>
-              <div class="mt-2 pt-2 border-t border-ink-blue/10">
-                <div class="text-[10px] text-ink-blue/35 mb-1.5 font-brand uppercase tracking-wide">
-                  Notes
-                </div>
-                <ul class="space-y-1">
-                  <%= for note <- question_notes do %>
-                    <li class="text-sm text-ink-blue/70 bg-surface-wall/40 rounded px-2 py-1">
-                      <span class="font-workshop">{note.content}</span>
-                      <span class="text-[10px] text-ink-blue/35 ml-1 font-brand">
-                        — {note.author_name}
-                      </span>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
+      <%!-- Scoring Grid --%>
+      <%= if length(@all_questions) > 0 do %>
+        {render_summary_grid(assigns)}
+      <% end %>
     </.sheet>
     """
   end
+
+  # Fixed number of participant column slots to maintain consistent grid width
+  @grid_participant_slots 7
+
+  # Questions that are first of a paired criterion — emit a header row before them
+  @first_of_pair MapSet.new(["2a", "5a"])
+
+  defp sub_label(question) do
+    cn = question.criterion_number
+
+    cond do
+      String.ends_with?(cn, "a") -> "a"
+      String.ends_with?(cn, "b") -> "b"
+      true -> nil
+    end
+  end
+
+  defp render_summary_grid(assigns) do
+    active_participants =
+      Enum.filter(assigns.participants, fn p -> not p.is_observer end)
+
+    balance_questions = Enum.filter(assigns.all_questions, &(&1.scale_type == "balance"))
+    maximal_questions = Enum.filter(assigns.all_questions, &(&1.scale_type == "maximal"))
+
+    empty_slots = max(@grid_participant_slots - length(active_participants), 0)
+    total_cols = 1 + length(active_participants) + empty_slots
+
+    assigns =
+      assigns
+      |> assign(:active_participants, active_participants)
+      |> assign(:balance_questions, balance_questions)
+      |> assign(:maximal_questions, maximal_questions)
+      |> assign(:empty_slots, empty_slots)
+      |> assign(:total_cols, total_cols)
+
+    ~H"""
+    <table class="scoring-grid">
+      <thead>
+        <tr>
+          <th class="criterion-col"></th>
+          <%= for p <- @active_participants do %>
+            <th class="participant-col">
+              {p.name}
+            </th>
+          <% end %>
+          <%= for _ <- 1..@empty_slots//1 do %>
+            <th class="participant-col"></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Scale label: Balance -->
+        <tr>
+          <td class="scale-label" colspan={@total_cols}>
+            Balance Scale (-5 to +5)
+          </td>
+        </tr>
+        <!-- Balance questions -->
+        <%= for q <- @balance_questions do %>
+          {render_question_row(assigns, q)}
+        <% end %>
+        <!-- Scale label: Maximal -->
+        <tr>
+          <td class="scale-label" colspan={@total_cols}>
+            Maximal Scale (0 to 10)
+          </td>
+        </tr>
+        <!-- Maximal questions -->
+        <%= for q <- @maximal_questions do %>
+          {render_question_row(assigns, q)}
+        <% end %>
+      </tbody>
+    </table>
+    """
+  end
+
+  defp render_question_row(assigns, question) do
+    # Get individual scores for this question
+    question_scores = Map.get(assigns.individual_scores, question.index, [])
+
+    # Build a map of participant_id -> score data for this question
+    scores_by_participant = Map.new(question_scores, &{&1.participant_id, &1})
+
+    is_first_of_pair = MapSet.member?(@first_of_pair, question.criterion_number)
+    label = sub_label(question)
+
+    assigns =
+      assigns
+      |> assign(:question, question)
+      |> assign(:scores_by_participant, scores_by_participant)
+      |> assign(:is_first_of_pair, is_first_of_pair)
+      |> assign(:sub_label, label)
+
+    ~H"""
+    <%= if @is_first_of_pair do %>
+      <tr>
+        <td class="criterion-group-header" colspan={@total_cols}>
+          {@question.criterion_name}
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <td class={[
+        "criterion",
+        @sub_label && "criterion-indented"
+      ]}>
+        <span class="name">
+          <%= if @sub_label do %>
+            <span style="text-transform: lowercase">{@sub_label}.</span> {format_criterion_title(
+              @question.title
+            )}
+          <% else %>
+            {format_criterion_title(@question.title)}
+          <% end %>
+        </span>
+      </td>
+      <%= for p <- @active_participants do %>
+        <% score_data = Map.get(@scores_by_participant, p.id) %>
+        <td class={[
+          "score-cell",
+          score_data && bg_color_class(score_data.color)
+        ]}>
+          <%= if score_data do %>
+            <span class={["font-bold font-workshop", text_color_class(score_data.color)]}>
+              {format_score_value(@question.scale_type, score_data.value)}
+            </span>
+          <% else %>
+            <span class="text-ink-blue/30">—</span>
+          <% end %>
+        </td>
+      <% end %>
+      <%= for _ <- 1..@empty_slots//1 do %>
+        <td class="score-cell"></td>
+      <% end %>
+    </tr>
+    """
+  end
+
+  defp format_score_value("balance", value) when value > 0, do: "+#{value}"
+  defp format_score_value(_, value), do: "#{value}"
+
+  defp format_criterion_title("Mutual Support and Respect") do
+    Phoenix.HTML.raw("Mutual Support<br/><span style=\"padding-left:8px\">and Respect</span>")
+  end
+
+  defp format_criterion_title(title), do: title
 end

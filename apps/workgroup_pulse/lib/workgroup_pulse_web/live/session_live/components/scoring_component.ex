@@ -23,69 +23,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   def render(assigns) do
     ~H"""
-    <%= if @show_mid_transition do %>
-      {render_mid_transition(assigns)}
-    <% else %>
-      <!-- Main Sheet with scoring grid -->
-      <.sheet
-        class="p-5 w-[720px] h-full shadow-sheet-lifted transition-all duration-300"
-        phx-click="focus_sheet"
-        phx-value-sheet="main"
-      >
-        <!-- Full Scoring Grid -->
-        <%= if length(@all_questions) > 0 do %>
-          {render_full_scoring_grid(assigns)}
-        <% end %>
-      </.sheet>
-    <% end %>
-    """
-  end
-
-  defp render_mid_transition(assigns) do
-    ~H"""
-    <.sheet class="shadow-sheet p-8 w-[720px] h-full">
-      <div class="text-center">
-        <div class="text-6xl mb-4">🔄</div>
-
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
-          New Scoring Scale Ahead
-        </h1>
-
-        <div class="text-ink-blue/80 space-y-4 text-lg text-left">
-          <p class="text-center">Great progress! You've completed the first four questions.</p>
-
-          <div class="bg-surface-wall rounded-lg p-6 my-6">
-            <p class="text-ink-blue font-semibold mb-3">
-              The next four questions use a different scale:
-            </p>
-
-            <div class="flex justify-between items-center mb-4">
-              <span class="text-ink-blue/60">0</span>
-              <span class="text-traffic-green font-semibold text-xl">→</span>
-              <span class="text-traffic-green font-semibold">10</span>
-            </div>
-
-            <ul class="space-y-2 text-ink-blue/70">
-              <li>
-                • For these,
-                <span class="text-traffic-green font-semibold">more is always better</span>
-              </li>
-              <li>• <span class="text-traffic-green font-semibold">10 is optimal</span></li>
-            </ul>
-          </div>
-
-          <p class="text-ink-blue/60 text-center">
-            These measure aspects of work where you can never have too much.
-          </p>
-        </div>
-
-        <button
-          phx-click="continue_past_transition"
-          class="mt-8 btn-workshop btn-workshop-primary text-lg px-8 py-3"
-        >
-          Continue to Question {@session.current_question_index + 1} →
-        </button>
-      </div>
+    <!-- Main Sheet with scoring grid -->
+    <.sheet
+      class="p-5 w-[720px] h-full shadow-sheet-lifted transition-all duration-300"
+      phx-click="focus_sheet"
+      phx-value-sheet="main"
+    >
+      <!-- Full Scoring Grid -->
+      <%= if length(@all_questions) > 0 do %>
+        {render_full_scoring_grid(assigns)}
+      <% end %>
     </.sheet>
     """
   end

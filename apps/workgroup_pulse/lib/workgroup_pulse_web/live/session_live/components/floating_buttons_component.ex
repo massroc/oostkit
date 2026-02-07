@@ -40,24 +40,46 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
     ~H"""
     <%= if @carousel_index in 0..3 do %>
       <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
-        <div class="pointer-events-auto flex justify-end items-center gap-3">
-          <%= if @carousel_index == 0 do %>
-            <button
-              phx-click="skip_intro"
-              class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
-            >
-              Skip intro
-            </button>
-          <% end %>
-          <%= if @carousel_index < 3 do %>
-            <button phx-click="intro_next" class="btn-workshop btn-workshop-primary">
-              Next →
-            </button>
-          <% else %>
-            <button phx-click="continue_to_scoring" class="btn-workshop btn-workshop-primary">
-              Next →
-            </button>
-          <% end %>
+        <div class="flex justify-between items-center">
+          <%!-- Left: Back button or Skip intro --%>
+          <div class="flex items-center gap-3">
+            <%= if @carousel_index == 0 do %>
+              <button
+                phx-click="skip_intro"
+                class="pointer-events-auto text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
+              >
+                Skip intro
+              </button>
+            <% else %>
+              <button phx-click="intro_prev" class="pointer-events-auto btn-workshop btn-workshop-secondary">
+                ← Back
+              </button>
+            <% end %>
+          </div>
+          <%!-- Center: Progress dots --%>
+          <div class="flex items-center gap-2">
+            <%= for i <- 0..3 do %>
+              <div class={[
+                "w-2 h-2 rounded-full transition-colors",
+                if(i == @carousel_index,
+                  do: "bg-accent-purple",
+                  else: "bg-ink-blue/20"
+                )
+              ]} />
+            <% end %>
+          </div>
+          <%!-- Right: Next / Start Scoring --%>
+          <div class="flex items-center">
+            <%= if @carousel_index < 3 do %>
+              <button phx-click="intro_next" class="pointer-events-auto btn-workshop btn-workshop-primary">
+                Next →
+              </button>
+            <% else %>
+              <button phx-click="continue_to_scoring" class="pointer-events-auto btn-workshop btn-workshop-primary">
+                Start Scoring →
+              </button>
+            <% end %>
+          </div>
         </div>
       </div>
     <% end %>
@@ -68,10 +90,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
     ~H"""
     <%= if @carousel_index == 4 and not @show_mid_transition do %>
       <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-5 pointer-events-none">
-        <div class="pointer-events-auto flex justify-end items-center gap-2">
+        <div class="flex justify-end items-center gap-2">
           <!-- Ready count (facilitator only, after scores revealed) -->
           <%= if @participant.is_facilitator and @scores_revealed do %>
-            <div class="text-sm font-brand mr-auto bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+            <div class="pointer-events-auto text-sm font-brand mr-auto bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
               <%= if @all_ready do %>
                 <span class="text-traffic-green">✓</span>
                 <span class="text-ink-blue/70">All participants ready</span>
@@ -84,19 +106,19 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
           <% end %>
           <!-- Back (facilitator, after Q1) -->
           <%= if @participant.is_facilitator and @session.current_question_index > 0 do %>
-            <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
+            <button phx-click="go_back" class="pointer-events-auto btn-workshop btn-workshop-secondary">
               ← Back
             </button>
           <% end %>
           <!-- Skip turn (facilitator, when someone else is scoring) -->
           <%= if @participant.is_facilitator and not @scores_revealed and not @current_turn_has_score and not (@is_my_turn and not @my_turn_locked) do %>
-            <button phx-click="skip_turn" class="btn-workshop btn-workshop-secondary">
+            <button phx-click="skip_turn" class="pointer-events-auto btn-workshop btn-workshop-secondary">
               Skip Turn
             </button>
           <% end %>
           <!-- Done (my turn, after submitting) -->
           <%= if @is_my_turn and not @my_turn_locked and @has_submitted do %>
-            <button phx-click="complete_turn" class="btn-workshop btn-workshop-primary">
+            <button phx-click="complete_turn" class="pointer-events-auto btn-workshop btn-workshop-primary">
               Done →
             </button>
           <% end %>
@@ -106,7 +128,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
               phx-click="next_question"
               disabled={not @all_ready}
               class={[
-                "btn-workshop",
+                "pointer-events-auto btn-workshop",
                 if(@all_ready,
                   do: "btn-workshop-primary",
                   else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
@@ -123,11 +145,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
           <!-- Ready (non-facilitator, after scores revealed) -->
           <%= if not @participant.is_facilitator and @scores_revealed and not @participant_was_skipped do %>
             <%= if @participant.is_ready do %>
-              <div class="btn-workshop btn-workshop-secondary opacity-70 cursor-default">
+              <div class="pointer-events-auto btn-workshop btn-workshop-secondary opacity-70 cursor-default">
                 <span class="text-traffic-green">✓</span> Ready
               </div>
             <% else %>
-              <button phx-click="mark_ready" class="btn-workshop btn-workshop-primary">
+              <button phx-click="mark_ready" class="pointer-events-auto btn-workshop btn-workshop-primary">
                 I'm Ready
               </button>
             <% end %>
@@ -142,16 +164,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
     ~H"""
     <%= if @carousel_index == 5 do %>
       <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
-        <div class="pointer-events-auto flex justify-end items-center gap-2">
+        <div class="flex justify-end items-center gap-2">
           <%= if @participant.is_facilitator do %>
-            <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
+            <button phx-click="go_back" class="pointer-events-auto btn-workshop btn-workshop-secondary">
               ← Back
             </button>
-            <button phx-click="continue_to_wrapup" class="btn-workshop btn-workshop-primary">
+            <button phx-click="continue_to_wrapup" class="pointer-events-auto btn-workshop btn-workshop-primary">
               Continue to Wrap-Up →
             </button>
           <% else %>
-            <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+            <span class="pointer-events-auto text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
               Waiting for facilitator to continue...
             </span>
           <% end %>
@@ -165,13 +187,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
     ~H"""
     <%= if @carousel_index == 6 do %>
       <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
-        <div class="pointer-events-auto flex justify-end items-center gap-2">
+        <div class="flex justify-end items-center gap-2">
           <%= if @participant.is_facilitator do %>
-            <button phx-click="finish_workshop" class="btn-workshop btn-workshop-primary">
+            <button phx-click="finish_workshop" class="pointer-events-auto btn-workshop btn-workshop-primary">
               Finish Workshop
             </button>
           <% else %>
-            <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+            <span class="pointer-events-auto text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
               Waiting for facilitator to finish...
             </span>
           <% end %>

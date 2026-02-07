@@ -1,15 +1,8 @@
 # Production Dockerfile for Fly.io deployment
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu
-# instead of Alpine to avoid DNS issues that often plague production.
+# Build context: monorepo root (not app directory)
 #
 # https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
 # https://hub.docker.com/_/ubuntu?tab=tags
-#
-# This file is based on these images:
-#
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/ubuntu?tab=tags - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
 
 ARG ELIXIR_VERSION=1.18.3
 ARG OTP_VERSION=27.2
@@ -24,7 +17,6 @@ FROM ${BUILDER_IMAGE} AS builder
 RUN apt-get update -y && apt-get install -y build-essential git curl \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-
 # Prepare build dir
 WORKDIR /app
 
@@ -36,21 +28,24 @@ RUN mix local.hex --force && \
 ENV MIX_ENV="prod"
 
 # Install mix dependencies
-COPY mix.exs mix.lock ./
+COPY apps/workgroup_pulse/mix.exs apps/workgroup_pulse/mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
 # Copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
-COPY config/config.exs config/${MIX_ENV}.exs config/
+COPY apps/workgroup_pulse/config/config.exs apps/workgroup_pulse/config/${MIX_ENV}.exs config/
 RUN mix deps.compile
 
-COPY priv priv
+COPY apps/workgroup_pulse/priv priv
 
-COPY lib lib
+COPY apps/workgroup_pulse/lib lib
 
-COPY assets assets
+# Copy shared design system preset (used by tailwind.config.js)
+COPY shared /shared
+
+COPY apps/workgroup_pulse/assets assets
 
 # Compile assets
 RUN mix assets.deploy
@@ -59,9 +54,9 @@ RUN mix assets.deploy
 RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
-COPY config/runtime.exs config/
+COPY apps/workgroup_pulse/config/runtime.exs config/
 
-COPY rel rel
+COPY apps/workgroup_pulse/rel rel
 RUN mix release
 
 # Start a new build stage so that the final image will only contain

@@ -454,6 +454,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             scores_summary={@scores_summary}
             individual_scores={@individual_scores}
             notes_by_question={@notes_by_question}
+            all_questions={(@template && @template.questions) || []}
           />
         </div>
       <% end %>
