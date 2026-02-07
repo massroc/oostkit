@@ -1,8 +1,9 @@
 defmodule Portal.Accounts.UserNotifier do
+  @moduledoc false
   import Swoosh.Email
 
-  alias Portal.Mailer
   alias Portal.Accounts.User
+  alias Portal.Mailer
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do

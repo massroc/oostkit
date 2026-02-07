@@ -6,7 +6,7 @@ defmodule Portal.Accounts do
   import Ecto.Query, warn: false
   alias Portal.Repo
 
-  alias Portal.Accounts.{User, UserToken, UserNotifier}
+  alias Portal.Accounts.{User, UserNotifier, UserToken}
 
   ## Database getters
 

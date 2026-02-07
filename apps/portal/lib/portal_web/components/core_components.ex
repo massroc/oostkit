@@ -93,8 +93,7 @@ defmodule PortalWeb.CoreComponents do
           href={@app.url}
           class="inline-flex items-center rounded-md bg-zinc-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-700"
         >
-          Launch
-          <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
+          Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
         </a>
         <.link
           navigate={~p"/apps/#{@app.id}"}
@@ -174,6 +173,8 @@ defmodule PortalWeb.CoreComponents do
   @doc """
   Renders an input with label and error messages.
   """
+  @dialyzer {:nowarn_function, input: 1}
+
   attr :id, :any, default: nil
   attr :name, :any
   attr :label, :string, default: nil

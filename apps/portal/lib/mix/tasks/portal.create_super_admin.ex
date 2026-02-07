@@ -27,11 +27,7 @@ defmodule Mix.Tasks.Portal.CreateSuperAdmin do
       {:error, changeset} ->
         Mix.shell().error("Failed to create super admin:")
 
-        Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-          Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
-            opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
-          end)
-        end)
+        Ecto.Changeset.traverse_errors(changeset, &interpolate_error/1)
         |> Enum.each(fn {field, errors} ->
           Mix.shell().error("  #{field}: #{Enum.join(errors, ", ")}")
         end)
@@ -40,5 +36,11 @@ defmodule Mix.Tasks.Portal.CreateSuperAdmin do
 
   def run(_) do
     Mix.shell().error("Usage: mix portal.create_super_admin email@example.com")
+  end
+
+  defp interpolate_error({msg, opts}) do
+    Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+      opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+    end)
   end
 end

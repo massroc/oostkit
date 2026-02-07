@@ -31,6 +31,8 @@ defmodule PortalWeb.ConnCase do
     end
   end
 
+  alias Portal.Accounts.Scope
+
   setup tags do
     Portal.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
@@ -46,7 +48,7 @@ defmodule PortalWeb.ConnCase do
   """
   def register_and_log_in_user(%{conn: conn} = context) do
     user = Portal.AccountsFixtures.user_fixture()
-    scope = Portal.Accounts.Scope.for_user(user)
+    scope = Scope.for_user(user)
 
     opts =
       context
