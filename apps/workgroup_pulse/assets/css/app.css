@@ -462,17 +462,11 @@ th.active-col-header {
   flex: 0 0 auto;
   min-width: 0;
   position: relative;
-  z-index: 1;
   height: calc(100vh - 52px - 3rem); /* viewport - header(52px) - padding(1.5rem×2) */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  transition: opacity 300ms ease;
-  margin-right: 2rem;
-}
-
-.carousel-slide:last-child {
-  margin-right: 0;
+  /* z-index, opacity, transform all driven by JS coverflow */
 }
 
 /* Standard sheets fill their slide */
@@ -488,13 +482,8 @@ th.active-col-header {
   overflow-y: auto;
 }
 
-.carousel-slide.active {
-  z-index: 2;
-}
-
-/* Non-active slides: dimmed */
+/* Non-active slides: not interactive */
 .carousel-slide:not(.active) {
-  opacity: 0.3;
   cursor: pointer;
 }
 

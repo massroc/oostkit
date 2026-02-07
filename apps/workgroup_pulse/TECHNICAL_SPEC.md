@@ -86,7 +86,7 @@ The `SheetCarousel` JS hook sends `carousel_navigate` events with `carousel: "wo
 
 **Layout:**
 - **Main Sheet** — `render_full_scoring_grid/1` renders all 8 questions as a `<table>` with participant columns. Questions are grouped by scale type (Balance, Maximal) with section labels.
-- **Score Overlay** — `render_score_overlay/1` shows a floating modal with score buttons. Auto-submits on selection. Only visible when `is_my_turn and not my_turn_locked and show_score_overlay`.
+- **Score Overlay** — `render_score_overlay/1` shows a floating modal with score buttons. Auto-submits on selection. Starts closed; opened explicitly by clicking a score cell. Uses `data-no-navigate` to prevent carousel click-through.
 - **Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20), rendered by `render_notes_panel/1` in `show.ex`. A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab sets `notes_revealed: true`, revealing a 480px panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
 - **Intro Context Slides** — Slides 0-3 reuse `IntroComponent` public functions (`slide_welcome/1`, etc.) at 480px width for read-only context.
 

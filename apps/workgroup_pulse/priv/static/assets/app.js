@@ -10371,6 +10371,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       this._initEmbla();
       this.el.addEventListener("click", (e) => {
         if (!this.embla) return;
+        if (e.target.closest("[data-no-navigate]")) return;
         const slide = e.target.closest(".carousel-slide");
         if (!slide) return;
         const i = this.embla.slideNodes().indexOf(slide);
@@ -10420,13 +10421,50 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
           });
         }
       });
+      this.embla.on("scroll", () => this._applyCoverflow());
+      this.embla.on("reInit", () => this._applyCoverflow());
       this._updateActive();
+      this._applyCoverflow();
     },
     _updateActive() {
       if (!this.embla) return;
       const selected = this.embla.selectedScrollSnap();
       this.embla.slideNodes().forEach((node, i) => {
         node.classList.toggle("active", i === selected);
+      });
+    },
+    _applyCoverflow() {
+      if (!this.embla) return;
+      const slides = this.embla.slideNodes();
+      const snapList = this.embla.scrollSnapList();
+      const progress = this.embla.scrollProgress();
+      if (snapList.length <= 1) {
+        slides.forEach((s) => {
+          s.style.transform = "";
+          s.style.opacity = "";
+          s.style.zIndex = "";
+        });
+        return;
+      }
+      const step = (snapList[snapList.length - 1] - snapList[0]) / (snapList.length - 1) || 1;
+      const ROTATE_PER_SLIDE = 12;
+      const MAX_ROTATE = 20;
+      const SCALE_PER_SLIDE = 0.06;
+      const MIN_SCALE = 0.8;
+      const OVERLAP_PX = 200;
+      const OPACITY_PER_SLIDE = 0.35;
+      const MIN_OPACITY = 0.25;
+      slides.forEach((slide, index) => {
+        const dist = (snapList[index] - progress) / step;
+        const absDist = Math.abs(dist);
+        const scale = Math.max(MIN_SCALE, 1 - absDist * SCALE_PER_SLIDE);
+        const rotateY = -Math.max(-MAX_ROTATE, Math.min(MAX_ROTATE, dist * ROTATE_PER_SLIDE));
+        const tx = -dist * OVERLAP_PX;
+        const opacity = Math.max(MIN_OPACITY, 1 - absDist * OPACITY_PER_SLIDE);
+        const zIndex = 100 - Math.round(absDist * 10);
+        slide.style.transform = `translateX(${tx}px) perspective(800px) rotateY(${rotateY}deg) scale(${scale})`;
+        slide.style.opacity = opacity;
+        slide.style.zIndex = zIndex;
       });
     }
   };
