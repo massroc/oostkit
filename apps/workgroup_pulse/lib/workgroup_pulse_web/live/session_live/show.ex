@@ -468,6 +468,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             scores_summary={@scores_summary}
             strengths={@strengths}
             concerns={@concerns}
+            all_actions={@all_actions}
             action_count={@action_count}
             show_export_modal={@show_export_modal}
             export_content={@export_content}

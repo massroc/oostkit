@@ -126,7 +126,7 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 **Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20). A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab sets `notes_revealed: true`, revealing a 480px panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
 
 **Actions in Scoring Phase:**
-Actions are managed during the scoring phase via the notes/actions side panel (below notes). The completed/wrap-up page shows action count for export purposes but does not have inline action management.
+Actions are managed during the scoring phase via the notes/actions side panel (below notes). The completed/wrap-up page displays all captured action items in a dedicated section (beneath strengths/concerns) and includes the action count for export purposes.
 
 ### Other Phase Components
 
