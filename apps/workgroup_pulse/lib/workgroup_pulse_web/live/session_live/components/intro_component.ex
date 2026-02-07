@@ -10,7 +10,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   attr :intro_step, :integer, required: true
-  attr :participant, :map, required: true
 
   def render(assigns) do
     ~H"""
@@ -21,7 +20,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
       class="sheet-carousel"
     >
       <div class="carousel-slide">
-        <.sheet class="shadow-sheet p-6 w-[720px]">
+        <.sheet class="shadow-sheet p-6 w-[720px] h-full">
           <div class="text-center">
             <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
               Welcome to the Workshop
@@ -41,30 +40,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
                 <span class="block text-sm mt-2 not-italic text-ink-blue/50">— Fred Emery</span>
               </blockquote>
             </div>
-
-            <div class="flex items-center justify-between mt-8 pt-4 border-t border-ink-blue/10">
-              <div></div>
-              <div class="flex items-center gap-4">
-                <button
-                  phx-click="skip_intro"
-                  class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
-                >
-                  Skip intro
-                </button>
-                <button
-                  phx-click="intro_next"
-                  class="btn-workshop btn-workshop-primary"
-                >
-                  Next →
-                </button>
-              </div>
-            </div>
           </div>
         </.sheet>
       </div>
 
       <div class="carousel-slide">
-        <.sheet class="shadow-sheet p-6 w-[720px]">
+        <.sheet class="shadow-sheet p-6 w-[720px] h-full">
           <div class="text-center">
             <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
               How This Workshop Works
@@ -90,21 +71,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
                 different experiences within your team.
               </p>
             </div>
-
-            <div class="flex items-center justify-end mt-8 pt-4 border-t border-ink-blue/10">
-              <button
-                phx-click="intro_next"
-                class="btn-workshop btn-workshop-primary"
-              >
-                Next →
-              </button>
-            </div>
           </div>
         </.sheet>
       </div>
 
       <div class="carousel-slide">
-        <.sheet class="shadow-sheet p-6 w-[720px]">
+        <.sheet class="shadow-sheet p-6 w-[720px] h-full">
           <div class="text-center">
             <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
               Understanding the Balance Scale
@@ -143,21 +115,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
                 Don't overthink — go with your gut feeling about your current experience.
               </p>
             </div>
-
-            <div class="flex items-center justify-end mt-8 pt-4 border-t border-ink-blue/10">
-              <button
-                phx-click="intro_next"
-                class="btn-workshop btn-workshop-primary"
-              >
-                Next →
-              </button>
-            </div>
           </div>
         </.sheet>
       </div>
 
       <div class="carousel-slide">
-        <.sheet class="shadow-sheet p-6 w-[720px]">
+        <.sheet class="shadow-sheet p-6 w-[720px] h-full">
           <div class="text-center">
             <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
               Creating a Safe Space
@@ -187,21 +150,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
                 <li>• Differences are expected — they reveal different experiences</li>
                 <li>• Your individual scores are visible only to this team</li>
               </ul>
-
-              <div class="mt-8 text-center">
-                <%= if @participant.is_facilitator do %>
-                  <button
-                    phx-click="continue_to_scoring"
-                    class="btn-workshop bg-traffic-green text-white text-xl px-12 py-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                  >
-                    Ready
-                  </button>
-                <% else %>
-                  <p class="text-ink-blue/60 text-sm font-brand">
-                    Waiting for facilitator to start...
-                  </p>
-                <% end %>
-              </div>
             </div>
           </div>
         </.sheet>

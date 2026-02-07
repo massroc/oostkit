@@ -323,95 +323,147 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       <div class="flex-1 relative">
         {render_phase_carousel(assigns)}
       </div>
-      <!-- Floating Action Buttons (scoring phase) -->
-      <%= if @session.state == "scoring" and not @show_mid_transition do %>
-        <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
-          <!-- Ready count message (facilitator only, after scores revealed) -->
-          <%= if @participant.is_facilitator and @scores_revealed do %>
-            <div class="bg-surface-sheet rounded-lg px-3 py-2 shadow-md text-sm font-brand">
-              <%= if @all_ready do %>
-                <span class="text-traffic-green">✓</span>
-                <span class="text-ink-blue/70">All participants ready</span>
-              <% else %>
-                <span class="text-ink-blue/70">
-                  {@ready_count}/{@eligible_participant_count} ready
-                </span>
-              <% end %>
-            </div>
-          <% end %>
-          
-    <!-- Button row -->
-          <div class="flex gap-2">
-            <!-- Back button (facilitator only, after Q1) -->
-            <%= if @participant.is_facilitator and @session.current_question_index > 0 do %>
+      <!-- Floating Action Buttons — fixed to viewport, aligned to sheet width -->
+      {render_floating_buttons(assigns)}
+    </div>
+    """
+  end
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Floating Action Buttons — viewport-fixed, aligned to 720px sheet width
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  defp render_floating_buttons(assigns) do
+    ~H"""
+    <%= case @session.state do %>
+      <% "intro" -> %>
+        <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
+          <div class="pointer-events-auto flex justify-end items-center gap-3">
+            <%= if @intro_step == 1 do %>
               <button
-                phx-click="go_back"
-                class="btn-workshop btn-workshop-secondary"
+                phx-click="skip_intro"
+                class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
               >
-                ← Back
+                Skip intro
               </button>
             <% end %>
-            
-    <!-- Skip button (facilitator only, when someone else is scoring and hasn't submitted) -->
-            <%= if @participant.is_facilitator and not @scores_revealed and not @current_turn_has_score and not (@is_my_turn and not @my_turn_locked) do %>
-              <button
-                phx-click="skip_turn"
-                class="btn-workshop btn-workshop-secondary"
-              >
-                Skip Turn
+            <%= if @intro_step < 4 do %>
+              <button phx-click="intro_next" class="btn-workshop btn-workshop-primary">
+                Next →
               </button>
-            <% end %>
-            
-    <!-- Done button (only during my turn, after score submitted) -->
-            <%= if @is_my_turn and not @my_turn_locked and @has_submitted do %>
-              <button
-                phx-click="complete_turn"
-                class="btn-workshop btn-workshop-primary"
-              >
-                Done →
+            <% else %>
+              <button phx-click="continue_to_scoring" class="btn-workshop btn-workshop-primary">
+                Next →
               </button>
-            <% end %>
-            
-    <!-- Next/Continue button (facilitator only, after scores revealed) -->
-            <%= if @participant.is_facilitator and @scores_revealed do %>
-              <button
-                phx-click="next_question"
-                disabled={not @all_ready}
-                class={[
-                  "btn-workshop",
-                  if(@all_ready,
-                    do: "btn-workshop-primary",
-                    else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
-                  )
-                ]}
-              >
-                <%= if @session.current_question_index + 1 >= @total_questions do %>
-                  Continue to Summary →
-                <% else %>
-                  Next Question →
-                <% end %>
-              </button>
-            <% end %>
-            
-    <!-- Ready button (non-facilitator, after scores revealed) -->
-            <%= if not @participant.is_facilitator and @scores_revealed and not @participant_was_skipped do %>
-              <%= if @participant.is_ready do %>
-                <div class="btn-workshop btn-workshop-secondary opacity-70 cursor-default">
-                  <span class="text-traffic-green">✓</span> Ready
-                </div>
-              <% else %>
-                <button
-                  phx-click="mark_ready"
-                  class="btn-workshop btn-workshop-primary"
-                >
-                  I'm Ready
-                </button>
-              <% end %>
             <% end %>
           </div>
         </div>
-      <% end %>
-    </div>
+      <% "scoring" -> %>
+        <%= if not @show_mid_transition do %>
+          <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-5 pointer-events-none">
+            <div class="pointer-events-auto flex justify-end items-center gap-2">
+              <!-- Ready count (facilitator only, after scores revealed) -->
+              <%= if @participant.is_facilitator and @scores_revealed do %>
+                <div class="text-sm font-brand mr-auto bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+                  <%= if @all_ready do %>
+                    <span class="text-traffic-green">✓</span>
+                    <span class="text-ink-blue/70">All participants ready</span>
+                  <% else %>
+                    <span class="text-ink-blue/70">
+                      {@ready_count}/{@eligible_participant_count} ready
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+              <!-- Back (facilitator, after Q1) -->
+              <%= if @participant.is_facilitator and @session.current_question_index > 0 do %>
+                <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
+                  ← Back
+                </button>
+              <% end %>
+              <!-- Skip turn (facilitator, when someone else is scoring) -->
+              <%= if @participant.is_facilitator and not @scores_revealed and not @current_turn_has_score and not (@is_my_turn and not @my_turn_locked) do %>
+                <button phx-click="skip_turn" class="btn-workshop btn-workshop-secondary">
+                  Skip Turn
+                </button>
+              <% end %>
+              <!-- Done (my turn, after submitting) -->
+              <%= if @is_my_turn and not @my_turn_locked and @has_submitted do %>
+                <button phx-click="complete_turn" class="btn-workshop btn-workshop-primary">
+                  Done →
+                </button>
+              <% end %>
+              <!-- Next question (facilitator, after scores revealed) -->
+              <%= if @participant.is_facilitator and @scores_revealed do %>
+                <button
+                  phx-click="next_question"
+                  disabled={not @all_ready}
+                  class={[
+                    "btn-workshop",
+                    if(@all_ready,
+                      do: "btn-workshop-primary",
+                      else: "btn-workshop-secondary opacity-50 cursor-not-allowed"
+                    )
+                  ]}
+                >
+                  <%= if @session.current_question_index + 1 >= @total_questions do %>
+                    Continue to Summary →
+                  <% else %>
+                    Next Question →
+                  <% end %>
+                </button>
+              <% end %>
+              <!-- Ready (non-facilitator, after scores revealed) -->
+              <%= if not @participant.is_facilitator and @scores_revealed and not @participant_was_skipped do %>
+                <%= if @participant.is_ready do %>
+                  <div class="btn-workshop btn-workshop-secondary opacity-70 cursor-default">
+                    <span class="text-traffic-green">✓</span> Ready
+                  </div>
+                <% else %>
+                  <button phx-click="mark_ready" class="btn-workshop btn-workshop-primary">
+                    I'm Ready
+                  </button>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% "summary" -> %>
+        <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
+          <div class="pointer-events-auto flex justify-end items-center gap-2">
+            <%= if @participant.is_facilitator do %>
+              <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
+                ← Back
+              </button>
+              <button phx-click="continue_to_wrapup" class="btn-workshop btn-workshop-primary">
+                Continue to Wrap-Up →
+              </button>
+            <% else %>
+              <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+                Waiting for facilitator to continue...
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% "completed" -> %>
+        <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
+          <div class="pointer-events-auto flex justify-end items-center gap-2">
+            <%= if @participant.is_facilitator do %>
+              <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
+                ← Back
+              </button>
+              <button phx-click="finish_workshop" class="btn-workshop btn-workshop-primary">
+                Finish Workshop
+              </button>
+            <% else %>
+              <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+                Waiting for facilitator to finish...
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% _ -> %>
+    <% end %>
     """
   end
 
@@ -425,7 +477,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       <% "lobby" -> %>
         {render_single_slide_carousel(assigns, :lobby)}
       <% "intro" -> %>
-        <IntroComponent.render intro_step={@intro_step} participant={@participant} />
+        <IntroComponent.render intro_step={@intro_step} />
       <% "scoring" -> %>
         {render_scoring_carousel(assigns)}
       <% "summary" -> %>
@@ -576,7 +628,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
 
   defp render_notes_slide(assigns) do
     ~H"""
-    <.sheet variant={:secondary} class="p-4 w-[480px] shadow-sheet" style="">
+    <.sheet variant={:secondary} class="p-4 w-[480px] h-full shadow-sheet" style="">
       <!-- Notes section -->
       <div class="mb-6">
         <div class="text-center mb-2">

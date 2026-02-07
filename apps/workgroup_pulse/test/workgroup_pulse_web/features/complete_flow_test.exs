@@ -100,7 +100,7 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       assert render(view) =~ "Welcome to the Workshop"
     end
 
-    test "facilitator can skip intro", %{conn: conn, template: template} do
+    test "facilitator can skip intro directly to scoring", %{conn: conn, template: template} do
       {:ok, session} =
         Sessions.create_session(template, duration_minutes: 60, timer_enabled: false)
 
@@ -117,10 +117,9 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       view |> element("button", "Start Workshop") |> render_click()
       assert render(view) =~ "Welcome to the Workshop"
 
-      # Skip intro goes to step 4
+      # Skip intro goes directly to scoring
       view |> element("button[phx-click='skip_intro']") |> render_click()
-      # Should be on last step with "Ready" button
-      assert render(view) =~ "Ready"
+      assert render(view) =~ "Test Question"
     end
 
     test "participant joins and sees lobby correctly", %{conn: conn, template: template} do

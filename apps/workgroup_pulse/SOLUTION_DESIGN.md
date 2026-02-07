@@ -1,8 +1,8 @@
 # Workgroup Pulse - Solution Design
 
 ## Document Info
-- **Version:** 3.1
-- **Last Updated:** 2026-02-06
+- **Version:** 3.3
+- **Last Updated:** 2026-02-07
 - **Status:** Draft
 
 ---
@@ -896,12 +896,20 @@ SessionLive.Show (root LiveView)
 
 All phases use the **Sheet Carousel** layout — a scroll-snap horizontal container that centres the active slide with adjacent slides peeking from behind (scaled down, dimmed, non-interactive). See `docs/carousel-layout.md` for the full specification.
 
+**Standardised Sheet Dimensions:**
+- **Width**: 720px (all primary sheets)
+- **Height**: `calc(100vh - 52px - 3rem)` — fills available viewport minus header (52px) and carousel padding (1.5rem × 2)
+- **Min-height**: 879px — flipchart ratio floor based on Post-it Easel Pad (635mm × 775mm = 0.819 W:H; 720/0.819 ≈ 879)
+- **Overflow**: CSS-driven — `.carousel-slide .paper-texture > div` gets `height: 100%; overflow-y: auto`. Content scrolls when it exceeds the sheet; no scrollbar when it fits.
+
 **Layout orchestration** lives in `show.ex` via `render_phase_carousel/1`:
 - **Single-slide phases** (lobby, summary, completed) — carousel container with one `.active` slide, no JS hook
 - **Intro** — delegates to `IntroComponent.render` (4 slides with `SheetCarousel` hook)
 - **Scoring** — 2 slides: main scoring grid + notes/actions sheet, uses `SheetCarousel` hook with `data-index` from `@active_sheet`
 
 The `SheetCarousel` JS hook sends `carousel_navigate` events with the carousel's `id`, allowing the server to dispatch to the correct handler (intro vs scoring).
+
+**Floating Action Buttons** are rendered by `render_floating_buttons/1` in `show.ex` — a single viewport-fixed bar (`fixed bottom-10 z-50`) that is 720px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet. The container uses `pointer-events-none` with `pointer-events-auto` on the inner button wrapper, so clicks pass through to the sheet except where buttons are. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline). This ensures action buttons are always visible without scrolling, positioned at the bottom-right of the sheet's visual area.
 
 #### ScoringComponent
 **File:** `lib/workgroup_pulse_web/live/session_live/components/scoring_component.ex`
@@ -1812,7 +1820,7 @@ default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
-*Document Version: 3.2*
+*Document Version: 3.3*
 *v2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
 *v2.1 - Added extracted handler modules (TimerHandler, OperationHelpers)*
 *v2.2 - Removed turn timeout (facilitator can manually skip inactive participants)*
@@ -1820,4 +1828,5 @@ default UI flow now skips it, going directly from "summary" to "completed".
 *v3.0 - Updated for Virtual Wall redesign: new component hierarchy, DataLoaders, EventHandlers/MessageHandlers split, ScoringComponent with full grid, score overlay, and three-panel layout*
 *v3.1 - Removed Timer schema/DB persistence (timer is purely in-process), removed ScoreResultsComponent and ActionsComponent, moved actions to scoring side-sheet, updated Workshops to read-only API, removed non-existent behaviours from SOLID examples, updated state machine to reflect lobby-intro-scoring-summary-completed flow*
 *v3.2 - Sheet Carousel layout system replaces Virtual Wall: universal carousel for all phases, notes as carousel slide, removed virtual_wall component, carousel_navigate dispatches by carousel ID*
+*v3.3 - Standardised sheet dimensions (flipchart ratio, viewport-filling height), floating action buttons (viewport-fixed, 720px-aligned), CSS-driven scroll for sheet content, skip_intro goes directly to scoring*
 *Last Updated: 2026-02-07*

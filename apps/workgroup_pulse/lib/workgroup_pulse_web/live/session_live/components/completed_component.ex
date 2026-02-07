@@ -24,7 +24,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-6 w-[720px]">
+    <.sheet class="shadow-sheet p-6 w-[720px] h-full">
       <!-- Header -->
       <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
@@ -134,33 +134,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
         export_content={@export_content}
         action_count={@action_count}
       />
-      
-    <!-- Navigation Footer -->
-      <div class="pt-4 border-t border-ink-blue/10">
-        <%= if @participant.is_facilitator do %>
-          <div class="flex gap-3">
-            <button
-              phx-click="go_back"
-              class="btn-workshop btn-workshop-secondary"
-            >
-              ← Back
-            </button>
-            <button
-              phx-click="finish_workshop"
-              class="flex-1 btn-workshop btn-workshop-primary"
-            >
-              Finish Workshop
-            </button>
-          </div>
-          <p class="text-center text-ink-blue/50 text-sm mt-2 font-brand">
-            Finish the workshop and return to the home page.
-          </p>
-        <% else %>
-          <p class="text-center text-ink-blue/60 font-brand">
-            Waiting for facilitator to finish the workshop...
-          </p>
-        <% end %>
-      </div>
     </.sheet>
     """
   end
