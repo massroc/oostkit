@@ -38,12 +38,15 @@ SessionLive.Show (root LiveView)
 ├── TimerHandler              # Facilitator timer logic
 │
 ├── Components/ (pure functional components)
-│   ├── LobbyComponent        # Waiting room, participant list, start button
-│   ├── IntroComponent        # 4 intro screens with navigation
-│   ├── ScoringComponent      # Scoring grid + score overlay (notes panel is fixed-position side panel)
-│   ├── SummaryComponent      # Score summary with individual scores & notes
-│   ├── CompletedComponent    # Wrap-up: results, action count, export
-│   └── ExportModalComponent  # Export format/content selection
+│   ├── LobbyComponent              # Waiting room, participant list, start button
+│   ├── IntroComponent              # 4 intro screens with navigation
+│   ├── ScoringComponent            # Scoring grid table (8-question grid)
+│   ├── FloatingButtonsComponent    # Phase-specific floating action buttons
+│   ├── NotesPanelComponent         # Notes/actions side panel (peek tab + expanded)
+│   ├── ScoreOverlayComponent       # Score input overlay + criterion info popup
+│   ├── SummaryComponent            # Score summary with individual scores & notes
+│   ├── CompletedComponent          # Wrap-up: results, action count, export
+│   └── ExportModalComponent        # Export format/content selection
 │
 ├── LiveComponents/
 │   └── ActionFormComponent   # Local form state for action creation
@@ -70,33 +73,58 @@ SessionLive.Show (root LiveView)
 
 ## 2. Phase Components
 
-All phases use the **Sheet Carousel** layout. See [docs/ux-implementation.md](docs/ux-implementation.md) for the full carousel specification (CSS classes, JS hook, slide index map).
+All phases use the **Sheet Stack** layout. See [docs/ux-implementation.md](docs/ux-implementation.md) for the full stack specification (CSS classes, JS hook, slide index map).
 
 **Layout orchestration** lives in `show.ex` via `render_phase_carousel/1`:
-- **Lobby** — standalone single-slide wrapper with one `.active` slide, no JS hook
-- **All other phases** — unified `workshop-carousel` with `SheetCarousel` hook, `data-index` from `@carousel_index`, click-only mode (`data-click-only` + `sheet-carousel-locked`). Slides 0-3 (intro) are always rendered; slides 4-6 (scoring, summary, wrap-up) are conditionally rendered based on session state. The notes/actions panel is a fixed-position side panel outside the carousel (see Notes Panel below).
+- **Lobby** — standalone single-slide wrapper, no JS hook
+- **All other phases** — unified `workshop-carousel` with `SheetStack` hook, `data-index` from `@carousel_index`, click-only navigation. Slides 0-3 (intro) are always rendered; slides 4-6 (scoring, summary, wrap-up) are conditionally rendered based on session state.
 
-The `SheetCarousel` JS hook sends `carousel_navigate` events with `carousel: "workshop-carousel"`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide (scoring → 4, summary → 5, completed → 6).
+The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carousel }`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide (scoring → 4, summary → 5, completed → 6).
 
 ### ScoringComponent
 
 **File:** `lib/workgroup_pulse_web/live/session_live/components/scoring_component.ex`
 
-**Purpose:** Renders the scoring grid sheet and floating score overlay. The notes/actions panel is a fixed-position side panel managed in `show.ex` (not a carousel slide). Pure functional component — all events bubble to the parent LiveView.
+**Purpose:** Renders the scoring grid table. Pure functional component — all events bubble to the parent LiveView. Score overlays, floating buttons, and the notes panel are separate components.
 
-**Layout:**
-- **Main Sheet** — `render_full_scoring_grid/1` renders all 8 questions as a `<table>` with participant columns. Questions are grouped by scale type (Balance, Maximal) with section labels.
-- **Score Overlay** — `render_score_overlay/1` shows a floating modal with score buttons. Auto-submits on selection. Starts closed; opened explicitly by clicking a score cell. Uses `data-no-navigate` to prevent carousel click-through.
-- **Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20), rendered by `render_notes_panel/1` in `show.ex`. A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab sets `notes_revealed: true`, revealing a 480px panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
-- **Intro Context Slides** — Slides 0-3 reuse `IntroComponent` public functions (`slide_welcome/1`, etc.) at 480px width for read-only context.
+**Attrs (11):** `session`, `participant`, `participants`, `current_question`, `has_submitted`, `is_my_turn`, `current_turn_participant_id`, `my_turn_locked`, `show_mid_transition`, `all_questions`, `all_questions_scores`
 
 **Key Render Functions:**
 - `render_full_scoring_grid/1` — Builds the complete 8-question x N-participant grid
 - `render_question_row/2` — Renders a single question row with per-participant score cells
 - `render_score_cell_value/3` — Pattern-matched function for cell display states (future `—`, past `?`, current `...`, scored value)
-- `render_score_overlay/1` — Floating score input modal
-- `render_balance_scale/1` / `render_maximal_scale/1` — Score button grids for each scale type
 - `render_mid_transition/1` — Scale change explanation screen (shown before Q5)
+
+### ScoreOverlayComponent
+
+**File:** `lib/workgroup_pulse_web/live/session_live/components/score_overlay_component.ex`
+
+**Purpose:** Renders the score input overlay and criterion info popup. These are rendered outside the carousel container in the DOM because CSS `transform` on carousel slides breaks `position: fixed`.
+
+**Attrs (9):** `session`, `is_my_turn`, `my_turn_locked`, `show_score_overlay`, `show_criterion_popup`, `current_question`, `selected_value`, `has_submitted`, `all_questions`
+
+**Key Render Functions:**
+- `render_score_overlay/1` — Floating score input modal with backdrop
+- `render_balance_scale/1` / `render_maximal_scale/1` — Score button grids for each scale type
+- `render_criterion_popup/1` — Criterion info popup with discussion tips
+
+### FloatingButtonsComponent
+
+**File:** `lib/workgroup_pulse_web/live/session_live/components/floating_buttons_component.ex`
+
+**Purpose:** Renders phase-specific floating action buttons fixed to the viewport. Scoring-specific attrs use defaults so the component works across all phases.
+
+**Attrs (14):** `session`, `participant`, `carousel_index`, `show_mid_transition`, `scores_revealed`, `all_ready`, `ready_count`, `eligible_participant_count`, `is_my_turn`, `my_turn_locked`, `has_submitted`, `current_turn_has_score`, `total_questions`, `participant_was_skipped`
+
+### NotesPanelComponent
+
+**File:** `lib/workgroup_pulse_web/live/session_live/components/notes_panel_component.ex`
+
+**Purpose:** Renders the notes/actions side panel fixed to the right edge of the viewport. Includes collapsed tab (vertical "Notes" text) and expanded panel.
+
+**Attrs (7):** `notes_revealed`, `carousel_index`, `question_notes`, `note_input`, `all_actions`, `action_count`, `action_input`
+
+**Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20). A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab sets `notes_revealed: true`, revealing a 480px panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
 
 **Actions in Scoring Phase:**
 Actions are managed during the scoring phase via the notes/actions side panel (below notes). The completed/wrap-up page shows action count for export purposes but does not have inline action management.
@@ -305,7 +333,7 @@ end
 - `show.ex` is a thin dispatcher — all logic lives in handler/helper modules
 - DataLoaders hydrate socket assigns in bulk, avoiding piecemeal loading
 - Template caching (`get_or_load_template/2`) avoids repeated DB queries
-- Floating action buttons are rendered directly in `show.ex` (not in ScoringComponent) to keep the component pure
+- Floating action buttons, notes panel, and score overlays are separate extracted components called from `show.ex`'s `render/1`
 
 ---
 
