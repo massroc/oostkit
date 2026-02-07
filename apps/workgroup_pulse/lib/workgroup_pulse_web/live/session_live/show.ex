@@ -60,7 +60,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(intro_step: 1)
      |> assign(show_mid_transition: false)
      |> assign(show_criterion_popup: nil)
-     |> assign(active_sheet: :main)
+     |> assign(active_slide_index: 4)
      |> assign(note_input: "")
      |> assign(action_input: "")
      |> assign(show_export_modal: false)
@@ -541,13 +541,31 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   defp render_scoring_carousel(assigns) do
-    active_index = if assigns.active_sheet == :notes, do: 1, else: 0
-    assigns = assign(assigns, :active_index, active_index)
-
     ~H"""
-    <%= if @show_mid_transition do %>
-      <div class="sheet-carousel">
-        <div class="carousel-slide active">
+    <div
+      id="scoring-carousel"
+      phx-hook="SheetCarousel"
+      data-index={@active_slide_index}
+      data-click-only
+      class="sheet-carousel sheet-carousel-locked"
+    >
+      <%!-- Slides 0-3: intro context sheets (read-only, smaller) --%>
+      <div class="carousel-slide">
+        <IntroComponent.slide_welcome class="shadow-sheet p-4 w-[480px] h-full text-sm" />
+      </div>
+      <div class="carousel-slide">
+        <IntroComponent.slide_how_it_works class="shadow-sheet p-4 w-[480px] h-full text-sm" />
+      </div>
+      <div class="carousel-slide">
+        <IntroComponent.slide_balance_scale class="shadow-sheet p-4 w-[480px] h-full text-sm" />
+      </div>
+      <div class="carousel-slide">
+        <IntroComponent.slide_safe_space class="shadow-sheet p-4 w-[480px] h-full text-sm" />
+      </div>
+
+      <%!-- Slide 4: scoring grid (default active) --%>
+      <div class="carousel-slide">
+        <%= if @show_mid_transition do %>
           <ScoringComponent.render
             session={@session}
             participant={@participant}
@@ -575,16 +593,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             all_questions_scores={@all_questions_scores || %{}}
             show_score_overlay={@show_score_overlay || false}
           />
-        </div>
-      </div>
-    <% else %>
-      <div
-        id="scoring-carousel"
-        phx-hook="SheetCarousel"
-        data-index={@active_index}
-        class="sheet-carousel"
-      >
-        <div class="carousel-slide">
+        <% else %>
           <ScoringComponent.render
             session={@session}
             participant={@participant}
@@ -612,13 +621,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             all_questions_scores={@all_questions_scores || %{}}
             show_score_overlay={@show_score_overlay || false}
           />
-        </div>
-
-        <div class="carousel-slide">
-          {render_notes_slide(assigns)}
-        </div>
+        <% end %>
       </div>
-    <% end %>
+
+      <%!-- Slide 5: notes/actions --%>
+      <div class="carousel-slide">
+        {render_notes_slide(assigns)}
+      </div>
+    </div>
     """
   end
 

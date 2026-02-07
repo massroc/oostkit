@@ -69,7 +69,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_mid_transition(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-8 w-[720px]">
+    <.sheet class="shadow-sheet p-8 w-[720px] h-full">
       <div class="text-center">
         <div class="text-6xl mb-4">🔄</div>
 

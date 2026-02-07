@@ -2749,8 +2749,7 @@ th.active-col-header {
   /* Padding lets first/last slides center: 50% minus half of 720px sheet */
   padding-left: calc(50% - 360px);
   padding-right: calc(50% - 360px);
-  /* Negative gap + negative margins on inactive slides creates overlap */
-  gap: 0;
+  gap: 2rem;
 }
 
 .sheet-carousel::-webkit-scrollbar {
@@ -2760,13 +2759,11 @@ th.active-col-header {
 .carousel-slide {
   flex: 0 0 auto;
   scroll-snap-align: center;
-  transition: opacity 300ms ease, transform 300ms ease;
+  transition: opacity 300ms ease;
   position: relative;
   z-index: 1;
   height: calc(100vh - 52px - 3rem);
   /* viewport - header(52px) - padding(1.5rem×2) */
-  min-height: 879px;
-  /* flipchart ratio floor: 720/0.819 */
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -2791,14 +2788,17 @@ th.active-col-header {
   z-index: 2;
 }
 
-/* Non-active slides: smaller, dimmed, tucked behind active */
+/* Non-active slides: dimmed */
 
 .carousel-slide:not(.active) {
-  opacity: 0.45;
+  opacity: 0.3;
   cursor: pointer;
-  transform: scale(0.82);
-  margin-left: -4rem;
-  margin-right: -4rem;
+}
+
+/* Click-only carousels: no scroll/swipe navigation */
+
+.sheet-carousel-locked {
+  overflow-x: hidden;
 }
 
 .carousel-slide:not(.active) * {

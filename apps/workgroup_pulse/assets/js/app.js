@@ -243,21 +243,24 @@ Hooks.PostHogTracker = {
   }
 }
 
-// Sheet carousel hook for intro phase scroll-snap navigation
+// Sheet carousel hook for scroll-snap navigation (intro) and click-only (scoring)
 Hooks.SheetCarousel = {
   mounted() {
     this.slides = this.el.querySelectorAll('.carousel-slide')
     this.index = parseInt(this.el.dataset.index) || 0
+    this.clickOnly = this.el.hasAttribute('data-click-only')
 
-    this.scrollToIndex(this.index, false)
     this.updateActive()
+    this.scrollToIndex(this.index, false)
 
-    // Debounced scroll-end detection
-    this.scrollTimer = null
-    this.el.addEventListener('scroll', () => {
-      clearTimeout(this.scrollTimer)
-      this.scrollTimer = setTimeout(() => this.onScrollEnd(), 100)
-    })
+    // Only register scroll listener for non-click-only carousels
+    if (!this.clickOnly) {
+      this.scrollTimer = null
+      this.el.addEventListener('scroll', () => {
+        clearTimeout(this.scrollTimer)
+        this.scrollTimer = setTimeout(() => this.onScrollEnd(), 100)
+      })
+    }
 
     // Click non-active slide to navigate
     this.slides.forEach((slide, i) => {
@@ -273,8 +276,8 @@ Hooks.SheetCarousel = {
     const newIndex = parseInt(this.el.dataset.index) || 0
     if (newIndex !== this.index) {
       this.index = newIndex
-      this.scrollToIndex(this.index, true)
       this.updateActive()
+      this.scrollToIndex(this.index, true)
     }
   },
 
@@ -284,7 +287,19 @@ Hooks.SheetCarousel = {
 
   scrollToIndex(index, smooth) {
     const slide = this.slides[index]
-    if (slide) {
+    if (!slide) return
+
+    if (this.clickOnly) {
+      // For overflow-x:hidden containers, use scrollTo with computed offset
+      const containerRect = this.el.getBoundingClientRect()
+      const slideRect = slide.getBoundingClientRect()
+      const offset = slideRect.left - containerRect.left + this.el.scrollLeft
+        - (containerRect.width / 2) + (slideRect.width / 2)
+      this.el.scrollTo({
+        left: offset,
+        behavior: smooth ? 'smooth' : 'instant'
+      })
+    } else {
       slide.scrollIntoView({
         behavior: smooth ? 'smooth' : 'instant',
         inline: 'center',
