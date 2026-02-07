@@ -720,14 +720,26 @@ All phases use the same **sheet carousel** layout — a scroll-snap horizontal c
 | Summary | 1 | Single slide, no hook |
 | Completed | 1 | Single slide, no hook |
 
-**Floating Action Buttons (bottom-right):**
-| Button | Shown When | Style |
-|--------|-----------|-------|
-| Done → | Current turn participant, after scoring | Primary (gradient) |
-| Skip Turn | Facilitator, when another participant hasn't scored | Secondary |
-| ← Back | Facilitator, after Q1 | Secondary |
-| Next Question → | Facilitator, all participants ready | Primary |
-| I'm Ready | Non-facilitator, after all turns complete | Primary |
+**Sheet Dimensions:**
+- **Width**: 720px (all primary sheets), 480px (notes side-sheet)
+- **Height**: Fills available viewport — `calc(100vh - header - carousel_padding)` with `min-height: 879px` (flipchart ratio floor, based on Post-it Easel Pad 635mm × 775mm)
+- **Overflow**: Content scrolls within the sheet when it exceeds the available height; no scrollbar when content fits
+
+**Floating Action Buttons:**
+Viewport-fixed bar aligned to the 720px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. `pointer-events-none` container with `pointer-events-auto` inner wrapper so clicks pass through to the sheet. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline).
+
+| Button | Phase | Shown When | Style |
+|--------|-------|-----------|-------|
+| Skip intro | Intro (slide 1 only) | Always on first intro slide | Text link |
+| Next → | Intro | All slides | Primary (gradient) |
+| Done → | Scoring | Current turn participant, after scoring | Primary (gradient) |
+| Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
+| ← Back | Scoring, Summary, Completed | Facilitator (scoring: after Q1) | Secondary |
+| Next Question → | Scoring | Facilitator, all participants ready | Primary |
+| Continue to Summary → | Scoring (last Q) | Facilitator, all participants ready | Primary |
+| I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |
+| Continue to Wrap-Up → | Summary | Facilitator | Primary |
+| Finish Workshop | Completed | Facilitator | Primary |
 
 ### Score Input: Floating Overlay
 
@@ -1000,5 +1012,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 3.1 - Sheet carousel layout system replaces Virtual Wall (universal carousel for all phases, notes as carousel slide)*
+*Document Version: 3.2 - Standardised sheet dimensions (flipchart ratio height), floating action buttons for all phases*
 *Last Updated: 2026-02-07*

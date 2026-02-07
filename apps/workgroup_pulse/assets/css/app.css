@@ -441,7 +441,9 @@ th.active-col-header {
   height: 100%;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -462,6 +464,24 @@ th.active-col-header {
   transition: opacity 300ms ease, transform 300ms ease;
   position: relative;
   z-index: 1;
+  height: calc(100vh - 52px - 3rem); /* viewport - header(52px) - padding(1.5rem×2) */
+  min-height: 879px; /* flipchart ratio floor: 720/0.819 */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* Standard sheets fill their slide */
+.carousel-slide .paper-texture,
+.carousel-slide .paper-texture-secondary {
+  height: 100%;
+}
+
+/* Inner wrapper fills sheet and scrolls overflow */
+.carousel-slide .paper-texture > div,
+.carousel-slide .paper-texture-secondary > div {
+  height: 100%;
+  overflow-y: auto;
 }
 
 .carousel-slide.active {

@@ -20,7 +20,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-6 w-[720px]">
+    <.sheet class="shadow-sheet p-6 w-[720px] h-full">
       <!-- Header -->
       <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
@@ -57,7 +57,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
       </div>
       
     <!-- Questions Grid -->
-      <div class="space-y-4 mb-6">
+      <div class="space-y-4">
         <%= for score <- @scores_summary do %>
           <% question_notes = Map.get(@notes_by_question, score.question_index, []) %>
           <% question_scores = Map.get(@individual_scores, score.question_index, []) %>
@@ -148,33 +148,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
                 </ul>
               </div>
             <% end %>
-          </div>
-        <% end %>
-      </div>
-      
-    <!-- Navigation Footer -->
-      <div class="pt-4 border-t border-ink-blue/10">
-        <%= if @participant.is_facilitator do %>
-          <div class="flex gap-3">
-            <button
-              phx-click="go_back"
-              class="btn-workshop btn-workshop-secondary"
-            >
-              ← Back
-            </button>
-            <button
-              phx-click="continue_to_wrapup"
-              class="flex-1 btn-workshop btn-workshop-primary"
-            >
-              Continue to Wrap-Up →
-            </button>
-          </div>
-          <p class="text-center text-ink-blue/50 text-sm mt-2 font-brand">
-            Proceed to create action items and finish the workshop.
-          </p>
-        <% else %>
-          <div class="text-center text-ink-blue/60 font-brand">
-            Reviewing summary. Waiting for facilitator to continue...
           </div>
         <% end %>
       </div>

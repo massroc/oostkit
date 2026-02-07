@@ -44,15 +44,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     <% else %>
       <!-- Main Sheet with scoring grid -->
       <.sheet
-        class="p-5 w-[720px] max-h-[min(90vh,1020px)] shadow-sheet-lifted transition-all duration-300"
+        class="p-5 w-[720px] h-full shadow-sheet-lifted transition-all duration-300"
         phx-click="focus_sheet"
         phx-value-sheet="main"
       >
         <!-- Full Scoring Grid -->
         <%= if length(@all_questions) > 0 do %>
-          <div class="overflow-y-auto overflow-x-hidden max-h-[calc(min(90vh,1020px)-3rem)]">
-            {render_full_scoring_grid(assigns)}
-          </div>
+          {render_full_scoring_grid(assigns)}
         <% end %>
       </.sheet>
       

@@ -62,10 +62,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
 
   @doc """
   Handles skip_intro event.
-  Jumps to the last intro step.
+  Advances directly to scoring phase.
   """
   def handle_skip_intro(socket) do
-    {:noreply, assign(socket, intro_step: 4)}
+    handle_continue_to_scoring(socket)
   end
 
   @doc """
@@ -88,27 +88,23 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
 
   @doc """
   Handles continue_to_scoring event.
-  Only facilitator can advance to scoring.
+  Advances from intro to scoring phase.
   """
   def handle_continue_to_scoring(socket) do
     session = socket.assigns.session
     participant = socket.assigns.participant
 
-    if participant.is_facilitator do
-      handle_operation(
-        socket,
-        Sessions.advance_to_scoring(session),
-        "Failed to advance to scoring",
-        fn socket, updated_session ->
-          socket
-          |> assign(session: updated_session)
-          |> DataLoaders.load_scoring_data(updated_session, participant)
-          |> TimerHandler.start_phase_timer(updated_session)
-        end
-      )
-    else
-      {:noreply, socket}
-    end
+    handle_operation(
+      socket,
+      Sessions.advance_to_scoring(session),
+      "Failed to advance to scoring",
+      fn socket, updated_session ->
+        socket
+        |> assign(session: updated_session)
+        |> DataLoaders.load_scoring_data(updated_session, participant)
+        |> TimerHandler.start_phase_timer(updated_session)
+      end
+    )
   end
 
   # Scoring events
