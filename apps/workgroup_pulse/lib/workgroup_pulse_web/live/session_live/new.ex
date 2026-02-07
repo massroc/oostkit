@@ -4,6 +4,8 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
   """
   use WorkgroupPulseWeb, :live_view
 
+  import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
+
   alias WorkgroupPulse.Workshops
 
   @impl true
@@ -72,10 +74,10 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
 
     ~H"""
     <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
-      <div class="max-w-md w-full">
+      <div class="w-[720px] mb-4">
         <.link
           navigate={~p"/"}
-          class="text-text-body hover:text-text-dark mb-8 inline-flex items-center"
+          class="text-text-body hover:text-text-dark inline-flex items-center"
         >
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -87,8 +89,10 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
           </svg>
           Back to Home
         </.link>
+      </div>
 
-        <div class="bg-surface-sheet rounded-sheet shadow-sheet p-sheet-padding">
+      <.sheet class="shadow-sheet p-6 w-[720px]">
+        <div class="max-w-md mx-auto">
           <h1 class="text-2xl font-bold text-text-dark mb-2 text-center font-brand">
             Create New Workshop
           </h1>
@@ -394,11 +398,11 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
             </button>
           </form>
         </div>
+      </.sheet>
 
-        <p class="text-text-body text-sm text-center mt-6">
-          You'll get a link to share with your team so they can join.
-        </p>
-      </div>
+      <p class="text-text-body text-sm text-center mt-6">
+        You'll get a link to share with your team so they can join.
+      </p>
     </div>
     """
   end

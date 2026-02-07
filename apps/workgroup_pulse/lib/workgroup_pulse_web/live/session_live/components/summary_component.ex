@@ -1,6 +1,6 @@
 defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   @moduledoc """
-  Renders the summary phase as a sheet on the Virtual Wall.
+  Renders the summary phase as a sheet in the carousel.
   Shows all scores with analysis and notes in a grid layout.
   Pure functional component - all events bubble to parent LiveView.
   """
@@ -20,7 +20,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-6 max-w-4xl w-full">
+    <.sheet class="shadow-sheet p-6 w-[720px]">
       <!-- Header -->
       <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">

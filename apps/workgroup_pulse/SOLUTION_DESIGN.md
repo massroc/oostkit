@@ -866,7 +866,7 @@ SessionLive.Show (root LiveView)
 ├── Components/ (pure functional components)
 │   ├── LobbyComponent        # Waiting room, participant list, start button
 │   ├── IntroComponent        # 4 intro screens with navigation
-│   ├── ScoringComponent      # Virtual Wall grid + score overlay + side panels (actions in notes side-sheet)
+│   ├── ScoringComponent      # Scoring grid + score overlay (notes slide managed in show.ex carousel)
 │   ├── SummaryComponent      # Score summary with individual scores & notes
 │   ├── CompletedComponent    # Wrap-up: results, action count, export
 │   └── ExportModalComponent  # Export format/content selection
@@ -894,18 +894,24 @@ SessionLive.Show (root LiveView)
 
 ### Phase Components (Functional Components)
 
-The scoring phase has been redesigned as the **Virtual Wall** — a full-screen three-panel layout:
+All phases use the **Sheet Carousel** layout — a scroll-snap horizontal container that centres the active slide with adjacent slides peeking from behind (scaled down, dimmed, non-interactive). See `docs/carousel-layout.md` for the full specification.
+
+**Layout orchestration** lives in `show.ex` via `render_phase_carousel/1`:
+- **Single-slide phases** (lobby, summary, completed) — carousel container with one `.active` slide, no JS hook
+- **Intro** — delegates to `IntroComponent.render` (4 slides with `SheetCarousel` hook)
+- **Scoring** — 2 slides: main scoring grid + notes/actions sheet, uses `SheetCarousel` hook with `data-index` from `@active_sheet`
+
+The `SheetCarousel` JS hook sends `carousel_navigate` events with the carousel's `id`, allowing the server to dispatch to the correct handler (intro vs scoring).
 
 #### ScoringComponent
 **File:** `lib/workgroup_pulse_web/live/session_live/components/scoring_component.ex`
 
-**Purpose:** Renders the entire scoring phase UI including the full 8-question grid, floating score overlay, left question info panel, and right notes side-sheet. Pure functional component — all events bubble to the parent LiveView.
+**Purpose:** Renders the scoring grid sheet and floating score overlay. The notes/actions sheet is a separate carousel slide managed in `show.ex`. Pure functional component — all events bubble to the parent LiveView.
 
 **Layout:**
-- **Main Sheet (centre)** — `render_full_scoring_grid/1` renders all 8 questions as a `<table>` with participant columns. Questions are grouped by scale type (Balance, Maximal) with section labels.
-- **Left Panel** — Question title, explanation, and expandable facilitator tips ("More tips" toggle).
-- **Right Panel (Side-sheet)** — Notes with focus-based expand/collapse. Shows preview (2 notes max) when unfocused, full list + add form when focused.
+- **Main Sheet** — `render_full_scoring_grid/1` renders all 8 questions as a `<table>` with participant columns. Questions are grouped by scale type (Balance, Maximal) with section labels.
 - **Score Overlay** — `render_score_overlay/1` shows a floating modal with score buttons. Auto-submits on selection. Only visible when `is_my_turn and not my_turn_locked and show_score_overlay`.
+- **Notes/Actions Slide** — Managed in `show.ex` as carousel slide 2, rendered by `render_notes_slide/1`. Full-height secondary sheet with notes and actions forms.
 
 **Key Render Functions:**
 - `render_full_scoring_grid/1` — Builds the complete 8-question × N-participant grid
@@ -916,7 +922,7 @@ The scoring phase has been redesigned as the **Virtual Wall** — a full-screen 
 - `render_mid_transition/1` — Scale change explanation screen (shown before Q5)
 
 **Actions in Scoring Phase:**
-Actions are managed during the scoring phase via the notes side-sheet (below notes). The ActionFormComponent (LiveComponent) provides local form state for action creation without triggering parent re-renders. The completed/wrap-up page shows action count for export purposes but does not have inline action management.
+Actions are managed during the scoring phase via the notes/actions carousel slide (below notes). The completed/wrap-up page shows action count for export purposes but does not have inline action management.
 
 **All other phase components** follow the same pure functional pattern:
 - `SummaryComponent` — Paper-textured sheet with individual score grids, team combined values, traffic lights, and notes
@@ -1806,11 +1812,12 @@ default UI flow now skips it, going directly from "summary" to "completed".
 
 ---
 
-*Document Version: 3.1*
+*Document Version: 3.2*
 *v2.0 - Refactored to turn-based sequential scoring (butcher paper model)*
 *v2.1 - Added extracted handler modules (TimerHandler, OperationHelpers)*
 *v2.2 - Removed turn timeout (facilitator can manually skip inactive participants)*
 *v2.3 - Added navigation rules and readiness behavior documentation*
 *v3.0 - Updated for Virtual Wall redesign: new component hierarchy, DataLoaders, EventHandlers/MessageHandlers split, ScoringComponent with full grid, score overlay, and three-panel layout*
 *v3.1 - Removed Timer schema/DB persistence (timer is purely in-process), removed ScoreResultsComponent and ActionsComponent, moved actions to scoring side-sheet, updated Workshops to read-only API, removed non-existent behaviours from SOLID examples, updated state machine to reflect lobby-intro-scoring-summary-completed flow*
-*Last Updated: 2026-02-06*
+*v3.2 - Sheet Carousel layout system replaces Virtual Wall: universal carousel for all phases, notes as carousel slide, removed virtual_wall component, carousel_navigate dispatches by carousel ID*
+*Last Updated: 2026-02-07*

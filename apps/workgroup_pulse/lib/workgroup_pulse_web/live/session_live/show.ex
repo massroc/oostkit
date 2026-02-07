@@ -174,6 +174,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
+  def handle_event("carousel_navigate", %{"index" => index, "carousel" => carousel}, socket) do
+    EventHandlers.handle_carousel_navigate(socket, carousel, index)
+  end
+
+  @impl true
   def handle_event("continue_to_scoring", _params, socket) do
     EventHandlers.handle_continue_to_scoring(socket)
   end
@@ -314,23 +319,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           do: nil,
           else: session_display_name(@session)
       } />
-      <!-- Main Content Area: Virtual Wall -->
-      <div class="flex-1 overflow-hidden relative">
-        <.virtual_wall
-          current_index={phase_to_index(@session.state)}
-          total_count={5}
-          active_sheet={@active_sheet}
-        >
-          <:previous_sheet :if={phase_to_index(@session.state) > 0}>
-            {render_previous_phase(assigns)}
-          </:previous_sheet>
-
-          {render_current_phase(assigns)}
-
-          <:side_sheet :if={@session.state == "scoring" and not @show_mid_transition}>
-            {render_notes_side_sheet(assigns)}
-          </:side_sheet>
-        </.virtual_wall>
+      <!-- Main Content Area -->
+      <div class="flex-1 relative">
+        {render_phase_carousel(assigns)}
       </div>
       <!-- Floating Action Buttons (scoring phase) -->
       <%= if @session.state == "scoring" and not @show_mid_transition do %>
@@ -425,358 +416,266 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # Phase index mapping
+  # Phase carousel — universal layout for all phases
   # ═══════════════════════════════════════════════════════════════════════════
 
-  defp phase_to_index("lobby"), do: 0
-  defp phase_to_index("intro"), do: 1
-  defp phase_to_index("scoring"), do: 2
-  defp phase_to_index("summary"), do: 3
-  defp phase_to_index("completed"), do: 4
-  defp phase_to_index(_), do: 0
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Phase renderers
-  # ═══════════════════════════════════════════════════════════════════════════
-
-  defp render_current_phase(assigns) do
+  defp render_phase_carousel(assigns) do
     ~H"""
     <%= case @session.state do %>
       <% "lobby" -> %>
-        <LobbyComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-        />
+        {render_single_slide_carousel(assigns, :lobby)}
       <% "intro" -> %>
-        <IntroComponent.render
-          intro_step={@intro_step}
-          participant={@participant}
-        />
+        <IntroComponent.render intro_step={@intro_step} participant={@participant} />
       <% "scoring" -> %>
-        <ScoringComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-          current_question={@current_question}
-          total_questions={@total_questions}
-          all_scores={@all_scores}
-          selected_value={@selected_value}
-          my_score={@my_score}
-          has_submitted={@has_submitted}
-          is_my_turn={@is_my_turn}
-          current_turn_participant_id={@current_turn_participant_id}
-          current_turn_has_score={@current_turn_has_score}
-          my_turn_locked={@my_turn_locked}
-          scores_revealed={@scores_revealed}
-          score_count={@score_count}
-          active_participant_count={@active_participant_count}
-          show_mid_transition={@show_mid_transition}
-          show_criterion_popup={@show_criterion_popup}
-          ready_count={@ready_count}
-          eligible_participant_count={@eligible_participant_count}
-          all_ready={@all_ready}
-          participant_was_skipped={@participant_was_skipped}
-          all_questions={(@template && @template.questions) || []}
-          all_questions_scores={@all_questions_scores || %{}}
-          show_score_overlay={@show_score_overlay || false}
-        />
+        {render_scoring_carousel(assigns)}
       <% "summary" -> %>
-        <SummaryComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-          scores_summary={@scores_summary}
-          individual_scores={@individual_scores}
-          notes_by_question={@notes_by_question}
-        />
+        {render_single_slide_carousel(assigns, :summary)}
       <% "completed" -> %>
-        <CompletedComponent.render
-          session={@session}
-          participant={@participant}
-          scores_summary={@scores_summary}
-          strengths={@strengths}
-          concerns={@concerns}
-          action_count={@action_count}
-          show_export_modal={@show_export_modal}
-          export_content={@export_content}
-        />
+        {render_single_slide_carousel(assigns, :completed)}
       <% _ -> %>
-        <LobbyComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-        />
+        {render_single_slide_carousel(assigns, :lobby)}
     <% end %>
     """
   end
 
-  defp previous_phase_name(state) do
-    case state do
-      "intro" -> "lobby"
-      "scoring" -> "intro"
-      "summary" -> "scoring"
-      "completed" -> "summary"
-      _ -> nil
-    end
-  end
-
-  defp render_previous_phase(assigns) do
-    previous_phase = previous_phase_name(assigns.session.state)
-    assigns = assign(assigns, :previous_phase, previous_phase)
+  defp render_single_slide_carousel(assigns, phase) do
+    assigns = assign(assigns, :phase, phase)
 
     ~H"""
-    <%= case @previous_phase do %>
-      <% "lobby" -> %>
-        <LobbyComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-        />
-      <% "intro" -> %>
-        <IntroComponent.render
-          intro_step={4}
-          participant={@participant}
-        />
-      <% "scoring" -> %>
-        <ScoringComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-          current_question={@current_question}
-          total_questions={@total_questions}
-          all_scores={@all_scores}
-          selected_value={@selected_value}
-          my_score={@my_score}
-          has_submitted={@has_submitted}
-          is_my_turn={false}
-          current_turn_participant_id={@current_turn_participant_id}
-          current_turn_has_score={@current_turn_has_score}
-          my_turn_locked={true}
-          scores_revealed={@scores_revealed}
-          score_count={@score_count}
-          active_participant_count={@active_participant_count}
-          show_mid_transition={false}
-          show_criterion_popup={nil}
-          ready_count={@ready_count}
-          eligible_participant_count={@eligible_participant_count}
-          all_ready={@all_ready}
-          participant_was_skipped={@participant_was_skipped}
-          all_questions={(@template && @template.questions) || []}
-          all_questions_scores={@all_questions_scores || %{}}
-          show_score_overlay={false}
-        />
-      <% "summary" -> %>
-        <SummaryComponent.render
-          session={@session}
-          participant={@participant}
-          participants={@participants}
-          scores_summary={@scores_summary}
-          individual_scores={@individual_scores}
-          notes_by_question={@notes_by_question}
-        />
-      <% _ -> %>
-    <% end %>
-    """
-  end
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Notes/Actions Side-Sheet (scoring phase only)
-  # ═══════════════════════════════════════════════════════════════════════════
-
-  defp render_notes_side_sheet(assigns) do
-    ~H"""
-    <div
-      phx-click="focus_sheet"
-      phx-value-sheet="notes"
-    >
-      <.sheet
-        variant={:secondary}
-        class={[
-          "p-4 overflow-hidden cursor-pointer transition-all duration-300",
-          if(@active_sheet == :notes,
-            do: "w-[320px] shadow-sheet-lifted",
-            else: "w-[280px] shadow-sheet hover:shadow-sheet-lifted"
-          )
-        ]}
-        style=""
-      >
-        <%= if @active_sheet == :notes do %>
-          <!-- Active: 50/50 split — Notes top, Actions bottom -->
-          <div class="flex flex-col h-[500px]">
-            <!-- Notes section (top half) -->
-            <div class="flex-1 flex flex-col min-h-0">
-              <div class="text-center mb-2">
-                <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
-                  Notes
-                  <%= if length(@question_notes) > 0 do %>
-                    <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                      ({length(@question_notes)})
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-
-              <form phx-submit="add_note" class="mb-2">
-                <input
-                  type="text"
-                  name="note"
-                  value={@note_input}
-                  phx-change="update_note_input"
-                  phx-debounce="300"
-                  placeholder="Add a note..."
-                  class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
-                />
-              </form>
-
-              <div class="space-y-1.5 overflow-y-auto flex-1 min-h-0">
-                <%= if length(@question_notes) > 0 do %>
-                  <%= for note <- @question_notes do %>
-                    <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
-                      <div class="flex justify-between items-start gap-1">
-                        <p class="font-workshop text-ink-blue flex-1">{note.content}</p>
-                        <button
-                          type="button"
-                          phx-click="delete_note"
-                          phx-value-id={note.id}
-                          class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  <% end %>
-                <% else %>
-                  <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
-                    No notes yet. Type above to add one.
-                  </p>
-                <% end %>
-              </div>
-            </div>
-            <!-- Actions section (bottom half) -->
-            <div class="flex-1 flex flex-col min-h-0 border-t border-ink-blue/10 pt-2 mt-2">
-              <div class="text-center mb-2">
-                <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
-                  Actions
-                  <%= if @action_count > 0 do %>
-                    <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                      ({@action_count})
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-
-              <form phx-submit="add_action" class="mb-2">
-                <input
-                  type="text"
-                  name="action"
-                  value={@action_input}
-                  phx-change="update_action_input"
-                  phx-debounce="300"
-                  placeholder="Add an action..."
-                  class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
-                />
-              </form>
-
-              <div class="space-y-1.5 overflow-y-auto flex-1 min-h-0">
-                <%= if @action_count > 0 do %>
-                  <%= for action <- @all_actions do %>
-                    <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
-                      <div class="flex justify-between items-start gap-1">
-                        <p class="font-workshop text-ink-blue flex-1">{action.description}</p>
-                        <button
-                          type="button"
-                          phx-click="delete_action"
-                          phx-value-id={action.id}
-                          class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  <% end %>
-                <% else %>
-                  <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
-                    No actions yet. Type above to add one.
-                  </p>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        <% else %>
-          <!-- Inactive: Show preview of both notes and actions -->
-          <div class="flex flex-col min-h-[200px]">
-            <!-- Notes preview -->
-            <div class="flex-1">
-              <div class="text-center mb-2">
-                <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
-                  Notes
-                  <%= if length(@question_notes) > 0 do %>
-                    <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                      ({length(@question_notes)})
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-              <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
-                <%= if length(@question_notes) > 0 do %>
-                  <%= for note <- Enum.take(@question_notes, 2) do %>
-                    <p class="mb-1 relative pl-4 text-sm">
-                      <span class="absolute left-0 text-ink-blue/60">•</span>
-                      {String.slice(note.content, 0, 30)}{if String.length(note.content) > 30,
-                        do: "..."}
-                    </p>
-                  <% end %>
-                  <%= if length(@question_notes) > 2 do %>
-                    <p class="text-xs opacity-60 text-center">
-                      +{length(@question_notes) - 2} more
-                    </p>
-                  <% end %>
-                <% else %>
-                  <p class="text-center text-ink-blue/50 italic text-sm">
-                    Click to add notes...
-                  </p>
-                <% end %>
-              </div>
-            </div>
-            <!-- Actions preview -->
-            <div class="flex-1 border-t border-ink-blue/10 pt-2 mt-2">
-              <div class="text-center mb-2">
-                <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
-                  Actions
-                  <%= if @action_count > 0 do %>
-                    <span class="text-sm font-normal text-ink-blue/50 ml-1">
-                      ({@action_count})
-                    </span>
-                  <% end %>
-                </div>
-              </div>
-              <div class="font-workshop text-ink-blue leading-relaxed opacity-70">
-                <%= if @action_count > 0 do %>
-                  <%= for action <- Enum.take(@all_actions, 2) do %>
-                    <p class="mb-1 relative pl-4 text-sm">
-                      <span class="absolute left-0 text-ink-blue/60">•</span>
-                      {String.slice(action.description, 0, 30)}{if String.length(action.description) >
-                                                                     30,
-                                                                   do: "..."}
-                    </p>
-                  <% end %>
-                  <%= if @action_count > 2 do %>
-                    <p class="text-xs opacity-60 text-center">
-                      +{@action_count - 2} more
-                    </p>
-                  <% end %>
-                <% else %>
-                  <p class="text-center text-ink-blue/50 italic text-sm">
-                    Click to add actions...
-                  </p>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </.sheet>
+    <div class="sheet-carousel">
+      <div class="carousel-slide active">
+        {render_phase_content(assigns, @phase)}
+      </div>
     </div>
+    """
+  end
+
+  defp render_phase_content(assigns, :lobby) do
+    ~H"""
+    <LobbyComponent.render
+      session={@session}
+      participant={@participant}
+      participants={@participants}
+    />
+    """
+  end
+
+  defp render_phase_content(assigns, :summary) do
+    ~H"""
+    <SummaryComponent.render
+      session={@session}
+      participant={@participant}
+      participants={@participants}
+      scores_summary={@scores_summary}
+      individual_scores={@individual_scores}
+      notes_by_question={@notes_by_question}
+    />
+    """
+  end
+
+  defp render_phase_content(assigns, :completed) do
+    ~H"""
+    <CompletedComponent.render
+      session={@session}
+      participant={@participant}
+      scores_summary={@scores_summary}
+      strengths={@strengths}
+      concerns={@concerns}
+      action_count={@action_count}
+      show_export_modal={@show_export_modal}
+      export_content={@export_content}
+    />
+    """
+  end
+
+  defp render_scoring_carousel(assigns) do
+    active_index = if assigns.active_sheet == :notes, do: 1, else: 0
+    assigns = assign(assigns, :active_index, active_index)
+
+    ~H"""
+    <%= if @show_mid_transition do %>
+      <div class="sheet-carousel">
+        <div class="carousel-slide active">
+          <ScoringComponent.render
+            session={@session}
+            participant={@participant}
+            participants={@participants}
+            current_question={@current_question}
+            total_questions={@total_questions}
+            all_scores={@all_scores}
+            selected_value={@selected_value}
+            my_score={@my_score}
+            has_submitted={@has_submitted}
+            is_my_turn={@is_my_turn}
+            current_turn_participant_id={@current_turn_participant_id}
+            current_turn_has_score={@current_turn_has_score}
+            my_turn_locked={@my_turn_locked}
+            scores_revealed={@scores_revealed}
+            score_count={@score_count}
+            active_participant_count={@active_participant_count}
+            show_mid_transition={@show_mid_transition}
+            show_criterion_popup={@show_criterion_popup}
+            ready_count={@ready_count}
+            eligible_participant_count={@eligible_participant_count}
+            all_ready={@all_ready}
+            participant_was_skipped={@participant_was_skipped}
+            all_questions={(@template && @template.questions) || []}
+            all_questions_scores={@all_questions_scores || %{}}
+            show_score_overlay={@show_score_overlay || false}
+          />
+        </div>
+      </div>
+    <% else %>
+      <div
+        id="scoring-carousel"
+        phx-hook="SheetCarousel"
+        data-index={@active_index}
+        class="sheet-carousel"
+      >
+        <div class="carousel-slide">
+          <ScoringComponent.render
+            session={@session}
+            participant={@participant}
+            participants={@participants}
+            current_question={@current_question}
+            total_questions={@total_questions}
+            all_scores={@all_scores}
+            selected_value={@selected_value}
+            my_score={@my_score}
+            has_submitted={@has_submitted}
+            is_my_turn={@is_my_turn}
+            current_turn_participant_id={@current_turn_participant_id}
+            current_turn_has_score={@current_turn_has_score}
+            my_turn_locked={@my_turn_locked}
+            scores_revealed={@scores_revealed}
+            score_count={@score_count}
+            active_participant_count={@active_participant_count}
+            show_mid_transition={false}
+            show_criterion_popup={@show_criterion_popup}
+            ready_count={@ready_count}
+            eligible_participant_count={@eligible_participant_count}
+            all_ready={@all_ready}
+            participant_was_skipped={@participant_was_skipped}
+            all_questions={(@template && @template.questions) || []}
+            all_questions_scores={@all_questions_scores || %{}}
+            show_score_overlay={@show_score_overlay || false}
+          />
+        </div>
+
+        <div class="carousel-slide">
+          {render_notes_slide(assigns)}
+        </div>
+      </div>
+    <% end %>
+    """
+  end
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Notes/Actions Slide (scoring carousel slide 2)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  defp render_notes_slide(assigns) do
+    ~H"""
+    <.sheet variant={:secondary} class="p-4 w-[480px] shadow-sheet" style="">
+      <!-- Notes section -->
+      <div class="mb-6">
+        <div class="text-center mb-2">
+          <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
+            Notes
+            <%= if length(@question_notes) > 0 do %>
+              <span class="text-sm font-normal text-ink-blue/50 ml-1">
+                ({length(@question_notes)})
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <form phx-submit="add_note" class="mb-2">
+          <input
+            type="text"
+            name="note"
+            value={@note_input}
+            phx-change="update_note_input"
+            phx-debounce="300"
+            placeholder="Add a note..."
+            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+          />
+        </form>
+
+        <div class="space-y-1.5">
+          <%= if length(@question_notes) > 0 do %>
+            <%= for note <- @question_notes do %>
+              <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
+                <div class="flex justify-between items-start gap-1">
+                  <p class="font-workshop text-ink-blue flex-1">{note.content}</p>
+                  <button
+                    type="button"
+                    phx-click="delete_note"
+                    phx-value-id={note.id}
+                    class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+              No notes yet. Type above to add one.
+            </p>
+          <% end %>
+        </div>
+      </div>
+      <!-- Actions section -->
+      <div class="border-t border-ink-blue/10 pt-4">
+        <div class="text-center mb-2">
+          <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
+            Actions
+            <%= if @action_count > 0 do %>
+              <span class="text-sm font-normal text-ink-blue/50 ml-1">
+                ({@action_count})
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <form phx-submit="add_action" class="mb-2">
+          <input
+            type="text"
+            name="action"
+            value={@action_input}
+            phx-change="update_action_input"
+            phx-debounce="300"
+            placeholder="Add an action..."
+            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+          />
+        </form>
+
+        <div class="space-y-1.5">
+          <%= if @action_count > 0 do %>
+            <%= for action <- @all_actions do %>
+              <div class="bg-surface-sheet/50 rounded p-2 text-sm group">
+                <div class="flex justify-between items-start gap-1">
+                  <p class="font-workshop text-ink-blue flex-1">{action.description}</p>
+                  <button
+                    type="button"
+                    phx-click="delete_action"
+                    phx-value-id={action.id}
+                    class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+              No actions yet. Type above to add one.
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </.sheet>
     """
   end
 
