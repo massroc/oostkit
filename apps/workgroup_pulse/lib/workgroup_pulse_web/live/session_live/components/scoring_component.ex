@@ -328,7 +328,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     assigns = assign(assigns, :popup_question, popup_question)
 
     ~H"""
-    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter" data-no-navigate>
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter"
+      data-no-navigate
+    >
       <!-- Backdrop -->
       <div
         class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm"
@@ -387,7 +390,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_score_overlay(assigns) do
     ~H"""
-    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter" data-no-navigate>
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter"
+      data-no-navigate
+    >
       <!-- Backdrop -->
       <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay">
       </div>
