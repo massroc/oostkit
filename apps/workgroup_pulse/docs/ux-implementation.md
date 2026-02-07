@@ -42,7 +42,7 @@ All workshop phases (except lobby) share a single carousel element:
 | ID | Element | Hook? | Click-only? |
 |----|---------|-------|-------------|
 | (none) | Lobby — standalone single slide, no hook | No | N/A |
-| `workshop-carousel` | All other phases — unified 8-slide carousel | Yes | Yes |
+| `workshop-carousel` | All other phases — unified 7-slide carousel | Yes | Yes |
 
 ### Unified Slide Index Map
 
@@ -55,13 +55,12 @@ Slides are progressively appended as the workshop advances. Indices are stable �
 | 2 | Balance Scale | 720px | always |
 | 3 | Safe Space | 720px | always |
 | 4 | Scoring Grid | 720px | state in scoring/summary/completed |
-| 5 | Notes/Actions | 480px | state in scoring/summary/completed |
-| 6 | Summary | 720px | state in summary/completed |
-| 7 | Wrap-up | 720px | state == completed |
+| 5 | Summary | 720px | state in summary/completed |
+| 6 | Wrap-up | 720px | state == completed |
 
 - `data-index` is driven by `@carousel_index` (set by event handlers and state transitions)
-- The `focus_sheet` event updates `@carousel_index` (`:main` → 4, `:notes` → 5)
-- Phase transitions set `@carousel_index` automatically (e.g., scoring → 4, summary → 6, completed → 7)
+- The `focus_sheet` event updates `@carousel_index` (`:main` → 4) or sets `notes_revealed: true` (`:notes`)
+- Phase transitions set `@carousel_index` automatically (e.g., scoring → 4, summary → 5, completed → 6)
 - Click-only: no scroll/swipe navigation — users click inactive slides to navigate
 
 ### IntroComponent Slide Functions
@@ -84,9 +83,16 @@ def handle_carousel_navigate(socket, "workshop-carousel", index)  # updates caro
 def handle_carousel_navigate(socket, _carousel, _index)           # no-op fallback
 ```
 
-### Side Sheets
+### Notes/Actions Side Panel
 
-Side sheets (e.g., notes/actions at index 5) are full carousel slides. When not active, they appear as a dimmed peek on the right edge. Navigate to them by clicking.
+The notes/actions panel is **not** a carousel slide. It is a fixed-position panel on the right edge of the viewport (z-20), outside the carousel DOM.
+
+- **Peek tab** (40px wide) is visible when the scoring grid is active (`carousel_index == 4`)
+- **Reveal:** Clicking the peek tab fires `reveal_notes`, setting `notes_revealed: true` and sliding in a 480px panel
+- **Dismiss:** Clicking outside the panel (transparent backdrop at z-10) fires `hide_notes`, setting `notes_revealed: false`
+- `handle_focus_sheet(:notes)` sets `notes_revealed: true` instead of changing the carousel index
+
+### Intro Context Slides
 
 During scoring, the intro slides appear as deep stacked peeks to the left of the active scoring grid, providing visual continuity between phases. Users can click them for reference without triggering any backend state change.
 
@@ -96,7 +102,7 @@ During scoring, the intro slides appear as deep stacked peeks to the left of the
 
 ### Standard Dimensions
 
-- **Width**: 720px (all primary sheets), 480px (notes side-sheet and intro context slides in scoring)
+- **Width**: 720px (all primary sheets), 480px (notes side panel and intro context slides in scoring)
 - **Height**: `calc(100vh - 52px - 3rem)` — fills available viewport minus header (52px) and carousel padding (1.5rem x 2)
 - **Min-height**: 879px — flipchart ratio floor based on Post-it Easel Pad (635mm x 775mm = 0.819 W:H; 720/0.819 = 879)
 

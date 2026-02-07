@@ -46,14 +46,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers do
 
       {true, _, "summary"} ->
         socket
-        |> assign(:carousel_index, 6)
+        |> assign(:carousel_index, 5)
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
 
       {true, _, "completed"} ->
         socket
-        |> assign(:carousel_index, 7)
+        |> assign(:carousel_index, 6)
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.stop_timer()

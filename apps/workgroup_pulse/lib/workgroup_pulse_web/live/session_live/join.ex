@@ -47,72 +47,75 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
-      <div class="max-w-md w-full">
-        <.link
-          navigate={~p"/"}
-          class="text-text-body hover:text-text-dark mb-8 inline-flex items-center"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          Back to Home
-        </.link>
+      <.sheet class="shadow-sheet p-sheet-padding w-[520px]">
+        <div class="text-center mb-5">
+          <.link
+            navigate={~p"/"}
+            class="text-ink-blue/50 hover:text-ink-blue inline-flex items-center text-sm font-brand mb-4"
+          >
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Back
+          </.link>
 
-        <div class="bg-surface-sheet rounded-sheet shadow-sheet p-sheet-padding">
-          <h1 class="text-2xl font-bold text-text-dark mb-2 text-center font-brand">
+          <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-1">
             Join Workshop
           </h1>
-          <p class="text-text-body text-center mb-8">
-            Session code: <span class="font-mono text-text-dark font-bold">{@session.code}</span>
+          <p class="text-ink-blue/60 text-sm font-brand">
+            Session <span class="font-mono text-ink-blue font-bold tracking-wider">{@session.code}</span>
           </p>
-
-          <form
-            id="join-form"
-            action={~p"/session/#{@session.code}/join"}
-            method="post"
-            class="space-y-6"
-          >
-            <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
-            <div>
-              <label for="participant_name" class="block text-sm font-medium text-text-dark mb-2">
-                Your Name
-              </label>
-              <input
-                type="text"
-                name="participant[name]"
-                id="participant_name"
-                value={@form[:name].value}
-                placeholder="Enter your name"
-                class="w-full bg-surface-wall border border-gray-300 rounded-lg px-4 py-3 text-text-dark placeholder-text-body focus:ring-2 focus:ring-accent-purple focus:border-transparent"
-                autofocus
-              />
-              <%= if @form[:name].errors != [] do %>
-                <p class="mt-2 text-sm text-accent-red">
-                  <%= for {msg, _opts} <- @form[:name].errors do %>
-                    {msg}
-                  <% end %>
-                </p>
-              <% end %>
-            </div>
-
-            <button
-              type="submit"
-              class="w-full px-6 py-4 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors text-lg"
-            >
-              Join Workshop
-            </button>
-          </form>
         </div>
 
-        <p class="text-text-body text-sm text-center mt-6">
-          You'll be able to participate once the facilitator starts the session.
+        <form
+          id="join-form"
+          action={~p"/session/#{@session.code}/join"}
+          method="post"
+          class="space-y-4"
+        >
+          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+          <div>
+            <label
+              for="participant_name"
+              class="block text-xs font-semibold text-ink-blue/70 mb-1.5 font-brand uppercase tracking-wide"
+            >
+              Your Name
+            </label>
+            <input
+              type="text"
+              name="participant[name]"
+              id="participant_name"
+              value={@form[:name].value}
+              placeholder="Enter your name"
+              class="w-full bg-surface-wall border border-ink-blue/10 rounded-lg px-4 py-2.5 text-ink-blue placeholder-ink-blue/30 focus:ring-2 focus:ring-accent-purple focus:border-transparent font-workshop text-xl"
+              autofocus
+            />
+            <%= if @form[:name].errors != [] do %>
+              <p class="mt-1.5 text-xs text-accent-red font-brand">
+                <%= for {msg, _opts} <- @form[:name].errors do %>
+                  {msg}
+                <% end %>
+              </p>
+            <% end %>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full btn-workshop btn-workshop-primary text-base py-3"
+          >
+            Join Workshop
+          </button>
+        </form>
+
+        <p class="text-ink-blue/40 text-xs text-center mt-4 font-brand">
+          You'll join once the facilitator starts the session.
         </p>
-      </div>
+      </.sheet>
     </div>
     """
   end

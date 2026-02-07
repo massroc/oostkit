@@ -502,6 +502,18 @@ th.active-col-header {
   pointer-events: none;
 }
 
+/* ─── Notes Side Panel ─── */
+
+.notes-panel .paper-texture-secondary > div {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.writing-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
 /* ─── Score Overlay Animation ─── */
 .score-overlay-enter {
   animation: score-overlay-enter 0.2s ease-out;

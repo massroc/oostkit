@@ -7,8 +7,8 @@ defmodule WorkgroupPulseWeb.HomeLiveTest do
     test "renders welcome message", %{conn: conn} do
       {:ok, view, html} = live(conn, ~p"/")
 
-      assert html =~ "Productive Work Groups"
-      assert html =~ "Six Criteria of Productive Work"
+      assert html =~ "Workgroup Pulse"
+      assert html =~ "Six Criteria for Productive Work"
       assert has_element?(view, "a", "Start New Workshop")
     end
 

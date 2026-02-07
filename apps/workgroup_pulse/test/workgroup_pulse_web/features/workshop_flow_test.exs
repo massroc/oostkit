@@ -36,9 +36,9 @@ defmodule WorkgroupPulseWeb.Features.WorkshopFlowTest do
   feature "user can create a new workshop session", %{session: session} do
     session
     |> visit("/")
-    |> assert_has(css("h1", text: "Productive Work Groups"))
+    |> assert_has(css("h1", text: "Workgroup Pulse"))
     |> click(link("Start New Workshop"))
-    |> assert_has(css("h1", text: "Create New Workshop"))
+    |> assert_has(css("h1", text: "New Workshop"))
   end
 
   @tag :e2e
@@ -60,7 +60,7 @@ defmodule WorkgroupPulseWeb.Features.WorkshopFlowTest do
   feature "home page displays correctly", %{session: session} do
     session
     |> visit("/")
-    |> assert_has(css("h1", text: "Productive Work Groups"))
+    |> assert_has(css("h1", text: "Workgroup Pulse"))
     |> assert_has(link("Start New Workshop"))
   end
 end

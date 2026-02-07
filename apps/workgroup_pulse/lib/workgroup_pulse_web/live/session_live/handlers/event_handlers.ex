@@ -243,7 +243,21 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   def handle_focus_sheet(socket, :notes) do
-    {:noreply, assign(socket, carousel_index: 5)}
+    {:noreply, assign(socket, notes_revealed: true)}
+  end
+
+  @doc """
+  Handles reveal_notes event - reveals the notes side panel.
+  """
+  def handle_reveal_notes(socket) do
+    {:noreply, assign(socket, notes_revealed: true)}
+  end
+
+  @doc """
+  Handles hide_notes event - hides the notes side panel.
+  """
+  def handle_hide_notes(socket) do
+    {:noreply, assign(socket, notes_revealed: false)}
   end
 
   # Note events
@@ -344,7 +358,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
         fn socket, updated_session ->
           socket
           |> assign(session: updated_session)
-          |> assign(carousel_index: 7)
+          |> assign(carousel_index: 6)
           |> DataLoaders.load_summary_data(updated_session)
           |> TimerHandler.stop_timer()
         end
@@ -544,7 +558,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
-        |> assign(carousel_index: 6)
+        |> assign(carousel_index: 5)
         |> DataLoaders.load_summary_data(updated_session)
       end
     )
@@ -626,7 +640,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
-        |> assign(carousel_index: 6)
+        |> assign(carousel_index: 5)
         |> DataLoaders.load_summary_data(updated_session)
         |> TimerHandler.start_phase_timer(updated_session)
       end
