@@ -71,7 +71,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
             </h1>
 
             <div class="text-ink-blue/80 text-lg text-left leading-relaxed">
-              <p class="mb-6">You'll work through 8 questions covering 6 criteria together as a team.</p>
+              <p class="mb-6">
+                You'll work through 8 questions covering 6 criteria together as a team.
+              </p>
 
               <p class="font-semibold text-ink-blue mb-3">For each question:</p>
 
@@ -131,7 +133,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
 
               <ul class="space-y-1.5 pl-4 text-ink-blue/70">
                 <li>• These criteria need the right amount — not too much, not too little</li>
-                <li>• <span class="text-traffic-green font-semibold">0 is optimal</span> (balanced)</li>
+                <li>
+                  • <span class="text-traffic-green font-semibold">0 is optimal</span> (balanced)
+                </li>
                 <li>• Negative means too little, positive means too much</li>
               </ul>
 

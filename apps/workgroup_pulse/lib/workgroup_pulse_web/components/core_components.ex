@@ -328,5 +328,4 @@ defmodule WorkgroupPulseWeb.CoreComponents do
     </div>
     """
   end
-
 end
