@@ -6,6 +6,7 @@ defmodule PortalWeb.ErrorHTML do
 
   embed_templates "error_html/*"
 
+  @dialyzer {:nowarn_function, render: 2}
   def render(template, _assigns) do
     Phoenix.Controller.status_message_from_template(template)
   end
