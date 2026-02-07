@@ -68,7 +68,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
             Join Workshop
           </h1>
           <p class="text-ink-blue/60 text-sm font-brand">
-            Session <span class="font-mono text-ink-blue font-bold tracking-wider">{@session.code}</span>
+            Session
+            <span class="font-mono text-ink-blue font-bold tracking-wider">{@session.code}</span>
           </p>
         </div>
 

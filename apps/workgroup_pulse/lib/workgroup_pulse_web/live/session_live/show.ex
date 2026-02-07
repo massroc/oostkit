@@ -632,7 +632,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
 
   defp render_notes_content(assigns) do
     ~H"""
-    <.sheet variant={:secondary} class="notes-panel p-4 w-full h-full shadow-sheet" style="transform: rotate(0deg)">
+    <.sheet
+      variant={:secondary}
+      class="notes-panel p-4 w-full h-full shadow-sheet"
+      style="transform: rotate(0deg)"
+    >
       <!-- Notes section -->
       <div class="mb-6">
         <div class="mb-2">
