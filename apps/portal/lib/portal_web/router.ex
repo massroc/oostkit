@@ -43,7 +43,10 @@ defmodule PortalWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_super_admin,
-      on_mount: [{PortalWeb.UserAuth, :require_authenticated}, {PortalWeb.UserAuth, :require_super_admin}] do
+      on_mount: [
+        {PortalWeb.UserAuth, :require_authenticated},
+        {PortalWeb.UserAuth, :require_super_admin}
+      ] do
       live "/users", Admin.UsersLive, :index
       live "/users/new", Admin.UsersLive, :new
       live "/users/:id/edit", Admin.UsersLive, :edit

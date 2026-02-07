@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 defaults:
   run:
@@ -43,12 +44,17 @@ jobs:
           git diff --quiet || echo "changes=true" >> $GITHUB_OUTPUT
         working-directory: .
 
-      - name: Commit changes
+      - name: Create pull request
         if: steps.changes.outputs.changes == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add -A
-          git commit -m "Auto-format code and update mix.lock"
-          git push
-        working-directory: .
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto-format code and update mix.lock"
+          branch: auto-format/workgroup-pulse
+          title: "Auto-format Workgroup Pulse code"
+          body: |
+            Automated formatting changes from `mix format` and dependency lock updates.
+
+            This PR was created automatically by the Auto Format workflow.
+          labels: auto-format
+          delete-branch: true

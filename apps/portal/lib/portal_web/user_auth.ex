@@ -1,4 +1,5 @@
 defmodule PortalWeb.UserAuth do
+  @moduledoc false
   use PortalWeb, :verified_routes
 
   import Plug.Conn

@@ -68,19 +68,33 @@ defmodule PortalWeb.Admin.UsersLive do
 
         <.form for={@form} phx-submit="save_user" class="space-y-4">
           <div>
-            <.input field={@form[:email]} type="email" label="Email" required={!@editing_user} readonly={!!@editing_user} />
+            <.input
+              field={@form[:email]}
+              type="email"
+              label="Email"
+              required={!@editing_user}
+              readonly={!!@editing_user}
+            />
           </div>
           <div>
             <.input field={@form[:name]} type="text" label="Name (optional)" />
           </div>
           <div :if={@editing_user}>
-            <.input field={@form[:role]} type="select" label="Role" options={[{"Session Manager", "session_manager"}, {"Super Admin", "super_admin"}]} />
+            <.input
+              field={@form[:role]}
+              type="select"
+              label="Role"
+              options={[{"Session Manager", "session_manager"}, {"Super Admin", "super_admin"}]}
+            />
           </div>
           <div class="flex gap-4">
             <.button type="submit">
               {if @editing_user, do: "Update User", else: "Create User"}
             </.button>
-            <.link patch={~p"/admin/users"} class="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900">
+            <.link
+              patch={~p"/admin/users"}
+              class="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
+            >
               Cancel
             </.link>
           </div>
@@ -235,12 +249,13 @@ defmodule PortalWeb.Admin.UsersLive do
   defp format_role(role), do: role
 
   defp format_errors(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
-        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
-      end)
+    Ecto.Changeset.traverse_errors(changeset, &interpolate_error/1)
+    |> Enum.map_join("; ", fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
+  end
+
+  defp interpolate_error({msg, opts}) do
+    Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+      opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
     end)
-    |> Enum.map(fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
-    |> Enum.join("; ")
   end
 end

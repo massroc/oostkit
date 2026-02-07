@@ -2,13 +2,15 @@
   <div class="mx-auto max-w-3xl px-6 py-16 sm:px-8">
     <!-- Back link -->
     <div class="mb-8">
-      <.link navigate={~p"/"} class="inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-zinc-900">
-        <.icon name="hero-arrow-left" class="h-4 w-4" />
-        Back to all tools
+      <.link
+        navigate={~p"/"}
+        class="inline-flex items-center gap-1 text-sm text-zinc-600 hover:text-zinc-900"
+      >
+        <.icon name="hero-arrow-left" class="h-4 w-4" /> Back to all tools
       </.link>
     </div>
-
-    <!-- App Header -->
+    
+<!-- App Header -->
     <div class="mb-8">
       <div class="flex items-start justify-between">
         <div>
@@ -28,13 +30,13 @@
         </span>
       </div>
     </div>
-
-    <!-- Description -->
+    
+<!-- Description -->
     <div class="prose prose-zinc mb-8">
       <p class="text-zinc-700 whitespace-pre-line">{@app.description}</p>
     </div>
-
-    <!-- Auth notice -->
+    
+<!-- Auth notice -->
     <div :if={@app.requires_auth} class="mb-8 rounded-lg bg-amber-50 p-4">
       <div class="flex">
         <.icon name="hero-lock-closed" class="h-5 w-5 text-amber-500" />
@@ -43,8 +45,8 @@
         </p>
       </div>
     </div>
-
-    <!-- Launch button -->
+    
+<!-- Launch button -->
     <div class="flex gap-4">
       <a
         href={@app.url}
