@@ -15,77 +15,80 @@ The sheet carousel is the universal layout system for all Pulse workshop phases.
 
 | Class | Purpose |
 |-------|---------|
-| `.sheet-carousel` | Container — flex row, scroll-snap, centring padding |
-| `.sheet-carousel-locked` | Click-only variant — `overflow-x: hidden`, no scroll/swipe |
-| `.carousel-slide` | Individual slide — snap-aligned, transition-enabled |
-| `.carousel-slide.active` | Active slide — full size, z-index 2 |
-| `.carousel-slide:not(.active)` | Inactive — scaled to 68%, 30% opacity, -7rem margins, clickable |
+| `.sheet-carousel` | Outer container — flex, centres single-slide layouts (lobby) |
+| `.embla__viewport` | Embla viewport — `overflow: hidden`, full width/height |
+| `.embla__container` | Embla flex container — holds slides |
+| `.carousel-slide` | Individual slide — fixed height, opacity transition |
+| `.carousel-slide.active` | Active slide — full opacity, z-index 2 |
+| `.carousel-slide:not(.active)` | Inactive — 30% opacity, clickable |
 
-### JS Hook: `SheetCarousel`
+### JS Hook: `SheetCarousel` (Embla Carousel)
 
-Mounted on carousel containers with 2+ slides. Reads `data-index` to set the initial active slide and syncs on `updated()`.
+Powered by [Embla Carousel](https://www.embla-carousel.com/) v8.6.0 (vendored ESM, ~6KB gzipped). Mounted on the unified `workshop-carousel` container. Reads `data-index` to set the initial active slide and syncs on `updated()`.
 
-**Click-only mode:** When `data-click-only` attribute is present, the scroll listener is skipped and `scrollTo` is used instead of `scrollIntoView` (required for `overflow-x: hidden` containers). Navigation only via clicking inactive slides.
+**Embla options:** `align: 'center'`, `containScroll: false`, `watchDrag: false` (click-only), `duration: 20`.
+
+**Event delegation:** Click listeners use event delegation on the container element (not per-slide binding), so dynamically added slides are handled automatically without rebinding.
+
+**Dynamic slides:** On `updated()`, the hook compares DOM slide count against Embla's known slides. If they differ (LiveView added/removed slides), it destroys and reinitialises Embla with the new slides and correct `startIndex`.
 
 **Events pushed to server:**
-- `carousel_navigate` with `{ index: <number>, carousel: <element-id> }`
+- `carousel_navigate` with `{ index: <number>, carousel: "workshop-carousel" }`
 
-**Scroll-end detection (non-click-only only):** Debounced (100ms) scroll handler finds the closest slide to container centre and pushes `carousel_navigate` if it differs from current index.
+### Unified Carousel
 
-### Phase Mapping
+All workshop phases (except lobby) share a single carousel element:
 
-| Phase | Carousel ID | Slides | Hook? | Click-only? |
-|-------|------------|--------|-------|-------------|
-| Lobby | (none) | 1 — lobby sheet | No (single `.active` slide) | N/A |
-| Intro | `intro-carousel` | 4 — welcome, how-it-works, scales, safe-space | Yes | No |
-| Scoring | `scoring-carousel` | 6 — 4 intro context + main grid + notes/actions | Yes | Yes |
-| Summary | (none) | 1 — summary sheet | No | N/A |
-| Completed | (none) | 1 — completed sheet | No | N/A |
+| ID | Element | Hook? | Click-only? |
+|----|---------|-------|-------------|
+| (none) | Lobby — standalone single slide, no hook | No | N/A |
+| `workshop-carousel` | All other phases — unified 8-slide carousel | Yes | Yes |
 
-### Scoring Carousel Slide Index Map
+### Unified Slide Index Map
 
-The scoring carousel contains 6 slides: the 4 intro sheets (read-only context, smaller at 480px) followed by the scoring grid and notes sheet.
+Slides are progressively appended as the workshop advances. Indices are stable — slides are never removed.
 
-| Index | Slide | Width |
-|-------|-------|-------|
-| 0 | Welcome (intro) | 480px |
-| 1 | How it works (intro) | 480px |
-| 2 | Balance scale (intro) | 480px |
-| 3 | Safe space (intro) | 480px |
-| 4 | Scoring grid (default active) | 720px |
-| 5 | Notes/actions | 480px |
+| Index | Slide | Width | Rendered When |
+|-------|-------|-------|--------------|
+| 0 | Welcome | 720px | always |
+| 1 | How It Works | 720px | always |
+| 2 | Balance Scale | 720px | always |
+| 3 | Safe Space | 720px | always |
+| 4 | Scoring Grid | 720px | state in scoring/summary/completed |
+| 5 | Notes/Actions | 480px | state in scoring/summary/completed |
+| 6 | Summary | 720px | state in summary/completed |
+| 7 | Wrap-up | 720px | state == completed |
 
-- `data-index` is driven by `@active_slide_index` (default `4` = scoring grid)
-- The `focus_sheet` event updates `@active_slide_index` (`:main` → 4, `:notes` → 5)
+- `data-index` is driven by `@carousel_index` (set by event handlers and state transitions)
+- The `focus_sheet` event updates `@carousel_index` (`:main` → 4, `:notes` → 5)
+- Phase transitions set `@carousel_index` automatically (e.g., scoring → 4, summary → 6, completed → 7)
 - Click-only: no scroll/swipe navigation — users click inactive slides to navigate
-- Intro slides reuse `IntroComponent` public functions (`slide_welcome/1`, etc.) with smaller dimensions
 
 ### IntroComponent Slide Functions
 
-`IntroComponent` exposes 4 public function components for reuse in the scoring carousel:
+`IntroComponent` exposes 4 public function components rendered directly in the unified carousel:
 
 - `IntroComponent.slide_welcome/1`
 - `IntroComponent.slide_how_it_works/1`
 - `IntroComponent.slide_balance_scale/1`
 - `IntroComponent.slide_safe_space/1`
 
-Each accepts an optional `class` attr (defaults to `"shadow-sheet p-6 w-[720px] h-full"` for intro phase). The scoring carousel passes smaller dimensions (`"shadow-sheet p-4 w-[480px] h-full text-sm"`).
+Each accepts an optional `class` attr (defaults to `"shadow-sheet p-6 w-[720px] h-full"`). All slides render at full 720px in the unified carousel.
 
 ### Server-Side Dispatch
 
-The `carousel_navigate` handler in `EventHandlers` dispatches by carousel ID:
+The `carousel_navigate` handler in `EventHandlers` uses a single clause:
 
 ```elixir
-def handle_carousel_navigate(socket, "intro-carousel", index)   # updates intro_step
-def handle_carousel_navigate(socket, "scoring-carousel", index)  # updates active_slide_index
-def handle_carousel_navigate(socket, _carousel, _index)          # no-op fallback
+def handle_carousel_navigate(socket, "workshop-carousel", index)  # updates carousel_index
+def handle_carousel_navigate(socket, _carousel, _index)           # no-op fallback
 ```
 
 ### Side Sheets
 
-Side sheets (e.g., notes/actions in the scoring carousel) are full carousel slides. When not active, they appear as a dimmed peek on the right edge. Navigate to them by clicking (scoring carousel is click-only, no swipe).
+Side sheets (e.g., notes/actions at index 5) are full carousel slides. When not active, they appear as a dimmed peek on the right edge. Navigate to them by clicking.
 
-The intro context slides appear as deep stacked peeks to the left of the active scoring grid, providing visual continuity between phases.
+During scoring, the intro slides appear as deep stacked peeks to the left of the active scoring grid, providing visual continuity between phases. Users can click them for reference without triggering any backend state change.
 
 ---
 
@@ -132,7 +135,7 @@ Floating action buttons are rendered by `render_floating_buttons/1` in `show.ex`
 | Next | Intro | All slides | Primary (gradient) |
 | Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
 | Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
-| Back | Scoring, Summary, Completed | Facilitator (scoring: after Q1) | Secondary |
+| Back | Scoring, Summary | Facilitator (scoring: after Q1) | Secondary |
 | Next Question | Scoring | Facilitator, all participants ready | Primary |
 | Continue to Summary | Scoring (last Q) | Facilitator, all participants ready | Primary |
 | I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |
@@ -227,13 +230,15 @@ Traffic light score display with colour coding.
 - Score overlay is full-width on mobile (mx-4 margin)
 - Side panels may stack or become drawers
 
-### Carousel Navigation by Mode
+### Carousel Navigation
 
-| Mode | Intro | Scoring |
-|------|-------|---------|
-| Scroll/swipe | Yes | No (click-only) |
-| Click inactive slide | Yes | Yes |
-| Server-driven `data-index` | Yes | Yes |
+The unified carousel uses **click-only navigation** for all phases. No scroll/swipe.
+
+| Mode | Behaviour |
+|------|-----------|
+| Click inactive slide | Navigates to that slide (local-only, no backend state change) |
+| Server-driven `data-index` | Phase transitions and FAB buttons update `@carousel_index` |
+| Scroll/swipe | Disabled (`overflow-x: hidden` via `sheet-carousel-locked`) |
 
 Non-active slides are scaled to 68%, dimmed to 30% opacity, with -7rem overlap margins and `pointer-events: none` on children.
 

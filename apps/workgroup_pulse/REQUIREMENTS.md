@@ -98,16 +98,20 @@ The tool behaves like butcher paper on a wall: **visible, permanent within each 
 
 ### 3. Scoring Phase (repeated for each criterion)
 
-**Sheet Carousel Layout:**
+**Unified Workshop Carousel:**
 
-All phases use a **sheet carousel** — a scroll-snap horizontal layout where the active sheet is centred and prominent, with adjacent sheets peeking from behind (scaled down, dimmed, non-interactive). See [docs/ux-implementation.md](docs/ux-implementation.md) for the full technical specification.
+All phases (except lobby) share a single **unified carousel** — a click-only horizontal layout powered by Embla Carousel. The active sheet is centred and prominent; adjacent sheets peek from behind at the same fixed size but dimmed (30% opacity), clickable for reference. Sheets never change size. See [docs/ux-implementation.md](docs/ux-implementation.md) for the full technical specification.
 
 The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
 
-**Unified Scoring Carousel (6 slides, click-only navigation):**
-- **Slides 0-3: Intro Context Sheets** — The 4 intro slides (welcome, how-it-works, balance scale, safe space) as read-only context, smaller (480px) and deep-stacked to the left
-- **Slide 4: Main Sheet (centre, default active)** — The full 8-question scoring grid, always visible
-- **Slide 5: Notes/Actions Sheet** — Notes and actions for the current question, navigable via click only (no scroll/swipe)
+**Unified Slide Map (up to 8 slides, progressively appended):**
+- **Slides 0-3: Intro slides** — Welcome, how-it-works, balance scale, safe space (always rendered, full 720px)
+- **Slide 4: Scoring Grid** — The full 8-question scoring grid (rendered in scoring/summary/completed)
+- **Slide 5: Notes/Actions** — Notes and actions for the current question (rendered in scoring/summary/completed)
+- **Slide 6: Summary** — Overview of all scores and notes (rendered in summary/completed)
+- **Slide 7: Wrap-up** — Action planning and export (rendered in completed)
+
+Users can click any visible slide to view it for reference. This is local navigation only — no backend state change. FABs (floating action buttons) drive phase transitions and are shown only when the carousel index matches the current phase.
 
 **Turn-Based Sequential Scoring:**
 

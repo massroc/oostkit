@@ -52,27 +52,35 @@ All phases use the same **sheet carousel** layout — a scroll-snap horizontal c
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Phase Slide Counts
+### Unified Slide Map
 
-| Phase | Slides | Notes |
-|-------|--------|-------|
-| Lobby | 1 | Single slide, no carousel navigation |
-| Intro | 4 | Welcome, how-it-works, scales, safe-space |
-| Scoring | 6 | 4 intro context + main grid + notes/actions (click-only navigation) |
-| Summary | 1 | Single slide |
-| Completed | 1 | Single slide |
+All workshop phases (except lobby) share a single unified carousel. Slides are progressively appended as the workshop advances through phases.
+
+| Index | Content | Width | Available When |
+|-------|---------|-------|---------------|
+| 0 | Welcome | 720px | always (carousel shown when state != "lobby") |
+| 1 | How It Works | 720px | always |
+| 2 | Balance Scale | 720px | always |
+| 3 | Safe Space | 720px | always |
+| 4 | Scoring Grid | 720px | state in scoring/summary/completed |
+| 5 | Notes/Actions | 480px | state in scoring/summary/completed |
+| 6 | Summary | 720px | state in summary/completed |
+| 7 | Wrap-up | 720px | state == completed |
+
+Lobby renders as a standalone single slide (no hook, no carousel navigation).
 
 ### Floating Action Buttons
 
-Viewport-fixed bar aligned to the 720px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline).
+Viewport-fixed bar aligned to the 720px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline). FABs are hidden when browsing slides outside the current phase (e.g., reviewing intro slides during scoring).
 
 | Button | Phase | Shown When | Style |
 |--------|-------|-----------|-------|
-| Skip intro | Intro (slide 1 only) | Always on first intro slide | Text link |
-| Next | Intro | All slides | Primary (gradient) |
+| Skip intro | Intro (carousel_index == 0) | First intro slide only | Text link |
+| Next | Intro (carousel_index 0-2) | Intro slides before last | Primary (gradient) |
+| Next (→ scoring) | Intro (carousel_index == 3) | Last intro slide | Primary (gradient) |
 | Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
 | Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
-| Back | Scoring, Summary, Completed | Facilitator (scoring: after Q1) | Secondary |
+| Back | Scoring, Summary | Facilitator (scoring: after Q1) | Secondary |
 | Next Question | Scoring | Facilitator, all participants ready | Primary |
 | Continue to Summary | Scoring (last Q) | Facilitator, all participants ready | Primary |
 | I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |

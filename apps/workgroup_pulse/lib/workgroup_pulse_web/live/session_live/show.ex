@@ -57,10 +57,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(session: workshop_session)
      |> assign(participant: participant)
      |> assign(participants: participants)
-     |> assign(intro_step: 1)
+     |> assign(carousel_index: initial_carousel_index(workshop_session.state))
      |> assign(show_mid_transition: false)
      |> assign(show_criterion_popup: nil)
-     |> assign(active_slide_index: 4)
      |> assign(note_input: "")
      |> assign(action_input: "")
      |> assign(show_export_modal: false)
@@ -315,9 +314,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       {render_facilitator_timer(assigns)}
       <!-- App Header (no session name during workshop phases) -->
       <.app_header session_name={
-        if @session.state in ["scoring", "summary", "completed"],
-          do: nil,
-          else: session_display_name(@session)
+        if @session.state == "lobby",
+          do: session_display_name(@session),
+          else: nil
       } />
       <!-- Main Content Area -->
       <div class="flex-1 relative">
@@ -337,29 +336,31 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     ~H"""
     <%= case @session.state do %>
       <% "intro" -> %>
-        <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
-          <div class="pointer-events-auto flex justify-end items-center gap-3">
-            <%= if @intro_step == 1 do %>
-              <button
-                phx-click="skip_intro"
-                class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
-              >
-                Skip intro
-              </button>
-            <% end %>
-            <%= if @intro_step < 4 do %>
-              <button phx-click="intro_next" class="btn-workshop btn-workshop-primary">
-                Next →
-              </button>
-            <% else %>
-              <button phx-click="continue_to_scoring" class="btn-workshop btn-workshop-primary">
-                Next →
-              </button>
-            <% end %>
+        <%= if @carousel_index in 0..3 do %>
+          <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
+            <div class="pointer-events-auto flex justify-end items-center gap-3">
+              <%= if @carousel_index == 0 do %>
+                <button
+                  phx-click="skip_intro"
+                  class="text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
+                >
+                  Skip intro
+                </button>
+              <% end %>
+              <%= if @carousel_index < 3 do %>
+                <button phx-click="intro_next" class="btn-workshop btn-workshop-primary">
+                  Next →
+                </button>
+              <% else %>
+                <button phx-click="continue_to_scoring" class="btn-workshop btn-workshop-primary">
+                  Next →
+                </button>
+              <% end %>
+            </div>
           </div>
-        </div>
+        <% end %>
       <% "scoring" -> %>
-        <%= if not @show_mid_transition do %>
+        <%= if @carousel_index in [4, 5] and not @show_mid_transition do %>
           <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-5 pointer-events-none">
             <div class="pointer-events-auto flex justify-end items-center gap-2">
               <!-- Ready count (facilitator only, after scores revealed) -->
@@ -429,39 +430,40 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           </div>
         <% end %>
       <% "summary" -> %>
-        <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
-          <div class="pointer-events-auto flex justify-end items-center gap-2">
-            <%= if @participant.is_facilitator do %>
-              <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
-                ← Back
-              </button>
-              <button phx-click="continue_to_wrapup" class="btn-workshop btn-workshop-primary">
-                Continue to Wrap-Up →
-              </button>
-            <% else %>
-              <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
-                Waiting for facilitator to continue...
-              </span>
-            <% end %>
+        <%= if @carousel_index == 6 do %>
+          <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
+            <div class="pointer-events-auto flex justify-end items-center gap-2">
+              <%= if @participant.is_facilitator do %>
+                <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
+                  ← Back
+                </button>
+                <button phx-click="continue_to_wrapup" class="btn-workshop btn-workshop-primary">
+                  Continue to Wrap-Up →
+                </button>
+              <% else %>
+                <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+                  Waiting for facilitator to continue...
+                </span>
+              <% end %>
+            </div>
           </div>
-        </div>
+        <% end %>
       <% "completed" -> %>
-        <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
-          <div class="pointer-events-auto flex justify-end items-center gap-2">
-            <%= if @participant.is_facilitator do %>
-              <button phx-click="go_back" class="btn-workshop btn-workshop-secondary">
-                ← Back
-              </button>
-              <button phx-click="finish_workshop" class="btn-workshop btn-workshop-primary">
-                Finish Workshop
-              </button>
-            <% else %>
-              <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
-                Waiting for facilitator to finish...
-              </span>
-            <% end %>
+        <%= if @carousel_index == 7 do %>
+          <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
+            <div class="pointer-events-auto flex justify-end items-center gap-2">
+              <%= if @participant.is_facilitator do %>
+                <button phx-click="finish_workshop" class="btn-workshop btn-workshop-primary">
+                  Finish Workshop
+                </button>
+              <% else %>
+                <span class="text-ink-blue/60 font-brand text-sm bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
+                  Waiting for facilitator to finish...
+                </span>
+              <% end %>
+            </div>
           </div>
-        </div>
+        <% end %>
       <% _ -> %>
     <% end %>
     """
@@ -473,160 +475,112 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
 
   defp render_phase_carousel(assigns) do
     ~H"""
-    <%= case @session.state do %>
-      <% "lobby" -> %>
-        {render_single_slide_carousel(assigns, :lobby)}
-      <% "intro" -> %>
-        <IntroComponent.render intro_step={@intro_step} />
-      <% "scoring" -> %>
-        {render_scoring_carousel(assigns)}
-      <% "summary" -> %>
-        {render_single_slide_carousel(assigns, :summary)}
-      <% "completed" -> %>
-        {render_single_slide_carousel(assigns, :completed)}
-      <% _ -> %>
-        {render_single_slide_carousel(assigns, :lobby)}
+    <%= if @session.state == "lobby" do %>
+      <div class="sheet-carousel">
+        <div class="carousel-slide active">
+          <LobbyComponent.render
+            session={@session}
+            participant={@participant}
+            participants={@participants}
+          />
+        </div>
+      </div>
+    <% else %>
+      {render_unified_carousel(assigns)}
     <% end %>
     """
   end
 
-  defp render_single_slide_carousel(assigns, phase) do
-    assigns = assign(assigns, :phase, phase)
-
-    ~H"""
-    <div class="sheet-carousel">
-      <div class="carousel-slide active">
-        {render_phase_content(assigns, @phase)}
-      </div>
-    </div>
-    """
-  end
-
-  defp render_phase_content(assigns, :lobby) do
-    ~H"""
-    <LobbyComponent.render
-      session={@session}
-      participant={@participant}
-      participants={@participants}
-    />
-    """
-  end
-
-  defp render_phase_content(assigns, :summary) do
-    ~H"""
-    <SummaryComponent.render
-      session={@session}
-      participant={@participant}
-      participants={@participants}
-      scores_summary={@scores_summary}
-      individual_scores={@individual_scores}
-      notes_by_question={@notes_by_question}
-    />
-    """
-  end
-
-  defp render_phase_content(assigns, :completed) do
-    ~H"""
-    <CompletedComponent.render
-      session={@session}
-      participant={@participant}
-      scores_summary={@scores_summary}
-      strengths={@strengths}
-      concerns={@concerns}
-      action_count={@action_count}
-      show_export_modal={@show_export_modal}
-      export_content={@export_content}
-    />
-    """
-  end
-
-  defp render_scoring_carousel(assigns) do
+  defp render_unified_carousel(assigns) do
     ~H"""
     <div
-      id="scoring-carousel"
+      id="workshop-carousel"
       phx-hook="SheetCarousel"
-      data-index={@active_slide_index}
-      data-click-only
-      class="sheet-carousel sheet-carousel-locked"
+      data-index={@carousel_index}
+      class="sheet-carousel"
     >
-      <%!-- Slides 0-3: intro context sheets (read-only, smaller) --%>
-      <div class="carousel-slide">
-        <IntroComponent.slide_welcome class="shadow-sheet p-4 w-[480px] h-full text-sm" />
-      </div>
-      <div class="carousel-slide">
-        <IntroComponent.slide_how_it_works class="shadow-sheet p-4 w-[480px] h-full text-sm" />
-      </div>
-      <div class="carousel-slide">
-        <IntroComponent.slide_balance_scale class="shadow-sheet p-4 w-[480px] h-full text-sm" />
-      </div>
-      <div class="carousel-slide">
-        <IntroComponent.slide_safe_space class="shadow-sheet p-4 w-[480px] h-full text-sm" />
-      </div>
+      <div class="embla__viewport">
+        <div class="embla__container">
+          <%!-- Slides 0-3: intro slides (always rendered) --%>
+          <div class="carousel-slide">
+            <IntroComponent.slide_welcome />
+          </div>
+          <div class="carousel-slide">
+            <IntroComponent.slide_how_it_works />
+          </div>
+          <div class="carousel-slide">
+            <IntroComponent.slide_balance_scale />
+          </div>
+          <div class="carousel-slide">
+            <IntroComponent.slide_safe_space />
+          </div>
 
-      <%!-- Slide 4: scoring grid (default active) --%>
-      <div class="carousel-slide">
-        <%= if @show_mid_transition do %>
-          <ScoringComponent.render
-            session={@session}
-            participant={@participant}
-            participants={@participants}
-            current_question={@current_question}
-            total_questions={@total_questions}
-            all_scores={@all_scores}
-            selected_value={@selected_value}
-            my_score={@my_score}
-            has_submitted={@has_submitted}
-            is_my_turn={@is_my_turn}
-            current_turn_participant_id={@current_turn_participant_id}
-            current_turn_has_score={@current_turn_has_score}
-            my_turn_locked={@my_turn_locked}
-            scores_revealed={@scores_revealed}
-            score_count={@score_count}
-            active_participant_count={@active_participant_count}
-            show_mid_transition={@show_mid_transition}
-            show_criterion_popup={@show_criterion_popup}
-            ready_count={@ready_count}
-            eligible_participant_count={@eligible_participant_count}
-            all_ready={@all_ready}
-            participant_was_skipped={@participant_was_skipped}
-            all_questions={(@template && @template.questions) || []}
-            all_questions_scores={@all_questions_scores || %{}}
-            show_score_overlay={@show_score_overlay || false}
-          />
-        <% else %>
-          <ScoringComponent.render
-            session={@session}
-            participant={@participant}
-            participants={@participants}
-            current_question={@current_question}
-            total_questions={@total_questions}
-            all_scores={@all_scores}
-            selected_value={@selected_value}
-            my_score={@my_score}
-            has_submitted={@has_submitted}
-            is_my_turn={@is_my_turn}
-            current_turn_participant_id={@current_turn_participant_id}
-            current_turn_has_score={@current_turn_has_score}
-            my_turn_locked={@my_turn_locked}
-            scores_revealed={@scores_revealed}
-            score_count={@score_count}
-            active_participant_count={@active_participant_count}
-            show_mid_transition={false}
-            show_criterion_popup={@show_criterion_popup}
-            ready_count={@ready_count}
-            eligible_participant_count={@eligible_participant_count}
-            all_ready={@all_ready}
-            participant_was_skipped={@participant_was_skipped}
-            all_questions={(@template && @template.questions) || []}
-            all_questions_scores={@all_questions_scores || %{}}
-            show_score_overlay={@show_score_overlay || false}
-          />
-        <% end %>
-      </div>
+          <%!-- Slides 4-5: scoring grid + notes (when scoring/summary/completed) --%>
+          <%= if @session.state in ["scoring", "summary", "completed"] do %>
+            <div class="carousel-slide">
+              <ScoringComponent.render
+                session={@session}
+                participant={@participant}
+                participants={@participants}
+                current_question={@current_question}
+                total_questions={@total_questions}
+                all_scores={@all_scores}
+                selected_value={@selected_value}
+                my_score={@my_score}
+                has_submitted={@has_submitted}
+                is_my_turn={@is_my_turn}
+                current_turn_participant_id={@current_turn_participant_id}
+                current_turn_has_score={@current_turn_has_score}
+                my_turn_locked={@my_turn_locked}
+                scores_revealed={@scores_revealed}
+                score_count={@score_count}
+                active_participant_count={@active_participant_count}
+                show_mid_transition={@show_mid_transition}
+                show_criterion_popup={@show_criterion_popup}
+                ready_count={@ready_count}
+                eligible_participant_count={@eligible_participant_count}
+                all_ready={@all_ready}
+                participant_was_skipped={@participant_was_skipped}
+                all_questions={(@template && @template.questions) || []}
+                all_questions_scores={@all_questions_scores || %{}}
+                show_score_overlay={@show_score_overlay || false}
+              />
+            </div>
+            <div class="carousel-slide">
+              {render_notes_slide(assigns)}
+            </div>
+          <% end %>
 
-      <%!-- Slide 5: notes/actions --%>
-      <div class="carousel-slide">
-        {render_notes_slide(assigns)}
+          <%!-- Slide 6: summary (when summary/completed) --%>
+          <%= if @session.state in ["summary", "completed"] do %>
+            <div class="carousel-slide">
+              <SummaryComponent.render
+                session={@session}
+                participant={@participant}
+                participants={@participants}
+                scores_summary={@scores_summary}
+                individual_scores={@individual_scores}
+                notes_by_question={@notes_by_question}
+              />
+            </div>
+          <% end %>
+
+          <%!-- Slide 7: wrap-up (when completed) --%>
+          <%= if @session.state == "completed" do %>
+            <div class="carousel-slide">
+              <CompletedComponent.render
+                session={@session}
+                participant={@participant}
+                scores_summary={@scores_summary}
+                strengths={@strengths}
+                concerns={@concerns}
+                action_count={@action_count}
+                show_export_modal={@show_export_modal}
+                export_content={@export_content}
+              />
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
     """
@@ -759,6 +713,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       "Six Criteria Assessment"
     end
   end
+
+  defp initial_carousel_index("scoring"), do: 4
+  defp initial_carousel_index("summary"), do: 6
+  defp initial_carousel_index("completed"), do: 7
+  defp initial_carousel_index(_), do: 0
 
   defp render_facilitator_timer(assigns) do
     ~H"""

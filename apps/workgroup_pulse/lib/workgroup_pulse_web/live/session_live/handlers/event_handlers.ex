@@ -47,8 +47,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   Advances to the next intro step.
   """
   def handle_intro_next(socket) do
-    current_step = socket.assigns.intro_step
-    {:noreply, assign(socket, intro_step: min(current_step + 1, 4))}
+    current = socket.assigns.carousel_index
+    {:noreply, assign(socket, carousel_index: min(current + 1, 3))}
   end
 
   @doc """
@@ -56,8 +56,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   Goes back to the previous intro step.
   """
   def handle_intro_prev(socket) do
-    current_step = socket.assigns.intro_step
-    {:noreply, assign(socket, intro_step: max(current_step - 1, 1))}
+    current = socket.assigns.carousel_index
+    {:noreply, assign(socket, carousel_index: max(current - 1, 0))}
   end
 
   @doc """
@@ -72,13 +72,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   Handles carousel_navigate event.
   Dispatches based on which carousel sent the event.
   """
-  def handle_carousel_navigate(socket, "intro-carousel", index) do
-    step = max(1, min(index + 1, 4))
-    {:noreply, assign(socket, intro_step: step)}
-  end
-
-  def handle_carousel_navigate(socket, "scoring-carousel", index) do
-    {:noreply, assign(socket, active_slide_index: index)}
+  def handle_carousel_navigate(socket, "workshop-carousel", index) do
+    {:noreply, assign(socket, carousel_index: index)}
   end
 
   def handle_carousel_navigate(socket, _carousel, _index) do
@@ -100,6 +95,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
+        |> assign(carousel_index: 4)
         |> DataLoaders.load_scoring_data(updated_session, participant)
         |> TimerHandler.start_phase_timer(updated_session)
       end
@@ -243,11 +239,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   Valid sheets: :main, :notes
   """
   def handle_focus_sheet(socket, :main) do
-    {:noreply, assign(socket, active_slide_index: 4)}
+    {:noreply, assign(socket, carousel_index: 4)}
   end
 
   def handle_focus_sheet(socket, :notes) do
-    {:noreply, assign(socket, active_slide_index: 5)}
+    {:noreply, assign(socket, carousel_index: 5)}
   end
 
   # Note events
@@ -348,6 +344,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
         fn socket, updated_session ->
           socket
           |> assign(session: updated_session)
+          |> assign(carousel_index: 7)
           |> DataLoaders.load_summary_data(updated_session)
           |> TimerHandler.stop_timer()
         end
@@ -531,6 +528,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
+        |> assign(carousel_index: 4)
         |> DataLoaders.load_scoring_data(updated_session, socket.assigns.participant)
       end
     )
@@ -546,6 +544,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
+        |> assign(carousel_index: 6)
         |> DataLoaders.load_summary_data(updated_session)
       end
     )
@@ -627,6 +626,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
       fn socket, updated_session ->
         socket
         |> assign(session: updated_session)
+        |> assign(carousel_index: 6)
         |> DataLoaders.load_summary_data(updated_session)
         |> TimerHandler.start_phase_timer(updated_session)
       end

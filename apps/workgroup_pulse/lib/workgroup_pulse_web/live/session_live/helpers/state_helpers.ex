@@ -19,8 +19,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers do
     turn_changed = old_session.current_turn_index != session.current_turn_index
 
     case {state_changed, question_changed, session.state} do
+      {true, _, "intro"} ->
+        assign(socket, :carousel_index, 0)
+
       {true, _, "scoring"} ->
         socket
+        |> assign(:carousel_index, 4)
         |> DataLoaders.load_scoring_data(session, socket.assigns.participant)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
 
@@ -42,12 +46,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers do
 
       {true, _, "summary"} ->
         socket
+        |> assign(:carousel_index, 6)
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
 
       {true, _, "completed"} ->
         socket
+        |> assign(:carousel_index, 7)
         |> DataLoaders.load_summary_data(session)
         |> DataLoaders.load_actions_data(session)
         |> TimerHandler.stop_timer()
