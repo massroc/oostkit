@@ -12,14 +12,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <!-- Export Button -->
-      <div class="bg-surface-sheet rounded-lg p-4 mb-6" id="export-container" phx-hook="FileDownload">
+      <%!-- Export Button --%>
+      <div id="export-container" phx-hook="FileDownload">
         <button
           type="button"
           phx-click="toggle_export_modal"
-          class="w-full px-6 py-3 bg-accent-purple hover:bg-highlight text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+          class="w-full btn-workshop btn-workshop-primary py-2.5 flex items-center justify-center gap-2"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -30,20 +30,20 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
           <span>Export Results</span>
         </button>
       </div>
-      <!-- Export Modal -->
+
+      <%!-- Export Modal --%>
       <%= if @show_export_modal do %>
         <div
-          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
           phx-click-away="close_export_modal"
         >
-          <div class="bg-surface-sheet rounded-lg p-6 max-w-md w-full mx-4">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-text-dark">Export Workshop Data</h3>
-
+          <div class="bg-surface-sheet rounded-sheet shadow-sheet-lifted p-sheet-padding max-w-sm w-full mx-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-workshop text-xl font-bold text-ink-blue">Export Data</h3>
               <button
                 type="button"
                 phx-click="close_export_modal"
-                class="text-text-body hover:text-text-dark"
+                class="text-ink-blue/30 hover:text-ink-blue/60 transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -56,14 +56,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
               </button>
             </div>
 
-            <p class="text-text-body text-sm mb-6">Select what to include in the export.</p>
+            <p class="text-ink-blue/60 text-xs font-brand mb-4">
+              Select what to include in the export.
+            </p>
 
-            <div class="space-y-3 mb-6">
+            <div class="space-y-2 mb-4">
               <label class={[
-                "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                "flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all border",
                 if(@export_content == "all",
-                  do: "bg-accent-purple/20 border border-accent-purple",
-                  else: "bg-gray-100 border border-gray-300 hover:bg-gray-200"
+                  do: "bg-accent-purple/10 border-accent-purple",
+                  else: "bg-surface-wall border-ink-blue/10 hover:border-ink-blue/20"
                 )
               ]}>
                 <input
@@ -73,19 +75,20 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                   checked={@export_content == "all"}
                   phx-click="select_export_content"
                   phx-value-content="all"
-                  class="w-4 h-4 text-blue-600"
+                  class="w-3.5 h-3.5 text-accent-purple"
                 />
                 <div>
-                  <div class="text-text-dark font-medium">Everything</div>
-
-                  <div class="text-text-body text-sm">Results, notes, and action items</div>
+                  <div class="text-ink-blue font-medium text-sm font-brand">Everything</div>
+                  <div class="text-ink-blue/50 text-xs font-brand">
+                    Results, notes, and action items
+                  </div>
                 </div>
               </label>
               <label class={[
-                "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors",
+                "flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all border",
                 if(@export_content == "results",
-                  do: "bg-accent-purple/20 border border-accent-purple",
-                  else: "bg-gray-100 border border-gray-300 hover:bg-gray-200"
+                  do: "bg-accent-purple/10 border-accent-purple",
+                  else: "bg-surface-wall border-ink-blue/10 hover:border-ink-blue/20"
                 )
               ]}>
                 <input
@@ -95,25 +98,26 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                   checked={@export_content == "results"}
                   phx-click="select_export_content"
                   phx-value-content="results"
-                  class="w-4 h-4 text-blue-600"
+                  class="w-3.5 h-3.5 text-accent-purple"
                 />
                 <div>
-                  <div class="text-text-dark font-medium">Results Only</div>
-
-                  <div class="text-text-body text-sm">Scores, participants, and notes</div>
+                  <div class="text-ink-blue font-medium text-sm font-brand">Results Only</div>
+                  <div class="text-ink-blue/50 text-xs font-brand">
+                    Scores, participants, and notes
+                  </div>
                 </div>
               </label>
               <label class={[
-                "flex items-center gap-3 p-3 rounded-lg transition-colors",
+                "flex items-center gap-3 p-2.5 rounded-lg transition-all border",
                 cond do
                   @action_count == 0 ->
-                    "bg-gray-100 border border-gray-300 cursor-not-allowed opacity-50"
+                    "bg-surface-wall border-ink-blue/10 cursor-not-allowed opacity-40"
 
                   @export_content == "actions" ->
-                    "bg-accent-purple/20 border border-accent-purple cursor-pointer"
+                    "bg-accent-purple/10 border-accent-purple cursor-pointer"
 
                   true ->
-                    "bg-gray-100 border border-gray-300 hover:bg-gray-200 cursor-pointer"
+                    "bg-surface-wall border-ink-blue/10 hover:border-ink-blue/20 cursor-pointer"
                 end
               ]}>
                 <input
@@ -124,18 +128,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                   disabled={@action_count == 0}
                   phx-click="select_export_content"
                   phx-value-content="actions"
-                  class="w-4 h-4 text-blue-600"
+                  class="w-3.5 h-3.5 text-accent-purple"
                 />
                 <div>
-                  <div class={
-                    if @action_count == 0,
-                      do: "text-gray-500 font-medium",
-                      else: "text-text-dark font-medium"
-                  }>
+                  <div class={[
+                    "font-medium text-sm font-brand",
+                    if(@action_count == 0, do: "text-ink-blue/40", else: "text-ink-blue")
+                  ]}>
                     Actions Only
                   </div>
-
-                  <div class="text-text-body text-sm">
+                  <div class="text-ink-blue/50 text-xs font-brand">
                     <%= if @action_count == 0 do %>
                       No action items recorded
                     <% else %>
@@ -146,12 +148,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
               </label>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 phx-click="export"
                 phx-value-format="csv"
-                class="px-4 py-3 bg-accent-purple hover:bg-highlight text-white rounded-lg transition-colors font-medium"
+                class="btn-workshop btn-workshop-primary py-2.5"
               >
                 Export CSV
               </button>
@@ -159,7 +161,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                 type="button"
                 phx-click="export"
                 phx-value-format="json"
-                class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-text-dark rounded-lg transition-colors font-medium"
+                class="btn-workshop btn-workshop-secondary py-2.5"
               >
                 Export JSON
               </button>

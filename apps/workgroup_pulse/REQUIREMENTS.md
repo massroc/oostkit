@@ -104,12 +104,14 @@ All phases (except lobby) share a single **unified carousel** — a click-only h
 
 The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
 
-**Unified Slide Map (up to 8 slides, progressively appended):**
+**Unified Slide Map (up to 7 slides, progressively appended):**
 - **Slides 0-3: Intro slides** — Welcome, how-it-works, balance scale, safe space (always rendered, full 720px)
 - **Slide 4: Scoring Grid** — The full 8-question scoring grid (rendered in scoring/summary/completed)
-- **Slide 5: Notes/Actions** — Notes and actions for the current question (rendered in scoring/summary/completed)
-- **Slide 6: Summary** — Overview of all scores and notes (rendered in summary/completed)
-- **Slide 7: Wrap-up** — Action planning and export (rendered in completed)
+- **Slide 5: Summary** — Overview of all scores and notes (rendered in summary/completed)
+- **Slide 6: Wrap-up** — Action planning and export (rendered in completed)
+
+**Notes/Actions Side Panel:**
+Notes and actions are presented in a fixed-position panel that peeks from the right edge of the viewport (not a carousel slide). A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab reveals a 480px panel; clicking outside dismisses it. This keeps notes accessible without consuming a carousel slot.
 
 Users can click any visible slide to view it for reference. This is local navigation only — no backend state change. FABs (floating action buttons) drive phase transitions and are shown only when the carousel index matches the current phase.
 

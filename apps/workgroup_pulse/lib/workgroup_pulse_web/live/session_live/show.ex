@@ -62,6 +62,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(show_criterion_popup: nil)
      |> assign(note_input: "")
      |> assign(action_input: "")
+     |> assign(notes_revealed: false)
      |> assign(show_export_modal: false)
      |> assign(export_content: "all")
      |> TimerHandler.init_timer_assigns()
@@ -233,6 +234,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
+  def handle_event("reveal_notes", _params, socket) do
+    EventHandlers.handle_reveal_notes(socket)
+  end
+
+  @impl true
+  def handle_event("hide_notes", _params, socket) do
+    EventHandlers.handle_hide_notes(socket)
+  end
+
+  @impl true
   def handle_event("update_note_input", %{"note" => value}, socket) do
     EventHandlers.handle_update_note_input(socket, value)
   end
@@ -322,6 +333,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       <div class="flex-1 relative">
         {render_phase_carousel(assigns)}
       </div>
+      <!-- Notes Side Panel (fixed to right edge of viewport) -->
+      <%= if @session.state in ["scoring", "summary", "completed"] do %>
+        {render_notes_panel(assigns)}
+      <% end %>
       <!-- Floating Action Buttons — fixed to viewport, aligned to sheet width -->
       {render_floating_buttons(assigns)}
     </div>
@@ -360,7 +375,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           </div>
         <% end %>
       <% "scoring" -> %>
-        <%= if @carousel_index in [4, 5] and not @show_mid_transition do %>
+        <%= if @carousel_index == 4 and not @show_mid_transition do %>
           <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-5 pointer-events-none">
             <div class="pointer-events-auto flex justify-end items-center gap-2">
               <!-- Ready count (facilitator only, after scores revealed) -->
@@ -430,7 +445,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           </div>
         <% end %>
       <% "summary" -> %>
-        <%= if @carousel_index == 6 do %>
+        <%= if @carousel_index == 5 do %>
           <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
             <div class="pointer-events-auto flex justify-end items-center gap-2">
               <%= if @participant.is_facilitator do %>
@@ -449,7 +464,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           </div>
         <% end %>
       <% "completed" -> %>
-        <%= if @carousel_index == 7 do %>
+        <%= if @carousel_index == 6 do %>
           <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
             <div class="pointer-events-auto flex justify-end items-center gap-2">
               <%= if @participant.is_facilitator do %>
@@ -515,7 +530,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             <IntroComponent.slide_safe_space />
           </div>
 
-          <%!-- Slides 4-5: scoring grid + notes (when scoring/summary/completed) --%>
+          <%!-- Slide 4: scoring grid (when scoring/summary/completed) --%>
           <%= if @session.state in ["scoring", "summary", "completed"] do %>
             <div class="carousel-slide">
               <ScoringComponent.render
@@ -546,12 +561,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
                 show_score_overlay={@show_score_overlay || false}
               />
             </div>
-            <div class="carousel-slide">
-              {render_notes_slide(assigns)}
-            </div>
           <% end %>
 
-          <%!-- Slide 6: summary (when summary/completed) --%>
+          <%!-- Slide 5: summary (when summary/completed) --%>
           <%= if @session.state in ["summary", "completed"] do %>
             <div class="carousel-slide">
               <SummaryComponent.render
@@ -565,7 +577,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             </div>
           <% end %>
 
-          <%!-- Slide 7: wrap-up (when completed) --%>
+          <%!-- Slide 6: wrap-up (when completed) --%>
           <%= if @session.state == "completed" do %>
             <div class="carousel-slide">
               <CompletedComponent.render
@@ -587,15 +599,47 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # Notes/Actions Slide (scoring carousel slide 2)
+  # Notes/Actions Side Panel (fixed to right edge of viewport)
   # ═══════════════════════════════════════════════════════════════════════════
 
-  defp render_notes_slide(assigns) do
+  defp render_notes_panel(assigns) do
     ~H"""
-    <.sheet variant={:secondary} class="p-4 w-[480px] h-full shadow-sheet" style="">
+    <%= if @notes_revealed do %>
+      <div class="fixed top-[52px] left-0 right-0 bottom-0 z-10" phx-click="hide_notes"></div>
+      <div class="fixed top-[52px] right-0 bottom-0 w-[480px] z-20 py-6 pr-4">
+        {render_notes_content(assigns)}
+      </div>
+    <% else %>
+      <%= if @carousel_index == 4 do %>
+        <button
+          phx-click="reveal_notes"
+          class="fixed top-[52px] right-0 bottom-0 w-[40px] z-20 py-6 cursor-pointer group"
+        >
+          <.sheet
+            variant={:secondary}
+            class="h-full w-full flex items-center justify-center shadow-sheet"
+            style="transform: rotate(0deg)"
+          >
+            <span class="font-workshop text-sm font-bold text-ink-blue/60 group-hover:text-ink-blue writing-vertical-rl">
+              Notes
+            </span>
+          </.sheet>
+        </button>
+      <% end %>
+    <% end %>
+    """
+  end
+
+  defp render_notes_content(assigns) do
+    ~H"""
+    <.sheet
+      variant={:secondary}
+      class="notes-panel p-4 w-full h-full shadow-sheet"
+      style="transform: rotate(0deg)"
+    >
       <!-- Notes section -->
       <div class="mb-6">
-        <div class="text-center mb-2">
+        <div class="mb-2">
           <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
             Notes
             <%= if length(@question_notes) > 0 do %>
@@ -636,7 +680,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               </div>
             <% end %>
           <% else %>
-            <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+            <p class="text-ink-blue/50 text-sm italic font-workshop">
               No notes yet. Type above to add one.
             </p>
           <% end %>
@@ -644,7 +688,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
       </div>
       <!-- Actions section -->
       <div class="border-t border-ink-blue/10 pt-4">
-        <div class="text-center mb-2">
+        <div class="mb-2">
           <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
             Actions
             <%= if @action_count > 0 do %>
@@ -685,7 +729,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
               </div>
             <% end %>
           <% else %>
-            <p class="text-center text-ink-blue/50 text-sm italic font-workshop">
+            <p class="text-ink-blue/50 text-sm italic font-workshop">
               No actions yet. Type above to add one.
             </p>
           <% end %>
@@ -715,8 +759,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   defp initial_carousel_index("scoring"), do: 4
-  defp initial_carousel_index("summary"), do: 6
-  defp initial_carousel_index("completed"), do: 7
+  defp initial_carousel_index("summary"), do: 5
+  defp initial_carousel_index("completed"), do: 6
   defp initial_carousel_index(_), do: 0
 
   defp render_facilitator_timer(assigns) do

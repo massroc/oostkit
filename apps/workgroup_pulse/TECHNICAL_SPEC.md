@@ -40,7 +40,7 @@ SessionLive.Show (root LiveView)
 ├── Components/ (pure functional components)
 │   ├── LobbyComponent        # Waiting room, participant list, start button
 │   ├── IntroComponent        # 4 intro screens with navigation
-│   ├── ScoringComponent      # Scoring grid + score overlay (notes slide managed in show.ex carousel)
+│   ├── ScoringComponent      # Scoring grid + score overlay (notes panel is fixed-position side panel)
 │   ├── SummaryComponent      # Score summary with individual scores & notes
 │   ├── CompletedComponent    # Wrap-up: results, action count, export
 │   └── ExportModalComponent  # Export format/content selection
@@ -74,20 +74,20 @@ All phases use the **Sheet Carousel** layout. See [docs/ux-implementation.md](do
 
 **Layout orchestration** lives in `show.ex` via `render_phase_carousel/1`:
 - **Lobby** — standalone single-slide wrapper with one `.active` slide, no JS hook
-- **All other phases** — unified `workshop-carousel` with `SheetCarousel` hook, `data-index` from `@carousel_index`, click-only mode (`data-click-only` + `sheet-carousel-locked`). Slides 0-3 (intro) are always rendered; slides 4-7 (scoring, notes, summary, wrap-up) are conditionally rendered based on session state.
+- **All other phases** — unified `workshop-carousel` with `SheetCarousel` hook, `data-index` from `@carousel_index`, click-only mode (`data-click-only` + `sheet-carousel-locked`). Slides 0-3 (intro) are always rendered; slides 4-6 (scoring, summary, wrap-up) are conditionally rendered based on session state. The notes/actions panel is a fixed-position side panel outside the carousel (see Notes Panel below).
 
-The `SheetCarousel` JS hook sends `carousel_navigate` events with `carousel: "workshop-carousel"`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide.
+The `SheetCarousel` JS hook sends `carousel_navigate` events with `carousel: "workshop-carousel"`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide (scoring → 4, summary → 5, completed → 6).
 
 ### ScoringComponent
 
 **File:** `lib/workgroup_pulse_web/live/session_live/components/scoring_component.ex`
 
-**Purpose:** Renders the scoring grid sheet and floating score overlay. The notes/actions sheet is a separate carousel slide managed in `show.ex`. Pure functional component — all events bubble to the parent LiveView.
+**Purpose:** Renders the scoring grid sheet and floating score overlay. The notes/actions panel is a fixed-position side panel managed in `show.ex` (not a carousel slide). Pure functional component — all events bubble to the parent LiveView.
 
 **Layout:**
 - **Main Sheet** — `render_full_scoring_grid/1` renders all 8 questions as a `<table>` with participant columns. Questions are grouped by scale type (Balance, Maximal) with section labels.
 - **Score Overlay** — `render_score_overlay/1` shows a floating modal with score buttons. Auto-submits on selection. Only visible when `is_my_turn and not my_turn_locked and show_score_overlay`.
-- **Notes/Actions Slide** — Managed in `show.ex` as carousel slide 5 (index 5), rendered by `render_notes_slide/1`. Full-height secondary sheet with notes and actions forms.
+- **Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20), rendered by `render_notes_panel/1` in `show.ex`. A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab sets `notes_revealed: true`, revealing a 480px panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
 - **Intro Context Slides** — Slides 0-3 reuse `IntroComponent` public functions (`slide_welcome/1`, etc.) at 480px width for read-only context.
 
 **Key Render Functions:**
@@ -99,7 +99,7 @@ The `SheetCarousel` JS hook sends `carousel_navigate` events with `carousel: "wo
 - `render_mid_transition/1` — Scale change explanation screen (shown before Q5)
 
 **Actions in Scoring Phase:**
-Actions are managed during the scoring phase via the notes/actions carousel slide (below notes). The completed/wrap-up page shows action count for export purposes but does not have inline action management.
+Actions are managed during the scoring phase via the notes/actions side panel (below notes). The completed/wrap-up page shows action count for export purposes but does not have inline action management.
 
 ### Other Phase Components
 
@@ -140,9 +140,10 @@ The following handler modules have been extracted from SessionLive.Show to impro
 - `handle_complete_turn/1` — Locks turn and advances to next participant
 - `handle_skip_turn/1` — Facilitator skips current participant
 - `handle_mark_ready/1` — Marks participant as ready to continue
-- `handle_focus_sheet/2` — Brings specified sheet panel to front (`:main` or `:notes`)
+- `handle_focus_sheet/2` — Brings specified sheet panel to front (`:main` → carousel index 4; `:notes` → sets `notes_revealed: true`)
 - `handle_next_question/1` — Advances to next question (facilitator only)
 - `handle_go_back/1` — Navigate back (facilitator only, context-aware)
+- `reveal_notes` / `hide_notes` — Toggle the fixed-position notes panel (`notes_revealed` assign)
 - Note, action, intro, transition, and export handlers
 
 ### MessageHandlers
@@ -252,7 +253,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(participants: participants)        # Ordered by join order
 
      # UI state
-     |> assign(carousel_index: initial_carousel_index(session.state))  # Unified carousel index
+     |> assign(carousel_index: initial_carousel_index(session.state))  # Unified carousel index (7 slides max)
+     |> assign(notes_revealed: false)          # Notes side panel visibility
      |> assign(show_mid_transition: false)
      |> assign(show_facilitator_tips: false)
      |> assign(note_input: "")

@@ -20,33 +20,33 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-6 w-[720px] h-full">
-      <!-- Header -->
-      <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
+    <.sheet class="shadow-sheet p-sheet-padding w-[720px] h-full">
+      <%!-- Header --%>
+      <div class="text-center mb-5 pb-3 border-b border-ink-blue/10">
+        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-1">
           Workshop Summary
         </h1>
-        <p class="text-ink-blue/70">
+        <p class="text-ink-blue/60 text-sm font-brand">
           Review your team's responses before creating action items.
         </p>
       </div>
-      
-    <!-- Participants -->
-      <div class="bg-surface-wall/50 rounded-lg p-4 mb-6">
-        <h2 class="text-sm font-semibold text-ink-blue/60 mb-3 font-brand uppercase tracking-wide">
+
+      <%!-- Participants --%>
+      <div class="bg-surface-wall/50 rounded-lg p-3 mb-5">
+        <h2 class="text-xs font-semibold text-ink-blue/50 mb-2 font-brand uppercase tracking-wide">
           Participants
         </h2>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-1.5">
           <%= for p <- @participants do %>
-            <div class="bg-surface-sheet rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm border border-ink-blue/5">
+            <div class="bg-surface-sheet rounded-md px-2.5 py-1 flex items-center gap-1.5 text-sm border border-ink-blue/5">
               <span class="font-workshop text-ink-blue">{p.name}</span>
               <%= cond do %>
                 <% p.is_observer -> %>
-                  <span class="text-xs bg-surface-wall text-ink-blue/60 px-1.5 py-0.5 rounded font-brand">
+                  <span class="text-[10px] bg-surface-wall text-ink-blue/50 px-1.5 py-0.5 rounded font-brand">
                     Observer
                   </span>
                 <% p.is_facilitator -> %>
-                  <span class="text-xs bg-accent-purple text-white px-1.5 py-0.5 rounded font-brand">
+                  <span class="text-[10px] bg-accent-purple text-white px-1.5 py-0.5 rounded font-brand">
                     Facilitator
                   </span>
                 <% true -> %>
@@ -55,23 +55,23 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
           <% end %>
         </div>
       </div>
-      
-    <!-- Questions Grid -->
-      <div class="space-y-4">
+
+      <%!-- Questions Grid --%>
+      <div class="space-y-3">
         <%= for score <- @scores_summary do %>
           <% question_notes = Map.get(@notes_by_question, score.question_index, []) %>
           <% question_scores = Map.get(@individual_scores, score.question_index, []) %>
-          <div class={["rounded-lg p-4 border", card_color_class(score.color)]}>
-            <!-- Question header -->
-            <div class="flex items-start justify-between mb-3">
+          <div class={["rounded-lg p-3 border", card_color_class(score.color)]}>
+            <%!-- Question header --%>
+            <div class="flex items-start justify-between mb-2">
               <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm text-ink-blue/50 font-brand">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs text-ink-blue/40 font-brand">
                     Q{score.question_index + 1}
                   </span>
-                  <h3 class="font-workshop font-semibold text-ink-blue text-lg">{score.title}</h3>
+                  <h3 class="font-workshop font-semibold text-ink-blue">{score.title}</h3>
                 </div>
-                <div class="text-xs text-ink-blue/40 mt-1 font-brand">
+                <div class="text-[10px] text-ink-blue/35 mt-0.5 font-brand">
                   <%= if score.scale_type == "balance" do %>
                     -5 to +5, optimal at 0
                   <% else %>
@@ -82,10 +82,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
 
               <div class="text-right">
                 <%= if score.combined_team_value do %>
-                  <div class={["text-2xl font-bold font-workshop", text_color_class(score.color)]}>
+                  <div class={["text-xl font-bold font-workshop", text_color_class(score.color)]}>
                     {round(score.combined_team_value)}/10
                   </div>
-                  <div class="flex items-center justify-end gap-1 text-xs text-ink-blue/40 font-brand">
+                  <div class="flex items-center justify-end gap-1 text-[10px] text-ink-blue/35 font-brand">
                     <span>team</span>
                     <span
                       class="cursor-help"
@@ -102,17 +102,20 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
                     </span>
                   </div>
                 <% else %>
-                  <div class="text-ink-blue/40 text-sm font-brand">No scores</div>
+                  <div class="text-ink-blue/40 text-xs font-brand">No scores</div>
                 <% end %>
               </div>
             </div>
-            
-    <!-- Individual Scores -->
+
+            <%!-- Individual Scores --%>
             <%= if length(question_scores) > 0 do %>
-              <div class="flex flex-wrap gap-2 justify-center">
+              <div class="flex flex-wrap gap-1.5 justify-center">
                 <%= for s <- question_scores do %>
-                  <div class={["rounded-lg p-2 text-center w-16 border", bg_color_class(s.color)]}>
-                    <div class={["text-lg font-bold font-workshop", text_color_class(s.color)]}>
+                  <div class={[
+                    "rounded-md px-2 py-1.5 text-center min-w-[3.5rem] border",
+                    bg_color_class(s.color)
+                  ]}>
+                    <div class={["text-base font-bold font-workshop", text_color_class(s.color)]}>
                       <%= if score.scale_type == "balance" and s.value > 0 do %>
                         +{s.value}
                       <% else %>
@@ -120,7 +123,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
                       <% end %>
                     </div>
                     <div
-                      class="text-xs text-ink-blue/60 truncate font-workshop"
+                      class="text-[10px] text-ink-blue/50 truncate font-workshop"
                       title={s.participant_name}
                     >
                       {s.participant_name}
@@ -129,18 +132,18 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
                 <% end %>
               </div>
             <% end %>
-            
-    <!-- Notes -->
+
+            <%!-- Notes --%>
             <%= if length(question_notes) > 0 do %>
-              <div class="mt-3 pt-3 border-t border-ink-blue/10">
-                <div class="text-xs text-ink-blue/40 mb-2 font-brand uppercase tracking-wide">
+              <div class="mt-2 pt-2 border-t border-ink-blue/10">
+                <div class="text-[10px] text-ink-blue/35 mb-1.5 font-brand uppercase tracking-wide">
                   Notes
                 </div>
-                <ul class="space-y-1.5">
+                <ul class="space-y-1">
                   <%= for note <- question_notes do %>
-                    <li class="text-sm text-ink-blue/70 bg-surface-wall/50 rounded px-2 py-1.5">
+                    <li class="text-sm text-ink-blue/70 bg-surface-wall/40 rounded px-2 py-1">
                       <span class="font-workshop">{note.content}</span>
-                      <span class="text-xs text-ink-blue/40 ml-1 font-brand">
+                      <span class="text-[10px] text-ink-blue/35 ml-1 font-brand">
                         — {note.author_name}
                       </span>
                     </li>

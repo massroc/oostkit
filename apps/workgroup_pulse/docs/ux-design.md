@@ -27,7 +27,7 @@
 ### Progressive Disclosure
 - Show only what's needed at each moment
 - Facilitator tips hidden behind expandable "More tips" button
-- Notes panel shows preview when unfocused, full form when clicked
+- Notes panel peeks as a 40px tab from the right edge; clicking reveals the full 480px panel
 - Score overlay only appears when it's your turn
 
 ---
@@ -63,11 +63,12 @@ All workshop phases (except lobby) share a single unified carousel. Slides are p
 | 2 | Balance Scale | 720px | always |
 | 3 | Safe Space | 720px | always |
 | 4 | Scoring Grid | 720px | state in scoring/summary/completed |
-| 5 | Notes/Actions | 480px | state in scoring/summary/completed |
-| 6 | Summary | 720px | state in summary/completed |
-| 7 | Wrap-up | 720px | state == completed |
+| 5 | Summary | 720px | state in summary/completed |
+| 6 | Wrap-up | 720px | state == completed |
 
 Lobby renders as a standalone single slide (no hook, no carousel navigation).
+
+**Notes/Actions Panel:** Notes and actions are presented in a fixed-position panel on the right edge of the viewport, not as a carousel slide. A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab reveals a 480px panel; clicking outside dismisses it.
 
 ### Floating Action Buttons
 

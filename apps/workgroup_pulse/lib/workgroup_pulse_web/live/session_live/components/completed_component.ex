@@ -24,32 +24,32 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-6 w-[720px] h-full">
-      <!-- Header -->
-      <div class="text-center mb-6 pb-4 border-b-2 border-ink-blue/10">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
+    <.sheet class="shadow-sheet p-sheet-padding w-[720px] h-full">
+      <%!-- Header --%>
+      <div class="text-center mb-5 pb-3 border-b border-ink-blue/10">
+        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-1">
           Workshop Wrap-Up
         </h1>
-        <p class="text-ink-blue/70">
+        <p class="text-ink-blue/60 text-sm font-brand">
           Review key findings and create action items.
         </p>
-        <p class="text-sm text-ink-blue/50 mt-2 font-brand">
-          Session code: <span class="font-mono text-ink-blue">{@session.code}</span>
+        <p class="text-xs text-ink-blue/40 mt-1.5 font-brand">
+          Session <span class="font-mono text-ink-blue/70 tracking-wider">{@session.code}</span>
         </p>
       </div>
-      
-    <!-- Score Grid -->
-      <div class="bg-surface-wall/50 rounded-lg p-4 mb-6">
-        <h2 class="text-sm font-semibold text-ink-blue/60 mb-3 font-brand uppercase tracking-wide">
+
+      <%!-- Score Grid --%>
+      <div class="bg-surface-wall/50 rounded-lg p-3 mb-5">
+        <h2 class="text-xs font-semibold text-ink-blue/50 mb-2 font-brand uppercase tracking-wide">
           All Scores
         </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <%= for score <- @scores_summary do %>
-            <div class={["rounded-lg p-3 text-center border", card_color_class(score.color)]}>
-              <div class="text-xs text-ink-blue/50 mb-1 font-brand">
+            <div class={["rounded-md p-2.5 text-center border", card_color_class(score.color)]}>
+              <div class="text-[10px] text-ink-blue/40 mb-0.5 font-brand">
                 Q{score.question_index + 1}
               </div>
-              <div class={["text-2xl font-bold font-workshop", text_color_class(score.color)]}>
+              <div class={["text-xl font-bold font-workshop", text_color_class(score.color)]}>
                 <%= if score.combined_team_value do %>
                   {round(score.combined_team_value)}/10
                 <% else %>
@@ -57,7 +57,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
                 <% end %>
               </div>
               <div
-                class="text-xs text-ink-blue/60 truncate mt-1 font-workshop"
+                class="text-[10px] text-ink-blue/50 truncate mt-0.5 font-workshop"
                 title={score.title}
               >
                 {score.title}
@@ -65,7 +65,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
             </div>
           <% end %>
         </div>
-        <div class="flex items-center justify-center gap-1 text-xs text-ink-blue/40 mt-2 font-brand">
+        <div class="flex items-center justify-center gap-1 text-[10px] text-ink-blue/35 mt-2 font-brand">
           <span>Combined Team Values</span>
           <span
             class="cursor-help"
@@ -82,22 +82,22 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
           </span>
         </div>
       </div>
-      
-    <!-- Pattern Highlighting -->
+
+      <%!-- Pattern Highlighting --%>
       <%= if length(@strengths) > 0 or length(@concerns) > 0 do %>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <!-- Strengths -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+          <%!-- Strengths --%>
           <%= if length(@strengths) > 0 do %>
-            <div class="bg-green-50 border border-traffic-green rounded-lg p-4">
-              <h3 class="text-lg font-semibold text-traffic-green mb-3 font-workshop">
+            <div class="bg-traffic-green/5 border border-traffic-green/30 rounded-lg p-3">
+              <h3 class="text-sm font-semibold text-traffic-green mb-2 font-brand">
                 Strengths ({length(@strengths)})
               </h3>
-              <ul class="space-y-2">
+              <ul class="space-y-1.5">
                 <%= for item <- @strengths do %>
-                  <li class="flex items-center gap-2 text-ink-blue/70">
-                    <span class="text-traffic-green">✓</span>
+                  <li class="flex items-center gap-2 text-sm text-ink-blue/70">
+                    <span class="text-traffic-green text-xs">✓</span>
                     <span class="font-workshop">{item.title}</span>
-                    <span class="text-traffic-green font-semibold ml-auto font-workshop">
+                    <span class="text-traffic-green font-semibold ml-auto font-workshop text-sm">
                       {round(item.combined_team_value)}/10
                     </span>
                   </li>
@@ -105,19 +105,19 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
               </ul>
             </div>
           <% end %>
-          
-    <!-- Concerns -->
+
+          <%!-- Concerns --%>
           <%= if length(@concerns) > 0 do %>
-            <div class="bg-red-50 border border-traffic-red rounded-lg p-4">
-              <h3 class="text-lg font-semibold text-traffic-red mb-3 font-workshop">
+            <div class="bg-traffic-red/5 border border-traffic-red/30 rounded-lg p-3">
+              <h3 class="text-sm font-semibold text-traffic-red mb-2 font-brand">
                 Areas of Concern ({length(@concerns)})
               </h3>
-              <ul class="space-y-2">
+              <ul class="space-y-1.5">
                 <%= for item <- @concerns do %>
-                  <li class="flex items-center gap-2 text-ink-blue/70">
-                    <span class="text-traffic-red">!</span>
+                  <li class="flex items-center gap-2 text-sm text-ink-blue/70">
+                    <span class="text-traffic-red text-xs">!</span>
                     <span class="font-workshop">{item.title}</span>
-                    <span class="text-traffic-red font-semibold ml-auto font-workshop">
+                    <span class="text-traffic-red font-semibold ml-auto font-workshop text-sm">
                       {round(item.combined_team_value)}/10
                     </span>
                   </li>
@@ -127,8 +127,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
           <% end %>
         </div>
       <% end %>
-      
-    <!-- Export Modal -->
+
+      <%!-- Export --%>
       <ExportModalComponent.render
         show_export_modal={@show_export_modal}
         export_content={@export_content}
