@@ -8740,13 +8740,16 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
     mounted() {
       this.slides = this.el.querySelectorAll(".carousel-slide");
       this.index = parseInt(this.el.dataset.index) || 0;
-      this.scrollToIndex(this.index, false);
+      this.clickOnly = this.el.hasAttribute("data-click-only");
       this.updateActive();
-      this.scrollTimer = null;
-      this.el.addEventListener("scroll", () => {
-        clearTimeout(this.scrollTimer);
-        this.scrollTimer = setTimeout(() => this.onScrollEnd(), 100);
-      });
+      this.scrollToIndex(this.index, false);
+      if (!this.clickOnly) {
+        this.scrollTimer = null;
+        this.el.addEventListener("scroll", () => {
+          clearTimeout(this.scrollTimer);
+          this.scrollTimer = setTimeout(() => this.onScrollEnd(), 100);
+        });
+      }
       this.slides.forEach((slide, i) => {
         slide.addEventListener("click", () => {
           if (i !== this.index) {
@@ -8759,8 +8762,8 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       const newIndex = parseInt(this.el.dataset.index) || 0;
       if (newIndex !== this.index) {
         this.index = newIndex;
-        this.scrollToIndex(this.index, true);
         this.updateActive();
+        this.scrollToIndex(this.index, true);
       }
     },
     destroyed() {
@@ -8768,7 +8771,16 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
     },
     scrollToIndex(index, smooth) {
       const slide = this.slides[index];
-      if (slide) {
+      if (!slide) return;
+      if (this.clickOnly) {
+        const containerRect = this.el.getBoundingClientRect();
+        const slideRect = slide.getBoundingClientRect();
+        const offset = slideRect.left - containerRect.left + this.el.scrollLeft - containerRect.width / 2 + slideRect.width / 2;
+        this.el.scrollTo({
+          left: offset,
+          behavior: smooth ? "smooth" : "instant"
+        });
+      } else {
         slide.scrollIntoView({
           behavior: smooth ? "smooth" : "instant",
           inline: "center",

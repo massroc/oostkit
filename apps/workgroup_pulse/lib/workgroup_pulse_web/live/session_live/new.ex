@@ -74,25 +74,23 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
 
     ~H"""
     <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
-      <div class="w-[720px] mb-4">
-        <.link
-          navigate={~p"/"}
-          class="text-text-body hover:text-text-dark inline-flex items-center"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          Back to Home
-        </.link>
-      </div>
-
       <.sheet class="shadow-sheet p-6 w-[720px]">
         <div class="max-w-md mx-auto">
+          <.link
+            navigate={~p"/"}
+            class="text-text-body hover:text-text-dark inline-flex items-center mb-6"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Back to Home
+          </.link>
+
           <h1 class="text-2xl font-bold text-text-dark mb-2 text-center font-brand">
             Create New Workshop
           </h1>
@@ -397,12 +395,12 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
               Create Workshop
             </button>
           </form>
+
+          <p class="text-text-body text-sm text-center mt-6">
+            You'll get a link to share with your team so they can join.
+          </p>
         </div>
       </.sheet>
-
-      <p class="text-text-body text-sm text-center mt-6">
-        You'll get a link to share with your team so they can join.
-      </p>
     </div>
     """
   end

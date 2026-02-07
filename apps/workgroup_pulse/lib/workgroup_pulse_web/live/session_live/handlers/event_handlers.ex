@@ -78,8 +78,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   def handle_carousel_navigate(socket, "scoring-carousel", index) do
-    sheet = if index == 1, do: :notes, else: :main
-    {:noreply, assign(socket, active_sheet: sheet)}
+    {:noreply, assign(socket, active_slide_index: index)}
   end
 
   def handle_carousel_navigate(socket, _carousel, _index) do
@@ -243,8 +242,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   Handles focus_sheet event - brings specified sheet to front.
   Valid sheets: :main, :notes
   """
-  def handle_focus_sheet(socket, sheet) when sheet in [:main, :notes] do
-    {:noreply, assign(socket, active_sheet: sheet)}
+  def handle_focus_sheet(socket, :main) do
+    {:noreply, assign(socket, active_slide_index: 4)}
+  end
+
+  def handle_focus_sheet(socket, :notes) do
+    {:noreply, assign(socket, active_slide_index: 5)}
   end
 
   # Note events
