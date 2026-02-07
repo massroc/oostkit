@@ -5,9 +5,8 @@ app = "workgroup-pulse"
 primary_region = "syd"  # Sydney, AU (matches database region)
 
 [build]
-  # Paths relative to monorepo root (build context set by CI workflow)
-  dockerfile = "apps/workgroup_pulse/Dockerfile"
-  ignorefile = "apps/workgroup_pulse/.dockerignore"
+  dockerfile = "Dockerfile"
+  ignorefile = ".dockerignore"
 
 [env]
   PHX_HOST = "workgroup-pulse.fly.dev"
