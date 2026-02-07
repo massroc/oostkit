@@ -275,8 +275,11 @@ Set via Fly.io secrets:
 
 ## Documentation
 
-- [REQUIREMENTS.md](REQUIREMENTS.md) - Functional requirements
-- [SOLUTION_DESIGN.md](SOLUTION_DESIGN.md) - Technical architecture
+- [REQUIREMENTS.md](REQUIREMENTS.md) — Functional requirements (what the product does)
+- [SOLUTION_DESIGN.md](SOLUTION_DESIGN.md) — Architecture & design decisions (why + how, high-level)
+- [TECHNICAL_SPEC.md](TECHNICAL_SPEC.md) — Implementation specification (components, handlers, state)
+- [docs/ux-design.md](docs/ux-design.md) — UX design specification (visual design, principles, accessibility)
+- [docs/ux-implementation.md](docs/ux-implementation.md) — UX implementation detail (CSS, JS hooks, carousel, sheets)
 
 ## License
 

@@ -77,6 +77,15 @@ docker compose exec wp_app mix format
 
 # View logs
 docker compose logs -f wp_app
+
+# Build static assets (CSS/JS) for committing
+# IMPORTANT: Do NOT use `mix assets.deploy` — it digests files and empties
+# the un-digested copies. The repo tracks un-digested dev builds.
+docker compose exec wp_app mix tailwind workgroup_pulse   # Build CSS
+docker compose exec wp_app mix esbuild workgroup_pulse    # Build JS
+# Then copy from container to host:
+docker compose cp wp_app:/app/priv/static/assets/app.css priv/static/assets/app.css
+docker compose cp wp_app:/app/priv/static/assets/app.js priv/static/assets/app.js
 ```
 
 ### Service Names (Workgroup Pulse)
@@ -243,6 +252,9 @@ Each app maintains its own documentation:
 - `apps/<app>/README.md` - App overview and setup
 - `apps/<app>/REQUIREMENTS.md` - Functional requirements (if applicable)
 - `apps/<app>/SOLUTION_DESIGN.md` - Technical architecture (if applicable)
+- `apps/<app>/TECHNICAL_SPEC.md` - Implementation specification (if applicable)
+- `apps/<app>/docs/ux-design.md` - UX design specification (if applicable)
+- `apps/<app>/docs/ux-implementation.md` - UX implementation detail (if applicable)
 
 Platform-wide documentation lives in `docs/`:
 - [Product Vision](docs/product-vision.md)
@@ -255,9 +267,12 @@ Platform-wide documentation lives in `docs/`:
 
 **Before creating a commit or PR via `/ship`, update documentation first.** This is the first step in the shipping process, before staging code changes.
 
-1. **REQUIREMENTS.md** - Update the app's functional requirements to reflect any new or changed behavior
-2. **SOLUTION_DESIGN.md** - Update the app's technical architecture/design doc to reflect implementation details
-3. **README.md** - Update if setup instructions, commands, or usage patterns changed
+1. **REQUIREMENTS.md** — Update if product behaviour changed
+2. **SOLUTION_DESIGN.md** — Update if architecture or design decisions changed
+3. **TECHNICAL_SPEC.md** — Update if implementation details changed (components, state, handlers)
+4. **docs/ux-design.md** — Update if design principles, visual design, or accessibility changed
+5. **docs/ux-implementation.md** — Update if CSS systems, JS hooks, or UI components changed
+6. **README.md** — Update if setup instructions, commands, or usage patterns changed
 
 Only update docs for the affected app(s). Skip a doc file if the changes are truly irrelevant to it (e.g., a pure CSS tweak doesn't need a SOLUTION_DESIGN.md update). Use judgment, but err on the side of updating.
 

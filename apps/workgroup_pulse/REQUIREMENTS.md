@@ -13,6 +13,12 @@ Team members enter their individual scores for each criterion and then discuss t
 - **Self-serve for teams** - any team can run this workshop independently
 - Provides context, explanations, and discussion prompts at each step
 
+**Related documents:**
+- [SOLUTION_DESIGN.md](SOLUTION_DESIGN.md) — Architecture, tech stack, design for reuse
+- [TECHNICAL_SPEC.md](TECHNICAL_SPEC.md) — LiveView components, handlers, state management
+- [docs/ux-design.md](docs/ux-design.md) — UX design principles, visual design, accessibility
+- [docs/ux-implementation.md](docs/ux-implementation.md) — CSS systems, JS hooks, sheet dimensions
+
 ## Domain Background
 
 Based on research by Drs Fred & Merrelyn Emery, the six intrinsic motivators that determine employee engagement are grouped into two categories:
@@ -42,49 +48,6 @@ Based on research by Drs Fred & Merrelyn Emery, the six intrinsic motivators tha
 | 5a | Socially Useful | Meaningfulness | 0 to 10 |
 | 5b | See Whole Product | Meaningfulness | 0 to 10 |
 | 6 | Desirable Future | Desirable Future | 0 to 10 |
-
-## Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Backend | Elixir / Phoenix |
-| Database | PostgreSQL |
-| Styling | Tailwind CSS |
-| Hosting | Fly.io |
-
-## Architecture Considerations
-
-### Design for Reuse
-
-This tool may serve as a foundation for other facilitated team events (e.g., team kick-offs, retrospectives, planning sessions). The architecture should support this by:
-
-**Separating concerns:**
-- **Core facilitation engine** - real-time sync, session management, participant tracking
-- **Workshop-specific content** - the Six Criteria questions, explanations, scoring scales
-- **Reusable UI components** - timers, voting/scoring widgets, discussion prompts, action capture
-
-**Potentially reusable components:**
-| Component | Reuse Potential |
-|-----------|-----------------|
-| Session creation & joining | Any team event |
-| Real-time participant sync | Any collaborative activity |
-| Waiting room / lobby | Any group event |
-| Timed sections with countdown | Any structured workshop |
-| Turn-based sequential input | Round-robin exercises, facilitated discussions |
-| Discussion prompts (contextual) | Any facilitated discussion |
-| Notes capture per section | Any workshop |
-| Action planning with owners | Any team session |
-| Facilitator Assistance (on-demand help) | Any guided experience |
-| Traffic light visualization | Any scored/rated content |
-| Feedback button | Any product |
-
-**Architectural approach:**
-- Clean separation between generic facilitation features and Six Criteria-specific content
-- Configuration-driven where possible (e.g., questions, scales, timing could be data)
-- Component-based UI that can be composed for different workshop types
-- Consider a "workshop template" concept for future flexibility
-
-*Note: This doesn't mean over-engineering the MVP - but make conscious decisions that don't paint us into a corner.*
 
 ## Scoring System
 
@@ -137,13 +100,14 @@ The tool behaves like butcher paper on a wall: **visible, permanent within each 
 
 **Sheet Carousel Layout:**
 
-All phases use a **sheet carousel** — a scroll-snap horizontal layout where the active sheet is centred and prominent, with adjacent sheets peeking from behind (scaled down, dimmed, non-interactive).
+All phases use a **sheet carousel** — a scroll-snap horizontal layout where the active sheet is centred and prominent, with adjacent sheets peeking from behind (scaled down, dimmed, non-interactive). See [docs/ux-implementation.md](docs/ux-implementation.md) for the full technical specification.
 
 The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
 
-**Scoring Carousel (2 slides):**
-- **Slide 1: Main Sheet (centre)** — The full 8-question scoring grid, always visible
-- **Slide 2: Notes/Actions Sheet** — Notes and actions for the current question, navigable via carousel swipe or click
+**Unified Scoring Carousel (6 slides, click-only navigation):**
+- **Slides 0-3: Intro Context Sheets** — The 4 intro slides (welcome, how-it-works, balance scale, safe space) as read-only context, smaller (480px) and deep-stacked to the left
+- **Slide 4: Main Sheet (centre, default active)** — The full 8-question scoring grid, always visible
+- **Slide 5: Notes/Actions Sheet** — Notes and actions for the current question, navigable via click only (no scroll/swipe)
 
 **Turn-Based Sequential Scoring:**
 
@@ -428,9 +392,9 @@ Colors indicate how concerning a score is at a glance.
 
 | Score | Color | Meaning |
 |-------|-------|---------|
-| 0, ±1 | Green | Healthy - close to optimal |
-| ±2, ±3 | Amber | Moderate concern |
-| ±4, ±5 | Red | Significant concern |
+| 0, +/-1 | Green | Healthy - close to optimal |
+| +/-2, +/-3 | Amber | Moderate concern |
+| +/-4, +/-5 | Red | Significant concern |
 
 **Maximal Scale Questions (5-8)** - where 10 is optimal:
 
@@ -662,216 +626,6 @@ The following explanations will be shown to participants when scoring each quest
 
 ---
 
-## UI/UX Design Guidelines
-
-The tool follows the **Sheet Carousel** design system (see `docs/carousel-layout.md` for full specification). These guidelines describe how the design system applies to the Pulse workshop.
-
-### Core Principles
-
-**1. Content First, Chrome Last**
-- The scoring grid is the star of the show — it dominates the screen as a paper-textured sheet
-- UI elements (buttons, navigation, controls) float above the grid as overlays
-- The accumulating scores *are* the interface
-
-**2. Sheet Carousel Metaphor**
-- The screen evokes sheets of butcher paper arranged on a table
-- Paper texture, subtle shadows, and slight rotation give a physical feel
-- Adjacent sheets peek from behind — clickable to navigate
-- See `docs/carousel-layout.md` for the complete vocabulary (Sheet, Carousel Slide, Reference View, etc.)
-
-**3. Clear Visual Hierarchy**
-- Use size, weight, and color to indicate importance
-- Most important element (the grid) is largest and centred
-- Side panels provide context without competing for attention
-- Disabled/inactive states clearly differentiated
-
-**4. Progressive Disclosure**
-- Show only what's needed at each moment
-- Facilitator tips hidden behind expandable "More tips" button
-- Notes panel shows preview when unfocused, full form when clicked
-- Score overlay only appears when it's your turn
-
-### Layout: Sheet Carousel
-
-All phases use the same **sheet carousel** layout — a scroll-snap horizontal container centring the active slide with adjacent slides peeking:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Header (app name, gradient accent)                              │
-├─────────────────────────────────────────────────────────────────┤
-│  SHEET CAROUSEL (bg: warm taupe #E8E4DF)                         │
-│                                                                   │
-│  ┌─────┐   ┌──────────────────────────────┐   ┌─────┐           │
-│  │dim  │   │                              │   │dim  │           │
-│  │prev │   │  Active Sheet (paper texture) │   │next │           │
-│  │slide│   │  (centred, full size)         │   │slide│           │
-│  └─────┘   └──────────────────────────────┘   └─────┘           │
-│                                                                   │
-│                     [Floating action buttons, bottom-right]       │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-**Phase Slide Counts:**
-| Phase | Slides | Notes |
-|-------|--------|-------|
-| Lobby | 1 | Single slide, no hook |
-| Intro | 4 | SheetCarousel hook, `data-index` from intro_step |
-| Scoring | 2 | Main grid + notes/actions sheet |
-| Summary | 1 | Single slide, no hook |
-| Completed | 1 | Single slide, no hook |
-
-**Sheet Dimensions:**
-- **Width**: 720px (all primary sheets), 480px (notes side-sheet)
-- **Height**: Fills available viewport — `calc(100vh - header - carousel_padding)` with `min-height: 879px` (flipchart ratio floor, based on Post-it Easel Pad 635mm × 775mm)
-- **Overflow**: Content scrolls within the sheet when it exceeds the available height; no scrollbar when content fits
-
-**Floating Action Buttons:**
-Viewport-fixed bar aligned to the 720px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. `pointer-events-none` container with `pointer-events-auto` inner wrapper so clicks pass through to the sheet. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline).
-
-| Button | Phase | Shown When | Style |
-|--------|-------|-----------|-------|
-| Skip intro | Intro (slide 1 only) | Always on first intro slide | Text link |
-| Next → | Intro | All slides | Primary (gradient) |
-| Done → | Scoring | Current turn participant, after scoring | Primary (gradient) |
-| Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
-| ← Back | Scoring, Summary, Completed | Facilitator (scoring: after Q1) | Secondary |
-| Next Question → | Scoring | Facilitator, all participants ready | Primary |
-| Continue to Summary → | Scoring (last Q) | Facilitator, all participants ready | Primary |
-| I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |
-| Continue to Wrap-Up → | Summary | Facilitator | Primary |
-| Finish Workshop | Completed | Facilitator | Primary |
-
-### Score Input: Floating Overlay
-
-When it's a participant's turn, a **floating overlay** appears centred on screen:
-
-- **Backdrop**: Semi-transparent with blur effect
-- **Modal**: Paper-textured sheet with score buttons
-- **Balance scale** (-5 to +5): 11 buttons in a row, 0 highlighted as optimal
-- **Maximal scale** (0 to 10): 11 buttons in a row
-- **Auto-submit**: Selecting a score immediately submits it and closes the overlay
-- **Click-to-edit**: After submitting, clicking your cell in the grid reopens the overlay
-- **Entrance animation**: Overlay fades/slides in for polish
-
-### Carousel Navigation
-
-Slides navigate via scroll-snap or click:
-- **Click a dimmed slide** to navigate to it (scroll-snap centres it)
-- **Scroll/swipe** horizontally within the carousel container
-- **Server-driven**: `data-index` attribute on the carousel container controls the active slide
-- **Non-active slides** are scaled to 82%, dimmed to 45% opacity, and have `pointer-events: none` on children
-
-### Interaction Patterns
-
-**Feedback & States**
-- Scores auto-submit with immediate visual feedback in the grid
-- Loading states for async operations (avoid spinners where possible)
-- Success/error states communicated via flash messages
-- Hover and focus states for all interactive elements
-
-**Transitions**
-- Score overlay entrance animation (`score-overlay-enter` keyframe)
-- Panel focus transitions (300ms duration)
-- Sheet lift on hover with shadow transition
-- Never animate in a way that delays user action
-
-**Touch & Click Targets**
-- Minimum 44x44px touch targets (WCAG recommendation)
-- Score buttons are full-width flex items for easy tapping
-- Entire note cards and sheet panels are clickable
-
-### Responsive Design
-
-**Breakpoints**
-| Size | Target | Considerations |
-|------|--------|----------------|
-| Mobile (< 640px) | Phones | Single column, larger touch targets |
-| Tablet (640-1024px) | iPads, small laptops | Comfortable grid view |
-| Desktop (> 1024px) | Primary use case | Full grid with side panels |
-
-**Mobile Considerations**
-- Grid may need horizontal scroll or condensed view
-- Score overlay is full-width on mobile (mx-4 margin)
-- Side panels may stack or become drawers
-
-### Error Prevention & Recovery
-
-**Prevent Errors**
-- Disable "Next Question" until all participants are ready
-- Auto-save scores immediately on selection
-- Confirm destructive actions (delete notes, skip turn)
-
-**Recover from Errors**
-- Clear error messages via flash
-- Easy path back (facilitator Back button)
-- Never lose user work due to errors
-
----
-
-## Visual Design
-
-### Design System
-The app follows the shared **Desirable Futures Workshop Design System** documented in `docs/design-system.md`. Key decisions are summarised here; refer to the design system for implementation details and Tailwind classes.
-
-**Reference:** https://www.desirablefutures.group/
-
-### Theme: Light
-
-All workshop apps use a **light theme** with warm off-white backgrounds, replacing the earlier dark theme concept.
-
-### Color Palette
-
-| Role | Color | Value |
-|------|-------|-------|
-| Wall Background | Warm taupe | `#E8E4DF` |
-| Sheet Surface | Cream (paper texture) | `#FEFDFB` |
-| Sheet Secondary | Light gray | `#F5F3F0` |
-| Ink (on-sheet content) | Deep blue | `#1a3a6b` |
-| UI Text | Dark gray | `#333333` |
-| Primary Accent | Purple | `#7245F4` |
-| Secondary Accent | Magenta | `#BC45F4` |
-| Score High / Success | Gold | `#F4B945` |
-| Score Low / Warning | Red | `#F44545` |
-| Traffic Green | Green | `#22c55e` |
-| Traffic Amber | Amber | `#f59e0b` |
-| Traffic Red | Red | `#ef4444` |
-
-See `docs/brand-colors.md` for the complete palette.
-
-### Typography
-
-| Use | Font | Notes |
-|-----|------|-------|
-| UI Chrome | DM Sans | Headers, buttons, labels |
-| Workshop Content | Caveat | Scores, criteria names, notes (handwritten feel) |
-
-### Style Direction
-
-- **Light, warm, physical** — evokes paper and markers on a wall
-- **Paper texture** — SVG noise overlays on sheet surfaces for tactile feel
-- **Multi-layer shadows** — sheets lift on hover, creating depth
-- **Subtle rotation** — sheets have slight CSS rotation for a natural, pinned-to-wall feel
-- **High contrast** — ink-blue text on cream paper for readability
-- **Generous whitespace** — breathing room within sheets
-
-### Traffic Light Colors
-
-Traffic lights use semantic Tailwind classes (`text-traffic-green`, `text-traffic-amber`, `text-traffic-red`) for consistent application across scores, summaries, and indicators.
-
----
-
-## Accessibility
-
-- **Target: WCAG AA compliance**
-- Semantic HTML structure
-- Full keyboard navigation
-- Screen reader compatible
-- Sufficient color contrast
-- Focus indicators
-- Alt text for any images/icons
-
----
-
 ## Error States & Edge Cases
 
 ### Connection Issues
@@ -964,20 +718,6 @@ Traffic lights use semantic Tailwind classes (`text-traffic-green`, `text-traffi
 
 ---
 
-## Usage Analytics (Future)
-
-Track anonymized usage patterns to refine the tool:
-
-- **Time per section** - how long do teams actually spend on each question?
-- **Where do teams exceed time?** - which questions generate the longest discussions?
-- **Completion rates** - do teams finish? Where do they drop off?
-- **Feature usage** - how often is Facilitator Assistance used? Skip intro?
-- **Comparison** - first-time vs repeat teams
-
-*Note: All analytics would be aggregated and anonymized. Individual session data remains private to the team.*
-
----
-
 ## Outstanding Items (To Be Defined)
 
 The following features require further design decisions:
@@ -1012,5 +752,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 3.2 - Standardised sheet dimensions (flipchart ratio height), floating action buttons for all phases*
+*Document Version: 4.0 — Restructured: UI/UX moved to docs/ux-design.md and docs/ux-implementation.md, tech stack and architecture moved to SOLUTION_DESIGN.md*
 *Last Updated: 2026-02-07*

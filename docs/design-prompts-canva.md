@@ -313,7 +313,8 @@ Once you have design concepts, bring them back to Claude Code to:
 
 - [brand-colors.md](./brand-colors.md) - Full color palette reference
 - [design-system.md](./design-system.md) - Design system tokens and Tailwind implementation
-- [REQUIREMENTS.md](../apps/workgroup_pulse/REQUIREMENTS.md) - Full app requirements including UI/UX guidelines
+- [REQUIREMENTS.md](../apps/workgroup_pulse/REQUIREMENTS.md) - Functional requirements
 - [SOLUTION_DESIGN.md](../apps/workgroup_pulse/SOLUTION_DESIGN.md) - Technical architecture
-- [UX Redesign Prep](../apps/workgroup_pulse/docs/ux-redesign-prep.md) - Component inventory and design decisions
+- [UX Design](../apps/workgroup_pulse/docs/ux-design.md) - UX design specification
+- [UX Implementation](../apps/workgroup_pulse/docs/ux-implementation.md) - UX implementation detail
 - Desirable Futures Group: https://www.desirablefutures.group/
