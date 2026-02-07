@@ -15,8 +15,9 @@
 ### Sheet Carousel Metaphor
 - The screen evokes sheets of butcher paper arranged on a table
 - Paper texture, subtle shadows, and slight rotation give a physical feel
-- Adjacent sheets peek from behind — clickable to navigate
-- See [ux-implementation.md](ux-implementation.md) for the technical implementation (CSS classes, JS hook, slide index map)
+- Adjacent sheets peek from behind with a subtle coverflow effect — scaled down, slightly rotated, dimmed, and overlapping the active sheet
+- Clickable to navigate
+- See [ux-implementation.md](ux-implementation.md) for the technical implementation (CSS classes, JS hook, coverflow parameters, slide index map)
 
 ### Clear Visual Hierarchy
 - Use size, weight, and color to indicate importance

@@ -18,9 +18,9 @@ The sheet carousel is the universal layout system for all Pulse workshop phases.
 | `.sheet-carousel` | Outer container — flex, centres single-slide layouts (lobby) |
 | `.embla__viewport` | Embla viewport — `overflow: hidden`, full width/height |
 | `.embla__container` | Embla flex container — holds slides |
-| `.carousel-slide` | Individual slide — fixed height, opacity transition |
-| `.carousel-slide.active` | Active slide — full opacity, z-index 2 |
-| `.carousel-slide:not(.active)` | Inactive — 30% opacity, clickable |
+| `.carousel-slide` | Individual slide — fixed height, coverflow transforms driven by JS |
+| `.carousel-slide.active` | Active slide — full opacity/scale, highest z-index |
+| `.carousel-slide:not(.active)` | Inactive — dimmed, scaled down, clickable |
 
 ### JS Hook: `SheetCarousel` (Embla Carousel)
 
@@ -28,7 +28,9 @@ Powered by [Embla Carousel](https://www.embla-carousel.com/) v8.6.0 (vendored ES
 
 **Embla options:** `align: 'center'`, `containScroll: false`, `watchDrag: false` (click-only), `duration: 20`.
 
-**Event delegation:** Click listeners use event delegation on the container element (not per-slide binding), so dynamically added slides are handled automatically without rebinding.
+**Event delegation:** Click listeners use event delegation on the container element (not per-slide binding), so dynamically added slides are handled automatically without rebinding. Elements with `[data-no-navigate]` are excluded from click-to-navigate (used by score overlay).
+
+**Coverflow effect:** The `_applyCoverflow()` method runs on every Embla `scroll` tick, applying per-slide transforms based on distance from the active slide: `perspective(800px)`, `rotateY` (±12°/slide, max ±20°), `scale` (−6%/slide, min 0.8), `translateX` (200px overlap toward centre), and `opacity` (−35%/slide, min 0.25). Z-index decreases with distance so the active slide renders on top. All parameters are grouped as named constants for easy tuning.
 
 **Dynamic slides:** On `updated()`, the hook compares DOM slide count against Embla's known slides. If they differ (LiveView added/removed slides), it destroys and reinitialises Embla with the new slides and correct `startIndex`.
 
@@ -167,10 +169,10 @@ When it's a participant's turn, a **floating overlay** appears centred on screen
 ### Visibility Logic
 
 ```elixir
-show_score_overlay: is_my_turn and not my_turn_locked and my_score == nil
+show_score_overlay: false  # always starts closed; opened explicitly by user
 ```
 
-After auto-submit, the overlay closes. Click-to-edit reopens it via `handle_edit_my_score/1`.
+The overlay no longer auto-opens on turn start. Users click their cell in the scoring grid to open it. Click-to-edit reopens it via `handle_edit_my_score/1`.
 
 ---
 

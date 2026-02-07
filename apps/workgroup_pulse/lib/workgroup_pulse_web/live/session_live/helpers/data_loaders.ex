@@ -47,10 +47,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(current_turn_has_score: turn_state.current_turn_has_score)
     |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_criterion_popup: nil)
-    |> assign(
-      show_score_overlay:
-        turn_state.is_my_turn and not turn_state.my_turn_locked and my_score == nil
-    )
+    |> assign(show_score_overlay: false)
     |> then(fn socket ->
       if turn_state.is_my_turn and my_score == nil do
         assign(socket, :carousel_index, 4)

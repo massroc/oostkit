@@ -328,7 +328,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     assigns = assign(assigns, :popup_question, popup_question)
 
     ~H"""
-    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter">
+    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter" data-no-navigate>
       <!-- Backdrop -->
       <div
         class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm"
@@ -387,18 +387,18 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_score_overlay(assigns) do
     ~H"""
-    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter">
+    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter" data-no-navigate>
       <!-- Backdrop -->
       <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay">
       </div>
       <!-- Modal -->
-      <.sheet class="shadow-sheet-lifted p-6 max-w-md w-full mx-4 relative">
-        <h3 class="font-workshop text-xl font-bold text-ink-blue text-center mb-2">
+      <.sheet class="shadow-sheet-lifted p-4 max-w-sm w-full mx-4 relative">
+        <h3 class="font-workshop text-lg font-bold text-ink-blue text-center mb-1">
           {@current_question.title}
         </h3>
 
-        <div class="text-center mb-4">
-          <div class="text-traffic-green text-lg font-semibold font-brand">
+        <div class="text-center mb-3">
+          <div class="text-traffic-green text-base font-semibold font-brand">
             <%= if @has_submitted do %>
               Discuss your score
             <% else %>
@@ -414,7 +414,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% end %>
 
         <%= if @has_submitted do %>
-          <p class="text-center text-ink-blue/60 text-sm mt-3">
+          <p class="text-center text-ink-blue/60 text-sm mt-2">
             Discuss this score, then click "Done" when ready
           </p>
         <% end %>
@@ -425,21 +425,21 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_balance_scale(assigns) do
     ~H"""
-    <div class="space-y-3">
-      <div class="flex justify-between text-sm text-ink-blue/60">
+    <div class="space-y-2">
+      <div class="flex justify-between text-xs text-ink-blue/60">
         <span>Too little</span>
         <span>Just right</span>
         <span>Too much</span>
       </div>
 
-      <div class="flex gap-1">
+      <div class="flex gap-0.5">
         <%= for v <- -5..5 do %>
           <button
             type="button"
             phx-click="select_score"
             phx-value-score={v}
             class={[
-              "flex-1 min-w-0 py-2.5 rounded-lg font-semibold text-sm transition-all cursor-pointer font-workshop",
+              "flex-1 min-w-0 py-2 rounded-md font-semibold text-xs transition-all cursor-pointer font-workshop",
               cond do
                 @selected_value == v ->
                   "bg-traffic-green text-white shadow-md"
@@ -472,20 +472,20 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_maximal_scale(assigns) do
     ~H"""
-    <div class="space-y-3">
-      <div class="flex justify-between text-sm text-ink-blue/60">
+    <div class="space-y-2">
+      <div class="flex justify-between text-xs text-ink-blue/60">
         <span>Low</span>
         <span>High</span>
       </div>
 
-      <div class="flex gap-1">
+      <div class="flex gap-0.5">
         <%= for v <- 0..10 do %>
           <button
             type="button"
             phx-click="select_score"
             phx-value-score={v}
             class={[
-              "flex-1 min-w-0 py-2.5 rounded-lg font-semibold text-sm transition-all cursor-pointer font-workshop",
+              "flex-1 min-w-0 py-2 rounded-md font-semibold text-xs transition-all cursor-pointer font-workshop",
               if(@selected_value == v,
                 do: "bg-accent-purple text-white shadow-md",
                 else:
