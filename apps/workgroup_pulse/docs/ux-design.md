@@ -1,0 +1,207 @@
+# Workgroup Pulse - UX Design Specification
+
+**Audience:** Designers, product owners, anyone asking "why does it look this way?"
+**Changes when:** Visual design, layout principles, or accessibility requirements change.
+
+---
+
+## 1. Design Principles
+
+### Content First, Chrome Last
+- The scoring grid is the star of the show — it dominates the screen as a paper-textured sheet
+- UI elements (buttons, navigation, controls) float above the grid as overlays
+- The accumulating scores *are* the interface
+
+### Sheet Carousel Metaphor
+- The screen evokes sheets of butcher paper arranged on a table
+- Paper texture, subtle shadows, and slight rotation give a physical feel
+- Adjacent sheets peek from behind — clickable to navigate
+- See [ux-implementation.md](ux-implementation.md) for the technical implementation (CSS classes, JS hook, slide index map)
+
+### Clear Visual Hierarchy
+- Use size, weight, and color to indicate importance
+- Most important element (the grid) is largest and centred
+- Side panels provide context without competing for attention
+- Disabled/inactive states clearly differentiated
+
+### Progressive Disclosure
+- Show only what's needed at each moment
+- Facilitator tips hidden behind expandable "More tips" button
+- Notes panel shows preview when unfocused, full form when clicked
+- Score overlay only appears when it's your turn
+
+---
+
+## 2. Layout Architecture
+
+All phases use the same **sheet carousel** layout — a scroll-snap horizontal container centring the active slide with adjacent slides peeking:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Header (app name, gradient accent)                              │
+├─────────────────────────────────────────────────────────────────┤
+│  SHEET CAROUSEL (bg: warm taupe #E8E4DF)                         │
+│                                                                   │
+│  ┌─────┐   ┌──────────────────────────────┐   ┌─────┐           │
+│  │dim  │   │                              │   │dim  │           │
+│  │prev │   │  Active Sheet (paper texture) │   │next │           │
+│  │slide│   │  (centred, full size)         │   │slide│           │
+│  └─────┘   └──────────────────────────────┘   └─────┘           │
+│                                                                   │
+│                     [Floating action buttons, bottom-right]       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Phase Slide Counts
+
+| Phase | Slides | Notes |
+|-------|--------|-------|
+| Lobby | 1 | Single slide, no carousel navigation |
+| Intro | 4 | Welcome, how-it-works, scales, safe-space |
+| Scoring | 6 | 4 intro context + main grid + notes/actions (click-only navigation) |
+| Summary | 1 | Single slide |
+| Completed | 1 | Single slide |
+
+### Floating Action Buttons
+
+Viewport-fixed bar aligned to the 720px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline).
+
+| Button | Phase | Shown When | Style |
+|--------|-------|-----------|-------|
+| Skip intro | Intro (slide 1 only) | Always on first intro slide | Text link |
+| Next | Intro | All slides | Primary (gradient) |
+| Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
+| Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
+| Back | Scoring, Summary, Completed | Facilitator (scoring: after Q1) | Secondary |
+| Next Question | Scoring | Facilitator, all participants ready | Primary |
+| Continue to Summary | Scoring (last Q) | Facilitator, all participants ready | Primary |
+| I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |
+| Continue to Wrap-Up | Summary | Facilitator | Primary |
+| Finish Workshop | Completed | Facilitator | Primary |
+
+---
+
+## 3. Visual Design
+
+### Design System
+
+The app follows the shared **Desirable Futures Workshop Design System** documented in `/docs/design-system.md`. Key decisions are summarised here; refer to the design system for implementation details and Tailwind classes.
+
+**Reference:** https://www.desirablefutures.group/
+
+### Theme: Light
+
+All workshop apps use a **light theme** with warm off-white backgrounds, replacing the earlier dark theme concept.
+
+### Color Palette
+
+| Role | Color | Value |
+|------|-------|-------|
+| Wall Background | Warm taupe | `#E8E4DF` |
+| Sheet Surface | Cream (paper texture) | `#FEFDFB` |
+| Sheet Secondary | Light gray | `#F5F3F0` |
+| Ink (on-sheet content) | Deep blue | `#1a3a6b` |
+| UI Text | Dark gray | `#333333` |
+| Primary Accent | Purple | `#7245F4` |
+| Secondary Accent | Magenta | `#BC45F4` |
+| Score High / Success | Gold | `#F4B945` |
+| Score Low / Warning | Red | `#F44545` |
+| Traffic Green | Green | `#22c55e` |
+| Traffic Amber | Amber | `#f59e0b` |
+| Traffic Red | Red | `#ef4444` |
+
+See `/docs/brand-colors.md` for the complete palette.
+
+### Typography
+
+| Use | Font | Notes |
+|-----|------|-------|
+| UI Chrome | DM Sans | Headers, buttons, labels |
+| Workshop Content | Caveat | Scores, criteria names, notes (handwritten feel) |
+
+### Style Direction
+
+- **Light, warm, physical** — evokes paper and markers on a wall
+- **Paper texture** — SVG noise overlays on sheet surfaces for tactile feel
+- **Multi-layer shadows** — sheets lift on hover, creating depth
+- **Subtle rotation** — sheets have slight CSS rotation for a natural, pinned-to-wall feel
+- **High contrast** — ink-blue text on cream paper for readability
+- **Generous whitespace** — breathing room within sheets
+
+### Traffic Light Colors
+
+Traffic lights use semantic Tailwind classes (`text-traffic-green`, `text-traffic-amber`, `text-traffic-red`) for consistent application across scores, summaries, and indicators.
+
+---
+
+## 4. Interaction Patterns
+
+### Feedback & States
+- Scores auto-submit with immediate visual feedback in the grid
+- Loading states for async operations (avoid spinners where possible)
+- Success/error states communicated via flash messages
+- Hover and focus states for all interactive elements
+
+### Transitions
+- Score overlay entrance animation (`score-overlay-enter` keyframe)
+- Panel focus transitions (300ms duration)
+- Sheet lift on hover with shadow transition
+- Never animate in a way that delays user action
+
+### Touch & Click Targets
+- Minimum 44x44px touch targets (WCAG recommendation)
+- Score buttons are full-width flex items for easy tapping
+- Entire note cards and sheet panels are clickable
+
+### Error Prevention & Recovery
+
+**Prevent Errors:**
+- Disable "Next Question" until all participants are ready
+- Auto-save scores immediately on selection
+- Confirm destructive actions (delete notes, skip turn)
+
+**Recover from Errors:**
+- Clear error messages via flash
+- Easy path back (facilitator Back button)
+- Never lose user work due to errors
+
+### Responsive Design
+
+| Size | Target | Considerations |
+|------|--------|----------------|
+| Mobile (< 640px) | Phones | Single column, larger touch targets |
+| Tablet (640-1024px) | iPads, small laptops | Comfortable grid view |
+| Desktop (> 1024px) | Primary use case | Full grid with side panels |
+
+**Mobile Considerations:**
+- Grid may need horizontal scroll or condensed view
+- Score overlay is full-width on mobile (mx-4 margin)
+- Side panels may stack or become drawers
+
+---
+
+## 5. Accessibility
+
+- **Target: WCAG AA compliance**
+- Semantic HTML structure
+- Full keyboard navigation
+- Screen reader compatible
+- Sufficient color contrast
+- Focus indicators
+- Alt text for any images/icons
+
+---
+
+## 6. Design System Reference
+
+The platform-wide design system is documented at [`/docs/design-system.md`](/docs/design-system.md). It covers:
+- Tailwind preset tokens (colors, typography, spacing, shadows, z-index)
+- Brand colors and palette
+- Component patterns shared across all workshop apps
+
+For the **implementation** of these design decisions (CSS classes, JS hooks, sheet dimensions, responsive breakpoints), see [ux-implementation.md](ux-implementation.md).
+
+---
+
+*Document Version: 1.0*
+*Created: 2026-02-07*
