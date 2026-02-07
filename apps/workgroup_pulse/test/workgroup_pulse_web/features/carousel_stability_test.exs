@@ -313,39 +313,28 @@ defmodule WorkgroupPulseWeb.Features.CarouselStabilityTest do
         nil
 
       {:nomatch, {close_pos, close_len}} ->
-        if depth == 1 do
-          offset + close_pos + close_len
-        else
-          rest = binary_part(html, close_pos + close_len, byte_size(html) - close_pos - close_len)
-          do_find_close(rest, offset + close_pos + close_len, depth - 1)
-        end
+        handle_close(html, offset, depth, close_pos, close_len)
 
       {_, {close_pos, close_len}} when open_div == :nomatch ->
-        if depth == 1 do
-          offset + close_pos + close_len
-        else
-          rest = binary_part(html, close_pos + close_len, byte_size(html) - close_pos - close_len)
-          do_find_close(rest, offset + close_pos + close_len, depth - 1)
-        end
+        handle_close(html, offset, depth, close_pos, close_len)
 
-      {{open_pos, _}, {close_pos, close_len}} ->
-        if close_pos < open_pos do
-          # Close comes first
-          if depth == 1 do
-            offset + close_pos + close_len
-          else
-            rest =
-              binary_part(html, close_pos + close_len, byte_size(html) - close_pos - close_len)
+      {{open_pos, _}, {close_pos, close_len}} when close_pos < open_pos ->
+        handle_close(html, offset, depth, close_pos, close_len)
 
-            do_find_close(rest, offset + close_pos + close_len, depth - 1)
-          end
-        else
-          # Open comes first — find the end of this open tag and recurse
-          after_open = open_pos + 4
-          rest = binary_part(html, after_open, byte_size(html) - after_open)
-          do_find_close(rest, offset + after_open, depth + 1)
-        end
+      {{open_pos, _}, _close_div} ->
+        after_open = open_pos + 4
+        rest = binary_part(html, after_open, byte_size(html) - after_open)
+        do_find_close(rest, offset + after_open, depth + 1)
     end
+  end
+
+  defp handle_close(_html, offset, 1, close_pos, close_len) do
+    offset + close_pos + close_len
+  end
+
+  defp handle_close(html, offset, depth, close_pos, close_len) do
+    rest = binary_part(html, close_pos + close_len, byte_size(html) - close_pos - close_len)
+    do_find_close(rest, offset + close_pos + close_len, depth - 1)
   end
 
   defp find_string_pos(html, search) do
