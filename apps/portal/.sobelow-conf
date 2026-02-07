@@ -7,6 +7,13 @@
   format: "txt",
   out: "",
   threshold: "low",
-  ignore: ["Config.CSP", "Config.HTTPS"],
-  ignore_files: ["lib/portal/release.ex"]
+  ignore: [
+    # CSP is handled at the CDN/reverse proxy level (Fly.io)
+    "Config.CSP",
+    # HTTPS is handled by Fly.io (TLS termination at edge)
+    "Config.HTTPS",
+    # Code.eval_file in release.ex uses fixed seed script path, not user input
+    "RCE.CodeModule"
+  ],
+  ignore_files: []
 ]
