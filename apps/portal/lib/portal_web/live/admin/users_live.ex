@@ -68,7 +68,7 @@ defmodule PortalWeb.Admin.UsersLive do
 
         <.form for={@form} phx-submit="save_user" class="space-y-4">
           <div>
-            <.input
+            <.field
               field={@form[:email]}
               type="email"
               label="Email"
@@ -77,10 +77,10 @@ defmodule PortalWeb.Admin.UsersLive do
             />
           </div>
           <div>
-            <.input field={@form[:name]} type="text" label="Name (optional)" />
+            <.field field={@form[:name]} type="text" label="Name (optional)" />
           </div>
           <div :if={@editing_user}>
-            <.input
+            <.field
               field={@form[:role]}
               type="select"
               label="Role"

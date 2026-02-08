@@ -16,7 +16,7 @@ defmodule PortalWeb.UserLive.Settings do
     </div>
 
     <.form for={@email_form} id="email_form" phx-submit="update_email" phx-change="validate_email">
-      <.input
+      <.field
         field={@email_form[:email]}
         type="email"
         label="Email"
@@ -44,14 +44,14 @@ defmodule PortalWeb.UserLive.Settings do
         autocomplete="username"
         value={@current_email}
       />
-      <.input
+      <.field
         field={@password_form[:password]}
         type="password"
         label="New password"
         autocomplete="new-password"
         required
       />
-      <.input
+      <.field
         field={@password_form[:password_confirmation]}
         type="password"
         label="Confirm new password"

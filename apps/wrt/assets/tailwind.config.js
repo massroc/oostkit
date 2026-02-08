@@ -6,15 +6,16 @@ const fs = require("fs")
 const path = require("path")
 
 // Import shared design system preset
-// Note: Local copy used for Docker builds - keep in sync with /shared/tailwind.preset.js
-const designSystemPreset = require("./tailwind.preset.js")
+// Path is /shared in Docker (mounted volume) or ../../../shared locally
+const designSystemPreset = require("/shared/tailwind.preset.js")
 
 module.exports = {
   presets: [designSystemPreset],
   content: [
     "./js/**/*.js",
     "../lib/wrt_web.ex",
-    "../lib/wrt_web/**/*.*ex"
+    "../lib/wrt_web/**/*.*ex",
+    "../deps/petal_components/**/*.*ex"
   ],
   theme: {
     extend: {

@@ -79,6 +79,14 @@ defmodule WorkgroupPulseWeb do
   defp html_helpers do
     quote do
       import Phoenix.HTML
+      import PetalComponents.{
+        Accordion, Alert, Avatar, Badge, Breadcrumbs, ButtonGroup,
+        Card, Container, Dropdown, Field, Form, Link, Loading,
+        Marquee, Modal, Pagination, Progress, Rating, Skeleton, SlideOver,
+        Stepper, Tabs, Typography, UserDropdownMenu, Menu
+      }
+
+      alias PetalComponents.HeroiconsV1
       import WorkgroupPulseWeb.CoreComponents
       use Gettext, backend: WorkgroupPulseWeb.Gettext
 

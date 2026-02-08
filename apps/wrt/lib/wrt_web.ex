@@ -61,7 +61,15 @@ defmodule WrtWeb do
   defp html_helpers do
     quote do
       import Phoenix.HTML
-      import WrtWeb.CoreComponents
+      import PetalComponents.{
+        Accordion, Alert, Avatar, Badge, Breadcrumbs, Button, ButtonGroup,
+        Card, Container, Dropdown, Field, Form, Icon, Input, Link, Loading,
+        Marquee, Modal, Pagination, Progress, Rating, Skeleton, SlideOver,
+        Stepper, Tabs, Typography, UserDropdownMenu, Menu
+      }
+
+      alias PetalComponents.HeroiconsV1
+      import WrtWeb.CoreComponents, except: [button: 1, icon: 1, input: 1]
       use Gettext, backend: WrtWeb.Gettext
 
       alias Phoenix.LiveView.JS

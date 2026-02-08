@@ -79,7 +79,8 @@ defmodule PortalWeb do
   defp html_helpers do
     quote do
       import Phoenix.HTML
-      import PortalWeb.CoreComponents
+      use PetalComponents
+      import PortalWeb.CoreComponents, except: [button: 1, icon: 1, input: 1]
       use Gettext, backend: PortalWeb.Gettext
 
       alias Phoenix.LiveView.JS

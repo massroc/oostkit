@@ -79,6 +79,10 @@ defmodule WorkgroupPulse.MixProject do
       {:dns_cluster, "~> 0.1.3 or ~> 0.2.0"},
       {:bandit, "~> 1.6"},
 
+      # UI Components
+      {:petal_components, "~> 2.0"},
+      {:phoenix_html_helpers, "~> 1.0"},
+
       # Testing
       {:ex_machina, "~> 2.8", only: :test},
       {:faker, "~> 0.18", only: :test},

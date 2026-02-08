@@ -14,7 +14,8 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "../lib/workgroup_pulse_web.ex",
-    "../lib/workgroup_pulse_web/**/*.*ex"
+    "../lib/workgroup_pulse_web/**/*.*ex",
+    "../deps/petal_components/**/*.*ex"
   ],
   theme: {
     extend: {

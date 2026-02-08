@@ -4,6 +4,9 @@
 //
 // Reference mockup: /apps/workgroup_pulse/docs/mockups/facilitator-scoring-v8.html
 
+const colors = require("tailwindcss/colors");
+const brand = require("./oostkit-brand.js");
+
 module.exports = {
   theme: {
     extend: {
@@ -65,10 +68,31 @@ module.exports = {
         // ===================
         // Secondary Brand Colors
         // ===================
-        'secondary': {
+        'brand-secondary': {
           'green-light': '#B0E2AB',
           'blue-light': '#71C1FB',
         },
+
+        // ===================
+        // OOSTKit Brand Color Scales
+        // ===================
+        'ok-purple': brand['ok-purple'],
+        'ok-magenta': brand['ok-magenta'],
+        'ok-gold': brand['ok-gold'],
+        'ok-red': brand['ok-red'],
+        'ok-blue': brand['ok-blue'],
+        'ok-green': brand['ok-green'],
+
+        // ===================
+        // Petal Components (semantic → OOSTKit brand mapping)
+        // ===================
+        primary: brand['ok-purple'],
+        secondary: brand['ok-magenta'],
+        success: colors.green,
+        danger: brand['ok-red'],
+        warning: brand['ok-gold'],
+        info: brand['ok-blue'],
+        gray: colors.gray,
 
         // ===================
         // Traffic Light (Score Indicators)
