@@ -107,10 +107,9 @@ defmodule WorkgroupPulseWeb.Features.FullWorkshopFlowTest do
       assert render(alice_view) =~ "Welcome to the Workshop"
 
       # ─── Phase 3: Skip Intro → Scoring Q1 ──────────────────────────
+      # Each participant navigates to scoring independently
       fac_view |> element("button[phx-click='skip_intro']") |> render_click()
-
-      # Flush PubSub to Alice
-      render(alice_view)
+      alice_view |> render_click("skip_intro")
 
       fac_html = render(fac_view)
       alice_html = render(alice_view)

@@ -42,26 +42,14 @@ defmodule WorkgroupPulse.SessionsPubSubTest do
 
       assert_receive {:session_started, received_session}
       assert received_session.id == started_session.id
-      assert received_session.state == "intro"
-    end
-
-    test "advance_to_scoring broadcasts session_updated", %{session: session} do
-      {:ok, started} = Sessions.start_session(session)
-      Sessions.subscribe(started)
-
-      {:ok, scoring_session} = Sessions.advance_to_scoring(started)
-
-      assert_receive {:session_updated, received_session}
-      assert received_session.id == scoring_session.id
       assert received_session.state == "scoring"
     end
 
     test "advance_question broadcasts session_updated", %{session: session} do
       {:ok, started} = Sessions.start_session(session)
-      {:ok, scoring} = Sessions.advance_to_scoring(started)
-      Sessions.subscribe(scoring)
+      Sessions.subscribe(started)
 
-      {:ok, advanced} = Sessions.advance_question(scoring)
+      {:ok, advanced} = Sessions.advance_question(started)
 
       assert_receive {:session_updated, received_session}
       assert received_session.current_question_index == advanced.current_question_index

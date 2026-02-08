@@ -55,24 +55,25 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
               <li class="flex items-center justify-between bg-surface-sheet rounded-lg px-4 py-2.5 border border-ink-blue/5">
                 <div class="flex items-center gap-2">
                   <span class="font-workshop text-ink-blue text-lg">{p.name}</span>
-                  <%= cond do %>
-                    <% p.is_observer -> %>
-                      <span class="text-xs bg-surface-wall text-ink-blue/60 px-2 py-0.5 rounded font-brand">
-                        Observer
-                      </span>
-                    <% p.is_facilitator -> %>
-                      <span class="text-xs bg-accent-purple text-white px-2 py-0.5 rounded font-brand">
-                        Facilitator
-                      </span>
-                    <% true -> %>
+                  <%= if p.is_observer do %>
+                    <span class="text-xs bg-surface-wall text-ink-blue/60 px-2 py-0.5 rounded font-brand">
+                      Observer
+                    </span>
                   <% end %>
                 </div>
 
-                <%= if p.id == @participant.id do %>
-                  <span class="text-xs bg-accent-purple text-white px-2 py-0.5 rounded font-brand">
-                    You
-                  </span>
-                <% end %>
+                <div class="flex items-center gap-2">
+                  <%= if p.is_facilitator do %>
+                    <span class="text-xs bg-accent-purple text-white px-2 py-0.5 rounded font-brand">
+                      Facilitator
+                    </span>
+                  <% end %>
+                  <%= if p.id == @participant.id do %>
+                    <span class="text-xs bg-accent-purple text-white px-2 py-0.5 rounded font-brand">
+                      You
+                    </span>
+                  <% end %>
+                </div>
               </li>
             <% end %>
           </ul>

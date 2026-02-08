@@ -90,13 +90,17 @@ The tool behaves like butcher paper on a wall: **visible, permanent within each 
 - Shareable link generated for team members to join
 - Waiting room shows who has joined (join order determines scoring order)
 
-### 2. Introduction Phase
+### 2. Introduction & Scoring Phase
+
+After the facilitator starts the session, all participants see intro slides (skippable). Each participant navigates to the scoring sheet independently — there is no facilitator-gated transition.
+
+**Introduction Slides (self-paced):**
 - **Guided overview** of the Six Criteria framework
 - Explanation of how the workshop works
 - What to expect from the process
-- "Ready to begin" confirmation from participants
+- Each participant clicks through or skips to scoring at their own pace
 
-### 3. Scoring Phase (repeated for each criterion)
+**Scoring (repeated for each criterion):**
 
 **Unified Workshop Carousel:**
 
@@ -207,7 +211,7 @@ This simplified approach ensures equal time per question and provides built-in f
 - Visual cue helps facilitator pace discussions
 
 **Auto-start behavior:**
-- Timer automatically starts when entering a timed phase (scoring, summary, actions)
+- Timer starts when the **facilitator first reaches the scoring sheet** (not during intro slides)
 - Timer restarts when moving to the next question
 - Summary and Actions **share one timer** - no restart on that transition
 
@@ -483,9 +487,9 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 The introduction is presented before scoring begins. **Skippable** for experienced teams.
 
 ### Skip Option
-- "Skip intro" button visible for teams who've done this before
-- Skipping takes all participants directly to the first question
-- Skip requires confirmation: "Has everyone done this workshop before?"
+- "Skip intro" button visible on all intro slides
+- Skipping takes the individual participant directly to the scoring sheet
+- Each participant navigates independently — no facilitator-gated transition
 
 ### Screen 1: Welcome
 
@@ -758,5 +762,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 4.0 — Restructured: UI/UX moved to docs/ux-design.md and docs/ux-implementation.md, tech stack and architecture moved to SOLUTION_DESIGN.md*
-*Last Updated: 2026-02-07*
+*Document Version: 4.1 — Removed intro state; intro slides are now local carousel navigation within scoring state*
+*Last Updated: 2026-02-08*

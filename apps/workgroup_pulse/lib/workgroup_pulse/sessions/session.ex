@@ -10,7 +10,6 @@ defmodule WorkgroupPulse.Sessions.Session do
 
   Sessions progress through the following states:
   - `lobby` - Initial state, waiting for participants to join
-  - `intro` - Introduction phase (can be skipped)
   - `scoring` - Main phase, cycling through questions with turn-based scoring
   - `summary` - Review of all scores
   - `actions` - Action planning phase
@@ -28,7 +27,7 @@ defmodule WorkgroupPulse.Sessions.Session do
   alias WorkgroupPulse.Timestamps
   alias WorkgroupPulse.Workshops.Template
 
-  @states ~w(lobby intro scoring summary actions completed)
+  @states ~w(lobby scoring summary actions completed)
 
   schema "sessions" do
     field :code, :string

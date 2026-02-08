@@ -183,7 +183,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
 
   @impl true
   def handle_event("continue_to_scoring", _params, socket) do
-    EventHandlers.handle_continue_to_scoring(socket)
+    EventHandlers.handle_skip_intro(socket)
   end
 
   @impl true

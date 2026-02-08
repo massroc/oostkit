@@ -49,7 +49,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(show_criterion_popup: nil)
     |> assign(show_score_overlay: false)
     |> then(fn socket ->
-      if turn_state.is_my_turn and my_score == nil do
+      if turn_state.is_my_turn and my_score == nil and socket.assigns.carousel_index >= 4 do
         assign(socket, :carousel_index, 4)
       else
         socket

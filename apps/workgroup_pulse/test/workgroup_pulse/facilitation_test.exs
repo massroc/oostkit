@@ -5,7 +5,6 @@ defmodule WorkgroupPulse.FacilitationTest do
 
   describe "phase management" do
     test "phase_name/1 returns descriptive phase names" do
-      assert Facilitation.phase_name("intro") == "Introduction"
       assert Facilitation.phase_name("question_0") == "Question 1"
       assert Facilitation.phase_name("question_7") == "Question 8"
       assert Facilitation.phase_name("summary") == "Summary"
@@ -14,8 +13,6 @@ defmodule WorkgroupPulse.FacilitationTest do
     end
 
     test "suggested_duration/1 returns default durations in seconds" do
-      # 10 minutes
-      assert Facilitation.suggested_duration("intro") == 600
       # 15 minutes per question
       assert Facilitation.suggested_duration("question_0") == 900
       # 10 minutes
@@ -82,11 +79,6 @@ defmodule WorkgroupPulse.FacilitationTest do
              }) == nil
 
       assert Facilitation.current_timer_phase(%WorkgroupPulse.Sessions.Session{
-               state: "intro",
-               current_question_index: 0
-             }) == nil
-
-      assert Facilitation.current_timer_phase(%WorkgroupPulse.Sessions.Session{
                state: "completed",
                current_question_index: 7
              }) == nil
@@ -105,11 +97,6 @@ defmodule WorkgroupPulse.FacilitationTest do
       assert Facilitation.timer_enabled?(%WorkgroupPulse.Sessions.Session{
                planned_duration_minutes: 100,
                state: "lobby"
-             }) == false
-
-      assert Facilitation.timer_enabled?(%WorkgroupPulse.Sessions.Session{
-               planned_duration_minutes: 100,
-               state: "intro"
              }) == false
 
       assert Facilitation.timer_enabled?(%WorkgroupPulse.Sessions.Session{
@@ -140,5 +127,6 @@ defmodule WorkgroupPulse.FacilitationTest do
       session = %WorkgroupPulse.Sessions.Session{planned_duration_minutes: nil}
       assert Facilitation.warning_threshold(session) == nil
     end
+
   end
 end

@@ -33,7 +33,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
         socket,
         Sessions.start_session(session),
         "Failed to start workshop",
-        &assign(&1, session: &2)
+        fn socket, updated_session ->
+          socket
+          |> assign(session: updated_session)
+          |> assign(carousel_index: 0)
+          |> DataLoaders.load_scoring_data(updated_session, participant)
+        end
       )
     else
       {:noreply, socket}
@@ -61,11 +66,21 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   @doc """
-  Handles skip_intro event.
-  Advances directly to scoring phase.
+  Handles skip_intro and continue_to_scoring events.
+  Navigates locally to the scoring sheet. Starts the timer for the facilitator
+  on first arrival.
   """
   def handle_skip_intro(socket) do
-    handle_continue_to_scoring(socket)
+    socket = assign(socket, carousel_index: 4)
+
+    socket =
+      if socket.assigns.participant.is_facilitator and not socket.assigns.timer_enabled do
+        TimerHandler.start_phase_timer(socket, socket.assigns.session)
+      else
+        socket
+      end
+
+    {:noreply, socket}
   end
 
   @doc """
@@ -78,28 +93,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
 
   def handle_carousel_navigate(socket, _carousel, _index) do
     {:noreply, socket}
-  end
-
-  @doc """
-  Handles continue_to_scoring event.
-  Advances from intro to scoring phase.
-  """
-  def handle_continue_to_scoring(socket) do
-    session = socket.assigns.session
-    participant = socket.assigns.participant
-
-    handle_operation(
-      socket,
-      Sessions.advance_to_scoring(session),
-      "Failed to advance to scoring",
-      fn socket, updated_session ->
-        socket
-        |> assign(session: updated_session)
-        |> assign(carousel_index: 4)
-        |> DataLoaders.load_scoring_data(updated_session, participant)
-        |> TimerHandler.start_phase_timer(updated_session)
-      end
-    )
   end
 
   # Scoring events
