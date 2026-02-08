@@ -100,11 +100,13 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 
 **Purpose:** Renders the score input overlay and criterion info popup. These are rendered outside the carousel container in the DOM because CSS `transform` on carousel slides breaks `position: fixed`.
 
-**Attrs (9):** `session`, `is_my_turn`, `my_turn_locked`, `show_score_overlay`, `show_criterion_popup`, `current_question`, `selected_value`, `has_submitted`, `all_questions`
+**Attrs (11):** `session`, `is_my_turn`, `my_turn_locked`, `show_score_overlay`, `show_discuss_prompt`, `show_team_discuss_prompt`, `show_criterion_popup`, `current_question`, `selected_value`, `has_submitted`, `all_questions`
 
 **Key Render Functions:**
 - `render_score_overlay/1` — Floating score input modal with backdrop
 - `render_balance_scale/1` / `render_maximal_scale/1` — Score button grids for each scale type
+- `render_discuss_prompt/1` — "Discuss your score" popup after individual score submission
+- `render_team_discuss_prompt/1` — "Discuss the scores as a team" popup when all turns complete (only during active scoring)
 - `render_criterion_popup/1` — Criterion info popup with discussion tips
 
 ### FloatingButtonsComponent
@@ -119,11 +121,11 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 
 **File:** `lib/workgroup_pulse_web/live/session_live/components/notes_panel_component.ex`
 
-**Purpose:** Renders the notes/actions side panel fixed to the right edge of the viewport. Includes collapsed tab (vertical "Notes" text) and expanded panel.
+**Purpose:** Renders the notes/actions side panel fixed to the right edge of the viewport. Includes a 70px read-only peek (showing notes/actions headings and content preview) and a 480px expanded editable panel.
 
 **Attrs (7):** `notes_revealed`, `carousel_index`, `question_notes`, `note_input`, `all_actions`, `action_count`, `action_input`
 
-**Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20). A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab sets `notes_revealed: true`, revealing a 480px panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
+**Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20). A 70px read-only peek is visible on slides 4-6 (scoring, summary, wrap-up). Clicking the peek sets `notes_revealed: true`, revealing a 480px editable panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
 
 **Actions in Scoring Phase:**
 Actions are managed during the scoring phase via the notes/actions side panel (below notes). The completed/wrap-up page displays all captured action items in a dedicated section (beneath strengths/concerns) and includes the action count for export purposes.
@@ -132,7 +134,7 @@ Actions are managed during the scoring phase via the notes/actions side panel (b
 
 All follow the same pure functional pattern:
 - **SummaryComponent** — Read-only scoring grid table with traffic-light coloured cells (same grid layout as scoring phase, grouped by scale type)
-- **CompletedComponent** — Wrap-up page with score overview, strengths/concerns, action count, and export
+- **CompletedComponent** — Wrap-up page with "Cumulative Team Score" overview, strengths/concerns, inline action items input, export, and "Finish Workshop" button (facilitator only)
 - **LobbyComponent** — Waiting room with participant list and start button
 - **IntroComponent** — 4-screen introduction with navigation
 

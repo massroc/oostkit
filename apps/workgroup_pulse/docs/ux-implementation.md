@@ -78,8 +78,8 @@ def handle_carousel_navigate(socket, _carousel, _index)           # no-op fallba
 
 The notes/actions panel is **not** a carousel slide. It is a fixed-position panel on the right edge of the viewport (z-20), outside the carousel DOM.
 
-- **Peek tab** (40px wide) is visible when the scoring grid is active (`carousel_index == 4`)
-- **Reveal:** Clicking the peek tab fires `reveal_notes`, setting `notes_revealed: true` and sliding in a 480px panel
+- **Peek tab** (70px wide, read-only preview showing notes/actions headings and content) is visible on slides 4-6 (scoring, summary, wrap-up)
+- **Reveal:** Clicking the peek tab fires `reveal_notes`, setting `notes_revealed: true` and showing the full 480px editable panel
 - **Dismiss:** Clicking outside the panel (transparent backdrop at z-10) fires `hide_notes`, setting `notes_revealed: false`
 - `handle_focus_sheet(:notes)` sets `notes_revealed: true` instead of changing the carousel index
 
@@ -106,9 +106,14 @@ Content scrolls within the sheet when it exceeds the available height; no scroll
 .sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-bottom: 5rem;
+  scrollbar-width: thin;                          /* Firefox */
+  scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
 }
 ```
+
+Cross-browser thin scrollbar styling is applied via `::-webkit-scrollbar` (Chromium/Edge/Safari, 6px width) and `scrollbar-width: thin` (Firefox). `overflow-x: hidden` prevents horizontal scrollbars caused by CSS rotation on sheet containers.
 
 This is CSS-driven — no JS intervention needed. The sheet is the scroll container, not the page. The `padding-bottom: 5rem` ensures content isn't hidden behind the fixed floating action buttons.
 
@@ -136,13 +141,16 @@ Floating action buttons are rendered by `FloatingButtonsComponent` — a pure fu
 | Start Scoring → | Intro (slide 3) | Last intro slide | Primary (gradient) |
 | Progress dots | Intro | All intro slides | 4 dots, active = accent-purple |
 | Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
-| Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
-| Back | Scoring, Summary | Facilitator (scoring: after Q1) | Secondary |
+| ← Prev Question | Scoring | Facilitator, after Q1 | Secondary |
 | Next Question | Scoring | Facilitator, all participants ready | Primary |
 | Continue to Summary | Scoring (last Q) | Facilitator, all participants ready | Primary |
 | I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |
-| Continue to Wrap-Up | Summary | Facilitator | Primary |
-| Finish Workshop | Completed | Facilitator | Primary |
+| ← Back | Slides 4-6 (review) | All participants, carousel nav to prev slide | Secondary |
+| Summary → | Slide 4 (review) | All participants, state past scoring | Primary |
+| Continue to Wrap-Up | Summary | Facilitator (active summary state) | Primary |
+| Wrap-Up → | Slide 5 (review) | All participants, state is completed | Primary |
+
+**Skip Turn** is rendered inline in the scoring grid cell (not as a floating button). **Finish Workshop** is rendered inside the wrap-up sheet (not floating).
 
 ---
 

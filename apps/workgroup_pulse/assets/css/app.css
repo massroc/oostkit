@@ -326,7 +326,38 @@ th.active-col-header {
 .sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-bottom: 5rem;
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
+}
+
+/* ─── Thin scrollbar styling (Chromium / Edge / Safari) ─── */
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar-track,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar-track,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar-thumb,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar-thumb,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar-thumb {
+  background: rgba(26, 58, 107, 0.15);
+  border-radius: 3px;
+}
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar-thumb:hover,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar-thumb:hover,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 58, 107, 0.3);
 }
 
 /* ─── Notes Side Panel ─── */
@@ -334,6 +365,8 @@ th.active-col-header {
 .notes-panel .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
 }
 
 .writing-vertical-rl {

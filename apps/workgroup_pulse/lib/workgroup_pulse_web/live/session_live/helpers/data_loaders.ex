@@ -48,6 +48,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(participant_was_skipped: turn_state.participant_was_skipped)
     |> assign(show_criterion_popup: nil)
     |> assign(show_score_overlay: false)
+    |> assign(show_discuss_prompt: false)
+    |> assign(show_team_discuss_prompt: false)
     |> then(fn socket ->
       if turn_state.is_my_turn and my_score == nil and socket.assigns.carousel_index >= 4 do
         assign(socket, :carousel_index, 4)
@@ -55,6 +57,35 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
         socket
       end
     end)
+    |> load_scores(session, question_index)
+    |> load_notes(session, question_index)
+    |> load_all_questions_scores(session, template)
+    |> load_actions_data(session)
+  end
+
+  def load_scoring_data(socket, %{state: state} = session, participant)
+      when state in ["summary", "completed"] do
+    template = get_or_load_template(socket, session.template_id)
+    question_index = session.current_question_index
+    question = Enum.find(template.questions, &(&1.index == question_index))
+    my_score = Scoring.get_score(session, participant, question_index)
+
+    socket
+    |> assign(template: template)
+    |> assign(total_questions: length(template.questions))
+    |> assign(current_question: question)
+    |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
+    |> assign(my_score: if(my_score, do: my_score.value, else: nil))
+    |> assign(has_submitted: my_score != nil)
+    |> assign(my_turn_locked: true)
+    |> assign(is_my_turn: false)
+    |> assign(current_turn_participant_id: nil)
+    |> assign(current_turn_has_score: false)
+    |> assign(participant_was_skipped: false)
+    |> assign(show_criterion_popup: nil)
+    |> assign(show_score_overlay: false)
+    |> assign(show_discuss_prompt: false)
+    |> assign(show_team_discuss_prompt: false)
     |> load_scores(session, question_index)
     |> load_notes(session, question_index)
     |> load_all_questions_scores(session, template)
@@ -117,6 +148,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(active_participant_count: 0)
     |> assign(question_notes: [])
     |> assign(show_criterion_popup: nil)
+    |> assign(show_discuss_prompt: false)
+    |> assign(show_team_discuss_prompt: false)
     |> assign(ready_count: 0)
     |> assign(eligible_participant_count: 0)
     |> assign(all_ready: false)
@@ -157,24 +190,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     current_turn_has_score =
       current_turn_participant != nil and Map.has_key?(score_map, current_turn_participant.id)
 
-    # Get fresh participants list for readiness calculation
-    # Use socket.assigns if available, otherwise load from database
-    all_participants =
-      case socket.assigns[:participants] do
-        [_ | _] = participants ->
-          participants
-
-        _ ->
-          Sessions.list_participants(session)
-      end
-
-    # Calculate readiness for non-facilitator, non-observer participants
-    # Skipped participants (no score when all turns done) count as ready
-    # If row is locked (revisiting completed question), all are auto-ready
+    # Calculate readiness and detect discussion phase transition
+    all_participants = get_participants_for_readiness(socket, session)
     row_locked = Scoring.row_locked?(session, question_index)
 
     {ready_count, eligible_count, all_ready} =
       calculate_readiness(all_participants, score_map, all_turns_done, row_locked)
+
+    entering_discussion = entering_discussion?(socket, session, all_scored, row_locked)
 
     socket
     |> assign(all_scores: participant_scores)
@@ -184,7 +207,22 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(current_turn_has_score: current_turn_has_score)
     |> assign(ready_count: ready_count)
     |> assign(eligible_participant_count: eligible_count)
+    |> then(fn s ->
+      if entering_discussion, do: assign(s, show_team_discuss_prompt: true), else: s
+    end)
     |> assign(all_ready: all_ready)
+  end
+
+  defp get_participants_for_readiness(socket, session) do
+    case socket.assigns[:participants] do
+      [_ | _] = participants -> participants
+      _ -> Sessions.list_participants(session)
+    end
+  end
+
+  defp entering_discussion?(socket, session, all_scored, row_locked) do
+    was_revealed = socket.assigns[:scores_revealed] || false
+    session.state == "scoring" and all_scored and not was_revealed and not row_locked
   end
 
   defp build_participant_scores(participants, score_map, session, current_question) do

@@ -14,6 +14,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
   attr :is_my_turn, :boolean, required: true
   attr :my_turn_locked, :boolean, required: true
   attr :show_score_overlay, :boolean, required: true
+  attr :show_discuss_prompt, :boolean, required: true
+  attr :show_team_discuss_prompt, :boolean, required: true
   attr :show_criterion_popup, :any, required: true
   attr :current_question, :map, required: true
   attr :selected_value, :any, required: true
@@ -26,6 +28,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
       <!-- Score Input Overlay -->
       <%= if @is_my_turn and not @my_turn_locked and @show_score_overlay do %>
         {render_score_overlay(assigns)}
+      <% end %>
+      <!-- Discuss Prompt (after score submitted) -->
+      <%= if @show_discuss_prompt and not @show_score_overlay do %>
+        {render_discuss_prompt(assigns)}
+      <% end %>
+      <!-- Team Discuss Prompt (all turns complete) -->
+      <%= if @show_team_discuss_prompt and not @show_score_overlay and not @show_discuss_prompt do %>
+        {render_team_discuss_prompt(assigns)}
       <% end %>
       <!-- Criterion Info Popup -->
       <%= if @show_criterion_popup != nil do %>
@@ -42,13 +52,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
       <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay">
       </div>
       <!-- Modal -->
-      <.sheet class="shadow-sheet-lifted p-4 max-w-sm w-full mx-4 relative">
-        <h3 class="font-workshop text-lg font-bold text-ink-blue text-center mb-1">
+      <.sheet class="shadow-sheet-lifted p-5 max-w-md w-full mx-4 relative">
+        <h3 class="font-workshop text-xl font-bold text-ink-blue text-center mb-1">
           {@current_question.title}
         </h3>
 
         <div class="text-center mb-3">
-          <div class="text-traffic-green text-base font-semibold font-brand">
+          <div class="text-traffic-green text-lg font-semibold font-brand">
             <%= if @has_submitted do %>
               Discuss your score
             <% else %>
@@ -64,7 +74,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
         <% end %>
 
         <%= if @has_submitted do %>
-          <p class="text-center text-ink-blue/60 text-sm mt-2">
+          <p class="text-center text-ink-blue/60 text-base mt-2">
             Discuss this score, then click "Done" when ready
           </p>
         <% end %>
@@ -73,10 +83,52 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
     """
   end
 
+  defp render_discuss_prompt(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter"
+      phx-click="dismiss_discuss_prompt"
+    >
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-ink-blue/20 backdrop-blur-[2px]"></div>
+      <!-- Prompt -->
+      <.sheet class="shadow-sheet-lifted px-8 py-6 relative">
+        <p class="font-workshop text-2xl font-bold text-ink-blue text-center">
+          Discuss your score
+        </p>
+        <p class="text-ink-blue/50 text-sm font-brand text-center mt-1">
+          Click anywhere to dismiss
+        </p>
+      </.sheet>
+    </div>
+    """
+  end
+
+  defp render_team_discuss_prompt(assigns) do
+    ~H"""
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter"
+      phx-click="dismiss_team_discuss_prompt"
+    >
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-ink-blue/20 backdrop-blur-[2px]"></div>
+      <!-- Prompt -->
+      <.sheet class="shadow-sheet-lifted px-8 py-6 relative">
+        <p class="font-workshop text-2xl font-bold text-ink-blue text-center">
+          Discuss the scores as a team
+        </p>
+        <p class="text-ink-blue/50 text-sm font-brand text-center mt-1">
+          Click anywhere to dismiss
+        </p>
+      </.sheet>
+    </div>
+    """
+  end
+
   defp render_balance_scale(assigns) do
     ~H"""
     <div class="space-y-2">
-      <div class="flex justify-between text-xs text-ink-blue/60">
+      <div class="flex justify-between text-sm text-ink-blue/60">
         <span>Too little</span>
         <span>Just right</span>
         <span>Too much</span>
@@ -89,7 +141,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
             phx-click="select_score"
             phx-value-score={v}
             class={[
-              "flex-1 min-w-0 py-2 rounded-md font-semibold text-xs transition-all cursor-pointer font-workshop",
+              "flex-1 min-w-0 py-3.5 rounded-md font-semibold text-lg transition-all cursor-pointer font-workshop",
               cond do
                 @selected_value == v ->
                   "bg-traffic-green text-white shadow-md"
@@ -111,7 +163,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
         <% end %>
       </div>
 
-      <div class="flex justify-between text-xs text-ink-blue/50">
+      <div class="flex justify-between text-sm text-ink-blue/50">
         <span>-5</span>
         <span class="text-traffic-green font-semibold">0 = optimal</span>
         <span>+5</span>
@@ -123,7 +175,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
   defp render_maximal_scale(assigns) do
     ~H"""
     <div class="space-y-2">
-      <div class="flex justify-between text-xs text-ink-blue/60">
+      <div class="flex justify-between text-sm text-ink-blue/60">
         <span>Low</span>
         <span>High</span>
       </div>
@@ -135,7 +187,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
             phx-click="select_score"
             phx-value-score={v}
             class={[
-              "flex-1 min-w-0 py-2 rounded-md font-semibold text-xs transition-all cursor-pointer font-workshop",
+              "flex-1 min-w-0 py-3.5 rounded-md font-semibold text-lg transition-all cursor-pointer font-workshop",
               if(@selected_value == v,
                 do: "bg-accent-purple text-white shadow-md",
                 else:
@@ -148,7 +200,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
         <% end %>
       </div>
 
-      <div class="flex justify-between text-xs text-ink-blue/50">
+      <div class="flex justify-between text-sm text-ink-blue/50">
         <span>0</span>
         <span>10</span>
       </div>

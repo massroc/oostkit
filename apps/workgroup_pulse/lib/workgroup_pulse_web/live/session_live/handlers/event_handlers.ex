@@ -88,7 +88,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   Dispatches based on which carousel sent the event.
   """
   def handle_carousel_navigate(socket, "workshop-carousel", index) do
-    {:noreply, assign(socket, carousel_index: index)}
+    {:noreply, assign(socket, carousel_index: String.to_integer(to_string(index)))}
   end
 
   def handle_carousel_navigate(socket, _carousel, _index) do
@@ -134,7 +134,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   """
   def handle_edit_my_score(socket) do
     if socket.assigns.is_my_turn and not socket.assigns.my_turn_locked do
-      {:noreply, assign(socket, show_score_overlay: true)}
+      {:noreply,
+       socket
+       |> assign(show_score_overlay: true)
+       |> assign(show_discuss_prompt: false)}
     else
       {:noreply, socket}
     end
@@ -300,8 +303,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   def handle_delete_note(socket, note_id) do
     session = socket.assigns.session
     question_index = session.current_question_index
+    note_id_int = String.to_integer(note_id)
 
-    note = Enum.find(socket.assigns.question_notes, &(&1.id == note_id))
+    note = Enum.find(socket.assigns.question_notes, &(&1.id == note_id_int))
 
     if note do
       case Notes.delete_note(note) do
@@ -405,7 +409,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   """
   def handle_delete_action(socket, action_id) do
     session = socket.assigns.session
-    action = Enum.find(socket.assigns.all_actions, &(&1.id == action_id))
+    action_id_int = String.to_integer(action_id)
+    action = Enum.find(socket.assigns.all_actions, &(&1.id == action_id_int))
 
     if action do
       case Notes.delete_action(action) do
@@ -596,6 +601,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
          |> assign(my_score: selected_value)
          |> assign(has_submitted: true)
          |> assign(show_score_overlay: false)
+         |> assign(show_discuss_prompt: true)
          |> DataLoaders.load_scores(session, question_index)
          |> DataLoaders.load_all_questions_scores(session, template)}
 

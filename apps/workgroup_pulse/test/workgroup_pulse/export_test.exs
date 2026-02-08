@@ -85,7 +85,8 @@ defmodule WorkgroupPulse.ExportTest do
       assert data =~ "PARTICIPANTS"
       assert data =~ "Alice"
       assert data =~ "Bob"
-      assert data =~ "SCORES"
+      assert data =~ "TEAM SCORES"
+      assert data =~ "INDIVIDUAL SCORES"
       assert data =~ "Elbow Room"
       assert data =~ "Mutual Support"
       assert data =~ "NOTES"
@@ -109,7 +110,8 @@ defmodule WorkgroupPulse.ExportTest do
       assert filename == "workshop_#{session.code}_all.csv"
       assert content_type == "text/csv"
       assert data =~ "SESSION INFORMATION"
-      assert data =~ "SCORES"
+      assert data =~ "TEAM SCORES"
+      assert data =~ "INDIVIDUAL SCORES"
       assert data =~ "ACTION ITEMS"
     end
 
@@ -123,7 +125,8 @@ defmodule WorkgroupPulse.ExportTest do
       decoded = Jason.decode!(data)
       assert decoded["session"]["code"] == session.code
       assert length(decoded["participants"]) == 2
-      assert length(decoded["questions"]) == 2
+      assert length(decoded["team_scores"]) == 2
+      assert length(decoded["individual_scores"]) == 2
       assert length(decoded["notes"]) == 1
     end
 
@@ -147,7 +150,8 @@ defmodule WorkgroupPulse.ExportTest do
 
       decoded = Jason.decode!(data)
       assert Map.has_key?(decoded, "session")
-      assert Map.has_key?(decoded, "questions")
+      assert Map.has_key?(decoded, "team_scores")
+      assert Map.has_key?(decoded, "individual_scores")
       assert Map.has_key?(decoded, "actions")
     end
 

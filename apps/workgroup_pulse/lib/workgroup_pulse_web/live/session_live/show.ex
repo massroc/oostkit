@@ -63,6 +63,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(carousel_index: initial_carousel_index(workshop_session.state))
      |> assign(show_mid_transition: false)
      |> assign(show_criterion_popup: nil)
+     |> assign(show_discuss_prompt: false)
+     |> assign(show_team_discuss_prompt: false)
      |> assign(note_input: "")
      |> assign(action_input: "")
      |> assign(notes_revealed: false)
@@ -199,6 +201,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   @impl true
   def handle_event("close_score_overlay", _params, socket) do
     EventHandlers.handle_close_score_overlay(socket)
+  end
+
+  @impl true
+  def handle_event("dismiss_discuss_prompt", _params, socket) do
+    {:noreply, assign(socket, show_discuss_prompt: false)}
+  end
+
+  @impl true
+  def handle_event("dismiss_team_discuss_prompt", _params, socket) do
+    {:noreply, assign(socket, show_team_discuss_prompt: false)}
   end
 
   @impl true
@@ -342,6 +354,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
         is_my_turn={@is_my_turn}
         my_turn_locked={@my_turn_locked}
         show_score_overlay={@show_score_overlay || false}
+        show_discuss_prompt={@show_discuss_prompt}
+        show_team_discuss_prompt={@show_team_discuss_prompt}
         show_criterion_popup={@show_criterion_popup}
         current_question={@current_question}
         selected_value={@selected_value}
@@ -454,7 +468,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             scores_summary={@scores_summary}
             individual_scores={@individual_scores}
             notes_by_question={@notes_by_question}
-            all_questions={(@template && @template.questions) || []}
+            all_questions={
+              case @summary_template || @template do
+                %{questions: q} -> q
+                _ -> []
+              end
+            }
           />
         </div>
       <% end %>
@@ -470,6 +489,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             concerns={@concerns}
             all_actions={@all_actions}
             action_count={@action_count}
+            action_input={@action_input}
             show_export_modal={@show_export_modal}
             export_content={@export_content}
           />
