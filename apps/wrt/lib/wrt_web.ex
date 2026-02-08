@@ -61,11 +61,36 @@ defmodule WrtWeb do
   defp html_helpers do
     quote do
       import Phoenix.HTML
+
       import PetalComponents.{
-        Accordion, Alert, Avatar, Badge, Breadcrumbs, Button, ButtonGroup,
-        Card, Container, Dropdown, Field, Form, Icon, Input, Link, Loading,
-        Marquee, Modal, Pagination, Progress, Rating, Skeleton, SlideOver,
-        Stepper, Tabs, Typography, UserDropdownMenu, Menu
+        Accordion,
+        Alert,
+        Avatar,
+        Badge,
+        Breadcrumbs,
+        Button,
+        ButtonGroup,
+        Card,
+        Container,
+        Dropdown,
+        Field,
+        Form,
+        Icon,
+        Input,
+        Link,
+        Loading,
+        Marquee,
+        Modal,
+        Pagination,
+        Progress,
+        Rating,
+        Skeleton,
+        SlideOver,
+        Stepper,
+        Tabs,
+        Typography,
+        UserDropdownMenu,
+        Menu
       }
 
       alias PetalComponents.HeroiconsV1

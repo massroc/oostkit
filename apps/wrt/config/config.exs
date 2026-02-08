@@ -57,7 +57,9 @@ config :wrt, Oban,
   queues: [default: 10, emails: 20, rounds: 5, maintenance: 2]
 
 # Configure Petal Components error translator
-config :petal_components, :error_translator_function, {WrtWeb.CoreComponents, :translate_error}
+config :petal_components,
+       :error_translator_function,
+       {WrtWeb.CoreComponents, :translate_error}
 
 # Configures Elixir's Logger
 config :logger, :console,

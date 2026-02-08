@@ -43,7 +43,9 @@ config :tailwind,
   ]
 
 # Configure Petal Components error translator
-config :petal_components, :error_translator_function, {WorkgroupPulseWeb.CoreComponents, :translate_error}
+config :petal_components,
+       :error_translator_function,
+       {WorkgroupPulseWeb.CoreComponents, :translate_error}
 
 # Configures Elixir's Logger
 config :logger, :console,
