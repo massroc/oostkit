@@ -1011,6 +1011,10 @@ select {
   margin-top: 0.125rem;
 }
 
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
 .mt-1\.5 {
   margin-top: 0.375rem;
 }
@@ -1167,16 +1171,16 @@ select {
   width: 30px;
 }
 
-.w-\[40px\] {
-  width: 40px;
-}
-
 .w-\[480px\] {
   width: 480px;
 }
 
 .w-\[520px\] {
   width: 520px;
+}
+
+.w-\[70px\] {
+  width: 70px;
 }
 
 .w-\[720px\] {
@@ -1375,6 +1379,10 @@ select {
   --tw-space-y-reverse: 0;
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+
+.overflow-hidden {
+  overflow: hidden;
 }
 
 .overflow-y-auto {
@@ -1720,6 +1728,11 @@ select {
   padding-right: 1.5rem;
 }
 
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
 .py-0\.5 {
   padding-top: 0.125rem;
   padding-bottom: 0.125rem;
@@ -1743,6 +1756,11 @@ select {
 .py-3 {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
+}
+
+.py-3\.5 {
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
 }
 
 .py-6 {
@@ -2184,6 +2202,12 @@ select {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
+.backdrop-blur-\[2px\] {
+  --tw-backdrop-blur: blur(2px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
 .backdrop-blur-sm {
   --tw-backdrop-blur: blur(4px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
@@ -2581,7 +2605,38 @@ th.active-col-header {
 .sheet-stack-slide .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-bottom: 5rem;
+  /* Firefox thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
+}
+
+/* ─── Thin scrollbar styling (Chromium / Edge / Safari) ─── */
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar-track,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar-track,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar-thumb,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar-thumb,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar-thumb {
+  background: rgba(26, 58, 107, 0.15);
+  border-radius: 3px;
+}
+
+.sheet-stack-slide .paper-texture > div::-webkit-scrollbar-thumb:hover,
+.sheet-stack-slide .paper-texture-secondary > div::-webkit-scrollbar-thumb:hover,
+.notes-panel .paper-texture-secondary > div::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 58, 107, 0.3);
 }
 
 /* ─── Notes Side Panel ─── */
@@ -2589,6 +2644,8 @@ th.active-col-header {
 .notes-panel .paper-texture-secondary > div {
   height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
 }
 
 .writing-vertical-rl {
@@ -2721,11 +2778,6 @@ th.active-col-header {
 .focus\:ring-accent-purple:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(114 69 244 / var(--tw-ring-opacity, 1));
-}
-
-.group:hover .group-hover\:text-ink-blue {
-  --tw-text-opacity: 1;
-  color: rgb(26 58 107 / var(--tw-text-opacity, 1));
 }
 
 .group:hover .group-hover\:opacity-100 {

@@ -20,6 +20,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   attr :concerns, :list, required: true
   attr :all_actions, :list, required: true
   attr :action_count, :integer, required: true
+  attr :action_input, :string, required: true
   attr :show_export_modal, :boolean, required: true
   attr :export_content, :string, required: true
 
@@ -42,7 +43,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
       <%!-- Score Grid --%>
       <div class="bg-surface-wall/50 rounded-lg p-3 mb-5">
         <h2 class="text-xs font-semibold text-ink-blue/50 mb-2 font-brand uppercase tracking-wide">
-          All Scores
+          Cumulative Team Score
         </h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <%= for score <- @scores_summary do %>
@@ -130,14 +131,30 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
       <% end %>
 
       <%!-- Actions --%>
-      <%= if length(@all_actions) > 0 do %>
-        <div class="bg-accent-purple/5 border border-accent-purple/30 rounded-lg p-3 mb-5">
-          <h3 class="text-sm font-semibold text-accent-purple mb-2 font-brand">
-            Action Items ({length(@all_actions)})
-          </h3>
+      <div class="bg-accent-purple/5 border border-accent-purple/30 rounded-lg p-3 mb-5">
+        <h3 class="text-sm font-semibold text-accent-purple mb-2 font-brand">
+          Action Items
+          <%= if @action_count > 0 do %>
+            ({@action_count})
+          <% end %>
+        </h3>
+
+        <form phx-submit="add_action" class="mb-2">
+          <input
+            type="text"
+            name="action"
+            value={@action_input}
+            phx-change="update_action_input"
+            phx-debounce="300"
+            placeholder="Add an action item..."
+            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+          />
+        </form>
+
+        <%= if @action_count > 0 do %>
           <ul class="space-y-1.5">
             <%= for action <- @all_actions do %>
-              <li class="flex items-start gap-2 text-sm text-ink-blue/70">
+              <li class="flex items-start gap-2 text-sm text-ink-blue/70 group">
                 <span class="text-accent-purple text-xs mt-0.5">→</span>
                 <span class="font-workshop flex-1">{action.description}</span>
                 <%= if action.owner_name do %>
@@ -145,11 +162,23 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
                     {action.owner_name}
                   </span>
                 <% end %>
+                <button
+                  type="button"
+                  phx-click="delete_action"
+                  phx-value-id={action.id}
+                  class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                >
+                  ✕
+                </button>
               </li>
             <% end %>
           </ul>
-        </div>
-      <% end %>
+        <% else %>
+          <p class="text-ink-blue/50 text-sm italic font-workshop">
+            No action items yet. Type above to add one.
+          </p>
+        <% end %>
+      </div>
 
       <%!-- Export --%>
       <ExportModalComponent.render
@@ -157,6 +186,18 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
         export_content={@export_content}
         action_count={@action_count}
       />
+
+      <%!-- Finish Workshop (facilitator only) --%>
+      <%= if @participant.is_facilitator do %>
+        <div class="mt-5 pt-4 border-t border-ink-blue/10 text-center">
+          <button
+            phx-click="finish_workshop"
+            class="btn-workshop btn-workshop-primary"
+          >
+            Finish Workshop
+          </button>
+        </div>
+      <% end %>
     </.sheet>
     """
   end

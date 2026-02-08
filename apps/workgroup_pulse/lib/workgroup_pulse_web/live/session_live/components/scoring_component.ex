@@ -173,22 +173,38 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
         <% score_data = Map.get(@question_scores_by_participant, p.id) %>
         <% can_interact =
           @is_current and p.id == @participant.id and @is_my_turn and not @my_turn_locked %>
+        <% can_skip =
+          @is_current and @participant.is_facilitator and
+            p.id == @current_turn_participant_id and p.id != @participant.id and
+            not has_score?(score_data) %>
         <td
           class={[
             "score-cell",
             @is_current && p.id == @current_turn_participant_id && "active-col",
             not @is_current && p.id == @current_turn_participant_id && "active-col",
             can_interact && "cursor-pointer hover:bg-accent-purple-light",
-            can_interact && not @has_submitted && "outline outline-2 outline-accent-purple rounded"
+            can_interact && not @has_submitted && "outline outline-2 outline-accent-purple rounded",
+            can_skip && "cursor-pointer"
           ]}
-          phx-click={can_interact && "edit_my_score"}
+          phx-click={
+            cond do
+              can_interact -> "edit_my_score"
+              can_skip -> "skip_turn"
+              true -> nil
+            end
+          }
         >
-          <%= if can_interact and not @has_submitted do %>
-            <span class="text-[11px] leading-tight text-accent-purple font-workshop block">
-              Click to<br />score
-            </span>
-          <% else %>
-            {render_score_cell_value(assigns, score_data, p.id)}
+          <%= cond do %>
+            <% can_interact and not @has_submitted -> %>
+              <span class="text-[11px] leading-tight text-accent-purple font-workshop block">
+                Click to<br />score
+              </span>
+            <% can_skip -> %>
+              <span class="text-[11px] leading-tight text-accent-purple font-workshop block">
+                Skip<br />turn
+              </span>
+            <% true -> %>
+              {render_score_cell_value(assigns, score_data, p.id)}
           <% end %>
         </td>
       <% end %>
@@ -228,6 +244,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   # Fallback
   defp render_score_cell_value(_assigns, _score_data, _participant_id), do: "—"
+
+  defp has_score?(%{has_score: true}), do: true
+  defp has_score?(_), do: false
 
   defp format_score_value("balance", value) when value > 0, do: "+#{value}"
   defp format_score_value(_, value), do: "#{value}"

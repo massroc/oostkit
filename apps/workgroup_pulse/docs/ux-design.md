@@ -28,8 +28,9 @@
 ### Progressive Disclosure
 - Show only what's needed at each moment
 - Facilitator tips hidden behind expandable "More tips" button
-- Notes panel peeks as a 40px tab from the right edge; clicking reveals the full 480px panel
-- Score overlay only appears when it's your turn
+- Notes panel peeks as a 70px read-only preview from the right edge (visible on scoring, summary, and wrap-up screens); clicking reveals the full 480px editable panel
+- Score overlay opens when participant clicks their cell in the scoring grid
+- "Discuss your score" popup appears after submitting; "Discuss the scores as a team" appears when all turns complete
 
 ---
 
@@ -69,7 +70,7 @@ All workshop phases (except lobby) share a single unified carousel. Slides are p
 
 Lobby renders as a standalone single slide (no hook, no carousel navigation).
 
-**Notes/Actions Panel:** Notes and actions are presented in a fixed-position panel on the right edge of the viewport, not as a carousel slide. A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab reveals a 480px panel; clicking outside dismisses it.
+**Notes/Actions Panel:** Notes and actions are presented in a fixed-position panel on the right edge of the viewport, not as a carousel slide. A 70px read-only peek is visible on slides 4-6 (scoring, summary, wrap-up). Clicking the peek reveals a 480px editable panel; clicking outside dismisses it.
 
 ### Floating Action Buttons
 
@@ -81,13 +82,16 @@ Viewport-fixed bar aligned to the 720px sheet width. Always visible at the botto
 | Next | Intro (carousel_index 0-2) | Intro slides before last | Primary (gradient) |
 | Next (→ scoring) | Intro (carousel_index == 3) | Last intro slide | Primary (gradient) |
 | Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
-| Skip Turn | Scoring | Facilitator, when another participant hasn't scored | Secondary |
-| Back | Scoring, Summary | Facilitator (scoring: after Q1) | Secondary |
+| ← Prev Question | Scoring | Facilitator, after Q1 | Secondary |
 | Next Question | Scoring | Facilitator, all participants ready | Primary |
 | Continue to Summary | Scoring (last Q) | Facilitator, all participants ready | Primary |
 | I'm Ready | Scoring | Non-facilitator, after all turns complete | Primary |
-| Continue to Wrap-Up | Summary | Facilitator | Primary |
-| Finish Workshop | Completed | Facilitator | Primary |
+| ← Back | Summary, Wrap-up | All participants (carousel nav to prev slide) | Secondary |
+| Summary → | Scoring (review) | All participants, when state past scoring | Primary |
+| Continue to Wrap-Up | Summary | Facilitator (active summary state) | Primary |
+| Wrap-Up → | Summary (review) | All participants, when state is completed | Primary |
+
+**Skip Turn** is rendered inline in the scoring grid cell (not as a floating button). **Finish Workshop** is rendered inside the wrap-up sheet (not floating).
 
 ---
 

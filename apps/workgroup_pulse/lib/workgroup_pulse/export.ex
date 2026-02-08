@@ -101,33 +101,49 @@ defmodule WorkgroupPulse.Export do
   defp participant_role(_), do: "Participant"
 
   defp build_scores_csv(scores_summary, individual_scores, participants) do
-    participant_names = Enum.map(participants, & &1.name)
+    team_section = build_team_scores_csv(scores_summary)
 
-    header =
-      "SCORES\nQuestion,Team Score," <> Enum.map_join(participant_names, ",", &csv_escape/1)
+    individual_section =
+      build_individual_scores_csv(scores_summary, individual_scores, participants)
+
+    team_section <> "\n\n" <> individual_section
+  end
+
+  defp build_team_scores_csv(scores_summary) do
+    header = "TEAM SCORES\nQuestion,Combined Team Score"
 
     rows =
       Enum.map_join(scores_summary, "\n", fn score ->
-        format_score_row(score, individual_scores, participants)
+        team_value =
+          if score.combined_team_value, do: "#{round(score.combined_team_value)}/10", else: ""
+
+        "#{csv_escape(score.title)},#{team_value}"
       end)
 
     header <> "\n" <> rows
   end
 
-  defp format_score_row(score, individual_scores, participants) do
-    question_scores = Map.get(individual_scores, score.question_index, [])
+  defp build_individual_scores_csv(scores_summary, individual_scores, participants) do
+    participant_names = Enum.map(participants, & &1.name)
 
-    score_values =
-      Enum.map_join(
-        participants,
-        ",",
-        &get_participant_score(&1, question_scores, score.scale_type)
-      )
+    header =
+      "INDIVIDUAL SCORES\nQuestion," <> Enum.map_join(participant_names, ",", &csv_escape/1)
 
-    team_value =
-      if score.combined_team_value, do: "#{round(score.combined_team_value)}/10", else: ""
+    rows =
+      Enum.map_join(scores_summary, "\n", fn score ->
+        question_scores = Map.get(individual_scores, score.question_index, [])
 
-    "#{csv_escape(score.title)},#{team_value},#{score_values}"
+        score_values =
+          Enum.map_join(
+            participants,
+            ",",
+            &get_participant_score(&1, question_scores, score.scale_type)
+          )
+
+        "#{csv_escape(score.title)},#{score_values}"
+      end)
+
+    header <> "\n" <> rows
   end
 
   defp get_participant_score(participant, question_scores, scale_type) do
@@ -209,10 +225,8 @@ defmodule WorkgroupPulse.Export do
             status: p.status
           }
         end),
-      questions:
+      team_scores:
         Enum.map(data.scores_summary, fn score ->
-          question_scores = Map.get(data.individual_scores, score.question_index, [])
-
           %{
             index: score.question_index + 1,
             title: score.title,
@@ -221,8 +235,18 @@ defmodule WorkgroupPulse.Export do
               if(score.combined_team_value, do: round(score.combined_team_value), else: nil),
             average: score.average,
             min: score.min,
-            max: score.max,
-            individual_scores:
+            max: score.max
+          }
+        end),
+      individual_scores:
+        Enum.map(data.scores_summary, fn score ->
+          question_scores = Map.get(data.individual_scores, score.question_index, [])
+
+          %{
+            index: score.question_index + 1,
+            title: score.title,
+            scale_type: score.scale_type,
+            scores:
               Enum.map(question_scores, fn s ->
                 %{
                   participant: s.participant_name,
