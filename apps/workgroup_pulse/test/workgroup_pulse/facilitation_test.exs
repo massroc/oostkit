@@ -127,6 +127,5 @@ defmodule WorkgroupPulse.FacilitationTest do
       session = %WorkgroupPulse.Sessions.Session{planned_duration_minutes: nil}
       assert Facilitation.warning_threshold(session) == nil
     end
-
   end
 end

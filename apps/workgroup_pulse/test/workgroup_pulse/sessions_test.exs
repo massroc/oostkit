@@ -90,7 +90,6 @@ defmodule WorkgroupPulse.SessionsTest do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
 
-
       {:ok, updated} = Sessions.advance_to_summary(session)
       assert updated.state == "summary"
     end
@@ -339,7 +338,6 @@ defmodule WorkgroupPulse.SessionsTest do
 
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-
 
       # Create participants in specific order
       {:ok, alice} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
