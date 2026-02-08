@@ -1,8 +1,8 @@
 # Workgroup Pulse - Solution Design
 
 ## Document Info
-- **Version:** 4.0
-- **Last Updated:** 2026-02-07
+- **Version:** 4.1
+- **Last Updated:** 2026-02-08
 - **Status:** Draft
 
 ---
@@ -463,7 +463,7 @@ defmodule WorkgroupPulse.Sessions.Session do
 
   schema "sessions" do
     field :code, :string  # 6-character join code
-    field :state, Ecto.Enum, values: [:lobby, :intro, :scoring, :summary, :actions, :completed]
+    field :state, Ecto.Enum, values: [:lobby, :scoring, :summary, :actions, :completed]
     field :current_question, :integer, default: 0
     field :current_turn_index, :integer, default: 0   # Index into turn_order for current scorer
 
@@ -866,13 +866,12 @@ end
                          │ facilitator starts
                          ▼
                     ┌─────────┐
-            ┌──────►│  intro  │ (skippable)
-            │       └────┬────┘
-            │            │ complete intro / skip
-            │            ▼
-            │       ┌─────────┐
-            │       │ scoring │◄───────────────┐
+            ┌──────►│ scoring │◄───────────────┐
             │       └────┬────┘                │
+            │       (intro slides shown via    │
+            │        local carousel_index 0-3; │
+            │        each participant skips    │
+            │        to scoring independently) │
             │            │                     │
             │            ▼                     │
             │    ┌─────────────────────────┐   │
@@ -1394,14 +1393,13 @@ end
 
 ```elixir
 defmodule WorkgroupPulse.Facilitation.TimeAllocations do
+  # Note: actual implementation uses 10-segment approach (see Facilitation context)
+  # 8 segments for questions, 1 for summary+actions, 1 flex buffer
   @default_percentages %{
-    introduction: 0.05,
-    questions_1_4: 0.35,
-    mid_transition: 0.02,
-    questions_5_8: 0.35,
-    summary: 0.08,
-    actions: 0.12,
-    buffer: 0.03
+    questions_1_4: 0.40,
+    questions_5_8: 0.40,
+    summary: 0.10,
+    buffer: 0.10
   }
 
   def calculate(total_minutes) do
@@ -1419,6 +1417,6 @@ end
 
 ---
 
-*Document Version: 4.0 — Restructured: implementation detail moved to TECHNICAL_SPEC.md, UX moved to docs/ux-design.md and docs/ux-implementation.md*
+*Document Version: 4.1 — Removed intro state from state machine; intro is now local carousel navigation within scoring state*
 *Previous versions: v3.x covered LiveView component structure, socket state, and timer implementation inline*
-*Last Updated: 2026-02-07*
+*Last Updated: 2026-02-08*

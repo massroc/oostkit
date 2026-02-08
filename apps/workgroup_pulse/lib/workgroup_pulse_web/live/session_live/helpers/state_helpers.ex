@@ -18,9 +18,15 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.StateHelpers do
     question_changed = old_session.current_question_index != session.current_question_index
     turn_changed = old_session.current_turn_index != session.current_turn_index
 
+    from_lobby = old_session.state == "lobby"
+
     case {state_changed, question_changed, session.state} do
-      {true, _, "intro"} ->
-        assign(socket, :carousel_index, 0)
+      {true, _, "scoring"} when from_lobby ->
+        # Workshop just started — show intro slides, let participants navigate at own pace
+        socket
+        |> assign(:carousel_index, 0)
+        |> DataLoaders.load_scoring_data(session, socket.assigns.participant)
+        |> TimerHandler.maybe_restart_timer_on_transition(old_session, session)
 
       {true, _, "scoring"} ->
         socket

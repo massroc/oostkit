@@ -13,8 +13,6 @@ defmodule WorkgroupPulse.Facilitation do
   ## Suggested Durations (in seconds)
 
   @default_durations %{
-    # 10 minutes
-    "intro" => 600,
     # 15 minutes per question
     "question" => 900,
     # 10 minutes
@@ -26,7 +24,6 @@ defmodule WorkgroupPulse.Facilitation do
   @doc """
   Returns a human-readable name for a phase.
   """
-  def phase_name("intro"), do: "Introduction"
   def phase_name("summary"), do: "Summary"
   def phase_name("summary_actions"), do: "Summary + Actions"
 
@@ -39,10 +36,10 @@ defmodule WorkgroupPulse.Facilitation do
   ## Segment-Based Timer Functions
 
   @doc """
-  Calculates the duration of each segment for a session's timer.
+  Calculates the base segment duration for a session's timer.
 
   Total session time is divided into 10 equal segments:
-  - 8 segments for 8 questions
+  - 8 segments for 8 questions (Q1 gets 2 segments, Q2-Q8 get 1 each)
   - 1 segment for Summary + Actions (combined)
   - 1 segment unallocated as flex/buffer
 
@@ -102,7 +99,6 @@ defmodule WorkgroupPulse.Facilitation do
   @doc """
   Returns the suggested duration for a phase in seconds.
   """
-  def suggested_duration("intro"), do: @default_durations["intro"]
   def suggested_duration("summary"), do: @default_durations["summary"]
 
   def suggested_duration("question_" <> _), do: @default_durations["question"]
@@ -114,8 +110,7 @@ defmodule WorkgroupPulse.Facilitation do
   Returns the total suggested duration for a complete workshop.
   """
   def total_suggested_duration(num_questions) do
-    @default_durations["intro"] +
-      num_questions * @default_durations["question"] +
+    num_questions * @default_durations["question"] +
       @default_durations["summary"]
   end
 end

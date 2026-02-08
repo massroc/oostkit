@@ -142,32 +142,20 @@ defmodule WorkgroupPulse.Sessions do
   ## Session State Transitions
 
   @doc """
-  Starts a session, transitioning from lobby to intro.
+  Starts a session, transitioning from lobby to scoring.
+
+  Participants browse the intro slides at their own pace via local carousel
+  navigation before navigating to the scoring sheet.
   """
   def start_session(%Session{state: "lobby"} = session) do
     session
-    |> Session.transition_changeset("intro", %{
-      started_at: Timestamps.now()
+    |> Session.transition_changeset("scoring", %{
+      started_at: Timestamps.now(),
+      current_question_index: 0,
+      current_turn_index: 0
     })
     |> Repo.update()
     |> with_broadcast(fn s -> broadcast(s, {:session_started, s}) end)
-  end
-
-  @doc """
-  Advances from intro to scoring phase.
-
-  Resets turn tracking for the first question.
-  """
-  def advance_to_scoring(%Session{state: "intro"} = session) do
-    result =
-      session
-      |> Session.transition_changeset("scoring", %{
-        current_question_index: 0,
-        current_turn_index: 0
-      })
-      |> Repo.update()
-
-    broadcast_session_update(result)
   end
 
   @doc """

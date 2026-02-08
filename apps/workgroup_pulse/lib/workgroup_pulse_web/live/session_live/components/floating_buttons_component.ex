@@ -22,16 +22,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
 
   def render(assigns) do
     ~H"""
-    <%= case @session.state do %>
-      <% "intro" -> %>
+    <%= cond do %>
+      <% @carousel_index in 0..3 -> %>
         {render_intro_buttons(assigns)}
-      <% "scoring" -> %>
+      <% @session.state == "scoring" and @carousel_index == 4 -> %>
         {render_scoring_buttons(assigns)}
-      <% "summary" -> %>
+      <% @session.state == "summary" -> %>
         {render_summary_buttons(assigns)}
-      <% "completed" -> %>
+      <% @session.state == "completed" -> %>
         {render_completed_buttons(assigns)}
-      <% _ -> %>
+      <% true -> %>
     <% end %>
     """
   end
@@ -41,16 +41,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
     <%= if @carousel_index in 0..3 do %>
       <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[720px] px-6 pointer-events-none">
         <div class="flex justify-between items-center">
-          <%!-- Left: Back button or Skip intro --%>
+          <%!-- Left: Back button --%>
           <div class="flex items-center gap-3">
-            <%= if @carousel_index == 0 do %>
-              <button
-                phx-click="skip_intro"
-                class="pointer-events-auto text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
-              >
-                Skip intro
-              </button>
-            <% else %>
+            <%= if @carousel_index > 0 do %>
               <button
                 phx-click="intro_prev"
                 class="pointer-events-auto btn-workshop btn-workshop-secondary"
@@ -71,9 +64,15 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
               ]} />
             <% end %>
           </div>
-          <%!-- Right: Next / Start Scoring --%>
-          <div class="flex items-center">
+          <%!-- Right: Skip intro + Next / Start Scoring --%>
+          <div class="flex items-center gap-3">
             <%= if @carousel_index < 3 do %>
+              <button
+                phx-click="skip_intro"
+                class="pointer-events-auto text-ink-blue/50 hover:text-ink-blue/70 text-sm transition-colors font-brand"
+              >
+                Skip intro
+              </button>
               <button
                 phx-click="intro_next"
                 class="pointer-events-auto btn-workshop btn-workshop-primary"

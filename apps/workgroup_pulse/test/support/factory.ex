@@ -100,8 +100,10 @@ defmodule WorkgroupPulse.Factory do
     struct!(
       session_factory(),
       %{
-        state: "intro",
-        started_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        state: "scoring",
+        started_at: DateTime.utc_now() |> DateTime.truncate(:second),
+        current_question_index: 0,
+        current_turn_index: 0
       }
     )
   end

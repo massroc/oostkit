@@ -79,7 +79,7 @@ All phases use the **Sheet Stack** layout. See [docs/ux-implementation.md](docs/
 - **Lobby** — standalone single-slide wrapper, no JS hook
 - **All other phases** — unified `workshop-carousel` with `SheetStack` hook, `data-index` from `@carousel_index`, click-only navigation. Slides 0-3 (intro) are always rendered; slides 4-6 (scoring, summary, wrap-up) are conditionally rendered based on session state.
 
-The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carousel }`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide (scoring → 4, summary → 5, completed → 6).
+The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carousel }`, updating `@carousel_index` on the server. Phase transitions (via PubSub) automatically set the carousel index to the appropriate slide. When transitioning from lobby → scoring, carousel starts at 0 (intro slides); participants navigate to the scoring sheet (index 4) independently. Summary → 5, completed → 6.
 
 ### ScoringComponent
 
@@ -171,7 +171,8 @@ The following handler modules have been extracted from SessionLive.Show to impro
 - `handle_next_question/1` — Advances to next question (facilitator only)
 - `handle_go_back/1` — Navigate back (facilitator only, context-aware)
 - `reveal_notes` / `hide_notes` — Toggle the fixed-position notes panel (`notes_revealed` assign)
-- Note, action, intro, transition, and export handlers
+- `handle_skip_intro/1` — Navigates to scoring sheet (local); starts timer for facilitator on first arrival
+- Note, action, transition, and export handlers
 
 ### MessageHandlers
 
@@ -378,9 +379,10 @@ The facilitator timer divides the total session time into 10 equal segments:
 ### Timer Behaviour
 
 - Timer is **facilitator-only** — participants don't see the timer
-- Timer **auto-starts** when entering a timed phase (scoring, summary)
+- Timer starts when the **facilitator first reaches the scoring sheet** (skips/completes intro slides)
 - Timer displays in **top-right corner** with fixed positioning
 - Timer shows **warning state** (red) at 10% remaining time
+- Timer **restarts** on each question transition and summary phase
 - Timer **stops** when entering wrap-up (completed) state
 
 ### Implementation Details
@@ -397,7 +399,7 @@ end
 def current_timer_phase(%Session{state: "scoring", current_question_index: idx}),
   do: "question_#{idx}"
 def current_timer_phase(%Session{state: "summary"}),
-  do: "summary"
+  do: "summary_actions"
 def current_timer_phase(_), do: nil  # Timer stops on completed (wrap-up) state
 
 # Warning threshold (10% of segment duration)
@@ -416,14 +418,21 @@ end
 - Handles warning state class toggling for visual feedback
 - Re-syncs on server updates to prevent drift
 
+### Timer Start Behaviour
+
+The timer does **not** start when the session enters scoring state. Instead, it starts when the **facilitator first reaches the scoring sheet** (skips or completes intro slides). This means:
+- Facilitator browses intro slides → no timer running
+- Facilitator clicks "Skip intro" or "Start Scoring" → timer starts for Question 1
+- Other participants' intro navigation has no effect on the timer
+
 ### Timer Visibility Rules
 
 | State | Timer Visible (Facilitator) |
 |-------|----------------------------|
 | lobby | No |
-| intro | No |
-| scoring | Yes (phase: Question N) |
-| summary | Yes (phase: Summary) |
+| scoring (intro slides, carousel 0-3) | No (timer not yet started) |
+| scoring (scoring sheet, carousel 4) | Yes (phase: Question N) |
+| summary | Yes (phase: Summary + Actions) |
 | completed | No (wrap-up page — actions created here) |
 
 Note: The "actions" state still exists for backwards compatibility but the default UI flow now skips it, going directly from "summary" to "completed".
@@ -506,5 +515,5 @@ Frequently updated sections have been extracted into LiveComponents to isolate r
 
 ---
 
-*Document Version: 1.0*
-*Created: 2026-02-07*
+*Document Version: 1.1 — Removed intro state; timer starts on facilitator reaching scoring sheet*
+*Last Updated: 2026-02-08*

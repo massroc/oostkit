@@ -183,7 +183,6 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       {:ok, _} = Sessions.join_session(session, "Alice", part_token)
 
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
 
       %{session: session, fac_token: fac_token, part_token: part_token}
     end

@@ -67,28 +67,20 @@ defmodule WorkgroupPulse.SessionsTest do
       assert Sessions.get_session_by_code(String.upcase(session.code)).id == session.id
     end
 
-    test "start_session/1 transitions from lobby to intro", %{template: template} do
+    test "start_session/1 transitions from lobby to scoring", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       assert session.state == "lobby"
 
       {:ok, updated} = Sessions.start_session(session)
-      assert updated.state == "intro"
-      assert updated.started_at != nil
-    end
-
-    test "advance_to_scoring/1 transitions from intro to scoring", %{template: template} do
-      {:ok, session} = Sessions.create_session(template)
-      {:ok, session} = Sessions.start_session(session)
-
-      {:ok, updated} = Sessions.advance_to_scoring(session)
       assert updated.state == "scoring"
+      assert updated.started_at != nil
       assert updated.current_question_index == 0
+      assert updated.current_turn_index == 0
     end
 
     test "advance_question/1 increments question index", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
 
       {:ok, updated} = Sessions.advance_question(session)
       assert updated.current_question_index == 1
@@ -97,7 +89,6 @@ defmodule WorkgroupPulse.SessionsTest do
     test "advance_to_summary/1 transitions to summary", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
 
       {:ok, updated} = Sessions.advance_to_summary(session)
       assert updated.state == "summary"
@@ -106,7 +97,7 @@ defmodule WorkgroupPulse.SessionsTest do
     test "advance_to_completed/1 transitions to completed", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
+
       {:ok, session} = Sessions.advance_to_summary(session)
 
       {:ok, updated} = Sessions.advance_to_completed(session)
@@ -132,7 +123,7 @@ defmodule WorkgroupPulse.SessionsTest do
     test "go_back_question/1 decrements question index", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
+
       {:ok, session} = Sessions.advance_question(session)
       assert session.current_question_index == 1
 
@@ -143,7 +134,7 @@ defmodule WorkgroupPulse.SessionsTest do
     test "go_back_question/1 returns error at first question", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
+
       assert session.current_question_index == 0
 
       assert {:error, :at_first_question} = Sessions.go_back_question(session)
@@ -152,7 +143,7 @@ defmodule WorkgroupPulse.SessionsTest do
     test "go_back_to_scoring/2 transitions from summary to last question", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
+
       {:ok, session} = Sessions.advance_to_summary(session)
       assert session.state == "summary"
 
@@ -164,7 +155,7 @@ defmodule WorkgroupPulse.SessionsTest do
     test "go_back_to_summary/1 transitions from completed to summary", %{template: template} do
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
+
       {:ok, session} = Sessions.advance_to_summary(session)
       {:ok, session} = Sessions.advance_to_completed(session)
       assert session.state == "completed"
@@ -347,7 +338,6 @@ defmodule WorkgroupPulse.SessionsTest do
 
       {:ok, session} = Sessions.create_session(template)
       {:ok, session} = Sessions.start_session(session)
-      {:ok, session} = Sessions.advance_to_scoring(session)
 
       # Create participants in specific order
       {:ok, alice} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
