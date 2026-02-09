@@ -263,18 +263,12 @@ Platform-wide documentation lives in `docs/`:
 - [Portal Implementation Plan](docs/portal-implementation-plan.md)
 - [WRT Requirements](docs/wrt-requirements.md)
 
-### Documentation-First Shipping (CRITICAL)
+### Documentation-First Shipping
 
-**Before creating a commit or PR via `/ship`, update documentation first.** This is the first step in the shipping process, before staging code changes.
-
-1. **REQUIREMENTS.md** — Update if product behaviour changed
-2. **SOLUTION_DESIGN.md** — Update if architecture or design decisions changed
-3. **TECHNICAL_SPEC.md** — Update if implementation details changed (components, state, handlers)
-4. **docs/ux-design.md** — Update if design principles, visual design, or accessibility changed
-5. **docs/ux-implementation.md** — Update if CSS systems, JS hooks, or UI components changed
-6. **README.md** — Update if setup instructions, commands, or usage patterns changed
-
-Only update docs for the affected app(s). Skip a doc file if the changes are truly irrelevant to it (e.g., a pure CSS tweak doesn't need a SOLUTION_DESIGN.md update). Use judgment, but err on the side of updating.
+The `/ship` command automatically handles documentation updates via a subagent before committing.
+It updates the relevant docs for the affected app(s): REQUIREMENTS.md, SOLUTION_DESIGN.md,
+TECHNICAL_SPEC.md, docs/ux-design.md, docs/ux-implementation.md, README.md.
+See `.claude/commands/ship.md` for the full workflow.
 
 ### Documentation Guidelines
 
@@ -295,9 +289,8 @@ Only update docs for the affected app(s). Skip a doc file if the changes are tru
 ### Committing Changes
 
 When the user asks to "commit" or "save" changes:
-1. **Update documentation first** - see [Documentation-First Shipping](#documentation-first-shipping-critical) above
-2. **Always use `/ship`** - never use manual `git add`, `git commit`, `git push origin main`
-3. The `/ship` skill handles creating branches and PRs properly
+1. **Always use `/ship`** - never use manual `git add`, `git commit`, `git push origin main`
+2. `/ship` handles documentation updates, branching, PR creation, and CI via subagents
 
 ### Monorepo PR Guidelines
 

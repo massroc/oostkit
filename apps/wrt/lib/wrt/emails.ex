@@ -74,6 +74,32 @@ defmodule Wrt.Emails do
   end
 
   @doc """
+  Sends a data retention warning email to an org admin.
+  """
+  def send_retention_warning(admin_email, campaign, days_until_deletion) do
+    admin_email
+    |> retention_warning_email(campaign, days_until_deletion)
+    |> Mailer.deliver()
+  end
+
+  @doc """
+  Composes a data retention warning email.
+  """
+  def retention_warning_email(admin_email, campaign, days_until_deletion) do
+    deletion_date =
+      Date.utc_today()
+      |> Date.add(days_until_deletion)
+      |> Calendar.strftime("%B %d, %Y")
+
+    new()
+    |> to(admin_email)
+    |> from({@from_name, @from_email})
+    |> subject("Data Retention Notice: #{campaign.name}")
+    |> html_body(retention_warning_html(campaign, days_until_deletion, deletion_date))
+    |> text_body(retention_warning_text(campaign, days_until_deletion, deletion_date))
+  end
+
+  @doc """
   Composes a reminder email.
   """
   def reminder_email(contact, magic_link, org) do
@@ -288,6 +314,68 @@ defmodule Wrt.Emails do
     ---
     This email was sent by #{org.name} using the Workshop Referral Tool.
     If you've already submitted your nominations, please ignore this reminder.
+    """
+  end
+
+  defp retention_warning_html(campaign, days_until_deletion, deletion_date) do
+    """
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #dc2626; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .warning { background: #fef2f2; border: 1px solid #fecaca; padding: 16px; border-radius: 8px; margin: 16px 0; }
+        .footer { padding: 20px; font-size: 12px; color: #6b7280; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1 style="margin: 0;">Data Retention Notice</h1>
+      </div>
+      <div class="content">
+        <p>This is an automated notice regarding data retention for the following campaign:</p>
+
+        <div class="warning">
+          <p><strong>Campaign:</strong> #{campaign.name}</p>
+          <p><strong>Scheduled deletion date:</strong> #{deletion_date}</p>
+          <p><strong>Days remaining:</strong> #{days_until_deletion}</p>
+        </div>
+
+        <p>In accordance with our data retention policy, this campaign's data will be permanently deleted on the date shown above.</p>
+
+        <p><strong>To preserve this data, please export it before the deletion date.</strong> You can export campaign results as CSV from the campaign dashboard.</p>
+
+        <p>If you have any questions about this policy, please contact your system administrator.</p>
+      </div>
+      <div class="footer">
+        <p>This is an automated message from the Workshop Referral Tool.</p>
+      </div>
+    </body>
+    </html>
+    """
+  end
+
+  defp retention_warning_text(campaign, days_until_deletion, deletion_date) do
+    """
+    DATA RETENTION NOTICE
+
+    This is an automated notice regarding data retention for the following campaign:
+
+    Campaign: #{campaign.name}
+    Scheduled deletion date: #{deletion_date}
+    Days remaining: #{days_until_deletion}
+
+    In accordance with our data retention policy, this campaign's data will be permanently deleted on the date shown above.
+
+    To preserve this data, please export it before the deletion date. You can export campaign results as CSV from the campaign dashboard.
+
+    If you have any questions about this policy, please contact your system administrator.
+
+    ---
+    This is an automated message from the Workshop Referral Tool.
     """
   end
 end

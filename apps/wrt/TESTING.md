@@ -17,6 +17,7 @@ This mailbox shows all emails "sent" by the app, including:
 - Round invitation emails (with magic links)
 - Verification code emails
 - Reminder emails
+- Data retention warning emails (to org admins)
 
 ### Testing Email Flows
 
