@@ -13,7 +13,7 @@ A web-based tool for managing participative referral processes based on Open Sys
 | Phase 5: Export | ✅ Complete | CSV/PDF export, reporting |
 | Phase 6: Operations | ✅ Complete | Rate limiting, health checks, logging |
 
-**Test Coverage:** 80 tests across contexts, controllers, and workers
+**Test Coverage:** 99 tests across contexts, controllers, workers, and emails
 
 ## Background
 
@@ -217,6 +217,7 @@ A record of one person nominating another:
 - ✅ Invitation email with magic link
 - ✅ Verification code email
 - ✅ Round reminder (optional, Oban worker)
+- ✅ Data retention warning email (to org admins, with campaign name, deletion date, days remaining)
 - Campaign completion summary (to admins) - *planned*
 
 #### F7.2: Email Delivery ✅
@@ -375,9 +376,9 @@ magic_links
 - Clear progress indicators for admins
 - Accessible (WCAG 2.1 AA)
 
-### Data Retention
+### Data Retention ✅
 - Completed campaign data auto-deleted after 24 months
-- Orgs notified before deletion (30 days warning)
+- ✅ Orgs notified before deletion (30 days warning via email to all org admins)
 - Export available before deletion deadline
 
 ## Out of Scope (MVP)

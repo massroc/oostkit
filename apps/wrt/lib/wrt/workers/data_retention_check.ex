@@ -10,6 +10,8 @@ defmodule Wrt.Workers.DataRetentionCheck do
   use Oban.Worker, queue: :maintenance, max_attempts: 3
 
   alias Wrt.Campaigns
+  alias Wrt.Emails
+  alias Wrt.Orgs
   alias Wrt.Platform
 
   require Logger
@@ -82,10 +84,31 @@ defmodule Wrt.Workers.DataRetentionCheck do
     org = Platform.get_organisation(org_id)
 
     if org do
-      # TODO: Send email to org admins about upcoming data deletion
-      Logger.info(
-        "Would send retention warning to org #{org_id} for campaigns: #{inspect(campaign_ids)}"
-      )
+      tenant = Platform.tenant_for_org(org)
+      admins = Orgs.list_org_admins(tenant)
+      warning_days = get_warning_days()
+
+      Enum.each(campaign_ids, fn campaign_id ->
+        case Campaigns.get_campaign(tenant, campaign_id) do
+          nil ->
+            Logger.warning("Campaign #{campaign_id} not found for retention warning")
+
+          campaign ->
+            Enum.each(admins, fn admin ->
+              case Emails.send_retention_warning(admin.email, campaign, warning_days) do
+                {:ok, _} ->
+                  Logger.info(
+                    "Sent retention warning to #{admin.email} for campaign #{campaign.name}"
+                  )
+
+                {:error, reason} ->
+                  Logger.error(
+                    "Failed to send retention warning to #{admin.email}: #{inspect(reason)}"
+                  )
+              end
+            end)
+        end
+      end)
     end
 
     :ok

@@ -107,6 +107,7 @@ lib/
 │   │
 │   ├── emails.ex                   # Email composition ✓
 │   │                               # - Invitation, verification, reminder emails
+│   │                               # - Data retention warning emails (to org admins)
 │   │                               # - HTML and text templates
 │   │
 │   ├── reports.ex                  # Reporting context ✓
@@ -197,11 +198,15 @@ test/
 │   └── factory.ex                  # ExMachina factories ✓
 │
 ├── wrt/
+│   ├── emails_test.exs             # Email composition tests ✓
 │   ├── magic_links_test.exs        # MagicLinks context tests ✓
 │   ├── reports_test.exs            # Reports context tests ✓
 │   └── workers/
 │       ├── cleanup_expired_magic_links_test.exs ✓
-│       └── data_retention_check_test.exs ✓
+│       ├── data_retention_check_test.exs ✓
+│       ├── send_invitation_email_test.exs ✓
+│       ├── send_reminder_email_test.exs ✓
+│       └── send_round_invitations_test.exs ✓
 │
 └── wrt_web/controllers/
     ├── health_controller_test.exs  # ✓
@@ -540,25 +545,18 @@ defmodule Wrt.Workers.SendReminder do
   end
 end
 
-# Data retention cleanup (runs daily)
-defmodule Wrt.Workers.RetentionCleanup do
-  use Oban.Worker, queue: :maintenance
+# Data retention check (runs weekly via Oban cron)
+defmodule Wrt.Workers.DataRetentionCheck do
+  use Oban.Worker, queue: :maintenance, max_attempts: 3
 
-  @impl true
-  def perform(_job) do
-    cutoff = DateTime.utc_now() |> DateTime.add(-24 * 30, :day)  # 24 months
-    warning_cutoff = DateTime.utc_now() |> DateTime.add(-23 * 30, :day)  # 23 months
-
-    # Send warnings for campaigns approaching deletion
-    Campaigns.list_completed_before(warning_cutoff)
-    |> Enum.each(&send_deletion_warning/1)
-
-    # Delete campaigns past retention period
-    Campaigns.list_completed_before(cutoff)
-    |> Enum.each(&Campaigns.delete_campaign/1)
-
-    :ok
-  end
+  # Supports three actions:
+  # - "check" (default): scans all orgs for campaigns needing warnings or archival
+  # - "warn": looks up org, gets all org admins, sends retention warning emails
+  #           via Emails.send_retention_warning/3 for each campaign
+  # - "archive": archives campaigns past retention period (logs for now)
+  #
+  # The check action queues separate "warn" and "archive" jobs as needed.
+  # Warning emails include campaign name, days remaining, and deletion date.
 end
 ```
 
@@ -909,4 +907,4 @@ end
 - [x] Business telemetry events
 - [x] Data retention check worker (24-month policy)
 - [x] Magic link cleanup worker (expired tokens)
-- [x] Comprehensive test suite (80 tests)
+- [x] Comprehensive test suite (99 tests)

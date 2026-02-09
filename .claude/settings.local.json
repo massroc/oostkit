@@ -84,7 +84,25 @@
       "Bash(/home/rossm/.fly/bin/flyctl machine update:*)",
       "Bash(tee:*)",
       "Bash(git cherry-pick:*)",
-      "Bash(git ls-tree:*)"
+      "Bash(git ls-tree:*)",
+      "WebFetch(domain:hex.pm)",
+      "WebFetch(domain:hexdocs.pm)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:petal.build)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(for module in alert modal typography link loading)",
+      "Bash(do echo \"=== Checking $module ===\" curl -s \"https://raw.githubusercontent.com/petalframework/petal_components/main/lib/petal_components/$module.ex\")",
+      "Bash(for fn in \"error\" \"header\" \"simple_form\" \"flash\" \"label\" \"show\" \"hide\")",
+      "Bash(do echo \"=== Searching for ''def $fn'' ===\" curl -s https://raw.githubusercontent.com/petalframework/petal_components/main/lib/petal_components/*.ex)",
+      "WebFetch(domain:uicolors.app)",
+      "Bash(git log:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(cmd.exe /c \"wmic memorychip get capacity\")",
+      "Bash(powershell.exe:*)",
+      "Bash(pstree:*)",
+      "Bash(ps aux:*)",
+      "Bash(kill:*)"
     ]
   }
 }
