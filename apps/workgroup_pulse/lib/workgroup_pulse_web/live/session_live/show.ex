@@ -69,7 +69,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(action_input: "")
      |> assign(notes_revealed: false)
      |> assign(show_export_modal: false)
-     |> assign(export_content: "all")
+     |> assign(export_report_type: "full")
      |> TimerHandler.init_timer_assigns()
      |> DataLoaders.load_scoring_data(workshop_session, participant)
      |> DataLoaders.load_summary_data(workshop_session)
@@ -324,8 +324,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_event("select_export_content", %{"content" => content}, socket) do
-    EventHandlers.handle_select_export_content(socket, content)
+  def handle_event("select_export_report_type", %{"type" => type}, socket) do
+    EventHandlers.handle_select_export_report_type(socket, type)
   end
 
   @impl true
@@ -484,14 +484,19 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
           <CompletedComponent.render
             session={@session}
             participant={@participant}
+            participants={@participants}
             scores_summary={@scores_summary}
+            individual_scores={@individual_scores}
             strengths={@strengths}
             concerns={@concerns}
+            all_notes={@all_notes}
+            notes_by_question={@notes_by_question}
             all_actions={@all_actions}
             action_count={@action_count}
             action_input={@action_input}
             show_export_modal={@show_export_modal}
-            export_content={@export_content}
+            export_report_type={@export_report_type}
+            summary_template={@summary_template}
           />
         </div>
       <% end %>

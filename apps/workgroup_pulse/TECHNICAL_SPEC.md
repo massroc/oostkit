@@ -46,7 +46,8 @@ SessionLive.Show (root LiveView)
 │   ├── ScoreOverlayComponent       # Score input overlay + criterion info popup
 │   ├── SummaryComponent            # Score summary with individual scores & notes
 │   ├── CompletedComponent          # Wrap-up: results, action count, export
-│   └── ExportModalComponent        # Export format/content selection
+│   ├── ExportModalComponent        # Export report type (full/team) + format (CSV/PDF) selection
+│   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
 │
 ├── LiveComponents/
 │   └── ActionFormComponent   # Local form state for action creation
@@ -289,7 +290,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> assign(show_facilitator_tips: false)
      |> assign(note_input: "")
      |> assign(show_export_modal: false)
-     |> assign(export_content: "all")
+     |> assign(export_report_type: "full")
 
      # Timer state (via TimerHandler.init_timer_assigns/1)
      # timer_enabled, timer_remaining, segment_duration,

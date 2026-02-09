@@ -174,7 +174,8 @@ Set via Fly.io secrets:
 │       │   │   ├── completed_component.ex  # Wrap-up/export
 │       │   │   ├── intro_component.ex      # Introduction screens
 │       │   │   ├── lobby_component.ex      # Waiting room
-│       │   │   └── export_modal_component.ex
+│       │   │   ├── export_modal_component.ex  # Report type + format selection
+│       │   │   └── export_print_component.ex # Print-optimized HTML for PDF
 │       │   ├── handlers/
 │       │   │   ├── event_handlers.ex       # All handle_event callbacks
 │       │   │   └── message_handlers.ex     # All handle_info (PubSub)
@@ -247,8 +248,9 @@ Set via Fly.io secrets:
 #### Completed Phase (Complete)
 - [x] Final summary with score overview and strengths/concerns
 - [x] Actions list
-- [x] Export modal UI (format selection)
-- [ ] Export implementation (CSV, PDF) - deferred to Phase 2
+- [x] Export modal UI (report type + format selection)
+- [x] Export: Full Workshop Report & Team Report (anonymized) in CSV and PDF formats
+- [x] Client-side PDF generation via html2pdf.js (html2canvas + jsPDF)
 
 #### Performance Optimizations (Complete)
 - [x] Input debouncing (300ms) on text fields to reduce server round-trips

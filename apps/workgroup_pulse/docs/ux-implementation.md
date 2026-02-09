@@ -249,7 +249,27 @@ The unified stack uses **server-driven navigation** only. Non-active slides are 
 | Server-driven `data-index` | Phase transitions and FAB buttons update `@carousel_index` |
 | Inactive slides | Hidden via `display: none` — no visual stacking or transforms |
 
+## 7. Export & PDF Generation
+
+### JS Hook: `ExportHook`
+
+Replaces the previous `FileDownload` hook. Attached to the export button container (`#export-container`). Handles two server-pushed events:
+
+- **`download`** — CSV export. Creates a Blob from the data and triggers a download via a temporary `<a>` link.
+- **`generate_pdf`** — PDF export via html2pdf.js. Clones `#export-print-content` into an isolated container on `document.body`, captures it with html2canvas, and generates an A4 landscape PDF via jsPDF. The clone approach avoids inherited transforms from the sheet/carousel stack.
+
+### ExportPrintComponent
+
+Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook reveals a clone for capture. Renders static inline-styled HTML (no Tailwind classes) sized at 960px wide with `box-sizing: border-box`. Content switches based on `export_report_type`:
+
+- **Full Report** — participants table, individual scores grid with traffic-light cell backgrounds, team score cards, strengths/concerns, notes with authors, actions with owners.
+- **Team Report** — team score cards, strengths/concerns, notes without authors, actions without owners. No participants or individual scores.
+
+### Vendor Dependency
+
+`assets/vendor/html2pdf.bundle.min.js` — UMD bundle including html2canvas + jsPDF. Imported in `app.js`.
+
 ---
 
-*Document Version: 1.0*
+*Document Version: 1.1 — Added export & PDF generation section*
 *Created: 2026-02-07*

@@ -1,6 +1,12 @@
 defmodule WorkgroupPulse.Export do
   @moduledoc """
-  Handles exporting workshop data to various formats (CSV, JSON).
+  Handles exporting workshop data to CSV.
+
+  Two report types:
+  - `:full` — Full Workshop Report with all data including individual scores,
+    participant names, note authors, and action owners
+  - `:team` — Team Report with anonymized team-level data: team scores,
+    strengths/concerns, notes without authors, actions without owners
   """
 
   alias WorkgroupPulse.Notes
@@ -9,17 +15,15 @@ defmodule WorkgroupPulse.Export do
   alias WorkgroupPulse.Sessions.Session
 
   @doc """
-  Exports workshop data to the specified format.
+  Exports workshop data as CSV.
 
   ## Options
-  - `:content` - What to export: :results, :actions, or :all (default: :all)
-  - `:format` - Export format: :csv or :json (default: :csv)
+  - `:content` - Report type: `:full` or `:team` (default: `:full`)
 
   Returns `{:ok, {filename, content_type, data}}` or `{:error, reason}`
   """
   def export(%Session{} = session, opts \\ []) do
-    content = Keyword.get(opts, :content, :all)
-    format = Keyword.get(opts, :format, :csv)
+    content = Keyword.get(opts, :content, :full)
 
     session = Sessions.get_session_with_all(session.id)
     template = session.template
@@ -39,37 +43,53 @@ defmodule WorkgroupPulse.Export do
       actions: actions
     }
 
-    case format do
-      :csv -> export_csv(data, content, session.code)
-      :json -> export_json(data, content, session.code)
-      _ -> {:error, :invalid_format}
-    end
+    export_csv(data, content, session.code)
   end
-
-  # CSV Export
 
   defp export_csv(data, content, code) do
     csv_content =
       case content do
-        :results -> build_results_csv(data)
-        :actions -> build_actions_csv(data)
-        :all -> build_results_csv(data) <> "\n\n" <> build_actions_csv(data)
+        :full -> build_full_csv(data)
+        :team -> build_team_csv(data)
       end
 
-    filename = "workshop_#{code}_#{content}.csv"
+    filename = "workshop_#{code}_#{content}_report.csv"
     {:ok, {filename, "text/csv", csv_content}}
   end
 
-  defp build_results_csv(data) do
+  defp build_full_csv(data) do
     session_section = build_session_info_csv(data.session)
     participants_section = build_participants_csv(data.participants)
 
     scores_section =
       build_scores_csv(data.scores_summary, data.individual_scores, data.participants)
 
-    notes_section = build_notes_csv(data.notes, data.scores_summary)
+    notes_section = build_notes_csv(data.notes, data.scores_summary, :full)
+    actions_section = build_actions_csv(data.actions, :full)
 
-    Enum.join([session_section, participants_section, scores_section, notes_section], "\n\n")
+    Enum.join(
+      [session_section, participants_section, scores_section, notes_section, actions_section],
+      "\n\n"
+    )
+  end
+
+  defp build_team_csv(data) do
+    session_section = build_session_info_csv(data.session)
+    team_scores_section = build_team_scores_csv(data.scores_summary)
+    strengths_concerns_section = build_strengths_concerns_csv(data.scores_summary)
+    notes_section = build_notes_csv(data.notes, data.scores_summary, :team)
+    actions_section = build_actions_csv(data.actions, :team)
+
+    Enum.join(
+      [
+        session_section,
+        team_scores_section,
+        strengths_concerns_section,
+        notes_section,
+        actions_section
+      ],
+      "\n\n"
+    )
   end
 
   defp build_session_info_csv(session) do
@@ -153,19 +173,68 @@ defmodule WorkgroupPulse.Export do
     end
   end
 
-  defp build_notes_csv(notes, scores_summary) do
+  defp build_strengths_concerns_csv(scores_summary) do
+    grouped = Enum.group_by(scores_summary, & &1.color)
+    strengths = Map.get(grouped, :green, [])
+    concerns = Map.get(grouped, :red, [])
+
+    strength_lines =
+      if Enum.empty?(strengths) do
+        "STRENGTHS\nNo strengths identified"
+      else
+        header = "STRENGTHS\nQuestion,Score"
+
+        rows =
+          Enum.map_join(strengths, "\n", fn s ->
+            "#{csv_escape(s.title)},#{round(s.combined_team_value)}/10"
+          end)
+
+        header <> "\n" <> rows
+      end
+
+    concern_lines =
+      if Enum.empty?(concerns) do
+        "AREAS OF CONCERN\nNo areas of concern identified"
+      else
+        header = "AREAS OF CONCERN\nQuestion,Score"
+
+        rows =
+          Enum.map_join(concerns, "\n", fn s ->
+            "#{csv_escape(s.title)},#{round(s.combined_team_value)}/10"
+          end)
+
+        header <> "\n" <> rows
+      end
+
+    strength_lines <> "\n\n" <> concern_lines
+  end
+
+  defp build_notes_csv(notes, scores_summary, report_type) do
     if Enum.empty?(notes) do
       "NOTES\nNo notes recorded"
     else
-      header = "NOTES\nQuestion,Note,Author"
-      rows = Enum.map_join(notes, "\n", &format_note_row(&1, scores_summary))
-      header <> "\n" <> rows
+      case report_type do
+        :full ->
+          header = "NOTES\nQuestion,Note,Author"
+          rows = Enum.map_join(notes, "\n", &format_note_row(&1, scores_summary, :full))
+          header <> "\n" <> rows
+
+        :team ->
+          header = "NOTES\nQuestion,Note"
+          rows = Enum.map_join(notes, "\n", &format_note_row(&1, scores_summary, :team))
+          header <> "\n" <> rows
+      end
     end
   end
 
-  defp format_note_row(note, scores_summary) do
+  defp format_note_row(note, scores_summary, :full) do
     question_title = get_question_title(note.question_index, scores_summary)
     "#{csv_escape(question_title)},#{csv_escape(note.content)},#{csv_escape(note.author_name)}"
+  end
+
+  defp format_note_row(note, scores_summary, :team) do
+    question_title = get_question_title(note.question_index, scores_summary)
+    "#{csv_escape(question_title)},#{csv_escape(note.content)}"
   end
 
   defp get_question_title(question_index, scores_summary) do
@@ -175,115 +244,33 @@ defmodule WorkgroupPulse.Export do
     end
   end
 
-  defp build_actions_csv(data) do
-    if Enum.empty?(data.actions) do
+  defp build_actions_csv(actions, report_type) do
+    if Enum.empty?(actions) do
       "ACTION ITEMS\nNo action items recorded"
     else
-      header = "ACTION ITEMS\nAction,Owner,Created"
-      rows = Enum.map_join(data.actions, "\n", &format_action_row/1)
-      header <> "\n" <> rows
+      case report_type do
+        :full ->
+          header = "ACTION ITEMS\nAction,Owner,Created"
+          rows = Enum.map_join(actions, "\n", &format_action_row(&1, :full))
+          header <> "\n" <> rows
+
+        :team ->
+          header = "ACTION ITEMS\nAction,Created"
+          rows = Enum.map_join(actions, "\n", &format_action_row(&1, :team))
+          header <> "\n" <> rows
+      end
     end
   end
 
-  defp format_action_row(action) do
+  defp format_action_row(action, :full) do
     owner = action.owner_name || ""
     created = format_datetime(action.inserted_at)
     "#{csv_escape(action.description)},#{csv_escape(owner)},#{created}"
   end
 
-  # JSON Export
-
-  defp export_json(data, content, code) do
-    json_data =
-      case content do
-        :results -> build_results_json(data)
-        :actions -> build_actions_json(data)
-        :all -> Map.merge(build_results_json(data), build_actions_json(data))
-      end
-
-    json_content = Jason.encode!(json_data, pretty: true)
-    filename = "workshop_#{code}_#{content}.json"
-    {:ok, {filename, "application/json", json_content}}
-  end
-
-  defp build_results_json(data) do
-    %{
-      session: %{
-        code: data.session.code,
-        started_at: format_datetime(data.session.started_at),
-        completed_at: format_datetime(data.session.completed_at)
-      },
-      participants:
-        Enum.map(data.participants, fn p ->
-          %{
-            name: p.name,
-            role:
-              if(p.is_facilitator,
-                do: "facilitator",
-                else: if(p.is_observer, do: "observer", else: "participant")
-              ),
-            status: p.status
-          }
-        end),
-      team_scores:
-        Enum.map(data.scores_summary, fn score ->
-          %{
-            index: score.question_index + 1,
-            title: score.title,
-            scale_type: score.scale_type,
-            combined_team_value:
-              if(score.combined_team_value, do: round(score.combined_team_value), else: nil),
-            average: score.average,
-            min: score.min,
-            max: score.max
-          }
-        end),
-      individual_scores:
-        Enum.map(data.scores_summary, fn score ->
-          question_scores = Map.get(data.individual_scores, score.question_index, [])
-
-          %{
-            index: score.question_index + 1,
-            title: score.title,
-            scale_type: score.scale_type,
-            scores:
-              Enum.map(question_scores, fn s ->
-                %{
-                  participant: s.participant_name,
-                  value: s.value,
-                  color: s.color
-                }
-              end)
-          }
-        end),
-      notes:
-        Enum.map(data.notes, fn note ->
-          question_title =
-            case Enum.find(data.scores_summary, &(&1.question_index == note.question_index)) do
-              nil -> "Q#{(note.question_index || 0) + 1}"
-              q -> q.title
-            end
-
-          %{
-            question: question_title,
-            content: note.content,
-            author: note.author_name
-          }
-        end)
-    }
-  end
-
-  defp build_actions_json(data) do
-    %{
-      actions:
-        Enum.map(data.actions, fn action ->
-          %{
-            description: action.description,
-            owner: action.owner_name,
-            created_at: format_datetime(action.inserted_at)
-          }
-        end)
-    }
+  defp format_action_row(action, :team) do
+    created = format_datetime(action.inserted_at)
+    "#{csv_escape(action.description)},#{created}"
   end
 
   # Helpers

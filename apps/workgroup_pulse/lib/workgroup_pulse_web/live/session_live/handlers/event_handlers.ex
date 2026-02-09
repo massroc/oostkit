@@ -476,35 +476,38 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers do
   end
 
   @doc """
-  Handles select_export_content event.
+  Handles select_export_report_type event.
   """
-  def handle_select_export_content(socket, content) do
-    {:noreply, assign(socket, export_content: content)}
+  def handle_select_export_report_type(socket, type) do
+    {:noreply, assign(socket, export_report_type: type)}
   end
 
   @doc """
   Handles export event.
-  Exports workshop data in the specified format.
+  Exports workshop data as CSV or triggers PDF generation on the client.
   """
-  def handle_export(socket, format) do
+  def handle_export(socket, "pdf") do
+    report_type = socket.assigns.export_report_type
+    code = socket.assigns.session.code
+    filename = "workshop_#{code}_#{report_type}_report.pdf"
+
+    {:noreply,
+     socket
+     |> assign(show_export_modal: false)
+     |> push_event("generate_pdf", %{report_type: report_type, filename: filename})}
+  end
+
+  def handle_export(socket, "csv") do
     session = socket.assigns.session
-    content = socket.assigns.export_content
+    report_type = socket.assigns.export_report_type
+    content_atom = String.to_existing_atom(report_type)
 
-    format_atom = String.to_existing_atom(format)
-    content_atom = String.to_existing_atom(content)
+    {:ok, {filename, content_type, data}} = Export.export(session, content: content_atom)
 
-    case Export.export(session, format: format_atom, content: content_atom) do
-      {:ok, {filename, content_type, data}} ->
-        {:noreply,
-         socket
-         |> assign(show_export_modal: false)
-         |> push_event("download", %{filename: filename, content_type: content_type, data: data})}
-
-      {:error, _reason} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Failed to export data")}
-    end
+    {:noreply,
+     socket
+     |> assign(show_export_modal: false)
+     |> push_event("download", %{filename: filename, content_type: content_type, data: data})}
   end
 
   # Private helper functions
