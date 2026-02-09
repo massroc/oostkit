@@ -42,6 +42,11 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
+# Configure Petal Components error translator
+config :petal_components,
+       :error_translator_function,
+       {WorkgroupPulseWeb.CoreComponents, :translate_error}
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

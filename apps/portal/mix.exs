@@ -74,6 +74,10 @@ defmodule Portal.MixProject do
       {:dns_cluster, "~> 0.1.3 or ~> 0.2.0"},
       {:bandit, "~> 1.6"},
 
+      # UI Components
+      {:petal_components, "~> 2.0"},
+      {:phoenix_html_helpers, "~> 1.0"},
+
       # Authentication
       {:bcrypt_elixir, "~> 3.1"},
 

@@ -55,6 +55,11 @@ config :tailwind,
 # Configures the mailer (using Swoosh)
 config :portal, Portal.Mailer, adapter: Swoosh.Adapters.Local
 
+# Configure Petal Components error translator
+config :petal_components,
+       :error_translator_function,
+       {PortalWeb.CoreComponents, :translate_error}
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

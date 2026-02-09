@@ -105,7 +105,7 @@ defmodule WorkgroupPulseWeb.SessionLive.ActionFormComponent do
         </div>
         <button
           type="submit"
-          class="w-full px-4 py-2 bg-df-green hover:bg-secondary-green-light text-white font-semibold rounded-lg transition-colors"
+          class="w-full px-4 py-2 bg-df-green hover:bg-brand-secondary-green-light text-white font-semibold rounded-lg transition-colors"
         >
           Add Action
         </button>
