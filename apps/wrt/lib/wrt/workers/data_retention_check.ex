@@ -82,24 +82,31 @@ defmodule Wrt.Workers.DataRetentionCheck do
 
   defp send_warnings(org_id, campaign_ids) do
     org = Platform.get_organisation(org_id)
+    send_warnings_for_org(org, campaign_ids)
+  end
 
-    if org do
-      tenant = Platform.tenant_for_org(org)
-      admins = Orgs.list_org_admins(tenant)
-      warning_days = get_warning_days()
+  defp send_warnings_for_org(nil, _campaign_ids), do: :ok
 
-      Enum.each(campaign_ids, fn campaign_id ->
-        case Campaigns.get_campaign(tenant, campaign_id) do
-          nil ->
-            Logger.warning("Campaign #{campaign_id} not found for retention warning")
+  defp send_warnings_for_org(org, campaign_ids) do
+    tenant = Platform.tenant_for_org(org)
+    admins = Orgs.list_org_admins(tenant)
+    warning_days = get_warning_days()
 
-          campaign ->
-            notify_admins(admins, campaign, warning_days)
-        end
-      end)
-    end
+    Enum.each(campaign_ids, fn campaign_id ->
+      warn_for_campaign(tenant, campaign_id, admins, warning_days)
+    end)
 
     :ok
+  end
+
+  defp warn_for_campaign(tenant, campaign_id, admins, warning_days) do
+    case Campaigns.get_campaign(tenant, campaign_id) do
+      nil ->
+        Logger.warning("Campaign #{campaign_id} not found for retention warning")
+
+      campaign ->
+        notify_admins(admins, campaign, warning_days)
+    end
   end
 
   defp notify_admins(admins, campaign, warning_days) do
