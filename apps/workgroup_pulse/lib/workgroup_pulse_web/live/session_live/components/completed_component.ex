@@ -12,17 +12,23 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
     only: [text_color_class: 1, card_color_class: 1]
 
   alias WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent
+  alias WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent
 
   attr :session, :map, required: true
   attr :participant, :map, required: true
+  attr :participants, :list, required: true
   attr :scores_summary, :list, required: true
+  attr :individual_scores, :map, required: true
   attr :strengths, :list, required: true
   attr :concerns, :list, required: true
+  attr :all_notes, :list, required: true
+  attr :notes_by_question, :map, required: true
   attr :all_actions, :list, required: true
   attr :action_count, :integer, required: true
   attr :action_input, :string, required: true
   attr :show_export_modal, :boolean, required: true
-  attr :export_content, :string, required: true
+  attr :export_report_type, :string, required: true
+  attr :summary_template, :map, required: true
 
   def render(assigns) do
     ~H"""
@@ -183,8 +189,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
       <%!-- Export --%>
       <ExportModalComponent.render
         show_export_modal={@show_export_modal}
-        export_content={@export_content}
-        action_count={@action_count}
+        export_report_type={@export_report_type}
       />
 
       <%!-- Finish Workshop (facilitator only) --%>
@@ -199,6 +204,21 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
         </div>
       <% end %>
     </.sheet>
+
+    <%!-- Hidden print div for PDF export --%>
+    <ExportPrintComponent.render
+      export_report_type={@export_report_type}
+      session={@session}
+      participants={@participants}
+      scores_summary={@scores_summary}
+      individual_scores={@individual_scores}
+      strengths={@strengths}
+      concerns={@concerns}
+      all_notes={@all_notes}
+      notes_by_question={@notes_by_question}
+      all_actions={@all_actions}
+      summary_template={@summary_template}
+    />
     """
   end
 end

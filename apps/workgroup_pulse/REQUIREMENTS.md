@@ -162,7 +162,10 @@ For each of the 8 questions (one row at a time):
 - Suggestions on what to focus on available via **Facilitator Assistance** (not shown by default)
 - Discussion notes summary
 - Participants list
-- Export option (coming soon)
+- Export with two report types:
+  - **Full Workshop Report** — all data including individual scores, participant names, note authors, action owners
+  - **Team Report** — anonymized team-level view: team scores, strengths/concerns, notes without authors, actions without owners
+- Export formats: CSV and PDF (client-side rendering via html2pdf.js)
 - "Finish Workshop" to return to home
 
 ## Time Management
@@ -333,7 +336,7 @@ Each team has a "team room" - a persistent space containing:
 ### Results Storage
 - Workshop results saved to database
 - Historical comparison available (for logged-in users)
-- Export options: CSV, PDF summary
+- Export options: CSV and PDF, with Full (all data) or Team (anonymized) report types
 
 ### Privacy Considerations
 - Anonymous sessions: data retained for session duration + configurable period
@@ -477,7 +480,7 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 - [ ] User accounts and authentication
 - [ ] Persistent teams
 - [ ] Historical comparison
-- [ ] Export (CSV, PDF) — modal UI exists, full implementation pending
+- [x] Export (CSV, PDF) — Full Workshop Report and Team Report types
 - [ ] Previous score comparison
 - [ ] Advanced visualizations
 - [ ] Usage analytics (aggregated, anonymized)
@@ -755,12 +758,11 @@ The following features require further design decisions:
 - Save sessions to account
 - Compare current workshop to previous results
 - Persistent team management
-- Export results (CSV, PDF)
 - Usage analytics dashboard (for product improvement)
 - Richer analytics and trend visualization
 - Mobile-optimized experience
 
 ---
 
-*Document Version: 4.1 — Removed intro state; intro slides are now local carousel navigation within scoring state*
-*Last Updated: 2026-02-08*
+*Document Version: 4.2 — Export revamp: Full/Team report types with CSV/PDF formats*
+*Last Updated: 2026-02-09*

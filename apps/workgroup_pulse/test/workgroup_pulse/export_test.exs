@@ -74,11 +74,11 @@ defmodule WorkgroupPulse.ExportTest do
       %{session: session, template: template}
     end
 
-    test "exports results as CSV", %{session: session} do
+    test "exports full report as CSV", %{session: session} do
       {:ok, {filename, content_type, data}} =
-        Export.export(session, format: :csv, content: :results)
+        Export.export(session, content: :full)
 
-      assert filename == "workshop_#{session.code}_results.csv"
+      assert filename == "workshop_#{session.code}_full_report.csv"
       assert content_type == "text/csv"
       assert data =~ "SESSION INFORMATION"
       assert data =~ session.code
@@ -91,68 +91,65 @@ defmodule WorkgroupPulse.ExportTest do
       assert data =~ "Mutual Support"
       assert data =~ "NOTES"
       assert data =~ "This is a test note"
-    end
-
-    test "exports actions as CSV", %{session: session} do
-      {:ok, {filename, content_type, data}} =
-        Export.export(session, format: :csv, content: :actions)
-
-      assert filename == "workshop_#{session.code}_actions.csv"
-      assert content_type == "text/csv"
       assert data =~ "ACTION ITEMS"
       assert data =~ "Follow up on feedback"
-      assert data =~ "Alice"
+      # Full report includes author and owner columns
+      assert data =~ "Question,Note,Author"
+      assert data =~ "Action,Owner,Created"
     end
 
-    test "exports all as CSV", %{session: session} do
-      {:ok, {filename, content_type, data}} = Export.export(session, format: :csv, content: :all)
+    test "exports team report as CSV", %{session: session} do
+      {:ok, {filename, content_type, data}} =
+        Export.export(session, content: :team)
 
-      assert filename == "workshop_#{session.code}_all.csv"
+      assert filename == "workshop_#{session.code}_team_report.csv"
       assert content_type == "text/csv"
       assert data =~ "SESSION INFORMATION"
+      assert data =~ session.code
       assert data =~ "TEAM SCORES"
+      # Team report should NOT include participants or individual scores
+      refute data =~ "PARTICIPANTS"
+      refute data =~ "INDIVIDUAL SCORES"
+      # Team report notes have no Author column
+      assert data =~ "Question,Note\n"
+      # Team report actions have no Owner column
+      assert data =~ "Action,Created\n"
+      # Team report includes strengths/concerns
+      assert data =~ "STRENGTHS"
+      assert data =~ "AREAS OF CONCERN"
+    end
+
+    test "team report excludes identifying information", %{session: session} do
+      {:ok, {_filename, _content_type, data}} =
+        Export.export(session, content: :team)
+
+      # Split into sections to check notes and actions sections specifically
+      # The note content should appear but not the author name in that context
+      lines = String.split(data, "\n")
+
+      # Find the NOTES section lines
+      notes_start = Enum.find_index(lines, &(&1 == "NOTES"))
+      actions_start = Enum.find_index(lines, &(&1 == "ACTION ITEMS"))
+
+      # Notes section header should not have Author column
+      notes_header = Enum.at(lines, notes_start + 1)
+      assert notes_header == "Question,Note"
+
+      # Actions section header should not have Owner column
+      actions_header = Enum.at(lines, actions_start + 1)
+      assert actions_header == "Action,Created"
+
+      # Participant names should not appear anywhere in team report
+      # (except in the note content itself if a name happens to be in the text)
+      refute data =~ "PARTICIPANTS"
+    end
+
+    test "defaults to full report", %{session: session} do
+      {:ok, {filename, _content_type, data}} = Export.export(session)
+
+      assert filename == "workshop_#{session.code}_full_report.csv"
+      assert data =~ "PARTICIPANTS"
       assert data =~ "INDIVIDUAL SCORES"
-      assert data =~ "ACTION ITEMS"
-    end
-
-    test "exports results as JSON", %{session: session} do
-      {:ok, {filename, content_type, data}} =
-        Export.export(session, format: :json, content: :results)
-
-      assert filename == "workshop_#{session.code}_results.json"
-      assert content_type == "application/json"
-
-      decoded = Jason.decode!(data)
-      assert decoded["session"]["code"] == session.code
-      assert length(decoded["participants"]) == 2
-      assert length(decoded["team_scores"]) == 2
-      assert length(decoded["individual_scores"]) == 2
-      assert length(decoded["notes"]) == 1
-    end
-
-    test "exports actions as JSON", %{session: session} do
-      {:ok, {filename, content_type, data}} =
-        Export.export(session, format: :json, content: :actions)
-
-      assert filename == "workshop_#{session.code}_actions.json"
-      assert content_type == "application/json"
-
-      decoded = Jason.decode!(data)
-      assert length(decoded["actions"]) == 1
-      assert hd(decoded["actions"])["description"] == "Follow up on feedback"
-    end
-
-    test "exports all as JSON", %{session: session} do
-      {:ok, {filename, content_type, data}} = Export.export(session, format: :json, content: :all)
-
-      assert filename == "workshop_#{session.code}_all.json"
-      assert content_type == "application/json"
-
-      decoded = Jason.decode!(data)
-      assert Map.has_key?(decoded, "session")
-      assert Map.has_key?(decoded, "team_scores")
-      assert Map.has_key?(decoded, "individual_scores")
-      assert Map.has_key?(decoded, "actions")
     end
 
     test "handles empty notes gracefully", %{template: template} do
@@ -160,7 +157,7 @@ defmodule WorkgroupPulse.ExportTest do
       {:ok, _participant} = Sessions.join_session(session, "Charlie", Ecto.UUID.generate())
 
       {:ok, {_filename, _content_type, data}} =
-        Export.export(session, format: :csv, content: :results)
+        Export.export(session, content: :full)
 
       assert data =~ "No notes recorded"
     end
@@ -170,7 +167,7 @@ defmodule WorkgroupPulse.ExportTest do
       {:ok, _participant} = Sessions.join_session(session, "Charlie", Ecto.UUID.generate())
 
       {:ok, {_filename, _content_type, data}} =
-        Export.export(session, format: :csv, content: :actions)
+        Export.export(session, content: :full)
 
       assert data =~ "No action items recorded"
     end
@@ -185,7 +182,7 @@ defmodule WorkgroupPulse.ExportTest do
         })
 
       {:ok, {_filename, _content_type, data}} =
-        Export.export(session, format: :csv, content: :results)
+        Export.export(session, content: :full)
 
       # CSV escaping should wrap in quotes and escape internal quotes
       assert data =~ "\"Test, User\""
@@ -194,7 +191,7 @@ defmodule WorkgroupPulse.ExportTest do
 
     test "formats balance scores with + prefix for positive values", %{session: session} do
       {:ok, {_filename, _content_type, data}} =
-        Export.export(session, format: :csv, content: :results)
+        Export.export(session, content: :full)
 
       # Alice scored +1 on Elbow Room (balance scale)
       assert data =~ "+1"

@@ -4,6 +4,7 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import html2pdf from "../vendor/html2pdf.bundle.min.js"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
@@ -97,8 +98,8 @@ Hooks.FacilitatorTimer = {
   }
 }
 
-// File download hook for export functionality
-Hooks.FileDownload = {
+// Export hook for CSV download and PDF generation
+Hooks.ExportHook = {
   mounted() {
     this.handleEvent("download", ({filename, content_type, data}) => {
       // Create a blob from the data
@@ -115,6 +116,41 @@ Hooks.FileDownload = {
 
       // Clean up the URL
       URL.revokeObjectURL(url)
+    })
+
+    this.handleEvent("generate_pdf", ({report_type, filename}) => {
+      const source = document.getElementById("export-print-content")
+      if (!source) return
+
+      // Clone into a completely isolated container on body.
+      // This avoids all inherited CSS, parent transforms, and
+      // positioning issues from the sheet/carousel stack.
+      const container = document.createElement("div")
+      container.style.cssText = "position:fixed;left:0;top:0;z-index:-9999;background:#fff;"
+      const clone = source.cloneNode(true)
+      clone.removeAttribute("id")
+      container.appendChild(clone)
+      document.body.appendChild(container)
+
+      html2pdf().set({
+        margin: [10, 10, 10, 10],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          windowWidth: 960,
+          scrollX: 0,
+          scrollY: 0,
+          x: 0,
+          y: 0
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak: { mode: ['avoid-all', 'css'] }
+      }).from(clone).save().then(() => {
+        document.body.removeChild(container)
+      })
     })
   }
 }

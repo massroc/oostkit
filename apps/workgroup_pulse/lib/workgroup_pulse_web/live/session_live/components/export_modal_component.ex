@@ -6,14 +6,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
   use Phoenix.Component
 
   attr :show_export_modal, :boolean, required: true
-  attr :export_content, :string, required: true
-  attr :action_count, :integer, required: true
+  attr :export_report_type, :string, required: true
 
   def render(assigns) do
     ~H"""
     <div>
       <%!-- Export Button --%>
-      <div id="export-container" phx-hook="FileDownload">
+      <div id="export-container" phx-hook="ExportHook">
         <button
           type="button"
           phx-click="toggle_export_modal"
@@ -39,7 +38,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
         >
           <div class="bg-surface-sheet rounded-sheet shadow-sheet-lifted p-sheet-padding max-w-sm w-full mx-4">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="font-workshop text-xl font-bold text-ink-blue">Export Data</h3>
+              <h3 class="font-workshop text-xl font-bold text-ink-blue">Export Report</h3>
               <button
                 type="button"
                 phx-click="close_export_modal"
@@ -57,92 +56,55 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
             </div>
 
             <p class="text-ink-blue/60 text-xs font-brand mb-4">
-              Select what to include in the export.
+              Choose a report type and format.
             </p>
 
             <div class="space-y-2 mb-4">
               <label class={[
                 "flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all border",
-                if(@export_content == "all",
+                if(@export_report_type == "full",
                   do: "bg-accent-purple/10 border-accent-purple",
                   else: "bg-surface-wall border-ink-blue/10 hover:border-ink-blue/20"
                 )
               ]}>
                 <input
                   type="radio"
-                  name="export_content"
-                  value="all"
-                  checked={@export_content == "all"}
-                  phx-click="select_export_content"
-                  phx-value-content="all"
+                  name="export_report_type"
+                  value="full"
+                  checked={@export_report_type == "full"}
+                  phx-click="select_export_report_type"
+                  phx-value-type="full"
                   class="w-3.5 h-3.5 text-accent-purple"
                 />
                 <div>
-                  <div class="text-ink-blue font-medium text-sm font-brand">Everything</div>
+                  <div class="text-ink-blue font-medium text-sm font-brand">
+                    Full Workshop Report
+                  </div>
                   <div class="text-ink-blue/50 text-xs font-brand">
-                    Results, notes, and action items
+                    All scores, participants, notes, and action items
                   </div>
                 </div>
               </label>
               <label class={[
                 "flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all border",
-                if(@export_content == "results",
+                if(@export_report_type == "team",
                   do: "bg-accent-purple/10 border-accent-purple",
                   else: "bg-surface-wall border-ink-blue/10 hover:border-ink-blue/20"
                 )
               ]}>
                 <input
                   type="radio"
-                  name="export_content"
-                  value="results"
-                  checked={@export_content == "results"}
-                  phx-click="select_export_content"
-                  phx-value-content="results"
+                  name="export_report_type"
+                  value="team"
+                  checked={@export_report_type == "team"}
+                  phx-click="select_export_report_type"
+                  phx-value-type="team"
                   class="w-3.5 h-3.5 text-accent-purple"
                 />
                 <div>
-                  <div class="text-ink-blue font-medium text-sm font-brand">Results Only</div>
+                  <div class="text-ink-blue font-medium text-sm font-brand">Team Report</div>
                   <div class="text-ink-blue/50 text-xs font-brand">
-                    Scores, participants, and notes
-                  </div>
-                </div>
-              </label>
-              <label class={[
-                "flex items-center gap-3 p-2.5 rounded-lg transition-all border",
-                cond do
-                  @action_count == 0 ->
-                    "bg-surface-wall border-ink-blue/10 cursor-not-allowed opacity-40"
-
-                  @export_content == "actions" ->
-                    "bg-accent-purple/10 border-accent-purple cursor-pointer"
-
-                  true ->
-                    "bg-surface-wall border-ink-blue/10 hover:border-ink-blue/20 cursor-pointer"
-                end
-              ]}>
-                <input
-                  type="radio"
-                  name="export_content"
-                  value="actions"
-                  checked={@export_content == "actions"}
-                  disabled={@action_count == 0}
-                  phx-click="select_export_content"
-                  phx-value-content="actions"
-                  class="w-3.5 h-3.5 text-accent-purple"
-                />
-                <div>
-                  <div class={[
-                    "font-medium text-sm font-brand",
-                    if(@action_count == 0, do: "text-ink-blue/40", else: "text-ink-blue")
-                  ]}>
-                    Actions Only
-                  </div>
-                  <div class="text-ink-blue/50 text-xs font-brand">
-                    <%= if @action_count == 0 do %>
-                      No action items recorded
-                    <% else %>
-                      Action items with owners
-                    <% end %>
+                    Anonymized team results — no individual scores or names
                   </div>
                 </div>
               </label>
@@ -160,10 +122,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
               <button
                 type="button"
                 phx-click="export"
-                phx-value-format="json"
+                phx-value-format="pdf"
                 class="btn-workshop btn-workshop-secondary py-2.5"
               >
-                Export JSON
+                Export PDF
               </button>
             </div>
           </div>
