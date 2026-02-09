@@ -11,7 +11,8 @@ defmodule Wrt.EmailsTest do
       insert_in_tenant(tenant, :active_round, %{
         campaign_id: campaign.id,
         round_number: 1,
-        deadline: DateTime.utc_now() |> DateTime.add(7 * 24 * 60 * 60) |> DateTime.truncate(:second)
+        deadline:
+          DateTime.utc_now() |> DateTime.add(7 * 24 * 60 * 60) |> DateTime.truncate(:second)
       })
 
     person = insert_in_tenant(tenant, :person, %{name: "Alice Test", email: "alice@example.com"})
@@ -46,7 +47,11 @@ defmodule Wrt.EmailsTest do
   end
 
   describe "invitation_email/3" do
-    test "composes invitation email with correct fields", %{contact: contact, magic_link: magic_link, org: org} do
+    test "composes invitation email with correct fields", %{
+      contact: contact,
+      magic_link: magic_link,
+      org: org
+    } do
       email = Emails.invitation_email(contact, magic_link, org)
 
       assert email.to == [{"Alice Test", "alice@example.com"}]
@@ -66,7 +71,10 @@ defmodule Wrt.EmailsTest do
   end
 
   describe "verification_code_email/2" do
-    test "composes verification code email with correct fields", %{magic_link: magic_link, org: org} do
+    test "composes verification code email with correct fields", %{
+      magic_link: magic_link,
+      org: org
+    } do
       email = Emails.verification_code_email(magic_link, org)
 
       assert email.to == [{"Alice Test", "alice@example.com"}]
@@ -83,7 +91,11 @@ defmodule Wrt.EmailsTest do
   end
 
   describe "reminder_email/3" do
-    test "composes reminder email with correct fields", %{contact: contact, magic_link: magic_link, org: org} do
+    test "composes reminder email with correct fields", %{
+      contact: contact,
+      magic_link: magic_link,
+      org: org
+    } do
       email = Emails.reminder_email(contact, magic_link, org)
 
       assert email.to == [{"Alice Test", "alice@example.com"}]
