@@ -94,24 +94,28 @@ defmodule Wrt.Workers.DataRetentionCheck do
             Logger.warning("Campaign #{campaign_id} not found for retention warning")
 
           campaign ->
-            Enum.each(admins, fn admin ->
-              case Emails.send_retention_warning(admin.email, campaign, warning_days) do
-                {:ok, _} ->
-                  Logger.info(
-                    "Sent retention warning to #{admin.email} for campaign #{campaign.name}"
-                  )
-
-                {:error, reason} ->
-                  Logger.error(
-                    "Failed to send retention warning to #{admin.email}: #{inspect(reason)}"
-                  )
-              end
-            end)
+            notify_admins(admins, campaign, warning_days)
         end
       end)
     end
 
     :ok
+  end
+
+  defp notify_admins(admins, campaign, warning_days) do
+    Enum.each(admins, fn admin ->
+      case Emails.send_retention_warning(admin.email, campaign, warning_days) do
+        {:ok, _} ->
+          Logger.info(
+            "Sent retention warning to #{admin.email} for campaign #{campaign.name}"
+          )
+
+        {:error, reason} ->
+          Logger.error(
+            "Failed to send retention warning to #{admin.email}: #{inspect(reason)}"
+          )
+      end
+    end)
   end
 
   defp archive_campaigns(tenant, campaign_ids) do
