@@ -100,7 +100,7 @@ defmodule Wrt.DataCase do
 
     SQL.query!(
       Repo,
-      "CREATE UNIQUE INDEX ON #{tenant}.people (LOWER(email))",
+      "CREATE UNIQUE INDEX people_email_index ON #{tenant}.people (LOWER(email))",
       []
     )
 
@@ -119,10 +119,15 @@ defmodule Wrt.DataCase do
           started_at TIMESTAMP(0) WITHOUT TIME ZONE,
           closed_at TIMESTAMP(0) WITHOUT TIME ZONE,
           inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-          UNIQUE (campaign_id, round_number)
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
         )
       """,
+      []
+    )
+
+    SQL.query!(
+      Repo,
+      "CREATE UNIQUE INDEX rounds_campaign_id_round_number_index ON #{tenant}.rounds (campaign_id, round_number)",
       []
     )
 
@@ -141,10 +146,15 @@ defmodule Wrt.DataCase do
           clicked_at TIMESTAMP(0) WITHOUT TIME ZONE,
           responded_at TIMESTAMP(0) WITHOUT TIME ZONE,
           inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-          UNIQUE (person_id, round_id)
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
         )
       """,
+      []
+    )
+
+    SQL.query!(
+      Repo,
+      "CREATE UNIQUE INDEX contacts_person_id_round_id_index ON #{tenant}.contacts (person_id, round_id)",
       []
     )
 
@@ -158,10 +168,15 @@ defmodule Wrt.DataCase do
           nominator_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
           nominee_id BIGINT NOT NULL REFERENCES #{tenant}.people(id) ON DELETE CASCADE,
           inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-          UNIQUE (round_id, nominator_id, nominee_id)
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
         )
       """,
+      []
+    )
+
+    SQL.query!(
+      Repo,
+      "CREATE UNIQUE INDEX nominations_round_id_nominator_id_nominee_id_index ON #{tenant}.nominations (round_id, nominator_id, nominee_id)",
       []
     )
 
@@ -186,6 +201,52 @@ defmodule Wrt.DataCase do
     )
 
     SQL.query!(Repo, "CREATE UNIQUE INDEX ON #{tenant}.magic_links (token)", [])
+
+    # Create org_admins table
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.org_admins (
+          id BIGSERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          email CITEXT NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
+        )
+      """,
+      []
+    )
+
+    SQL.query!(
+      Repo,
+      "CREATE UNIQUE INDEX org_admins_email_index ON #{tenant}.org_admins (email)",
+      []
+    )
+
+    # Create campaign_admins table
+    SQL.query!(
+      Repo,
+      """
+        CREATE TABLE #{tenant}.campaign_admins (
+          id BIGSERIAL PRIMARY KEY,
+          campaign_id BIGINT NOT NULL REFERENCES #{tenant}.campaigns(id) ON DELETE CASCADE,
+          name VARCHAR(255) NOT NULL,
+          email CITEXT NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          invited_by_id BIGINT REFERENCES #{tenant}.org_admins(id) ON DELETE SET NULL,
+          inserted_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
+          updated_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
+        )
+      """,
+      []
+    )
+
+    SQL.query!(
+      Repo,
+      "CREATE UNIQUE INDEX campaign_admins_campaign_id_email_index ON #{tenant}.campaign_admins (campaign_id, email)",
+      []
+    )
   end
 
   @doc """
