@@ -5,9 +5,11 @@ defmodule Wrt.Factory do
 
   use ExMachina.Ecto, repo: Wrt.Repo
 
-  alias Wrt.Campaigns.Campaign
+  alias Wrt.Campaigns.{Campaign, CampaignAdmin}
   alias Wrt.MagicLinks.MagicLink
+  alias Wrt.Orgs.OrgAdmin
   alias Wrt.People.{Nomination, Person}
+  alias Wrt.Platform.{Organisation, SuperAdmin}
   alias Wrt.Rounds.{Contact, Round}
 
   # ============================================================================
@@ -177,6 +179,70 @@ defmodule Wrt.Factory do
       code: generate_code(),
       code_expires_at: DateTime.utc_now() |> DateTime.add(-5 * 60) |> DateTime.truncate(:second)
     )
+  end
+
+  # ============================================================================
+  # Super Admin Factory (public schema)
+  # ============================================================================
+
+  def super_admin_factory do
+    %SuperAdmin{
+      name: Faker.Person.name(),
+      email: sequence(:super_admin_email, &"superadmin#{&1}@example.com"),
+      password_hash: Bcrypt.hash_pwd_salt("password123")
+    }
+  end
+
+  # ============================================================================
+  # Organisation Factory (public schema)
+  # ============================================================================
+
+  def organisation_factory do
+    name = sequence(:org_name, &"Test Organisation #{&1}")
+
+    %Organisation{
+      name: name,
+      slug:
+        name
+        |> String.downcase()
+        |> String.replace(~r/[^a-z0-9\s]/, "")
+        |> String.replace(~r/\s+/, "-"),
+      admin_name: Faker.Person.name(),
+      admin_email: sequence(:org_admin_email, &"orgadmin#{&1}@example.com"),
+      status: "pending"
+    }
+  end
+
+  def approved_organisation_factory do
+    struct!(
+      organisation_factory(),
+      status: "approved",
+      approved_at: DateTime.utc_now() |> DateTime.truncate(:second)
+    )
+  end
+
+  # ============================================================================
+  # Org Admin Factory (tenant schema)
+  # ============================================================================
+
+  def org_admin_factory do
+    %OrgAdmin{
+      name: Faker.Person.name(),
+      email: sequence(:org_admin_user_email, &"orgadminuser#{&1}@example.com"),
+      password_hash: Bcrypt.hash_pwd_salt("password123")
+    }
+  end
+
+  # ============================================================================
+  # Campaign Admin Factory (tenant schema)
+  # ============================================================================
+
+  def campaign_admin_factory do
+    %CampaignAdmin{
+      name: Faker.Person.name(),
+      email: sequence(:campaign_admin_email, &"campaignadmin#{&1}@example.com"),
+      password_hash: Bcrypt.hash_pwd_salt("password123")
+    }
   end
 
   # ============================================================================
