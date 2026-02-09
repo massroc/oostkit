@@ -106,14 +106,10 @@ defmodule Wrt.Workers.DataRetentionCheck do
     Enum.each(admins, fn admin ->
       case Emails.send_retention_warning(admin.email, campaign, warning_days) do
         {:ok, _} ->
-          Logger.info(
-            "Sent retention warning to #{admin.email} for campaign #{campaign.name}"
-          )
+          Logger.info("Sent retention warning to #{admin.email} for campaign #{campaign.name}")
 
         {:error, reason} ->
-          Logger.error(
-            "Failed to send retention warning to #{admin.email}: #{inspect(reason)}"
-          )
+          Logger.error("Failed to send retention warning to #{admin.email}: #{inspect(reason)}")
       end
     end)
   end
