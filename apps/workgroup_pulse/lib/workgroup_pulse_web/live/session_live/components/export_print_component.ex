@@ -28,34 +28,37 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
 
     ~H"""
     <div id="export-print-wrapper" style="overflow:hidden;height:0;width:0;">
-      <div id="export-print-content" style="box-sizing:border-box;width:960px;overflow:hidden;background:#fff;padding:28px 32px;font-family:system-ui,-apple-system,sans-serif;color:#1e293b;font-size:12px;line-height:1.4;">
-      <%!-- Header --%>
-      <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e2e8f0;">
-        <h1 style="font-size:20px;font-weight:bold;margin:0 0 4px 0;">
-          <%= if @export_report_type == "full" do %>
-            Full Workshop Report
-          <% else %>
-            Team Report
-          <% end %>
-        </h1>
-        <p style="color:#64748b;font-size:14px;margin:0;">
-          Session {@session.code}
-        </p>
-        <p style="color:#94a3b8;font-size:12px;margin:4px 0 0 0;">
-          <%= if @session.started_at do %>
-            Started: {format_datetime(@session.started_at)}
-          <% end %>
-          <%= if @session.completed_at do %>
-            — Completed: {format_datetime(@session.completed_at)}
-          <% end %>
-        </p>
-      </div>
+      <div
+        id="export-print-content"
+        style="box-sizing:border-box;width:960px;overflow:hidden;background:#fff;padding:28px 32px;font-family:system-ui,-apple-system,sans-serif;color:#1e293b;font-size:12px;line-height:1.4;"
+      >
+        <%!-- Header --%>
+        <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e2e8f0;">
+          <h1 style="font-size:20px;font-weight:bold;margin:0 0 4px 0;">
+            <%= if @export_report_type == "full" do %>
+              Full Workshop Report
+            <% else %>
+              Team Report
+            <% end %>
+          </h1>
+          <p style="color:#64748b;font-size:14px;margin:0;">
+            Session {@session.code}
+          </p>
+          <p style="color:#94a3b8;font-size:12px;margin:4px 0 0 0;">
+            <%= if @session.started_at do %>
+              Started: {format_datetime(@session.started_at)}
+            <% end %>
+            <%= if @session.completed_at do %>
+              — Completed: {format_datetime(@session.completed_at)}
+            <% end %>
+          </p>
+        </div>
 
-      <%= if @export_report_type == "full" do %>
-        {render_full_report(assigns)}
-      <% else %>
-        {render_team_report(assigns)}
-      <% end %>
+        <%= if @export_report_type == "full" do %>
+          {render_full_report(assigns)}
+        <% else %>
+          {render_team_report(assigns)}
+        <% end %>
       </div>
     </div>
     """
@@ -74,8 +77,12 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
       <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
         <thead>
           <tr>
-            <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Name</th>
-            <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Role</th>
+            <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+              Name
+            </th>
+            <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+              Role
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -95,7 +102,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
       <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
         <thead>
           <tr>
-            <th style="text-align:left;padding:4px 8px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Question</th>
+            <th style="text-align:left;padding:4px 8px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+              Question
+            </th>
             <%= for p <- @active_participants do %>
               <th style="text-align:center;padding:4px 6px;border-bottom:2px solid #e2e8f0;font-size:10px;color:#64748b;max-width:80px;overflow:hidden;text-overflow:ellipsis;">
                 {p.name}
@@ -108,7 +117,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
             <% question_scores = Map.get(@individual_scores, q.index, []) %>
             <% scores_by_pid = Map.new(question_scores, &{&1.participant_id, &1}) %>
             <tr>
-              <td style="padding:3px 8px;border-bottom:1px solid #f1f5f9;font-weight:500;">{q.title}</td>
+              <td style="padding:3px 8px;border-bottom:1px solid #f1f5f9;font-weight:500;">
+                {q.title}
+              </td>
               <%= for p <- @active_participants do %>
                 <% score_data = Map.get(scores_by_pid, p.id) %>
                 <td style={"text-align:center;padding:3px 6px;border-bottom:1px solid #f1f5f9;font-weight:bold;" <> cell_bg_style(score_data && score_data.color)}>
@@ -194,7 +205,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
             <%= for item <- @strengths do %>
               <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;">
                 <span>{item.title}</span>
-                <span style="color:#16a34a;font-weight:600;">{round(item.combined_team_value)}/10</span>
+                <span style="color:#16a34a;font-weight:600;">
+                  {round(item.combined_team_value)}/10
+                </span>
               </div>
             <% end %>
           </div>
@@ -207,7 +220,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
             <%= for item <- @concerns do %>
               <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;">
                 <span>{item.title}</span>
-                <span style="color:#dc2626;font-weight:600;">{round(item.combined_team_value)}/10</span>
+                <span style="color:#dc2626;font-weight:600;">
+                  {round(item.combined_team_value)}/10
+                </span>
               </div>
             <% end %>
           </div>
@@ -229,10 +244,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
         <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
           <thead>
             <tr>
-              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Question</th>
-              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Note</th>
+              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+                Question
+              </th>
+              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+                Note
+              </th>
               <%= if @report_type == :full do %>
-                <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Author</th>
+                <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+                  Author
+                </th>
               <% end %>
             </tr>
           </thead>
@@ -242,9 +263,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
                 <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;vertical-align:top;">
                   {get_question_title(note.question_index, @scores_summary)}
                 </td>
-                <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">{note.content}</td>
+                <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+                  {note.content}
+                </td>
                 <%= if @report_type == :full do %>
-                  <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;color:#64748b;vertical-align:top;">{note.author_name}</td>
+                  <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;color:#64748b;vertical-align:top;">
+                    {note.author_name}
+                  </td>
                 <% end %>
               </tr>
             <% end %>
@@ -267,18 +292,26 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
         <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
           <thead>
             <tr>
-              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Action</th>
+              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+                Action
+              </th>
               <%= if @report_type == :full do %>
-                <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">Owner</th>
+                <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
+                  Owner
+                </th>
               <% end %>
             </tr>
           </thead>
           <tbody>
             <%= for action <- @all_actions do %>
               <tr style="page-break-inside:avoid;">
-                <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">{action.description}</td>
+                <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
+                  {action.description}
+                </td>
                 <%= if @report_type == :full do %>
-                  <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;color:#64748b;vertical-align:top;">{action.owner_name || ""}</td>
+                  <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;color:#64748b;vertical-align:top;">
+                    {action.owner_name || ""}
+                  </td>
                 <% end %>
               </tr>
             <% end %>
