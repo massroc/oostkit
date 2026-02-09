@@ -37,4 +37,33 @@ defmodule WrtWeb.ConnCase do
     Wrt.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  @doc """
+  Logs in a super admin by setting the session.
+  """
+  def log_in_super_admin(conn, super_admin) do
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Plug.Conn.put_session(:super_admin_id, super_admin.id)
+  end
+
+  @doc """
+  Logs in an org admin by setting the session.
+  """
+  def log_in_org_admin(conn, org_admin) do
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Plug.Conn.put_session(:org_admin_id, org_admin.id)
+  end
+
+  @doc """
+  Creates an approved org with its tenant schema and returns
+  {org, tenant} for use in org-scoped controller tests.
+  """
+  def create_org_with_tenant do
+    org = Wrt.Repo.insert!(Wrt.Factory.build(:approved_organisation))
+    tenant = "tenant_#{org.id}"
+    Wrt.DataCase.create_tenant_tables(tenant)
+    {org, tenant}
+  end
 end
