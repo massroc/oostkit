@@ -554,6 +554,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-10 | Design system applied to Portal (semantic tokens, DM Sans, brand stripe, surface/text classes, branded nav header) |
 | 2026-02-10 | Design system applied to WRT (semantic tokens, DM Sans, brand stripe, surface/text classes) |
 | 2026-02-06 | Added sheet dimensions, paper texture, shadows from mockup |
 | 2026-02-06 | Finalized fonts: DM Sans (UI) + Caveat (workshop) |

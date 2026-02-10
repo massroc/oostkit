@@ -88,7 +88,7 @@ All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
 - **Shadows**: `shadow-sheet` for card-like surfaces
 - **Brand stripe**: Magenta-to-purple gradient bar below headers
 
-Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. See `docs/design-system.md` for the full specification.
+Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
 
 ## Shared Infrastructure (Planned)
 

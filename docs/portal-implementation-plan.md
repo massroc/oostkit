@@ -77,10 +77,13 @@ The portal is a Phoenix application that serves as:
 - Tool cards displaying: name, tagline, launch button
 - Footer with basic info
 
-**Task 1.2.3: Placeholder branding**
-- Simple text logo "OOSTKit"
-- Basic color palette (can use Tailwind defaults initially)
-- Consistent typography
+**Task 1.2.3: ~~Placeholder branding~~ OOSTKit design system applied**
+- ~~Simple text logo "OOSTKit"~~ Branded navigation header with `bg-ok-purple-900`
+- ~~Basic color palette (can use Tailwind defaults initially)~~ Full semantic token palette via shared Tailwind preset (ok-purple, ok-green, ok-red, ok-gold, ok-blue)
+- ~~Consistent typography~~ DM Sans brand font loaded via Google Fonts, `font-brand` utility class
+- Brand stripe (magenta-to-purple gradient) below header
+- Surface tokens (`bg-surface-wall`, `bg-surface-sheet`, `bg-surface-sheet-secondary`) for backgrounds
+- Text tokens (`text-text-dark`) for headings
 
 **Task 1.2.4: App detail pages**
 - Route: `/apps/:app_id`
