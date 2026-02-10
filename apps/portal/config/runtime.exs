@@ -67,9 +67,9 @@ if config_env() == :prod do
 
   # Internal API key for cross-app auth
   config :portal,
-    :internal_api_key,
-    System.get_env("INTERNAL_API_KEY") ||
-      raise("environment variable INTERNAL_API_KEY is missing")
+         :internal_api_key,
+         System.get_env("INTERNAL_API_KEY") ||
+           raise("environment variable INTERNAL_API_KEY is missing")
 
   # Cross-app cookie domain (e.g., ".oostkit.com")
   cookie_domain = System.get_env("COOKIE_DOMAIN")
