@@ -71,7 +71,7 @@ Technical architecture and implementation design for the OST Referral Tool.
 ```
 lib/
 ├── wrt/
-│   ├── application.ex              # OTP Application
+│   ├── application.ex              # OTP Application (Finch pool for Portal API, ETS cache table)
 │   │
 │   ├── repo.ex                     # Ecto Repo
 │   │
@@ -140,7 +140,21 @@ lib/
 │   │
 │   ├── endpoint.ex                 # ✓ (with rate limiter)
 │   │
+│   ├── portal_auth_client.ex        # Finch HTTP client for Portal token validation ✓
+│   │                                # - Calls POST /api/internal/auth/validate
+│   │                                # - ETS cache with 5-minute TTL
+│   │                                # - Configured via portal_api_url, portal_api_key
+│   │
 │   ├── plugs/
+│   │   ├── portal_auth.ex           # Portal cross-app auth plug ✓
+│   │   │                            # - Reads _oostkit_token cookie
+│   │   │                            # - Validates via PortalAuthClient
+│   │   │                            # - Sets :portal_user assign on conn
+│   │   │
+│   │   ├── require_portal_or_wrt_super_admin.ex  # Transitional auth plug ✓
+│   │   │                            # - Accepts Portal super_admin OR WRT session auth
+│   │   │                            # - Used during migration period
+│   │   │
 │   │   └── rate_limiter.ex         # PlugAttack rate limiting ✓
 │   │                               # - Login: 5/min
 │   │                               # - Magic links: 3/min
@@ -319,9 +333,12 @@ GET  /                                    # Landing page
 GET  /register                            # Org registration form
 POST /register                            # Submit registration
 
-# Super admin routes
+# Super admin auth routes (no portal auth required)
 GET  /admin/login                         # Super admin login
 POST /admin/login
+DELETE /admin/logout                      # Super admin logout
+
+# Super admin protected routes (portal auth OR WRT session)
 GET  /admin/dashboard                     # Platform overview
 GET  /admin/orgs                          # Pending/approved orgs
 POST /admin/orgs/:id/approve
@@ -361,7 +378,9 @@ POST /webhooks/email/:provider            # Email tracking callbacks
 
 ### Super Admin Authentication
 
-Standard email/password with session cookie.
+Two authentication paths (transitional during Portal migration):
+
+**Path 1: WRT-native** — Standard email/password with session cookie (retained during transition).
 
 ```elixir
 defmodule Wrt.Auth do
@@ -378,6 +397,16 @@ defmodule Wrt.Auth do
   end
 end
 ```
+
+**Path 2: Portal cross-app auth** — Reads `_oostkit_token` cookie, validates against Portal API.
+
+```elixir
+# PortalAuthClient validates tokens via Portal's internal API with ETS caching.
+# PortalAuth plug reads the cookie and sets :portal_user assign.
+# RequirePortalOrWrtSuperAdmin accepts either auth method.
+```
+
+Admin routes are split: auth routes (login/logout) are separate from protected routes (dashboard/orgs). The `RequirePortalOrWrtSuperAdmin` plug is applied at the router pipeline level, replacing controller-level `RequireSuperAdmin` plugs.
 
 ### Org/Campaign Admin Authentication
 
@@ -807,9 +836,12 @@ primary_region = "lhr"
 
 ```
 DATABASE_URL=postgres://...
-SECRET_KEY_BASE=...
+SECRET_KEY_BASE=...                # Must match Portal's SECRET_KEY_BASE for cookie sharing
 PHX_HOST=wrt.example.com
 POSTMARK_API_KEY=...
+PORTAL_API_URL=https://oostkit.com # Portal base URL for auth validation
+PORTAL_API_KEY=...                 # Same value as Portal's INTERNAL_API_KEY
+PORTAL_LOGIN_URL=https://oostkit.com/login  # Redirect URL for unauthenticated users
 ```
 
 ### Release Configuration
@@ -831,6 +863,11 @@ if config_env() == :prod do
 
   config :wrt, Wrt.Mailer,
     api_key: System.fetch_env!("POSTMARK_API_KEY")
+
+  # Portal cross-app auth
+  config :wrt, :portal_api_url, System.fetch_env!("PORTAL_API_URL")
+  config :wrt, :portal_api_key, System.fetch_env!("PORTAL_API_KEY")
+  config :wrt, :portal_login_url, System.fetch_env!("PORTAL_LOGIN_URL")
 end
 ```
 

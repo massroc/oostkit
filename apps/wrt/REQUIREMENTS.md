@@ -233,10 +233,19 @@ A record of one person nominating another:
 ### F8: Admin Authentication
 
 #### F8.1: Super Admin
-- Standard email/password login
+- Standard email/password login (WRT-native, retained during transition)
+- Portal cross-app authentication: reads `_oostkit_token` cookie, validates against Portal's internal API
+- Transitional: either WRT-native super admin session OR Portal super_admin role grants access
 - Protected routes for platform management
 
-#### F8.2: Org and Campaign Admins
+#### F8.2: Portal Integration
+- `PortalAuthClient` calls Portal's `POST /api/internal/auth/validate` endpoint
+- Results cached in ETS with 5-minute TTL (avoids per-request HTTP calls)
+- `PortalAuth` plug reads `_oostkit_token` cookie and sets `:portal_user` assign on conn
+- `RequirePortalOrWrtSuperAdmin` plug accepts either auth method during migration
+- Config: `portal_api_url`, `portal_api_key`, `portal_login_url`
+
+#### F8.3: Org and Campaign Admins
 - Email/password login
 - Scoped to their organisation's schema
 - Role-based access (org admin vs. campaign admin)

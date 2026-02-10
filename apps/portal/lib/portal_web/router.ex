@@ -17,6 +17,18 @@ defmodule PortalWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :internal_api do
+    plug :accepts, ["json"]
+    plug PortalWeb.Plugs.ApiAuth
+  end
+
+  # Internal API (cross-app token validation)
+  scope "/api/internal", PortalWeb.Api do
+    pipe_through [:internal_api]
+
+    post "/auth/validate", AuthController, :validate
+  end
+
   # Public routes
   scope "/", PortalWeb do
     pipe_through :browser

@@ -44,5 +44,8 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
+# Internal API key for cross-app auth
+config :portal, :internal_api_key, "dev_internal_api_key"
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false

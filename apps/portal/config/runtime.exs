@@ -43,4 +43,40 @@ if config_env() == :prod do
       port: port
     ],
     secret_key_base: secret_key_base
+
+  # Email configuration
+  # MAIL_ADAPTER options:
+  #   - "postmark" (default if POSTMARK_API_KEY set) - sends real emails
+  #   - "logger" - logs emails to stdout (useful for staging)
+  #   - unset without POSTMARK_API_KEY - emails silently dropped
+  mail_adapter = System.get_env("MAIL_ADAPTER")
+  postmark_api_key = System.get_env("POSTMARK_API_KEY")
+
+  cond do
+    mail_adapter == "logger" ->
+      config :portal, Portal.Mailer, adapter: Swoosh.Adapters.Logger
+
+    postmark_api_key != nil ->
+      config :portal, Portal.Mailer,
+        adapter: Swoosh.Adapters.Postmark,
+        api_key: postmark_api_key
+
+    true ->
+      :ok
+  end
+
+  # Internal API key for cross-app auth
+  config :portal,
+         :internal_api_key,
+         System.get_env("INTERNAL_API_KEY") ||
+           raise("environment variable INTERNAL_API_KEY is missing")
+
+  # Cross-app cookie domain (e.g., ".oostkit.com")
+  cookie_domain = System.get_env("COOKIE_DOMAIN")
+  if cookie_domain, do: config(:portal, :cookie_domain, cookie_domain)
+
+  # Configurable from-address
+  config :portal, :mail_from,
+    name: System.get_env("MAIL_FROM_NAME", "OOSTKit"),
+    address: System.get_env("MAIL_FROM_ADDRESS", "noreply@oostkit.com")
 end

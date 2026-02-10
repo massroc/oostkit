@@ -44,6 +44,18 @@ defmodule PortalWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-  plug Plug.Session, @session_options
+  plug :put_session_with_domain
   plug PortalWeb.Router
+
+  defp put_session_with_domain(conn, _opts) do
+    opts = @session_options ++ cookie_domain_opts()
+    Plug.Session.call(conn, Plug.Session.init(opts))
+  end
+
+  defp cookie_domain_opts do
+    case Application.get_env(:portal, :cookie_domain) do
+      nil -> []
+      domain -> [domain: domain]
+    end
+  end
 end

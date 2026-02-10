@@ -14,6 +14,15 @@ defmodule WrtWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :portal_auth do
+    plug WrtWeb.Plugs.PortalAuth
+  end
+
+  pipeline :require_portal_or_wrt_super_admin do
+    plug WrtWeb.Plugs.PortalAuth
+    plug WrtWeb.Plugs.RequirePortalOrWrtSuperAdmin
+  end
+
   # Health check routes (no auth required)
   scope "/health", WrtWeb do
     pipe_through :api
@@ -31,15 +40,19 @@ defmodule WrtWeb.Router do
     post "/register", RegistrationController, :create
   end
 
-  # Super admin routes
+  # Super admin auth routes (no auth required)
   scope "/admin", WrtWeb.SuperAdmin, as: :super_admin do
     pipe_through :browser
 
     get "/login", SessionController, :new
     post "/login", SessionController, :create
     delete "/logout", SessionController, :delete
+  end
 
-    # Protected routes (require super admin auth)
+  # Super admin protected routes (Portal or WRT auth required)
+  scope "/admin", WrtWeb.SuperAdmin, as: :super_admin do
+    pipe_through [:browser, :require_portal_or_wrt_super_admin]
+
     get "/dashboard", DashboardController, :index
     get "/orgs", OrgController, :index
     get "/orgs/:id", OrgController, :show

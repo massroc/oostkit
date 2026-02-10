@@ -4,7 +4,6 @@ defmodule WrtWeb.SuperAdmin.OrgController do
   alias Wrt.Platform
 
   plug :put_layout, html: {WrtWeb.Layouts, :admin}
-  plug WrtWeb.Plugs.RequireSuperAdmin
 
   def index(conn, params) do
     status_filter = params["status"]
