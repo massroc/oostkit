@@ -31,15 +31,13 @@ defmodule WrtWeb.Plugs.RequirePortalOrWrtSuperAdmin do
   end
 
   defp check_auth(conn) do
-    cond do
-      portal_super_admin?(conn) ->
-        {:ok, conn}
-
-      true ->
-        case wrt_super_admin(conn) do
-          {:ok, conn} -> {:ok, conn}
-          :error -> :unauthorized
-        end
+    if portal_super_admin?(conn) do
+      {:ok, conn}
+    else
+      case wrt_super_admin(conn) do
+        {:ok, conn} -> {:ok, conn}
+        :error -> :unauthorized
+      end
     end
   end
 
