@@ -120,7 +120,7 @@ GitHub Actions runs on every push and pull request:
 |----------|------|--------|
 | App | `workgroup-pulse` | Sydney (syd) |
 | Database | `workgroup-pulse-db` | Sydney (syd) |
-| URL | https://workgroup-pulse.fly.dev | |
+| URL | https://pulse.oostkit.com | |
 
 ### Manual Deployment
 

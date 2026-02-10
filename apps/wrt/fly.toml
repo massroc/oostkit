@@ -8,7 +8,7 @@ primary_region = "syd"  # Sydney, AU (matches database region)
   dockerfile = "Dockerfile"
 
 [env]
-  PHX_HOST = "wrt-tool.fly.dev"
+  PHX_HOST = "wrt.oostkit.com"
   PORT = "8080"
   PHX_SERVER = "true"
 

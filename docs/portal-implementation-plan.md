@@ -326,8 +326,8 @@ Domain: **oostkit.com** (registered)
 
 ```
 oostkit.com        → portal.fly.dev
-pulse.oostkit.com  → workgroup-pulse.fly.dev
-wrt.oostkit.com    → wrt.fly.dev
+pulse.oostkit.com  → pulse.oostkit.com (custom domain)
+wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 ```
 
 ---
