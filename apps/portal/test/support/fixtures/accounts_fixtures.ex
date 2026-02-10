@@ -50,6 +50,23 @@ defmodule Portal.AccountsFixtures do
     Scope.for_user(user)
   end
 
+  def super_admin_fixture(attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        email: unique_user_email(),
+        password: valid_user_password()
+      })
+
+    {:ok, user} = Accounts.create_super_admin(attrs)
+    user
+  end
+
+  def session_manager_fixture(attrs \\ %{}) do
+    attrs = Enum.into(attrs, %{email: unique_user_email()})
+    {:ok, user} = Accounts.create_session_manager(attrs)
+    user
+  end
+
   def set_password(user) do
     {:ok, {user, _expired_tokens}} =
       Accounts.update_user_password(user, %{password: valid_user_password()})

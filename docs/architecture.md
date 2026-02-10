@@ -94,19 +94,22 @@ Each app imports the preset in its `assets/tailwind.config.js` and can extend wi
 
 ### Authentication
 
-Not yet implemented. When needed:
-- Build as separate app in `apps/auth/` with own database
-- Other apps validate tokens against it
-- Options: JWT tokens, API-based validation
-- Fly.io internal networking for service-to-service communication
+Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentication using a cross-app token model:
+
+- **Portal login** sets a subdomain-scoped `_oostkit_token` cookie (domain configurable via `COOKIE_DOMAIN` env var, e.g., `.oostkit.com`)
+- **Internal validation API** at `POST /api/internal/auth/validate` allows other apps to verify tokens. Protected by `INTERNAL_API_KEY` (shared secret via `ApiAuth` plug).
+- **Consumer apps** (e.g., WRT) read the `_oostkit_token` cookie and call the Portal API to resolve the user. Results are cached in ETS with a 5-minute TTL.
+- **Shared `SECRET_KEY_BASE`** across Portal and all consuming apps ensures cookie signing compatibility.
+- **Mail delivery** uses a configurable `mail_from` address (supports Postmark sender signatures in production).
 
 ### Portal/Landing Page
 
-Implemented in `apps/portal/` (Phase 1 complete):
+Implemented in `apps/portal/` (Phase 1 complete, Phase 2 in progress):
 - User authentication (password + magic link)
 - Landing page with app cards (split by audience)
 - Role system (Super Admin, Session Manager)
-- Future: subdomain cookie auth, shared header across apps
+- Admin user management (`/admin/users` LiveView)
+- Cross-app auth: subdomain cookie + internal validation API (Phase 2)
 
 ## Deployment
 
@@ -132,15 +135,29 @@ GitHub Actions with path filtering:
 
 ## Inter-App Communication
 
-### Current: None Required
+### Cross-App Authentication (Active)
 
-Apps are currently independent with no need to communicate.
+Portal authenticates users and issues a signed `_oostkit_token` cookie scoped to the shared domain (`.oostkit.com`). Consumer apps validate tokens via Portal's internal API:
 
-### Future Options (if needed)
+```
+WRT (or other app)                        Portal
+─────────────────                         ──────
+1. Read _oostkit_token cookie
+2. POST /api/internal/auth/validate  ──►  3. Verify token, return user JSON
+   (Authorization: Bearer <API_KEY>)  ◄──  4. {id, email, role}
+5. Cache result in ETS (5-min TTL)
+6. Set :portal_user assign on conn
+```
 
-- **Shared auth**: Token validation via internal API
+**Secrets required:**
+- Portal: `INTERNAL_API_KEY`, `COOKIE_DOMAIN` (e.g., `.oostkit.com`)
+- WRT: `PORTAL_API_KEY` (same value as Portal's `INTERNAL_API_KEY`), `PORTAL_API_URL`
+- Both: must share the same `SECRET_KEY_BASE`
+
+### Future Options
+
 - **Event-based**: Message queue if apps need loose coupling
-- **Direct API**: REST/GraphQL between services
+- **Direct API**: REST/GraphQL between services for non-auth use cases
 
 Preference: Keep apps independent as long as possible. Add communication only when genuinely needed.
 

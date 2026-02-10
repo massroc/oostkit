@@ -86,11 +86,13 @@ Emails will be sent but you can monitor them in the Postmark dashboard.
 
 ## Production Environment
 
-Production uses Postmark for real email delivery.
+Production uses Postmark for real email delivery and Portal for cross-app auth.
 
 **Required secrets:**
 ```bash
-fly secrets set POSTMARK_API_KEY=your-production-token -a your-prod-app
+fly secrets set POSTMARK_API_KEY=your-production-token -a wrt-tool
+fly secrets set SECRET_KEY_BASE=<same-as-portal> -a wrt-tool
+fly secrets set PORTAL_API_KEY=<same-as-portal-internal-api-key> -a wrt-tool
 ```
 
 ## Environment Variable Reference
@@ -99,11 +101,17 @@ fly secrets set POSTMARK_API_KEY=your-production-token -a your-prod-app
 |----------|--------|-------------|
 | `MAIL_ADAPTER` | `logger`, `postmark` | Override default adapter |
 | `POSTMARK_API_KEY` | API token | Postmark server token |
+| `PORTAL_API_URL` | URL | Portal base URL for auth validation |
+| `PORTAL_API_KEY` | API key | Shared secret matching Portal's `INTERNAL_API_KEY` |
+| `PORTAL_LOGIN_URL` | URL | Redirect URL for unauthenticated users |
+| `SECRET_KEY_BASE` | Base64 string | Must match Portal's value for cookie sharing |
 
 **Behavior:**
 - If `MAIL_ADAPTER=logger` → logs emails (staging mode)
 - If `POSTMARK_API_KEY` set → sends via Postmark
 - If neither set → emails will fail (intentional, to catch misconfig)
+- Portal auth variables are required in production for cross-app authentication
+- In dev/test, Portal auth defaults are configured in `config/dev.exs` and `config/test.exs`
 
 ## Rate Limiting
 

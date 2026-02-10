@@ -12,11 +12,7 @@ defmodule PortalWeb.UserAuth do
   # the session validity setting in UserToken.
   @max_cookie_age_in_days 14
   @remember_me_cookie "_portal_web_user_remember_me"
-  @remember_me_options [
-    sign: true,
-    max_age: @max_cookie_age_in_days * 24 * 60 * 60,
-    same_site: "Lax"
-  ]
+  @cross_app_cookie "_oostkit_token"
 
   # How old the session token should be before a new one is issued. When a request is made
   # with a session token older than this value, then a new session token will be created
@@ -56,7 +52,8 @@ defmodule PortalWeb.UserAuth do
 
     conn
     |> renew_session(nil)
-    |> delete_resp_cookie(@remember_me_cookie)
+    |> delete_resp_cookie(@remember_me_cookie, remember_me_options())
+    |> delete_resp_cookie(@cross_app_cookie, cross_app_cookie_options())
     |> redirect(to: ~p"/")
   end
 
@@ -117,6 +114,7 @@ defmodule PortalWeb.UserAuth do
     |> renew_session(user)
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params, remember_me)
+    |> write_cross_app_cookie(token)
   end
 
   # Do not renew session if the user is already logged in
@@ -160,7 +158,35 @@ defmodule PortalWeb.UserAuth do
   defp write_remember_me_cookie(conn, token) do
     conn
     |> put_session(:user_remember_me, true)
-    |> put_resp_cookie(@remember_me_cookie, token, @remember_me_options)
+    |> put_resp_cookie(@remember_me_cookie, token, remember_me_options())
+  end
+
+  defp write_cross_app_cookie(conn, token) do
+    encoded = Base.url_encode64(token)
+    put_resp_cookie(conn, @cross_app_cookie, encoded, cross_app_cookie_options())
+  end
+
+  defp cross_app_cookie_options do
+    base = [
+      max_age: @max_cookie_age_in_days * 24 * 60 * 60,
+      same_site: "Lax",
+      http_only: true,
+      secure: true
+    ]
+
+    case Application.get_env(:portal, :cookie_domain) do
+      nil -> base
+      domain -> Keyword.put(base, :domain, domain)
+    end
+  end
+
+  defp remember_me_options do
+    base = [sign: true, max_age: @max_cookie_age_in_days * 24 * 60 * 60, same_site: "Lax"]
+
+    case Application.get_env(:portal, :cookie_domain) do
+      nil -> base
+      domain -> Keyword.put(base, :domain, domain)
+    end
   end
 
   defp put_token_in_session(conn, token) do

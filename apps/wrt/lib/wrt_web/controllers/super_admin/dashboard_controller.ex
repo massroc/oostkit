@@ -4,7 +4,6 @@ defmodule WrtWeb.SuperAdmin.DashboardController do
   alias Wrt.Platform
 
   plug :put_layout, html: {WrtWeb.Layouts, :admin}
-  plug WrtWeb.Plugs.RequireSuperAdmin
 
   def index(conn, _params) do
     stats = Platform.count_organisations_by_status()

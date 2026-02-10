@@ -247,16 +247,18 @@ All apps display a shared header:
 
 ### Authentication Implementation
 
-Options to evaluate:
-- Phoenix built-in auth (phx.gen.auth)
-- Guardian / JWT tokens
-- Session cookies with subdomain scope
+Uses Phoenix built-in auth (`phx.gen.auth`) with cross-app extensions:
 
-Key requirements:
-- Secure password hashing
+- **Session cookies**: Standard Phoenix session auth for Portal UI
+- **Cross-app token cookie** (`_oostkit_token`): Written on login, deleted on logout. Scoped to the shared domain via `COOKIE_DOMAIN` env var (e.g., `.oostkit.com`).
+- **Internal validation API**: `POST /api/internal/auth/validate` -- accepts the token in the request body, returns user `{id, email, role}`. Protected by `ApiAuth` plug requiring `Authorization: Bearer <INTERNAL_API_KEY>` header.
+- **Configurable email from-address**: `mail_from` config supports Postmark sender signatures in production (env: `MAIL_FROM`).
+
+Key requirements (all met):
+- Secure password hashing (bcrypt via phx.gen.auth)
 - Session management
-- Cross-subdomain cookie support
-- (Future: OAuth providers, magic links)
+- Cross-subdomain cookie support via configurable `COOKIE_DOMAIN`
+- Internal API for token validation by other apps
 
 ---
 
@@ -279,11 +281,13 @@ Key requirements:
 - Account management for super admin
 - Shared header styles (portal only initially)
 
-### Phase 2: Unified Experience
+### Phase 2: Unified Experience (In Progress)
 - App detail pages
 - Shared header integrated into Workgroup Pulse and WRT
-- Subdomain cookie authentication working across apps
-- WRT uses portal auth instead of its own
+- Subdomain cookie authentication working across apps (implemented: `_oostkit_token` cookie + `COOKIE_DOMAIN`)
+- Internal auth validation API (`POST /api/internal/auth/validate` with `ApiAuth` plug)
+- WRT integration: `PortalAuthClient` + `PortalAuth` plug + transitional `RequirePortalOrWrtSuperAdmin` plug
+- Configurable email from-address for Postmark production sender signatures
 
 ### Phase 3: Enhanced Features
 - "Learn about OST" content section

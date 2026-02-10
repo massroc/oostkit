@@ -21,6 +21,9 @@ config :portal, PortalWeb.Endpoint,
 # In test we don't send emails
 config :portal, Portal.Mailer, adapter: Swoosh.Adapters.Test
 
+# Internal API key for cross-app auth
+config :portal, :internal_api_key, "test_internal_api_key"
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 

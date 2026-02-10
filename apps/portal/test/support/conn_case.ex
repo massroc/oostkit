@@ -73,6 +73,17 @@ defmodule PortalWeb.ConnCase do
     |> Plug.Conn.put_session(:user_token, token)
   end
 
+  @doc """
+  Setup helper that registers and logs in a super admin.
+
+      setup :register_and_log_in_super_admin
+  """
+  def register_and_log_in_super_admin(%{conn: conn}) do
+    user = Portal.AccountsFixtures.super_admin_fixture()
+    scope = Scope.for_user(user)
+    %{conn: log_in_user(conn, user), user: user, scope: scope}
+  end
+
   defp maybe_set_token_authenticated_at(_token, nil), do: nil
 
   defp maybe_set_token_authenticated_at(token, authenticated_at) do

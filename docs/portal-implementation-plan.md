@@ -147,7 +147,7 @@ The portal is a Phoenix application that serves as:
 
 ---
 
-## Phase 2: Unified Experience
+## Phase 2: Unified Experience (In Progress)
 
 ### 2.1 Subdomain & Cookie Setup
 
@@ -156,47 +156,46 @@ The portal is a Phoenix application that serves as:
 - Set up subdomains: portal, pulse, wrt
 - SSL certificates for all subdomains
 
-**Task 2.1.2: Cross-subdomain cookies**
-- Configure session cookie with domain scope (`.oostkit.com`)
-- Test cookie sharing between portal and apps
+**Task 2.1.2: Cross-subdomain cookies** (done)
+- Session cookie domain is runtime-configurable via `COOKIE_DOMAIN` env var (e.g., `.oostkit.com`)
+- Portal writes `_oostkit_token` cookie on login, deletes on logout
+- All apps sharing the same `SECRET_KEY_BASE` can read the cookie
 
 ### 2.2 WRT Auth Migration
 
-**Task 2.2.1: Auth token/session sharing**
-- Design token format for cross-app auth
-- Options:
-  - Signed cookie readable by all apps
-  - JWT token
-  - API endpoint for session validation
+**Task 2.2.1: Auth token/session sharing** (done)
+- Portal sets `_oostkit_token` cookie (subdomain-scoped, signed)
+- Internal API endpoint `POST /api/internal/auth/validate` for cross-app validation
+- Protected by `ApiAuth` plug requiring `Authorization: Bearer <INTERNAL_API_KEY>`
+- Returns user `{id, email, role}` on success
 
-**Task 2.2.2: WRT integration**
-- Remove WRT's built-in admin auth
-- Add portal auth integration to WRT
-- Redirect unauthorized WRT access to portal login
-- Map portal session managers to WRT org admins
+**Task 2.2.2: WRT integration** (done - transitional)
+- Added `PortalAuthClient` (Finch HTTP client with ETS cache, 5-min TTL)
+- Added `PortalAuth` plug (reads `_oostkit_token`, validates via client, sets `:portal_user` assign)
+- Added `RequirePortalOrWrtSuperAdmin` plug (transitional: accepts either Portal super_admin or WRT's existing session auth)
+- Split admin routes: auth routes (login/logout) separated from protected routes (dashboard/orgs)
+- Removed controller-level `RequireSuperAdmin` plug from dashboard and org controllers (now handled by router pipeline)
+- Config additions: `portal_api_url`, `portal_api_key`, `portal_login_url`
 
 **Task 2.2.3: Migration path**
-- Migrate existing WRT admin accounts to portal (if any)
-- Ensure no disruption to active campaigns
+- Transitional approach: `RequirePortalOrWrtSuperAdmin` accepts both auth methods during migration
+- WRT's existing super admin login still works alongside Portal auth
+- Future: remove WRT's built-in admin auth once all admins use Portal
 
 ### 2.3 Shared Header Integration
 
-**Task 2.3.1: Extract shared styles**
-- Create shared Tailwind config or CSS file
-- Options:
-  - Hex package (overkill for now)
-  - Shared CSS file copied to each app
-  - Shared Tailwind preset
+**Task 2.3.1: Extract shared styles** (done)
+- Shared Tailwind preset at `shared/tailwind.preset.js`
+- All apps import the preset and share design tokens
 
-**Task 2.3.2: Update Workgroup Pulse**
-- Add shared header to Workgroup Pulse
+**Task 2.3.2: Update Workgroup Pulse** (done)
+- Shared header applied via design system
 - "Home" link to portal
-- Match visual design
 
-**Task 2.3.3: Update WRT**
-- Add shared header to WRT
+**Task 2.3.3: Update WRT** (done)
+- Shared header applied via design system
 - "Home" link to portal
-- Display login state from portal session
+- Display login state from portal session (via `:portal_user` assign)
 
 ---
 
@@ -266,7 +265,7 @@ users_tokens (from phx.gen.auth)
 - inserted_at
 ```
 
-### API Routes (Phase 1)
+### API Routes
 
 ```
 GET  /                    Landing page
@@ -282,15 +281,22 @@ GET  /admin/users/new     New user form
 POST /admin/users         Create user
 GET  /admin/users/:id     View user
 PUT  /admin/users/:id     Update user
+
+# Internal API (Phase 2)
+POST /api/internal/auth/validate   Validate cross-app token (requires INTERNAL_API_KEY)
 ```
 
 ### Environment Variables
 
 ```
 DATABASE_URL              PostgreSQL connection
-SECRET_KEY_BASE           Phoenix secret
+SECRET_KEY_BASE           Phoenix secret (must match across all apps for cookie sharing)
 PHX_HOST                  Host for URL generation
 PORTAL_SUPER_ADMIN_EMAIL  Initial super admin (for seeding)
+COOKIE_DOMAIN             Subdomain cookie scope (e.g., .oostkit.com)
+INTERNAL_API_KEY          Shared secret for internal API auth (used by WRT as PORTAL_API_KEY)
+POSTMARK_API_KEY          Postmark API key for email delivery
+MAIL_FROM                 Configurable email from-address (e.g., noreply@oostkit.com)
 ```
 
 ---

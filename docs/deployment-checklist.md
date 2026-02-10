@@ -158,44 +158,85 @@ fly tokens create deploy -x 999999h
 
 - [ ] CI/CD pipeline deploying successfully
 
+## Cross-App Auth Secrets
+
+Portal and WRT (and future apps) require coordinated secrets for cross-app authentication.
+
+### Portal Secrets
+
+```bash
+# Generate a shared secret key base (MUST be the same across all apps)
+fly secrets set SECRET_KEY_BASE=<shared-value> -a oostkit-portal
+
+# Internal API key for cross-app token validation
+fly secrets set INTERNAL_API_KEY=$(openssl rand -base64 32 | tr -d '\n') -a oostkit-portal
+
+# Cookie domain for subdomain-scoped cookies
+fly secrets set COOKIE_DOMAIN=.oostkit.com -a oostkit-portal
+
+# Postmark API key for email delivery
+fly secrets set POSTMARK_API_KEY=<postmark-token> -a oostkit-portal
+```
+
+- [ ] `SECRET_KEY_BASE` set (shared with WRT)
+- [ ] `INTERNAL_API_KEY` set
+- [ ] `COOKIE_DOMAIN` set to `.oostkit.com`
+- [ ] `POSTMARK_API_KEY` set
+
+### WRT Secrets
+
+```bash
+# Same SECRET_KEY_BASE as Portal
+fly secrets set SECRET_KEY_BASE=<same-shared-value> -a wrt-tool
+
+# Portal API key (same value as Portal's INTERNAL_API_KEY)
+fly secrets set PORTAL_API_KEY=<same-as-internal-api-key> -a wrt-tool
+```
+
+- [ ] `SECRET_KEY_BASE` matches Portal's value
+- [ ] `PORTAL_API_KEY` matches Portal's `INTERNAL_API_KEY`
+
 ## Future Apps (WRT, etc.)
 
 Repeat the process for each new app:
 
 1. [ ] Create Fly.io app: `fly apps create <app-name>`
 2. [ ] Create or attach database
-3. [ ] Set secrets
+3. [ ] Set secrets (including `SECRET_KEY_BASE` matching Portal, and `PORTAL_API_KEY` if using Portal auth)
 4. [ ] Configure `fly.toml`
 5. [ ] Deploy: `fly deploy`
 6. [ ] Add subdomain certificate
 7. [ ] Configure DNS
 
-## Portal/Landing Page (Optional)
+## Portal Deployment
 
-Options for the main `oostkit.com` domain:
-
-### Option A: Static Site on Fly.io
+Portal is a Phoenix app deployed on Fly.io as `oostkit-portal`. It serves as the authentication hub and landing page.
 
 ```bash
-# Simple static site with links to apps
+cd apps/portal
+
+# Create the app
 fly apps create oostkit-portal
+
+# Create database
+fly postgres create --name oostkit-portal-db --region syd --vm-size shared-cpu-1x --initial-cluster-size 1 --volume-size 1
+fly postgres attach oostkit-portal-db --app oostkit-portal
+
+# Set secrets (see "Cross-App Auth Secrets" section above for auth-specific secrets)
+fly secrets set SECRET_KEY_BASE=<shared-value> -a oostkit-portal
+fly secrets set INTERNAL_API_KEY=<generated-key> -a oostkit-portal
+fly secrets set COOKIE_DOMAIN=.oostkit.com -a oostkit-portal
+fly secrets set POSTMARK_API_KEY=<postmark-token> -a oostkit-portal
+
+# Deploy
+fly deploy
 ```
 
-### Option B: GitHub Pages (Free)
-
-- Create `docs/` folder or separate repo
-- Enable GitHub Pages in repository settings
-- Configure custom domain in GitHub
-
-### Option C: Cloudflare Pages (Free)
-
-- Connect GitHub repo
-- Configure build settings
-- Add custom domain
-
-- [ ] Portal approach decided
+- [ ] Portal app created on Fly.io
+- [ ] Portal database created and attached
+- [ ] Portal secrets set (including cross-app auth secrets)
 - [ ] Portal deployed
-- [ ] Root domain configured
+- [ ] Root domain (`oostkit.com`) configured and SSL certificate issued
 
 ## Monitoring & Maintenance
 

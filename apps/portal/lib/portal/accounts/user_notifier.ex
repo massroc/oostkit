@@ -10,7 +10,7 @@ defmodule Portal.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Portal", "contact@example.com"})
+      |> from({mail_from_name(), mail_from_address()})
       |> subject(subject)
       |> text_body(body)
 
@@ -64,6 +64,14 @@ defmodule Portal.Accounts.UserNotifier do
 
     ==============================
     """)
+  end
+
+  defp mail_from_name do
+    Application.get_env(:portal, :mail_from, [])[:name] || "OOSTKit"
+  end
+
+  defp mail_from_address do
+    Application.get_env(:portal, :mail_from, [])[:address] || "noreply@oostkit.com"
   end
 
   defp deliver_confirmation_instructions(user, url) do

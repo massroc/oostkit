@@ -55,6 +55,11 @@ config :tailwind,
 # Configures the mailer (using Swoosh)
 config :portal, Portal.Mailer, adapter: Swoosh.Adapters.Local
 
+# Default mail from address
+config :portal, :mail_from,
+  name: "OOSTKit",
+  address: "noreply@oostkit.com"
+
 # Configure Petal Components error translator
 config :petal_components,
        :error_translator_function,
