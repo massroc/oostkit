@@ -70,14 +70,14 @@
       <.link
         href={~p"/admin/orgs/#{@organisation.id}/approve"}
         method="post"
-        class="rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500"
+        class="rounded-md bg-ok-green-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-ok-green-500"
       >
         Approve
       </.link>
       <.link
         href={~p"/admin/orgs/#{@organisation.id}/reject"}
         method="post"
-        class="rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+        class="rounded-md bg-ok-red-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-ok-red-500"
         data-confirm="Are you sure you want to reject this organisation?"
       >
         Reject
@@ -86,7 +86,7 @@
       <.link
         href={~p"/admin/orgs/#{@organisation.id}/suspend"}
         method="post"
-        class="rounded-md bg-yellow-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-yellow-500"
+        class="rounded-md bg-ok-gold-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-ok-gold-500"
         data-confirm="Are you sure you want to suspend this organisation?"
       >
         Suspend

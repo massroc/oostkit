@@ -9,7 +9,10 @@
     <.input field={f[:description]} type="textarea" label="Description" />
 
     <:actions>
-      <.link href={~p"/org/#{@org.slug}/dashboard"} class="text-gray-600 hover:text-gray-800 mr-4">
+      <.link
+        href={~p"/org/#{@org.slug}/dashboard"}
+        class="text-ok-purple-600 hover:text-ok-purple-800 mr-4"
+      >
         Cancel
       </.link>
       <.button phx-disable-with="Creating...">Create Campaign</.button>

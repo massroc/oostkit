@@ -1,4 +1,4 @@
-<header class="bg-zinc-900">
+<header class="bg-ok-purple-900">
   <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
     <div class="flex items-center gap-x-12">
       <a href="/admin/dashboard" class="text-lg font-semibold text-white">
@@ -8,13 +8,13 @@
         <div class="flex gap-x-6">
           <.link
             navigate={~p"/admin/dashboard"}
-            class="text-sm font-semibold text-zinc-300 hover:text-white"
+            class="text-sm font-semibold text-ok-purple-200 hover:text-white"
           >
             Dashboard
           </.link>
           <.link
             navigate={~p"/admin/orgs"}
-            class="text-sm font-semibold text-zinc-300 hover:text-white"
+            class="text-sm font-semibold text-ok-purple-200 hover:text-white"
           >
             Organisations
           </.link>
@@ -23,11 +23,11 @@
     </div>
     <div class="flex items-center gap-x-6">
       <%= if assigns[:current_super_admin] do %>
-        <span class="text-sm text-zinc-400">{@current_super_admin.email}</span>
+        <span class="text-sm text-ok-purple-300">{@current_super_admin.email}</span>
         <.link
           href={~p"/admin/logout"}
           method="delete"
-          class="text-sm font-semibold text-zinc-300 hover:text-white"
+          class="text-sm font-semibold text-ok-purple-200 hover:text-white"
         >
           Log out
         </.link>
@@ -35,6 +35,7 @@
     </div>
   </nav>
 </header>
+<div class="brand-stripe"></div>
 <main class="px-4 py-10 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-4xl">
     <.flash_group flash={@flash} />

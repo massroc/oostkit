@@ -9,8 +9,11 @@
 ```
 /
 ├── apps/                          # Individual applications
+│   ├── portal/                    # OOSTKit Portal (landing page & auth hub)
 │   ├── workgroup_pulse/           # Workgroup Pulse (6 Criteria workshop)
-│   └── <future: wrt>/             # Workshop Referral Tool
+│   └── wrt/                       # Workshop Referral Tool
+├── shared/                        # Shared assets across apps
+│   └── tailwind.preset.js         # Design system tokens (colors, fonts, shadows)
 ├── docs/                          # Platform-wide documentation
 ├── .github/workflows/             # CI/CD pipelines (per-app)
 ├── docker-compose.yml             # Root orchestration
@@ -22,8 +25,9 @@
 
 | Product Name | Directory | Description |
 |--------------|-----------|-------------|
+| Portal | `apps/portal/` | Landing page & auth hub |
 | Workgroup Pulse | `apps/workgroup_pulse/` | 6 Criteria for Productive Work |
-| Workshop Referral Tool (WRT) | `apps/wrt/` (planned) | PDW participant selection |
+| Workshop Referral Tool (WRT) | `apps/wrt/` | PDW participant selection |
 
 ### App Conventions
 
@@ -71,7 +75,20 @@ Shared services (e.g., future auth) would have their own database.
 
 | App | Dev Database | Test Database | Port |
 |-----|--------------|---------------|------|
+| portal | `portal_dev` | `portal_test` | 5436/5437 |
 | workgroup_pulse | `workgroup_pulse_dev` | `workgroup_pulse_test` | 5432/5433 |
+| wrt | `wrt_dev` | `wrt_test` | 5434/5435 |
+
+## Shared Design System
+
+All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
+
+- **Semantic color tokens**: `ok-purple`, `ok-green`, `ok-red`, `ok-gold`, `ok-blue` (branded), plus surface and text tokens (`bg-surface-wall`, `bg-surface-sheet`, `text-text-dark`)
+- **Typography**: DM Sans (UI chrome) loaded via Google Fonts, with `font-brand` utility
+- **Shadows**: `shadow-sheet` for card-like surfaces
+- **Brand stripe**: Magenta-to-purple gradient bar below headers
+
+Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. See `docs/design-system.md` for the full specification.
 
 ## Shared Infrastructure (Planned)
 
@@ -85,10 +102,11 @@ Not yet implemented. When needed:
 
 ### Portal/Landing Page
 
-Planned entry point for tool selection:
-- Could be simple static site or lightweight app
-- Links to individual tool apps
-- Presents tools by audience (team tools vs facilitator toolkit)
+Implemented in `apps/portal/` (Phase 1 complete):
+- User authentication (password + magic link)
+- Landing page with app cards (split by audience)
+- Role system (Super Admin, Session Manager)
+- Future: subdomain cookie auth, shared header across apps
 
 ## Deployment
 

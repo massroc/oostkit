@@ -1,6 +1,6 @@
 # OOSTKit Platform Roadmap
 
-Last updated: 2026-02-06
+Last updated: 2026-02-10
 
 ## Platform Overview
 
@@ -9,7 +9,7 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 | App | Purpose | Status | Port |
 |-----|---------|--------|------|
 | **Portal** | Landing page & auth hub | Phase 1 complete | 4002 |
-| **Workgroup Pulse** | 6 Criteria workshop (self-guided) | MVP complete, UX redesign in progress | 4000 |
+| **Workgroup Pulse** | 6 Criteria workshop (self-guided) | MVP + UX redesign + export complete | 4000 |
 | **WRT** | Workshop Referral Tool (facilitator) | All 6 phases complete | 4001 |
 
 ---
@@ -49,16 +49,17 @@ Core features working:
 
 **Test coverage**: 241 test cases - excellent TDD coverage
 
-**Current work**: UX redesign (Virtual Wall) — in progress
+**UX redesign** — Complete
 - PostHog analytics integration added
 - Design system defined and applied (see `docs/design-system.md`)
-- Virtual Wall scoring screen implemented: full 8-question grid, floating score overlay, three-panel layout
+- Virtual Wall scoring screen: full 8-question grid, floating score overlay, three-panel layout
 - Light theme with paper texture, handwritten fonts, warm colour palette
-- Sheet strip navigation, focus system for panels
+- Sheet carousel with coverflow effect, side panel for notes
 - Auto-submit scoring (no separate Submit button), click-to-edit
+- Petal Components installed with OOSTKit brand colours
+- Export: Full and Team reports with CSV & PDF
 
 **Deferred to Phase 2**:
-- Export (CSV/PDF)
 - Authentication integration with Portal
 - Persistent teams
 - Historical comparison
@@ -78,53 +79,66 @@ Core features working:
 - CSV/PDF export and reporting
 - Rate limiting, health checks, structured logging
 
-**Test coverage**: 1,185 lines, 7 test suites (infrastructure solid, gaps in context tests)
+**Test coverage**: 1,185+ lines across 13+ test suites (comprehensive coverage including context unit tests and controller integration tests)
 
-**Outstanding items**:
-- One TODO: Data retention warning emails
-- Test coverage gaps in business logic contexts
-
----
-
-## Current Sprint: Pulse Visual Redesign
-
-### Objective
-
-Apply the design system (documented in `docs/design-system.md`) to the Workgroup Pulse app. This visual foundation will then be shared across all apps.
-
-### Approach
-
-1. **Reference design** - Use the design system spec and any visual mockups as the source of truth
-2. **Apply Tailwind preset** - Implement the shared `tailwind.preset.js` with design tokens
-3. **Component-by-component** - Work through each phase/component, updating styles
-4. **Preserve functionality** - Handle any breaking changes to flow management carefully
-5. **Test parity** - Ensure all 241 tests continue to pass
-
-### Key Design Elements
-
-From `docs/design-system.md`:
-- **Virtual Wall metaphor** - Sheets of butcher paper on a wall
-- **Light theme** - Warm taupe wall (`#E8E4DF`), cream paper (`#FEFDFB`)
-- **Typography** - DM Sans (UI chrome), Caveat (workshop content)
-- **Paper texture** - SVG noise for tactile feel
-- **Color system** - Traffic lights for scores, purple accent for interactions
-
-### Success Criteria
-
-- Pulse app matches the design system visually
-- All existing tests pass
-- Tailwind preset ready for Portal and WRT adoption
+**Recently completed**:
+- OOSTKit design system applied (shared Tailwind preset, branded semantic tokens, DM Sans font, brand stripe)
+- Data retention warning emails (PR #106)
+- Context tests for 6 business logic modules (PR #103)
+- Controller integration tests across all routes (PR #104)
 
 ---
 
-## Next Phase: WRT Testing & Refinement
+## Completed Sprints
 
-After the Pulse visual redesign is complete:
+### Pulse Visual Redesign — Done
 
-1. **Review WRT functionality** - Walk through all user flows
-2. **Expand test coverage** - Add context unit tests for Campaigns, Rounds, People
-3. **Apply design system** - Bring WRT visual design in line with Pulse
-4. **Address outstanding TODO** - Implement data retention warning emails
+Applied the design system (`docs/design-system.md`) to Workgroup Pulse (PRs #78–#102):
+- Virtual Wall metaphor with sheet carousel and coverflow effect
+- Light theme: warm taupe wall, cream paper, paper textures
+- Typography: DM Sans (UI chrome), Caveat (workshop content)
+- Traffic light colour system, purple accent for interactions
+- Petal Components installed with OOSTKit brand colours
+- All 241+ tests passing
+
+### WRT Testing & Refinement — Done
+
+Completed all planned items (PRs #103–#106):
+- Context unit tests for 6 business logic modules
+- Controller integration tests across all routes
+- Data retention warning emails implemented
+
+### WRT Visual Design Alignment — Done
+
+Applied the OOSTKit design system to WRT, bringing it in line with Pulse:
+- Generic Tailwind colors replaced with branded semantic tokens (ok-purple, ok-green, ok-red, ok-gold, ok-blue)
+- Cards migrated to `bg-surface-sheet shadow-sheet`
+- Headings use `text-text-dark`, body uses `bg-surface-wall font-brand`
+- DM Sans brand font loaded via Google Fonts
+- Brand stripe (magenta-to-purple gradient) added below headers in all layouts
+- App branding corrected: "WRT" page title suffix, "Workshop Referral Tool" header name
+- All templates updated across nominator, org admin, super admin, registration, and public pages
+
+### Pulse Export — Done
+
+Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Phase 2, shipped early.
+
+---
+
+## Next Up
+
+### Pulse: Remaining Feature Gaps
+
+- [ ] Timer: pacing indicator (on track/behind)
+- [ ] Timer: pause/resume controls
+- [ ] Facilitator Assistance button (contextual help beyond tips)
+- [ ] Feedback button
+- [ ] Participant dropout handling (greyed out visual)
+
+### WRT: Visual Design Alignment — Done
+
+- [x] Apply OOSTKit design system to WRT (shared Tailwind preset, Petal Components)
+- [x] Bring WRT visual design in line with Pulse
 
 ---
 
@@ -139,7 +153,7 @@ After the Pulse visual redesign is complete:
 
 ### Pulse Phase 2: Enhanced Features
 
-- Export (CSV, PDF)
+- ~~Export (CSV, PDF)~~ — Shipped (PR #105)
 - Integration with Portal authentication
 - Persistent teams (requires accounts)
 - Historical session comparison
@@ -147,8 +161,8 @@ After the Pulse visual redesign is complete:
 ### WRT Enhancements
 
 - Full Portal auth integration
-- Visual design alignment
-- Expanded test coverage
+- ~~Visual design alignment with design system~~ — Shipped
+- ~~Expanded test coverage~~ — Shipped (PRs #103, #104)
 
 ### Platform-Wide
 

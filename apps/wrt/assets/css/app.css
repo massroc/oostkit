@@ -34,6 +34,12 @@
   display: none;
 }
 
+/* Brand stripe */
+.brand-stripe {
+  height: 3px;
+  background: linear-gradient(to right, #BC45F4, #7245F4, transparent);
+}
+
 /* Heroicons */
 [class^="hero-"] {
   display: inline-block;

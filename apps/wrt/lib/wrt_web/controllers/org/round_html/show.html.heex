@@ -14,14 +14,14 @@
 </.header>
 
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="bg-white shadow rounded-lg p-6">
+  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Contacts</h3>
-    <p class="mt-2 text-3xl font-semibold text-gray-900">{@contact_stats.total}</p>
+    <p class="mt-2 text-3xl font-semibold text-text-dark">{@contact_stats.total}</p>
   </div>
 
-  <div class="bg-white shadow rounded-lg p-6">
+  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Responded</h3>
-    <p class="mt-2 text-3xl font-semibold text-green-600">{@contact_stats.responded}</p>
+    <p class="mt-2 text-3xl font-semibold text-ok-green-600">{@contact_stats.responded}</p>
     <p class="mt-1 text-sm text-gray-500">
       <%= if @contact_stats.total > 0 do %>
         {Float.round(@contact_stats.responded / @contact_stats.total * 100, 1)}% response rate
@@ -31,16 +31,16 @@
     </p>
   </div>
 
-  <div class="bg-white shadow rounded-lg p-6">
+  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
     <h3 class="text-sm font-medium text-gray-500">Nominations</h3>
-    <p class="mt-2 text-3xl font-semibold text-indigo-600">{length(@nominations)}</p>
+    <p class="mt-2 text-3xl font-semibold text-ok-purple-600">{length(@nominations)}</p>
   </div>
 </div>
 
 <%= if @round.status == "active" do %>
-  <div class="mt-8 bg-green-50 border border-green-200 rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-green-800">Round Active</h2>
-    <p class="text-green-700 mt-1">
+  <div class="mt-8 bg-ok-green-50 border border-ok-green-200 rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-ok-green-800">Round Active</h2>
+    <p class="text-ok-green-700 mt-1">
       Deadline: {Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p")}
     </p>
     <div class="mt-4 flex gap-4">
@@ -51,19 +51,19 @@
       >
         <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
         <div>
-          <label for="extension_days" class="block text-sm font-medium text-green-700">
+          <label for="extension_days" class="block text-sm font-medium text-ok-green-700">
             Extend by
           </label>
           <select
             name="extension[days]"
             id="extension_days"
-            class="mt-1 block rounded-md border-green-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+            class="mt-1 block rounded-md border-ok-green-300 shadow-sm focus:border-ok-green-500 focus:ring-ok-green-500 sm:text-sm"
           >
             <option value="7">7 days</option>
             <option value="14">14 days</option>
           </select>
         </div>
-        <.button type="submit" class="bg-green-600 hover:bg-green-700">Extend</.button>
+        <.button type="submit" class="bg-ok-green-600 hover:bg-ok-green-700">Extend</.button>
       </form>
 
       <form
@@ -71,14 +71,14 @@
         method="post"
       >
         <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-        <.button type="submit" class="bg-red-600 hover:bg-red-700">Close Round</.button>
+        <.button type="submit" class="bg-ok-red-600 hover:bg-ok-red-700">Close Round</.button>
       </form>
     </div>
   </div>
 <% end %>
 
 <div class="mt-8">
-  <h2 class="text-lg font-semibold text-gray-900">Contacts</h2>
+  <h2 class="text-lg font-semibold text-text-dark">Contacts</h2>
 
   <%= if Enum.empty?(@contacts) do %>
     <p class="text-gray-500 mt-4">No contacts in this round.</p>
@@ -89,13 +89,15 @@
       <:col :let={contact} label="Status">
         <%= cond do %>
           <% contact.responded_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+            <span class="px-2 py-1 text-xs rounded-full bg-ok-green-100 text-ok-green-800">
               Responded
             </span>
           <% contact.clicked_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Clicked</span>
+            <span class="px-2 py-1 text-xs rounded-full bg-ok-blue-100 text-ok-blue-800">
+              Clicked
+            </span>
           <% contact.opened_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+            <span class="px-2 py-1 text-xs rounded-full bg-ok-gold-100 text-ok-gold-800">
               Opened
             </span>
           <% contact.delivered_at -> %>
@@ -112,7 +114,7 @@
 
 <%= if length(@nominations) > 0 do %>
   <div class="mt-8">
-    <h2 class="text-lg font-semibold text-gray-900">Nominations</h2>
+    <h2 class="text-lg font-semibold text-text-dark">Nominations</h2>
     <.table id="nominations" rows={@nominations}>
       <:col :let={nom} label="Nominee">{nom.nominee.name}</:col>
       <:col :let={nom} label="Nominated By">{nom.nominator.name}</:col>

@@ -11,8 +11,8 @@
 </.header>
 
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-  <div class="bg-white shadow rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Upload CSV</h2>
+  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-text-dark mb-4">Upload CSV</h2>
     <p class="text-sm text-gray-600 mb-4">
       Upload a CSV file with columns: <code>name</code>, <code>email</code>
     </p>
@@ -27,15 +27,15 @@
           type="file"
           name="csv"
           accept=".csv"
-          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-ok-purple-50 file:text-ok-purple-700 hover:file:bg-ok-purple-100"
         />
         <.button type="submit">Upload</.button>
       </div>
     </form>
   </div>
 
-  <div class="bg-white shadow rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Add Person</h2>
+  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-text-dark mb-4">Add Person</h2>
     <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed/add"} method="post">
       <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
       <div class="space-y-4">
@@ -46,7 +46,7 @@
             name="person[name]"
             id="person_name"
             required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
           />
         </div>
         <div>
@@ -56,7 +56,7 @@
             name="person[email]"
             id="person_email"
             required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
           />
         </div>
         <.button type="submit">Add to Seed Group</.button>
@@ -66,7 +66,7 @@
 </div>
 
 <div class="mt-8">
-  <h2 class="text-lg font-semibold text-gray-900">Seed Group ({length(@seed_people)} people)</h2>
+  <h2 class="text-lg font-semibold text-text-dark">Seed Group ({length(@seed_people)} people)</h2>
 
   <%= if Enum.empty?(@seed_people) do %>
     <p class="text-gray-500 mt-4">
