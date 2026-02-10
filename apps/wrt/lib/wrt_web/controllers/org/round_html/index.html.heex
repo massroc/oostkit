@@ -9,8 +9,8 @@
 </.header>
 
 <%= if @can_start_round do %>
-  <div class="mt-8 bg-white shadow rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Start New Round</h2>
+  <div class="mt-8 bg-surface-sheet shadow-sheet rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-text-dark mb-4">Start New Round</h2>
     <form action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"} method="post">
       <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
       <div class="flex items-end gap-4">
@@ -21,7 +21,7 @@
           <select
             name="round[duration_days]"
             id="duration_days"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
           >
             <option value="7">7 days</option>
             <option value="14">14 days</option>
@@ -36,8 +36,8 @@
     </form>
   </div>
 <% else %>
-  <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-    <p class="text-yellow-800">
+  <div class="mt-8 bg-ok-gold-50 border border-ok-gold-200 rounded-lg p-6">
+    <p class="text-ok-gold-800">
       Round {@active_round.round_number} is currently active.
       <.link
         href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@active_round}"}
@@ -51,7 +51,7 @@
 <% end %>
 
 <div class="mt-8">
-  <h2 class="text-lg font-semibold text-gray-900">All Rounds</h2>
+  <h2 class="text-lg font-semibold text-text-dark">All Rounds</h2>
 
   <%= if Enum.empty?(@rounds) do %>
     <p class="text-gray-500 mt-4">No rounds yet. Start your first round above.</p>
@@ -72,7 +72,7 @@
       <:action :let={round}>
         <.link
           href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"}
-          class="text-indigo-600 hover:text-indigo-900"
+          class="text-ok-purple-600 hover:text-ok-purple-800"
         >
           View
         </.link>

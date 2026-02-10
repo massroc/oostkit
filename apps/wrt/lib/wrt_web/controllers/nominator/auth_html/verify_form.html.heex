@@ -6,9 +6,9 @@
     </:subtitle>
   </.header>
 
-  <div class="mt-8 bg-white shadow rounded-lg p-6">
+  <div class="mt-8 bg-surface-sheet shadow-sheet rounded-lg p-6">
     <%= if assigns[:error] do %>
-      <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+      <div class="mb-4 p-4 bg-ok-red-50 border border-ok-red-200 rounded-lg text-ok-red-700">
         {@error}
       </div>
     <% end %>
@@ -30,7 +30,7 @@
           maxlength="6"
           required
           autofocus
-          class="block w-full text-center text-2xl tracking-widest rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          class="block w-full text-center text-2xl tracking-widest rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500"
           placeholder="000000"
         />
       </div>

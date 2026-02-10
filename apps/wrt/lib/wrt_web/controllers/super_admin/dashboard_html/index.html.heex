@@ -4,49 +4,49 @@
 </.header>
 
 <div class="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+  <div class="overflow-hidden rounded-lg bg-surface-sheet px-4 py-5 shadow-sheet sm:p-6">
     <dt class="truncate text-sm font-medium text-zinc-500">Pending Approval</dt>
-    <dd class="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-text-dark">
       {Map.get(@stats, "pending", 0)}
     </dd>
   </div>
 
-  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+  <div class="overflow-hidden rounded-lg bg-surface-sheet px-4 py-5 shadow-sheet sm:p-6">
     <dt class="truncate text-sm font-medium text-zinc-500">Active Organisations</dt>
-    <dd class="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-text-dark">
       {Map.get(@stats, "approved", 0)}
     </dd>
   </div>
 
-  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+  <div class="overflow-hidden rounded-lg bg-surface-sheet px-4 py-5 shadow-sheet sm:p-6">
     <dt class="truncate text-sm font-medium text-zinc-500">Suspended</dt>
-    <dd class="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-text-dark">
       {Map.get(@stats, "suspended", 0)}
     </dd>
   </div>
 
-  <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+  <div class="overflow-hidden rounded-lg bg-surface-sheet px-4 py-5 shadow-sheet sm:p-6">
     <dt class="truncate text-sm font-medium text-zinc-500">Rejected</dt>
-    <dd class="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
+    <dd class="mt-1 text-3xl font-semibold tracking-tight text-text-dark">
       {Map.get(@stats, "rejected", 0)}
     </dd>
   </div>
 </div>
 
 <div class="mt-10">
-  <h2 class="text-lg font-semibold text-zinc-900">Quick Actions</h2>
+  <h2 class="text-lg font-semibold text-text-dark">Quick Actions</h2>
   <div class="mt-4 flex gap-4">
     <%= if @pending_count > 0 do %>
       <.link
         navigate={~p"/admin/orgs?status=pending"}
-        class="rounded-md bg-zinc-900 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-700"
+        class="rounded-md bg-ok-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
       >
         Review pending requests ({@pending_count})
       </.link>
     <% end %>
     <.link
       navigate={~p"/admin/orgs"}
-      class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50"
+      class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-text-dark shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-surface-sheet-secondary"
     >
       View all organisations
     </.link>
