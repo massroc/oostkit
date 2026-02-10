@@ -126,6 +126,7 @@ GitHub Actions with path filtering:
 - Changes to `apps/workgroup_pulse/**` trigger only that app's CI
 - Each app has own workflow file
 - Deploys to Fly.io on merge to main
+- Portal: CI/CD enabled with `.dockerignore` to optimize build context
 
 ### Environment Configuration
 

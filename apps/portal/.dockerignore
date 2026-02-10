@@ -1,0 +1,45 @@
+# Dockerignore for Portal production builds
+# Paths relative to monorepo root (the build context)
+
+# Version control
+.git
+.gitignore
+
+# Other apps (not needed for Portal build)
+apps/workgroup_pulse/
+apps/wrt/
+
+# Build artifacts
+**/_build/
+**/deps/
+**/.elixir_ls/
+
+# Test artifacts
+**/cover/
+**/tmp/
+
+# Node modules
+**/node_modules/
+
+# IDE
+.idea/
+.vscode/
+**/*.swp
+**/*.swo
+
+# OS
+**/.DS_Store
+**/Thumbs.db
+
+# Local env files
+**/.env
+**/.env.local
+
+# Documentation (root level)
+docs/
+Makefile
+
+# Docker / CI
+**/docker-compose*.yml
+**/Dockerfile.dev
+.github/

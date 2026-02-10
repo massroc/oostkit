@@ -35,7 +35,8 @@ The portal is a Phoenix application that serves as:
 **Task 1.1.3: CI/CD workflow**
 - Create `.github/workflows/portal.yml` calling `_elixir-ci.yml`
 - Add path filtering for `apps/portal/**`
-- Configure deployment to Fly.io (when ready)
+- Configure deployment to Fly.io (enabled)
+- Add `.dockerignore` to exclude other apps from build context
 
 **Task 1.1.4: Development tooling**
 - Configure `mix format`

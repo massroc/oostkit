@@ -212,6 +212,8 @@ Repeat the process for each new app:
 
 Portal is a Phoenix app deployed on Fly.io as `oostkit-portal`. It serves as the authentication hub and landing page.
 
+**CI/CD:** Portal has automated deployment enabled via GitHub Actions. Merges to main automatically deploy to Fly.io.
+
 ```bash
 cd apps/portal
 
@@ -228,7 +230,7 @@ fly secrets set INTERNAL_API_KEY=<generated-key> -a oostkit-portal
 fly secrets set COOKIE_DOMAIN=.oostkit.com -a oostkit-portal
 fly secrets set POSTMARK_API_KEY=<postmark-token> -a oostkit-portal
 
-# Deploy
+# Deploy (manual - or let CI handle it)
 fly deploy
 ```
 
@@ -237,6 +239,8 @@ fly deploy
 - [ ] Portal secrets set (including cross-app auth secrets)
 - [ ] Portal deployed
 - [ ] Root domain (`oostkit.com`) configured and SSL certificate issued
+- [x] CI/CD enabled (auto-deploys on merge to main)
+- [x] `.dockerignore` configured to exclude other apps from build context
 
 ## Monitoring & Maintenance
 
