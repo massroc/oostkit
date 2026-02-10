@@ -25,6 +25,7 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 - Landing page with app cards (split by audience)
 - Session-based auth with sudo mode
 - Role system (Super Admin, Session Manager)
+- OOSTKit design system applied (branded semantic tokens, DM Sans, brand stripe, navigation header)
 
 **Test coverage**: 787 lines across 9 test files
 
@@ -108,6 +109,20 @@ Completed all planned items (PRs #103–#106):
 - Controller integration tests across all routes
 - Data retention warning emails implemented
 
+### Portal Visual Design Alignment — Done
+
+Applied the OOSTKit design system to Portal, completing design consistency across all three apps:
+- Generic Tailwind colors (zinc, emerald, rose, amber, purple, blue) replaced with branded semantic tokens (ok-purple, ok-green, ok-red, ok-gold, ok-blue)
+- Cards migrated to `bg-surface-sheet shadow-sheet`
+- Headings use `text-text-dark`, body uses `bg-surface-wall font-brand`
+- DM Sans brand font loaded via Google Fonts in root layout
+- New branded navigation header with `bg-ok-purple-900` and nav links
+- Brand stripe (magenta-to-purple gradient) added below header
+- Primary buttons use `bg-ok-purple-600`, links use `text-ok-purple-600`
+- Footer uses `bg-surface-sheet-secondary`, empty states and table hover rows use `bg-surface-sheet-secondary`
+- Status badges use branded ok-purple, ok-blue, ok-green, ok-red tokens
+- All templates updated: landing page, app detail, admin users, error pages, core components
+
 ### WRT Visual Design Alignment — Done
 
 Applied the OOSTKit design system to WRT, bringing it in line with Pulse:
@@ -135,10 +150,11 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 - [ ] Feedback button
 - [ ] Participant dropout handling (greyed out visual)
 
-### WRT: Visual Design Alignment — Done
+### Visual Design Alignment — Done (all apps)
 
-- [x] Apply OOSTKit design system to WRT (shared Tailwind preset, Petal Components)
-- [x] Bring WRT visual design in line with Pulse
+- [x] Apply OOSTKit design system to Pulse (original design system target)
+- [x] Apply OOSTKit design system to WRT (PR #108)
+- [x] Apply OOSTKit design system to Portal (PR #109)
 
 ---
 

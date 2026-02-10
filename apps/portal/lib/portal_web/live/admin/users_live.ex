@@ -49,19 +49,22 @@ defmodule PortalWeb.Admin.UsersLive do
     <div class="mx-auto max-w-4xl py-8">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-bold text-zinc-900">User Management</h1>
+          <h1 class="text-2xl font-bold text-text-dark">User Management</h1>
           <p class="mt-1 text-sm text-zinc-600">Manage session manager accounts</p>
         </div>
         <.link
           :if={!@show_form}
           patch={~p"/admin/users/new"}
-          class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700"
+          class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700"
         >
           Create User
         </.link>
       </div>
 
-      <div :if={@show_form} class="mb-8 rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+      <div
+        :if={@show_form}
+        class="mb-8 rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet"
+      >
         <h2 class="text-lg font-semibold mb-4">
           {if @editing_user, do: "Edit User", else: "Create New User"}
         </h2>
@@ -93,7 +96,7 @@ defmodule PortalWeb.Admin.UsersLive do
             </.button>
             <.link
               patch={~p"/admin/users"}
-              class="px-4 py-2 text-sm font-medium text-zinc-600 hover:text-zinc-900"
+              class="px-4 py-2 text-sm font-medium text-ok-purple-600 hover:text-ok-purple-800"
             >
               Cancel
             </.link>
@@ -101,9 +104,9 @@ defmodule PortalWeb.Admin.UsersLive do
         </.form>
       </div>
 
-      <div class="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+      <div class="overflow-hidden rounded-lg border border-zinc-200 bg-surface-sheet shadow-sheet">
         <table class="min-w-full divide-y divide-zinc-200">
-          <thead class="bg-zinc-50">
+          <thead class="bg-surface-sheet-secondary">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                 Email
@@ -123,8 +126,8 @@ defmodule PortalWeb.Admin.UsersLive do
             </tr>
           </thead>
           <tbody class="divide-y divide-zinc-200">
-            <tr :for={user <- @users} class="hover:bg-zinc-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900">
+            <tr :for={user <- @users} class="hover:bg-surface-sheet-secondary">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-text-dark">
                 {user.email}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
@@ -133,8 +136,8 @@ defmodule PortalWeb.Admin.UsersLive do
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class={[
                   "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  user.role == "super_admin" && "bg-purple-100 text-purple-800",
-                  user.role == "session_manager" && "bg-blue-100 text-blue-800"
+                  user.role == "super_admin" && "bg-ok-purple-100 text-ok-purple-800",
+                  user.role == "session_manager" && "bg-ok-blue-100 text-ok-blue-800"
                 ]}>
                   {format_role(user.role)}
                 </span>
@@ -142,8 +145,8 @@ defmodule PortalWeb.Admin.UsersLive do
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class={[
                   "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  user.enabled && "bg-green-100 text-green-800",
-                  !user.enabled && "bg-red-100 text-red-800"
+                  user.enabled && "bg-ok-green-100 text-ok-green-800",
+                  !user.enabled && "bg-ok-red-100 text-ok-red-800"
                 ]}>
                   {if user.enabled, do: "Enabled", else: "Disabled"}
                 </span>
@@ -151,7 +154,7 @@ defmodule PortalWeb.Admin.UsersLive do
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                 <.link
                   patch={~p"/admin/users/#{user.id}/edit"}
-                  class="text-zinc-600 hover:text-zinc-900"
+                  class="text-ok-purple-600 hover:text-ok-purple-800"
                 >
                   Edit
                 </.link>
@@ -161,8 +164,8 @@ defmodule PortalWeb.Admin.UsersLive do
                   phx-value-id={user.id}
                   class={[
                     "text-sm",
-                    user.enabled && "text-red-600 hover:text-red-900",
-                    !user.enabled && "text-green-600 hover:text-green-900"
+                    user.enabled && "text-ok-red-600 hover:text-ok-red-800",
+                    !user.enabled && "text-ok-green-600 hover:text-ok-green-800"
                   ]}
                 >
                   {if user.enabled, do: "Disable", else: "Enable"}

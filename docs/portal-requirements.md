@@ -189,24 +189,27 @@ All apps display a shared header:
 
 ### Design Language
 
-- Consistent across portal and all apps
+- Consistent across portal and all apps via the OOSTKit design system (`docs/design-system.md`)
 - Professional, approachable, not overly corporate
 - Reflects OST values (collaboration, participation, human-centered)
 
-### Shared Elements
+### Shared Elements (Implemented)
 
-- Logo and wordmark
-- Color palette
-- Typography scale
-- Button and form styles
-- Card components
-- Header layout
+- Branded navigation header (`bg-ok-purple-900`) with OOSTKit wordmark
+- Brand stripe (magenta-to-purple gradient) below header
+- Semantic color tokens: ok-purple, ok-green, ok-red, ok-gold, ok-blue
+- DM Sans brand font via Google Fonts
+- Surface tokens for backgrounds: `bg-surface-wall`, `bg-surface-sheet`, `bg-surface-sheet-secondary`
+- Text tokens: `text-text-dark` for headings
+- Card components: `bg-surface-sheet shadow-sheet`
+- Button styles: `bg-ok-purple-600` for primary actions
+- Form focus/error states: `focus:border-ok-purple-400`, `border-ok-red-400`
 
 ### Implementation
 
-- Shared Tailwind configuration
-- Possibly a shared CSS file or Hex package
-- Design tokens for colors, spacing, etc.
+- Shared Tailwind preset at `shared/tailwind.preset.js` imported by all apps
+- Design tokens for colors, spacing, typography, and shadows
+- All three apps (Portal, Pulse, WRT) fully aligned to the design system
 
 ---
 

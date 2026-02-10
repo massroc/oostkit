@@ -38,8 +38,8 @@ defmodule PortalWeb.CoreComponents do
       role="alert"
       class={[
         "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
-        @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
-        @kind == :error && "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
+        @kind == :info && "bg-ok-green-50 text-ok-green-800 ring-ok-green-500 fill-ok-green-900",
+        @kind == :error && "bg-ok-red-50 text-ok-red-900 shadow-md ring-ok-red-500 fill-ok-red-900"
       ]}
       {@rest}
     >
@@ -78,10 +78,10 @@ defmodule PortalWeb.CoreComponents do
 
   def app_card(assigns) do
     ~H"""
-    <div class="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition hover:shadow-md">
+    <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet transition hover:shadow-sheet-lifted">
       <div class="flex items-start justify-between">
         <div class="flex-1">
-          <h3 class="text-lg font-semibold text-zinc-900">{@app.name}</h3>
+          <h3 class="text-lg font-semibold text-text-dark">{@app.name}</h3>
           <p class="mt-1 text-sm text-zinc-600">{@app.tagline}</p>
         </div>
         <span :if={@app.requires_auth} title="Requires login">
@@ -91,13 +91,13 @@ defmodule PortalWeb.CoreComponents do
       <div class="mt-4 flex items-center gap-3">
         <a
           href={@app.url}
-          class="inline-flex items-center rounded-md bg-zinc-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-zinc-700"
+          class="inline-flex items-center rounded-md bg-ok-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
         >
           Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
         </a>
         <.link
           navigate={~p"/apps/#{@app.id}"}
-          class="text-sm font-medium text-zinc-600 hover:text-zinc-900"
+          class="text-sm font-medium text-ok-purple-600 hover:text-ok-purple-800"
         >
           Learn more
         </.link>
@@ -113,7 +113,7 @@ defmodule PortalWeb.CoreComponents do
 
   def empty_state(assigns) do
     ~H"""
-    <div class="rounded-lg border border-dashed border-zinc-300 bg-zinc-50 p-6 text-center">
+    <div class="rounded-lg border border-dashed border-zinc-300 bg-surface-sheet-secondary p-6 text-center">
       <p class="text-sm text-zinc-500">{render_slot(@inner_block)}</p>
     </div>
     """
@@ -135,7 +135,7 @@ defmodule PortalWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white">
+      <div class="mt-10 space-y-8">
         {render_slot(@inner_block, f)}
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           {render_slot(action, f)}
@@ -159,7 +159,7 @@ defmodule PortalWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
+        "phx-submit-loading:opacity-75 rounded-lg bg-ok-purple-600 hover:bg-ok-purple-700 py-2 px-3",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
         @class
       ]}
@@ -225,7 +225,7 @@ defmodule PortalWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
+          class="rounded border-zinc-300 text-ok-purple-600 focus:ring-0"
           {@rest}
         />
         {@label}
@@ -242,7 +242,7 @@ defmodule PortalWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-2 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm"
+        class="mt-2 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-ok-purple-400 focus:ring-0 sm:text-sm"
         multiple={@multiple}
         {@rest}
       >
@@ -263,8 +263,8 @@ defmodule PortalWeb.CoreComponents do
         name={@name}
         class={[
           "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6 min-h-[6rem]",
-          @errors == [] && "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          @errors == [] && "border-zinc-300 focus:border-ok-purple-400",
+          @errors != [] && "border-ok-red-400 focus:border-ok-red-400"
         ]}
         {@rest}
       >{Form.normalize_value("textarea", @value)}</textarea>
@@ -284,8 +284,8 @@ defmodule PortalWeb.CoreComponents do
         value={Form.normalize_value(@type, @value)}
         class={[
           "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
-          @errors == [] && "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          @errors == [] && "border-zinc-300 focus:border-ok-purple-400",
+          @errors != [] && "border-ok-red-400 focus:border-ok-red-400"
         ]}
         {@rest}
       />
@@ -302,7 +302,7 @@ defmodule PortalWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+    <label for={@for} class="block text-sm font-semibold leading-6 text-text-dark">
       {render_slot(@inner_block)}
     </label>
     """
@@ -315,7 +315,7 @@ defmodule PortalWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-ok-red-600">
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
       {render_slot(@inner_block)}
     </p>
@@ -335,7 +335,7 @@ defmodule PortalWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+        <h1 class="text-lg font-semibold leading-8 text-text-dark">
           {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
