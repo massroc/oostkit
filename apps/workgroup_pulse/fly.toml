@@ -9,7 +9,7 @@ primary_region = "syd"  # Sydney, AU (matches database region)
   ignorefile = ".dockerignore"
 
 [env]
-  PHX_HOST = "workgroup-pulse.fly.dev"
+  PHX_HOST = "pulse.oostkit.com"
   PORT = "8080"
   PHX_SERVER = "true"
 

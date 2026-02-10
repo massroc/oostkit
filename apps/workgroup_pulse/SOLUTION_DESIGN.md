@@ -1263,7 +1263,7 @@ primary_region = "syd"  # Sydney for AU-based teams
     MIX_ENV = "prod"
 
 [env]
-  PHX_HOST = "workgroup-pulse.fly.dev"
+  PHX_HOST = "pulse.oostkit.com"
   PORT = "8080"
 
 [http_service]
