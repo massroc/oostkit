@@ -25,7 +25,7 @@ See also: [Portal UX Design](../apps/portal/docs/ux-design.md) for detailed desi
 4. Give super admins operational control via an admin hub
 5. Capture email interest for features not yet live
 
-## Non-Goals (for initial release)
+## Non-Goals (current scope)
 
 - Aggregated dashboards or cross-app data views
 - Persistent workshop data storage
@@ -163,9 +163,7 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 | Super Admin | Platform owner | All apps, admin hub, platform settings |
 | Session Manager | Facilitator running workshops | Apps they have access to (e.g., WRT) |
 
-### Initial Scope
-
-For the first release:
+### Current Scope
 - Self-service registration for facilitators (email + name, magic link confirmation)
 - Super Admin can also create Session Manager accounts via admin panel
 - Session Managers log in to access WRT
@@ -328,68 +326,16 @@ Key requirements (all met):
 
 ---
 
-## Phases
+## Deferred Items
 
-### Completed Phases
-
-#### Phase 1: Foundation (Complete)
-- Portal app with landing page and app cards
-- Basic authentication (super admin + session managers)
-- Account management for super admin
-- Shared header styles
-
-#### Phase 2: Unified Experience (Complete)
-- App detail pages
-- Shared header integrated into Workgroup Pulse and WRT
-- Subdomain cookie authentication (`_oostkit_token` cookie + `COOKIE_DOMAIN`)
-- Internal auth validation API (`POST /api/internal/auth/validate` with `ApiAuth` plug)
-- WRT integration: `PortalAuthClient` + `PortalAuth` plug + transitional `RequirePortalOrWrtSuperAdmin` plug
-- Configurable email from-address for Postmark production sender signatures
-
-### New Rollout Plan
-
-Four phases, each independently deployable. See [Portal UX Design](../apps/portal/docs/ux-design.md) for full detail.
-
-#### Phase A: Foundation + Public Face (Complete)
-New public experience live. Replaced the current landing page.
-- A1: Tools table + seed data -- `tools` table with 11 seeded tools, `Portal.Tools` context + `Tool` schema
-- A2: Interest signups table -- `interest_signups` table, `Portal.Marketing` context + `InterestSignup` schema
-- A3: Route restructure -- `/` is marketing landing (redirects logged-in to `/home`), `/home` is dashboard, `/coming-soon` added
-- A4: Coming-soon page -- `ComingSoonLive` LiveView with context-aware messaging and email capture
-- A5: Header redesign -- three-zone layout, Sign Up / Log In buttons to `/coming-soon`
-- A6: Dashboard (`/home`) -- DB-backed tool cards with three states (live, coming soon, maintenance)
-- A7: Marketing landing page (`/`) -- hero, tool highlights, OST context, footer CTA
-
-#### Phase B: Admin Hub (Complete)
-Operational control panel for platform management.
-- B1: Admin dashboard (`/admin`) with stats cards (email signup count, registered users, active users 30d, tool status breakdown) and quick links
-- B2: Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export via `/admin/signups/export`
-- B3: Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle per tool
-- B4: Enhanced user management -- added Registered date and Last Login columns to `/admin/users`
-
-#### Phase C: Auth & Onboarding (Complete)
-Self-service registration and facilitator onboarding live.
-- C1: User profile fields -- DB migration adding `organisation`, `referral_source`, `onboarding_completed` to users + `user_tool_interests` join table. New `UserToolInterest` schema.
-- C2: Registration flow update -- email + name form with `registration_changeset`, magic link confirmation, facilitator-focused messaging ("Start running workshops with OOSTKit")
-- C3: Login page messaging -- "Welcome back" heading, magic link as primary login method, password as secondary
-- C4: Settings page update -- profile editing (name, org, referral source) via `profile_changeset`, dynamic password label ("Add a password" vs "Change password")
-- C5: First-visit onboarding -- dashboard card with org, referral source, tool interest checkboxes. `OnboardingController` for form POST. `onboarding_changeset` saves data. Dismissable via skip.
-- C6: Flip the switch -- Sign Up / Log In header buttons now point to `/users/register` and `/users/log-in` instead of `/coming-soon`. Organisation column added to admin users table.
-
-#### Phase D: Polish & Detail (D1-D3 Complete, D4-D5 Deferred)
-Enhancements once core platform is running.
-- D1: App detail page enhancements -- richer layout with better spacing, structured sections for description and action area (Complete)
-- D2: Inline email capture on detail pages -- for coming-soon tools, name + email "Notify me" form with success state via `?subscribed=true` query param, `POST /apps/:app_id/notify` route in `PageController` creating interest_signup with context `tool:{tool_id}` (Complete)
-- D3: SEO & social sharing -- meta description, `og:title`, `og:description`, `og:type`, `og:site_name` in root layout with per-page overrides via assigns, title suffix changed to em dash (" — OOSTKit") (Complete)
-- D4: Header integration in Pulse/WRT (breadcrumb app name) -- Deferred
-- D5: Admin dashboard trends (charts/time-series) -- Deferred
+- Header breadcrumb integration in Pulse/WRT (app name in shared header across apps)
+- Admin dashboard trends (charts/time-series once there's enough data)
 
 ---
 
 ## Related Documents
 
 - [Portal UX Design](../apps/portal/docs/ux-design.md)
-- [Portal Implementation Plan](portal-implementation-plan.md)
 - [Product Vision](product-vision.md)
 - [Architecture](architecture.md)
 - [WRT Requirements](../apps/wrt/REQUIREMENTS.md)

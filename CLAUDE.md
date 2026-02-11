@@ -260,7 +260,6 @@ Platform-wide documentation lives in `docs/`:
 - [Product Vision](docs/product-vision.md)
 - [Architecture](docs/architecture.md)
 - [Portal Requirements](docs/portal-requirements.md)
-- [Portal Implementation Plan](docs/portal-implementation-plan.md)
 - [WRT Requirements](docs/wrt-requirements.md)
 
 ### Documentation-First Shipping

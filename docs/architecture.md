@@ -95,7 +95,7 @@ All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
 
 Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
 
-## Shared Infrastructure (Planned)
+## Shared Infrastructure
 
 ### Authentication
 
@@ -109,9 +109,9 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 
 ### Portal
 
-Implemented in `apps/portal/` (Phases 1-2, A, B, C complete; Phase D: D1-D3 complete, D4-D5 deferred). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
+Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
 
-**Current state (through Phase D):**
+**Current state:**
 - User authentication (password + magic link)
 - Self-service registration (name + email, magic link confirmation, facilitator-focused messaging)
 - Role system (Super Admin, Session Manager)
@@ -135,13 +135,24 @@ Implemented in `apps/portal/` (Phases 1-2, A, B, C complete; Phase D: D1-D3 comp
 - App detail pages (`/apps/:id`) with richer layout, inline email capture for coming-soon tools (`POST /apps/:app_id/notify`)
 - SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
 
-**Deferred:** D4 (header breadcrumbs in Pulse/WRT), D5 (admin dashboard trends/charts).
+**Deferred:** Header breadcrumbs in Pulse/WRT, admin dashboard trends/charts.
 
-**Data model additions:**
+**Data model:**
+- `users` table -- email, name, role, organisation, referral_source, onboarding_completed, enabled
+- `users_tokens` table -- session/magic link tokens (from phx.gen.auth)
 - `tools` table -- 11 tools with name, tagline, status, URL, audience, sort_order, admin kill switch
-- `interest_signups` table -- email captures from coming-soon page
+- `interest_signups` table -- email captures from coming-soon and app detail pages
 - `user_tool_interests` table -- onboarding tool interest (user_id + tool_id join table)
-- `users` table extensions -- `organisation`, `referral_source`, `onboarding_completed` fields
+
+**Environment variables:**
+- `DATABASE_URL` -- PostgreSQL connection
+- `SECRET_KEY_BASE` -- Phoenix secret (must match across all apps for cookie sharing)
+- `PHX_HOST` -- Host for URL generation
+- `PORTAL_SUPER_ADMIN_EMAIL` -- Initial super admin (for seeding)
+- `COOKIE_DOMAIN` -- Subdomain cookie scope (e.g., `.oostkit.com`)
+- `INTERNAL_API_KEY` -- Shared secret for internal API auth (used by WRT as `PORTAL_API_KEY`)
+- `POSTMARK_API_KEY` -- Postmark API key for email delivery
+- `MAIL_FROM` -- Configurable email from-address (e.g., `noreply@oostkit.com`)
 
 ## Deployment
 

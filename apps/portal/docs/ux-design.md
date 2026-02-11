@@ -243,7 +243,7 @@ or "Get started as a facilitator" — not generic "create an account" language.
 
 ## Authentication & Access Model
 
-### Current State (Auth Live — Phase C Complete)
+### Current State
 
 - **Sign Up button**: Links to `/users/register` — self-service registration with name + email, magic link confirmation
 - **Log In button**: Links to `/users/log-in` — "Welcome back" page with magic link (primary) and password (secondary)
@@ -723,7 +723,7 @@ Depends on tool status:
 - Description: what a Search Conference is, how the tool will support it
 - Status: Coming soon → email capture
 
-### SEO & Sharing (Implemented — Phase D3)
+### SEO & Sharing
 
 These pages are the primary shareable URL for each tool. Implemented:
 - Descriptive `<title>` tags: "Workgroup Pulse — OOSTKit" (em dash separator)
@@ -765,72 +765,10 @@ Resolved during design discussions (February 2026):
 
 ---
 
-## Rollout Plan
+## Deferred Items
 
-Four phases, each independently deployable. Phase A is the priority.
-
-### Phase A: Foundation + Public Face (Complete)
-
-Gets the new public experience live. Replaces the current landing page.
-
-| Step | What | Status | Notes |
-|------|------|--------|-------|
-| A1 | **Tools table + seed data** | Done | DB migration. 11 tools seeded with name, tagline, description, status, URL, audience, sort order. `Portal.Tools` context + `Tool` schema. |
-| A2 | **Interest signups table** | Done | DB migration for email capture. `Portal.Marketing` context + `InterestSignup` schema. |
-| A3 | **Route restructure** | Done | `/` is marketing landing (redirects logged-in users to `/home`). `/home` is dashboard. `/coming-soon` route added. `signed_in_path` updated to `/home`. |
-| A4 | **Coming-soon page** | Done | `ComingSoonLive` LiveView with context-aware messaging via query params and email capture form. |
-| A5 | **Header redesign** | Done | Three-zone layout in `root.html.heex`. Sign Up + Log In buttons point to `/coming-soon`. |
-| A6 | **Dashboard (`/home`)** | Done | Tool cards reading from DB via `tool_card` component. Three states (live, coming soon, maintenance). |
-| A7 | **Marketing landing page (`/`)** | Done | Hero, tool highlights, OST context, footer CTA. Bold aspirational tone. |
-
-**Result:** The public sees a proper marketing page, can explore the dashboard with all
-11 tools (1 live, 10 coming soon), can sign up for email notifications, and the header
-is consistent and clean. Super admin still logs in via direct URL.
-
-### Phase B: Admin Hub (Complete)
-
-Operational control panel for managing the platform.
-
-| Step | What | Status | Notes |
-|------|------|--------|-------|
-| B1 | **Admin dashboard (`/admin`)** | Done | `DashboardLive` with stats cards (email signups, registered users, active users 30d, tool status breakdown) and quick links to sub-pages. |
-| B2 | **Email signups admin (`/admin/signups`)** | Done | `SignupsLive` with table listing, live search, delete, CSV export via `/admin/signups/export`. |
-| B3 | **Tool management admin (`/admin/tools`)** | Done | `ToolsLive` with status display and admin_enabled kill switch toggle per tool. |
-| B4 | **Enhanced user management** | Done | Added Registered date and Last Login columns to `/admin/users`. Organisation column deferred to Phase C. |
-
-**Result:** Super admin has full visibility and operational control. Can toggle tools
-off in an emergency, export the email list, and see platform health at a glance.
-
-### Phase C: Auth & Onboarding (Complete)
-
-Self-service registration and facilitator onboarding live.
-
-| Step | What | Status | Notes |
-|------|------|--------|-------|
-| C1 | **User profile fields** | Done | DB migration `20260212000001`: adds `organisation`, `referral_source`, `onboarding_completed` to users + `user_tool_interests` join table. New `UserToolInterest` schema. |
-| C2 | **Registration flow update** | Done | Name + email form with `registration_changeset`, magic link confirmation, facilitator-focused messaging ("Start running workshops with OOSTKit"). |
-| C3 | **Login page messaging** | Done | "Welcome back" heading, magic link as primary method, password section below as secondary. |
-| C4 | **Settings page update** | Done | Profile editing (name, org, referral source) via `profile_changeset`. Dynamic password label ("Add a password" vs "Change password"). |
-| C5 | **First-visit onboarding** | Done | Dashboard card with org, referral source, tool interest checkboxes. `OnboardingController` handles POST. Dismissable via "Skip for now". |
-| C6 | **Flip the switch** | Done | Header Sign Up / Log In buttons now point to `/users/register` and `/users/log-in`. Organisation column added to admin users table. |
-
-**Result:** Facilitators can sign up, log in, complete onboarding, and access tools.
-Auth is live. The coming-soon gate is removed for auth (but stays for coming-soon tools).
-
-### Phase D: Polish & Detail (D1-D3 Complete, D4-D5 Deferred)
-
-Enhancements once the core platform is running.
-
-| Step | What | Status | Notes |
-|------|------|--------|-------|
-| D1 | **App detail page enhancements** | Done | Richer layout with better spacing, structured header area, visual walkthrough section, detailed description, and action area. |
-| D2 | **Inline email capture on detail pages** | Done | For coming-soon tools. Name + email "Notify me" form on `/apps/:id` pages. `POST /apps/:app_id/notify` creates interest_signup with context `tool:{tool_id}`. Success state via `?subscribed=true` query param. |
-| D3 | **SEO & social sharing** | Done | Meta description, `og:title`, `og:description`, `og:type`, `og:site_name` in root layout with per-page overrides via assigns. Title suffix changed to em dash (" — OOSTKit"). App detail pages pass tool description as `meta_description`. |
-| D4 | **Header integration in Pulse/WRT** | Deferred | Breadcrumb app name in the shared header across apps. Lower priority. |
-| D5 | **Admin dashboard trends** | Deferred | Charts and time-series once there's enough data. Not enough data volume yet. |
-
-**Result:** Polished product pages with inline email capture, better SEO and social sharing
-discoverability. Header integration and admin trends deferred for later.
+- Header breadcrumb integration in Pulse/WRT (app name in shared header across apps)
+- Admin dashboard trends (charts/time-series once there's enough data)
 
 ---
 
