@@ -48,7 +48,13 @@ defmodule PortalWeb.ComingSoonLive do
           <div class="mt-10 rounded-xl border border-zinc-200 bg-surface-sheet p-8 shadow-sheet">
             <.simple_form for={@form} phx-submit="submit" phx-change="validate">
               <.input field={@form[:name]} label="Name" placeholder="Your name" />
-              <.input field={@form[:email]} type="email" label="Email" placeholder="you@example.com" required />
+              <.input
+                field={@form[:email]}
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                required
+              />
               <:actions>
                 <.button type="submit" class="w-full">
                   Keep me posted
@@ -79,7 +85,8 @@ defmodule PortalWeb.ComingSoonLive do
 
   @impl true
   def handle_event("submit", %{"interest_signup" => params}, socket) do
-    params = Map.put(params, "context", signup_context(socket.assigns.context, socket.assigns.tool_name))
+    params =
+      Map.put(params, "context", signup_context(socket.assigns.context, socket.assigns.tool_name))
 
     case Marketing.create_interest_signup(params) do
       {:ok, _signup} ->

@@ -19,7 +19,17 @@ defmodule Portal.Tools.Tool do
 
   def changeset(tool, attrs) do
     tool
-    |> cast(attrs, [:id, :name, :tagline, :description, :url, :audience, :default_status, :admin_enabled, :sort_order])
+    |> cast(attrs, [
+      :id,
+      :name,
+      :tagline,
+      :description,
+      :url,
+      :audience,
+      :default_status,
+      :admin_enabled,
+      :sort_order
+    ])
     |> validate_required([:id, :name, :tagline, :audience, :default_status, :sort_order])
     |> validate_inclusion(:audience, ~w(facilitator team))
     |> validate_inclusion(:default_status, ~w(live coming_soon))

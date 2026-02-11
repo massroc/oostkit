@@ -25,8 +25,8 @@
       </div>
     </div>
   </div>
-
-  <!-- What's in the Kit -->
+  
+<!-- What's in the Kit -->
   <div class="px-6 py-20 sm:px-8 lg:px-12">
     <div class="mx-auto max-w-4xl">
       <h2 class="text-center text-3xl font-bold tracking-tight text-text-dark">
@@ -64,9 +64,12 @@
             </a>
           </div>
         </div>
-
-        <!-- Coming soon tools (compact) -->
-        <div :for={tool <- Enum.reject(@tools, &(&1.default_status == "live"))} class="rounded-xl border border-zinc-200 bg-surface-sheet-secondary p-6 opacity-75">
+        
+<!-- Coming soon tools (compact) -->
+        <div
+          :for={tool <- Enum.reject(@tools, &(&1.default_status == "live"))}
+          class="rounded-xl border border-zinc-200 bg-surface-sheet-secondary p-6 opacity-75"
+        >
           <div class="flex items-start justify-between">
             <div>
               <div class="flex items-center gap-3">
@@ -82,8 +85,8 @@
       </div>
     </div>
   </div>
-
-  <!-- OST Context -->
+  
+<!-- OST Context -->
   <div class="border-t border-zinc-200 bg-surface-sheet-secondary px-6 py-20 sm:px-8 lg:px-12">
     <div class="mx-auto max-w-3xl text-center">
       <h2 class="text-2xl font-bold tracking-tight text-text-dark">
@@ -96,8 +99,8 @@
       </p>
     </div>
   </div>
-
-  <!-- Footer CTA -->
+  
+<!-- Footer CTA -->
   <div class="px-6 py-20 sm:px-8 lg:px-12">
     <div class="mx-auto max-w-xl text-center">
       <h2 class="text-2xl font-bold tracking-tight text-text-dark">
@@ -116,8 +119,8 @@
       </div>
     </div>
   </div>
-
-  <!-- Footer -->
+  
+<!-- Footer -->
   <footer class="border-t border-zinc-200 bg-surface-sheet-secondary py-8">
     <div class="mx-auto max-w-6xl px-6 text-center text-sm text-zinc-500">
       <p>OOSTKit — Open Systems Thinking Toolkit</p>
