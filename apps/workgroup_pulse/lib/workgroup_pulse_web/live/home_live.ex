@@ -25,9 +25,9 @@ defmodule WorkgroupPulseWeb.HomeLive do
 
         <div class="mb-5">
           <div class="flex items-center gap-2 mb-2">
-            <div class="w-6 h-6 rounded-md bg-accent-purple/10 flex items-center justify-center">
+            <div class="w-6 h-6 rounded-md bg-accent-gold/10 flex items-center justify-center">
               <svg
-                class="w-3.5 h-3.5 text-accent-purple"
+                class="w-3.5 h-3.5 text-accent-gold"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

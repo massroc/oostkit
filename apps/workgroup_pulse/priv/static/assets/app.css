@@ -11552,12 +11552,6 @@ input::-webkit-datetime-edit {
   margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
 }
 
-.space-y-3 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
-}
-
 .space-y-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
@@ -11568,6 +11562,12 @@ input::-webkit-datetime-edit {
   --tw-space-y-reverse: 0;
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
 }
 
 .self-start {
@@ -11710,6 +11710,19 @@ input::-webkit-datetime-edit {
   border-color: rgb(224 224 224 / var(--tw-border-opacity, 1));
 }
 
+.border-accent-magenta\/30 {
+  border-color: rgb(188 69 244 / 0.3);
+}
+
+.border-accent-red\/30 {
+  border-color: rgb(244 69 69 / 0.3);
+}
+
+.border-accent-gold {
+  --tw-border-opacity: 1;
+  border-color: rgb(244 185 69 / var(--tw-border-opacity, 1));
+}
+
 .bg-accent-purple {
   --tw-bg-opacity: 1;
   background-color: rgb(114 69 244 / var(--tw-bg-opacity, 1));
@@ -11740,11 +11753,6 @@ input::-webkit-datetime-edit {
 .bg-blue-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
-}
-
-.bg-df-green {
-  --tw-bg-opacity: 1;
-  background-color: rgb(66 210 53 / var(--tw-bg-opacity, 1));
 }
 
 .bg-df-green\/10 {
@@ -11855,6 +11863,33 @@ input::-webkit-datetime-edit {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.bg-df-green {
+  --tw-bg-opacity: 1;
+  background-color: rgb(66 210 53 / var(--tw-bg-opacity, 1));
+}
+
+.bg-accent-magenta\/5 {
+  background-color: rgb(188 69 244 / 0.05);
+}
+
+.bg-accent-red\/5 {
+  background-color: rgb(244 69 69 / 0.05);
+}
+
+.bg-accent-magenta {
+  --tw-bg-opacity: 1;
+  background-color: rgb(188 69 244 / var(--tw-bg-opacity, 1));
+}
+
+.bg-accent-gold {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 185 69 / var(--tw-bg-opacity, 1));
+}
+
+.bg-accent-gold\/10 {
+  background-color: rgb(244 185 69 / 0.1);
 }
 
 .fill-cyan-900 {
@@ -12235,11 +12270,6 @@ input::-webkit-datetime-edit {
   color: rgb(136 19 55 / var(--tw-text-opacity, 1));
 }
 
-.text-text-body {
-  --tw-text-opacity: 1;
-  color: rgb(163 163 163 / var(--tw-text-opacity, 1));
-}
-
 .text-text-dark {
   --tw-text-opacity: 1;
   color: rgb(21 21 21 / var(--tw-text-opacity, 1));
@@ -12268,6 +12298,21 @@ input::-webkit-datetime-edit {
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.text-text-body {
+  --tw-text-opacity: 1;
+  color: rgb(163 163 163 / var(--tw-text-opacity, 1));
+}
+
+.text-accent-magenta {
+  --tw-text-opacity: 1;
+  color: rgb(188 69 244 / var(--tw-text-opacity, 1));
+}
+
+.text-accent-gold {
+  --tw-text-opacity: 1;
+  color: rgb(244 185 69 / var(--tw-text-opacity, 1));
 }
 
 .underline {
@@ -12954,11 +12999,6 @@ th.active-col-header {
   background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
 }
 
-.hover\:bg-brand-secondary-green-light:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(176 226 171 / var(--tw-bg-opacity, 1));
-}
-
 .hover\:bg-df-green:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(66 210 53 / var(--tw-bg-opacity, 1));
@@ -12976,6 +13016,11 @@ th.active-col-header {
 .hover\:bg-surface-sheet-secondary:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(245 243 240 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-brand-secondary-green-light:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(176 226 171 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-accent-purple:hover {
@@ -13020,6 +13065,11 @@ th.active-col-header {
   border-color: transparent;
 }
 
+.focus\:border-accent-magenta:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(188 69 244 / var(--tw-border-opacity, 1));
+}
+
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -13040,6 +13090,11 @@ th.active-col-header {
 .focus\:ring-accent-purple:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(114 69 244 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-accent-magenta:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(188 69 244 / var(--tw-ring-opacity, 1));
 }
 
 .group:hover .group-hover\:opacity-100 {

@@ -29,7 +29,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
             Based on forty years of research by Fred and Merrelyn Emery, the Six Criteria are the psychological factors that determine whether work is motivating or draining.
           </p>
 
-          <blockquote class="italic text-ink-blue/70 border-l-4 border-traffic-green pl-4 text-left my-6">
+          <blockquote class="italic text-ink-blue/70 border-l-4 border-accent-gold pl-4 text-left my-6">
             "If you don't get these criteria right, there will not be the human interest to see the job through."
             <span class="block text-sm mt-2 not-italic text-ink-blue/50">— Fred Emery</span>
           </blockquote>
