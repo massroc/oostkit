@@ -77,18 +77,21 @@ lib/
 │   │
 │   ├── tenant_manager.ex           # Multi-tenancy orchestration ✓
 │   │
+│   ├── auth/                       # Shared authentication helpers
+│   │   └── password.ex             # Shared hash_password/1 and valid_password?/2
+│   │
 │   ├── platform/                   # Public schema (cross-tenant) ✓
 │   │   ├── organisation.ex         # Schema
-│   │   ├── super_admin.ex          # Schema
+│   │   ├── super_admin.ex          # Schema (delegates to Auth.Password)
 │   │   └── platform.ex             # Context
 │   │
 │   ├── orgs/                       # Org management (tenant-scoped) ✓
-│   │   ├── org_admin.ex            # Schema
+│   │   ├── org_admin.ex            # Schema (delegates to Auth.Password)
 │   │   └── orgs.ex                 # Context
 │   │
 │   ├── campaigns/                  # Campaign management ✓
 │   │   ├── campaign.ex             # Schema
-│   │   ├── campaign_admin.ex       # Schema
+│   │   ├── campaign_admin.ex       # Schema (delegates to Auth.Password)
 │   │   └── campaigns.ex            # Context
 │   │
 │   ├── rounds/                     # Round management ✓
@@ -111,13 +114,12 @@ lib/
 │   │                               # - HTML and text templates
 │   │
 │   ├── reports.ex                  # Reporting context ✓
-│   │                               # - Campaign/round statistics
-│   │                               # - Convergence metrics
-│   │                               # - Top nominees/nominators
+│   │                               # - Campaign statistics
+│   │                               # - Convergence metrics (scoped by campaign_id)
+│   │                               # - Top nominees
 │   │
 │   ├── logger.ex                   # Structured logging ✓
-│   │                               # - Security events
-│   │                               # - Business metrics
+│   │                               # - Rate limit events only
 │   │
 │   ├── telemetry.ex                # Business telemetry ✓
 │   │                               # - Login attempts
@@ -195,7 +197,7 @@ lib/
 │   │
 │   ├── components/                 # ✓
 │   │   ├── layouts.ex
-│   │   └── core_components.ex
+│   │   └── core_components.ex      # Includes campaign/round/source status badge helpers
 │   │
 │   └── templates/                  # ✓
 │       └── nominator/
@@ -388,7 +390,7 @@ defmodule Wrt.Auth do
     case Platform.get_super_admin_by_email(email) do
       nil -> {:error, :not_found}
       admin ->
-        if Bcrypt.verify_pass(password, admin.password_hash) do
+        if Wrt.Auth.Password.valid_password?(admin, password) do
           {:ok, admin}
         else
           {:error, :invalid_password}
@@ -397,6 +399,9 @@ defmodule Wrt.Auth do
   end
 end
 ```
+
+Password hashing and verification are centralized in `Wrt.Auth.Password`, which is shared
+by `SuperAdmin`, `OrgAdmin`, and `CampaignAdmin` schemas via `defdelegate`.
 
 **Path 2: Portal cross-app auth** — Reads `_oostkit_token` cookie, validates against Portal API.
 
@@ -417,7 +422,7 @@ def authenticate_org_admin(tenant, email, password) do
   case Orgs.get_admin_by_email(tenant, email) do
     nil -> {:error, :not_found}
     admin ->
-      if Bcrypt.verify_pass(password, admin.password_hash) do
+      if Wrt.Auth.Password.valid_password?(admin, password) do
         {:ok, admin}
       else
         {:error, :invalid_password}
@@ -504,6 +509,12 @@ defmodule WrtWeb.WebhookController do
 
       "Click" ->
         update_contact_status(params["Metadata"]["contact_id"], :clicked)
+
+      "Bounce" ->
+        update_contact_status(params["Metadata"]["contact_id"], :bounced)
+
+      "SpamComplaint" ->
+        update_contact_status(params["Metadata"]["contact_id"], :spam)
 
       _ ->
         :ok

@@ -98,20 +98,4 @@ defmodule Wrt.AuthTest do
                Auth.authenticate_org_admin(tenant, "nobody@test.com", "password123")
     end
   end
-
-  describe "get_org_admin/2" do
-    setup do
-      tenant = create_test_tenant()
-      admin = insert_in_tenant(tenant, :org_admin)
-      %{tenant: tenant, admin: admin}
-    end
-
-    test "returns org admin by tenant and id", %{tenant: tenant, admin: admin} do
-      assert Auth.get_org_admin(tenant, admin.id).id == admin.id
-    end
-
-    test "returns nil for non-existent id", %{tenant: tenant} do
-      assert is_nil(Auth.get_org_admin(tenant, -1))
-    end
-  end
 end

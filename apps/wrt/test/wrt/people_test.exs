@@ -58,22 +58,18 @@ defmodule Wrt.PeopleTest do
     end
   end
 
-  describe "get_person/2 and get_person!/2" do
+  describe "get_person!/2" do
     setup do
       tenant = create_test_tenant()
       person = insert_in_tenant(tenant, :person)
       %{tenant: tenant, person: person}
     end
 
-    test "get_person returns person by id", %{tenant: tenant, person: person} do
-      assert People.get_person(tenant, person.id).id == person.id
+    test "returns person by id", %{tenant: tenant, person: person} do
+      assert People.get_person!(tenant, person.id).id == person.id
     end
 
-    test "get_person returns nil for non-existent id", %{tenant: tenant} do
-      assert is_nil(People.get_person(tenant, -1))
-    end
-
-    test "get_person! raises for non-existent id", %{tenant: tenant} do
+    test "raises for non-existent id", %{tenant: tenant} do
       assert_raise Ecto.NoResultsError, fn ->
         People.get_person!(tenant, -1)
       end
@@ -172,7 +168,7 @@ defmodule Wrt.PeopleTest do
 
     test "deletes the person", %{tenant: tenant, person: person} do
       assert {:ok, _} = People.delete_person(tenant, person)
-      assert is_nil(People.get_person(tenant, person.id))
+      assert is_nil(Wrt.Repo.get(Wrt.People.Person, person.id, prefix: tenant))
     end
   end
 

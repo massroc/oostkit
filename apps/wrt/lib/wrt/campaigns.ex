@@ -10,7 +10,7 @@ defmodule Wrt.Campaigns do
 
   import Ecto.Query, warn: false
 
-  alias Wrt.Campaigns.{Campaign, CampaignAdmin}
+  alias Wrt.Campaigns.Campaign
   alias Wrt.Repo
 
   # =============================================================================
@@ -137,70 +137,5 @@ defmodule Wrt.Campaigns do
   """
   def change_campaign(%Campaign{} = campaign, attrs \\ %{}) do
     Campaign.changeset(campaign, attrs)
-  end
-
-  # =============================================================================
-  # Campaign Admin Functions
-  # =============================================================================
-
-  @doc """
-  Lists all campaign admins for a campaign.
-  """
-  def list_campaign_admins(tenant, campaign_id) do
-    CampaignAdmin
-    |> where([ca], ca.campaign_id == ^campaign_id)
-    |> order_by([ca], asc: ca.name)
-    |> Repo.all(prefix: tenant)
-  end
-
-  @doc """
-  Gets a campaign admin by ID.
-  """
-  def get_campaign_admin(tenant, id) do
-    Repo.get(CampaignAdmin, id, prefix: tenant)
-  end
-
-  @doc """
-  Gets a campaign admin by email for a specific campaign.
-  """
-  def get_campaign_admin_by_email(tenant, campaign_id, email) do
-    CampaignAdmin
-    |> where([ca], ca.campaign_id == ^campaign_id and ca.email == ^String.downcase(email))
-    |> Repo.one(prefix: tenant)
-  end
-
-  @doc """
-  Invites a campaign admin.
-  """
-  def invite_campaign_admin(tenant, attrs) do
-    %CampaignAdmin{}
-    |> CampaignAdmin.changeset(attrs)
-    |> Repo.insert(prefix: tenant)
-  end
-
-  @doc """
-  Removes a campaign admin.
-  """
-  def remove_campaign_admin(tenant, %CampaignAdmin{} = campaign_admin) do
-    Repo.delete(campaign_admin, prefix: tenant)
-  end
-
-  @doc """
-  Authenticates a campaign admin.
-  """
-  def authenticate_campaign_admin(tenant, campaign_id, email, password) do
-    campaign_admin = get_campaign_admin_by_email(tenant, campaign_id, email)
-
-    cond do
-      campaign_admin && CampaignAdmin.valid_password?(campaign_admin, password) ->
-        {:ok, campaign_admin}
-
-      campaign_admin ->
-        {:error, :invalid_password}
-
-      true ->
-        Bcrypt.no_user_verify()
-        {:error, :not_found}
-    end
   end
 end

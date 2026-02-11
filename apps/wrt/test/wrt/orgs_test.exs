@@ -2,7 +2,6 @@ defmodule Wrt.OrgsTest do
   use Wrt.DataCase, async: true
 
   alias Wrt.Orgs
-  alias Wrt.Orgs.OrgAdmin
 
   # =============================================================================
   # Org Admin CRUD
@@ -109,22 +108,6 @@ defmodule Wrt.OrgsTest do
     end
   end
 
-  describe "update_org_admin/3" do
-    setup do
-      tenant = create_test_tenant()
-      admin = insert_in_tenant(tenant, :org_admin)
-      %{tenant: tenant, admin: admin}
-    end
-
-    test "updates name and email", %{tenant: tenant, admin: admin} do
-      assert {:ok, updated} =
-               Orgs.update_org_admin(tenant, admin, %{name: "Updated", email: "updated@test.com"})
-
-      assert updated.name == "Updated"
-      assert updated.email == "updated@test.com"
-    end
-  end
-
   describe "delete_org_admin/2" do
     setup do
       tenant = create_test_tenant()
@@ -162,13 +145,6 @@ defmodule Wrt.OrgsTest do
     test "returns {:error, :not_found} for non-existent email", %{tenant: tenant} do
       assert {:error, :not_found} =
                Orgs.authenticate_org_admin(tenant, "nonexistent@test.com", "password123")
-    end
-  end
-
-  describe "change_org_admin/2" do
-    test "returns a changeset" do
-      changeset = Orgs.change_org_admin(%OrgAdmin{}, %{name: "Test"})
-      assert %Ecto.Changeset{} = changeset
     end
   end
 end

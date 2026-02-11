@@ -8,6 +8,7 @@ defmodule Wrt.Campaigns.CampaignAdmin do
 
   use Ecto.Schema
   import Ecto.Changeset
+  import Wrt.Auth.Password
 
   alias Wrt.Campaigns.Campaign
   alias Wrt.Orgs.OrgAdmin
@@ -50,25 +51,5 @@ defmodule Wrt.Campaigns.CampaignAdmin do
     |> unique_constraint([:campaign_id, :email])
   end
 
-  defp hash_password(changeset) do
-    case get_change(changeset, :password) do
-      nil ->
-        changeset
-
-      password ->
-        changeset
-        |> put_change(:password_hash, Bcrypt.hash_pwd_salt(password))
-        |> delete_change(:password)
-    end
-  end
-
-  @doc """
-  Verifies a password against the stored hash.
-  """
-  def valid_password?(%__MODULE__{password_hash: hash}, password)
-      when is_binary(hash) and is_binary(password) do
-    Bcrypt.verify_pass(password, hash)
-  end
-
-  def valid_password?(_, _), do: false
+  defdelegate valid_password?(admin, password), to: Wrt.Auth.Password
 end

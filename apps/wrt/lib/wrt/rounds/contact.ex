@@ -12,7 +12,7 @@ defmodule Wrt.Rounds.Contact do
   alias Wrt.People.Person
   alias Wrt.Rounds.Round
 
-  @email_statuses ~w(pending sent delivered opened clicked)
+  @email_statuses ~w(pending sent delivered opened clicked bounced spam)
 
   schema "contacts" do
     field :email_status, :string, default: "pending"

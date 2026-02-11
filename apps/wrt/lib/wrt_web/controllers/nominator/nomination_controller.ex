@@ -85,8 +85,7 @@ defmodule WrtWeb.Nominator.NominationController do
             People.create_nomination(tenant, %{
               nominator_id: person_id,
               nominee_id: nominee.id,
-              round_id: round_id,
-              reason: nom["reason"]
+              round_id: round_id
             })
 
           error ->

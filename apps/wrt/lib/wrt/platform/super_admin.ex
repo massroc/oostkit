@@ -10,6 +10,7 @@ defmodule Wrt.Platform.SuperAdmin do
 
   use Ecto.Schema
   import Ecto.Changeset
+  import Wrt.Auth.Password
 
   schema "super_admins" do
     field :name, :string
@@ -55,25 +56,5 @@ defmodule Wrt.Platform.SuperAdmin do
     |> hash_password()
   end
 
-  defp hash_password(changeset) do
-    case get_change(changeset, :password) do
-      nil ->
-        changeset
-
-      password ->
-        changeset
-        |> put_change(:password_hash, Bcrypt.hash_pwd_salt(password))
-        |> delete_change(:password)
-    end
-  end
-
-  @doc """
-  Verifies a password against the stored hash.
-  """
-  def valid_password?(%__MODULE__{password_hash: hash}, password)
-      when is_binary(hash) and is_binary(password) do
-    Bcrypt.verify_pass(password, hash)
-  end
-
-  def valid_password?(_, _), do: false
+  defdelegate valid_password?(admin, password), to: Wrt.Auth.Password
 end
