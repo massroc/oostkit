@@ -23,13 +23,29 @@ defmodule WrtWeb.Plugs.PortalAuth do
 
     case conn.cookies[@cross_app_cookie] do
       nil ->
-        assign(conn, :portal_user, nil)
+        maybe_dev_bypass(conn)
 
       encoded_token ->
         case WrtWeb.PortalAuthClient.validate_token(encoded_token) do
           {:ok, user} -> assign(conn, :portal_user, user)
           {:error, _} -> assign(conn, :portal_user, nil)
         end
+    end
+  end
+
+  if Mix.env() == :dev do
+    defp maybe_dev_bypass(conn) do
+      assign(conn, :portal_user, %{
+        "id" => 0,
+        "email" => "dev@oostkit.local",
+        "name" => "Dev Admin",
+        "role" => "super_admin",
+        "enabled" => true
+      })
+    end
+  else
+    defp maybe_dev_bypass(conn) do
+      assign(conn, :portal_user, nil)
     end
   end
 end

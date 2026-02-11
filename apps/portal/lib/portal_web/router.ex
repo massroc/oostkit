@@ -11,6 +11,8 @@ defmodule PortalWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug :maybe_dev_auto_login
+    plug :assign_dev_mode
   end
 
   pipeline :api do
@@ -53,6 +55,12 @@ defmodule PortalWeb.Router do
 
       live_dashboard "/dashboard", metrics: PortalWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+
+    scope "/dev", PortalWeb do
+      pipe_through :browser
+
+      post "/admin-login", DevController, :admin_login
     end
   end
 
@@ -106,5 +114,19 @@ defmodule PortalWeb.Router do
 
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
+  end
+
+  # Dev-only plugs (no-op in prod/test)
+  if Application.compile_env(:portal, :dev_routes) do
+    alias PortalWeb.Plugs.DevAutoLogin
+
+    defp maybe_dev_auto_login(conn, _opts) do
+      DevAutoLogin.call(conn, [])
+    end
+
+    defp assign_dev_mode(conn, _opts), do: assign(conn, :dev_mode, true)
+  else
+    defp maybe_dev_auto_login(conn, _opts), do: conn
+    defp assign_dev_mode(conn, _opts), do: assign(conn, :dev_mode, false)
   end
 end

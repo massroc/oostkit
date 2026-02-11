@@ -330,6 +330,7 @@ Adapts based on authentication state:
 | State | Right Zone Content |
 |-------|-------------------|
 | **Anonymous** | "Sign Up" (primary button → `/users/register`) + "Log In" (secondary/text → `/users/log-in`) |
+| **Anonymous (dev mode)** | "Admin" button (gold text, `POST /dev/admin-login`) + Sign Up + Log In. The Admin button logs in as the dev super admin for quick access. |
 | **Logged in** | User name/email + Settings link + "Log Out" |
 | **Super admin** | Same as logged in + "Admin" link |
 
@@ -603,6 +604,7 @@ This replaces the current hardcoded app config and gives the admin full control.
 | `/admin/signups` | Email signups | Super Admin | View/export coming-soon email capture list. |
 | `/admin/tools` | Tool management | Super Admin | View tool status, toggle tools on/off (kill switch). |
 | `/coming-soon` | Holding page | No | Context-aware holding page with email capture. |
+| `POST /dev/admin-login` | Dev admin login | No | Dev-only. Logs in as dev super admin and redirects to `/admin`. |
 
 ---
 

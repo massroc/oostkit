@@ -1,34 +1,6 @@
 defmodule PortalWeb.PageControllerTest do
   use PortalWeb.ConnCase
 
-  alias Portal.Tools
-
-  setup do
-    {:ok, _} =
-      Tools.create_tool(%{
-        id: "workgroup_pulse",
-        name: "Workgroup Pulse",
-        tagline: "6 Criteria for Productive Work",
-        description: "Test tool for teams",
-        url: "https://pulse.oostkit.com",
-        audience: "team",
-        default_status: "live",
-        sort_order: 1
-      })
-
-    {:ok, _} =
-      Tools.create_tool(%{
-        id: "wrt",
-        name: "Workshop Referral Tool",
-        tagline: "Participative selection for design workshops",
-        audience: "facilitator",
-        default_status: "coming_soon",
-        sort_order: 2
-      })
-
-    :ok
-  end
-
   describe "GET / (landing page)" do
     test "renders the marketing landing page for anonymous users", %{conn: conn} do
       conn = get(conn, ~p"/")

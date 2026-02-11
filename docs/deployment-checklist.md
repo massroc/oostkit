@@ -244,7 +244,7 @@ fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile
 - [ ] Portal app created on Fly.io
 - [ ] Portal database created and attached
 - [ ] Portal secrets set (including cross-app auth secrets)
-- [ ] Portal deployed
+- [ ] Portal deployed (tool catalogue is seeded automatically via data migration -- no manual seed step required)
 - [ ] Root domain (`oostkit.com`) configured and SSL certificate issued
 - [x] CI/CD enabled (auto-deploys on merge to main)
 - [x] `.dockerignore` configured to exclude other apps from build context

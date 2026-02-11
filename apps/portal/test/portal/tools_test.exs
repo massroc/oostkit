@@ -15,15 +15,15 @@ defmodule Portal.ToolsTest do
 
   describe "list_tools/0" do
     test "returns tools ordered by sort_order" do
-      {:ok, _} = Tools.create_tool(%{@valid_attrs | id: "tool_b", sort_order: 98})
-      {:ok, _} = Tools.create_tool(%{@valid_attrs | id: "tool_a", sort_order: 97})
-
       tools = Tools.list_tools()
-      assert [%{id: "tool_a"}, %{id: "tool_b"}] = tools
+      sort_orders = Enum.map(tools, & &1.sort_order)
+      assert sort_orders == Enum.sort(sort_orders)
     end
 
-    test "returns empty list when no tools" do
-      assert [] == Tools.list_tools()
+    test "includes seeded tools" do
+      tools = Tools.list_tools()
+      ids = Enum.map(tools, & &1.id)
+      assert "workgroup_pulse" in ids
     end
   end
 

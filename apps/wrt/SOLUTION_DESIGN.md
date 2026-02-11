@@ -151,6 +151,7 @@ lib/
 │   │   │                            # - Reads _oostkit_token cookie
 │   │   │                            # - Validates via PortalAuthClient
 │   │   │                            # - Sets :portal_user assign on conn
+│   │   │                            # - Dev bypass: assigns fake dev admin when no cookie present
 │   │   │
 │   │   ├── require_portal_super_admin.ex  # Portal super admin auth plug ✓
 │   │   │                            # - Requires portal_user with super_admin role
@@ -387,6 +388,8 @@ The authentication pipeline consists of two plugs applied at the router level:
 1. **`PortalAuth`** — Reads the `_oostkit_token` cookie and validates it against Portal's
    internal API via `PortalAuthClient`. Sets `:portal_user` assign on conn with the user's
    `id`, `email`, `role`, and `enabled` status. Results are cached in ETS with 5-minute TTL.
+   In dev mode, if no cookie is present, assigns a fake dev admin user (`dev@oostkit.local`,
+   `super_admin` role) so WRT routes work without requiring Portal to be running.
 
 2. **`RequirePortalSuperAdmin`** — For `/admin/*` routes. Checks that `portal_user` has
    `role: "super_admin"` and `enabled: true`. Redirects to Portal login if not.
