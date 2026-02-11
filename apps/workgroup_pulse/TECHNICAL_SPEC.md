@@ -59,11 +59,11 @@ SessionLive.Show (root LiveView)
 │   └── .score_indicator      # Traffic light score display
 │
 ├── Layouts
-│   ├── app.html.heex         # Standard layout with OOSTKit header + brand stripe (Home, Join, Create)
+│   ├── app.html.heex         # Standard layout with OOSTKit header + brand stripe (Create, Join)
 │   └── session.html.heex     # Bare layout for session pages (no header — session uses .app_header inline)
 │
 └── Other LiveViews
-    ├── SessionLive.New        # Create new session
+    ├── SessionLive.New        # Home page / create new session (mounted at `/`)
     └── SessionLive.Join       # Join existing session
 ```
 
@@ -548,5 +548,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.4 — OOSTKit brand header; `:session` layout for workshop pages (no duplicate header); `:app` layout for non-session pages*
+*Document Version: 1.5 — Merged HomeLive into SessionLive.New (home page is now create session at `/`)*
 *Last Updated: 2026-02-12*

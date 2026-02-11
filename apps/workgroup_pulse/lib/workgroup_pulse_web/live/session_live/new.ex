@@ -14,7 +14,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
 
     {:ok,
      socket
-     |> assign(page_title: "Create Workshop")
+     |> assign(page_title: "New Workshop")
      |> assign(template: template)
      |> assign(facilitator_name: "")
      |> assign(facilitator_participating: true)
@@ -73,33 +73,22 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
     assigns = assign(assigns, :final_duration, final_duration)
 
     ~H"""
-    <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
+    <div class="flex-1 flex flex-col items-center justify-center px-4 py-4">
       <.sheet class="shadow-sheet p-sheet-padding w-[520px]">
-        <div class="text-center mb-5">
-          <.link
-            navigate={~p"/"}
-            class="text-ink-blue/50 hover:text-ink-blue inline-flex items-center text-sm font-brand mb-4"
-          >
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Back
-          </.link>
-
-          <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-1">
-            New Workshop
+        <div class="text-center mb-3">
+          <h1 class="font-workshop text-4xl font-bold text-ink-blue mb-1">
+            Workgroup Pulse
           </h1>
-          <p class="text-ink-blue/60 text-sm">
-            Six Criteria for Productive Work
+          <p class="text-ink-blue/60 text-sm font-brand mb-3">
+            Intrinsic Motivator Assessment
+          </p>
+          <p class="text-ink-blue/70 text-sm font-brand">
+            Create a session and share the link with your team.
+            <br />No accounts required. No data is stored after session ends.
           </p>
         </div>
 
-        <form action={~p"/session/create"} method="post" phx-change="validate" class="space-y-4">
+        <form action={~p"/session/create"} method="post" phx-change="validate" class="space-y-3">
           <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
           <input type="hidden" name="duration" value={@final_duration || ""} />
           <input
@@ -368,15 +357,11 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
 
           <button
             type="submit"
-            class="w-full btn-workshop btn-workshop-primary text-base py-3 mt-2"
+            class="w-full btn-workshop btn-workshop-primary text-base py-3"
           >
             Create Workshop
           </button>
         </form>
-
-        <p class="text-ink-blue/50 text-xs text-center mt-4 font-brand">
-          You'll get a link to share with your team.
-        </p>
       </.sheet>
     </div>
     """

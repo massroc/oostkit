@@ -196,7 +196,7 @@ Two Phoenix layouts control header presence:
 
 | Layout | Used By | Header |
 |--------|---------|--------|
-| `:app` | Home, Join, Create pages | OOSTKit header + brand stripe in layout (no inline `.app_header`) |
+| `:app` | Create (home page) and Join pages | OOSTKit header + brand stripe in layout (no inline `.app_header`) |
 | `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders `.app_header` inline |
 
 The `:session` layout prevents duplicate headers when the session LiveView renders its own `app_header` component (which includes the session name).
@@ -253,8 +253,7 @@ Three Tailwind token classes provide accent colours across all phase components.
 | `LobbyComponent` | "You" badge (`bg-accent-magenta text-white`) | — | — |
 | `IntroComponent` | — | Welcome blockquote border | Scale endpoint labels (-5/+5, 0) |
 | `FloatingButtonsComponent` | — | Intro progress dots (active dot), ready checkmarks (individual and all-ready) | — |
-| `new.ex` (New Workshop) | — | Timer active icon, duration button selected state (`bg-accent-gold border-accent-gold text-white`) | — |
-| `home_live.ex` (Home) | — | New workshop "+" icon (`text-accent-gold`, `bg-accent-gold/10`) | — |
+| `new.ex` (Home / Create Workshop) | — | Timer active icon, duration button selected state (`bg-accent-gold border-accent-gold text-white`) | — |
 | `ExportPrintComponent` | — | Strengths section (inline gold border/background/text for PDF) | Concerns section (inline red border/background/text for PDF) |
 
 ---
@@ -306,6 +305,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.5 — OOSTKit brand header; `:app`/`:session` layout split; sheet height changed to `100%`*
+*Document Version: 1.6 — Removed HomeLive from accent color table (merged into SessionLive.New); updated layout table*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

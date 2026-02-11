@@ -35,7 +35,7 @@ defmodule WorkgroupPulseWeb.SessionController do
       {:error, :name_required} ->
         conn
         |> put_flash(:error, "Your name is required.")
-        |> redirect(to: ~p"/session/new")
+        |> redirect(to: ~p"/")
 
       {:error, :template_not_found} ->
         conn
@@ -45,7 +45,7 @@ defmodule WorkgroupPulseWeb.SessionController do
       {:error, _changeset} ->
         conn
         |> put_flash(:error, "Failed to create session. Please try again.")
-        |> redirect(to: ~p"/session/new")
+        |> redirect(to: ~p"/")
     end
   end
 
