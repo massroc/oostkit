@@ -36,6 +36,7 @@ defmodule PortalWeb.Router do
     get "/", PageController, :landing
     get "/home", PageController, :home
     get "/apps/:app_id", PageController, :app_detail
+    post "/apps/:app_id/notify", PageController, :notify
 
     live_session :public,
       on_mount: [{PortalWeb.UserAuth, :mount_current_scope}] do

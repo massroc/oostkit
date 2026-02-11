@@ -78,7 +78,7 @@ The functional tool hub. Accessible to everyone (anonymous and logged-in).
 
 ### App Detail Pages (`/apps/:id`)
 
-Product page per tool. Shareable URL. Includes visual walkthrough, detailed description, and context-appropriate action (launch button or inline email capture for coming-soon tools).
+Product page per tool. Shareable URL. Includes visual walkthrough, detailed description, and context-appropriate action (launch button for live tools, or inline email capture form for coming-soon tools with name + email fields and "Notify me" button). Subscribing redirects back with `?subscribed=true` for a success message. Route: `POST /apps/:app_id/notify` creates an interest signup with context `tool:{tool_id}`.
 
 ### Coming Soon Page (`/coming-soon`)
 
@@ -376,13 +376,13 @@ Self-service registration and facilitator onboarding live.
 - C5: First-visit onboarding -- dashboard card with org, referral source, tool interest checkboxes. `OnboardingController` for form POST. `onboarding_changeset` saves data. Dismissable via skip.
 - C6: Flip the switch -- Sign Up / Log In header buttons now point to `/users/register` and `/users/log-in` instead of `/coming-soon`. Organisation column added to admin users table.
 
-#### Phase D: Polish & Detail
+#### Phase D: Polish & Detail (D1-D3 Complete, D4-D5 Deferred)
 Enhancements once core platform is running.
-- D1: App detail page enhancements (screenshots, visual walkthroughs)
-- D2: Inline email capture on detail pages for coming-soon tools
-- D3: SEO & social sharing (Open Graph tags, meta descriptions)
-- D4: Header integration in Pulse/WRT (breadcrumb app name)
-- D5: Admin dashboard trends (charts/time-series)
+- D1: App detail page enhancements -- richer layout with better spacing, structured sections for description and action area (Complete)
+- D2: Inline email capture on detail pages -- for coming-soon tools, name + email "Notify me" form with success state via `?subscribed=true` query param, `POST /apps/:app_id/notify` route in `PageController` creating interest_signup with context `tool:{tool_id}` (Complete)
+- D3: SEO & social sharing -- meta description, `og:title`, `og:description`, `og:type`, `og:site_name` in root layout with per-page overrides via assigns, title suffix changed to em dash (" — OOSTKit") (Complete)
+- D4: Header integration in Pulse/WRT (breadcrumb app name) -- Deferred
+- D5: Admin dashboard trends (charts/time-series) -- Deferred
 
 ---
 

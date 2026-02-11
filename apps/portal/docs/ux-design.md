@@ -592,7 +592,8 @@ This replaces the current hardcoded app config and gives the admin full control.
 |-------|------|---------------|-------------|
 | `/` | Marketing landing | No | Brochure/sales page. Redirects to `/home` if logged in. |
 | `/home` | Dashboard | No | Tool hub. Shows all tools, lock state varies by auth. |
-| `/apps/:id` | App detail / product page | No | Visual walkthrough, full description, launch or email capture. Shareable URL. |
+| `/apps/:id` | App detail / product page | No | Visual walkthrough, full description, launch or inline email capture. Shareable URL. |
+| `POST /apps/:app_id/notify` | Email capture from detail page | No | Creates interest_signup with context `tool:{tool_id}`. Redirects back with `?subscribed=true`. |
 | `/users/log-in` | Login | No | "Welcome back" heading. Magic link (primary) + password (secondary). |
 | `/users/register` | Registration | No | Name + email form, magic link confirmation. Facilitator-focused messaging. |
 | `/users/settings` | Account settings | Yes | Profile (name, org, referral source), email change, password (add/change). |
@@ -701,7 +702,7 @@ Depends on tool status:
 |--------|-------------|
 | **Live & open** | "Launch [tool name]" button → direct link to app |
 | **Live & locked** | "Log in to access" (anon) / "Launch" (logged in) |
-| **Coming soon** | Inline email capture form: "Interested? Leave your email and we'll let you know when it's ready." Name + email fields, same as coming-soon page but embedded. Context auto-set to the specific tool. |
+| **Coming soon** | Inline email capture form: "Interested? Leave your email and we'll let you know when it's ready." Name + email fields with "Notify me" button. Submits to `POST /apps/:app_id/notify`, creates interest_signup with context `tool:{tool_id}`. Success state shown via `?subscribed=true` redirect: "Thanks! We'll let you know when it's ready." |
 
 ### Content Per Tool
 
@@ -722,11 +723,13 @@ Depends on tool status:
 - Description: what a Search Conference is, how the tool will support it
 - Status: Coming soon → email capture
 
-### SEO & Sharing
+### SEO & Sharing (Implemented — Phase D3)
 
-These pages are the primary shareable URL for each tool. They should have:
-- Descriptive `<title>` tags: "Workgroup Pulse — OOSTKit"
-- Open Graph meta tags for social sharing (title, description, image)
+These pages are the primary shareable URL for each tool. Implemented:
+- Descriptive `<title>` tags: "Workgroup Pulse — OOSTKit" (em dash separator)
+- Open Graph meta tags in root layout: `og:title`, `og:description`, `og:type` ("website"), `og:site_name` ("OOSTKit")
+- `<meta name="description">` tag with per-page overrides via `@meta_description` assign
+- App detail pages pass tool description as `meta_description` for page-specific SEO
 - Clean, readable URLs
 
 ---
@@ -814,20 +817,20 @@ Self-service registration and facilitator onboarding live.
 **Result:** Facilitators can sign up, log in, complete onboarding, and access tools.
 Auth is live. The coming-soon gate is removed for auth (but stays for coming-soon tools).
 
-### Phase D: Polish & Detail
+### Phase D: Polish & Detail (D1-D3 Complete, D4-D5 Deferred)
 
 Enhancements once the core platform is running.
 
-| Step | What | Notes |
-|------|------|-------|
-| D1 | **App detail page enhancements** | Screenshots, visual walkthroughs, richer descriptions per tool. |
-| D2 | **Inline email capture on detail pages** | For coming-soon tools. |
-| D3 | **SEO & social sharing** | Open Graph tags, meta descriptions, clean titles per page. |
-| D4 | **Header integration in Pulse/WRT** | Breadcrumb app name in the shared header across apps. |
-| D5 | **Admin dashboard trends** | Charts and time-series once there's enough data. |
+| Step | What | Status | Notes |
+|------|------|--------|-------|
+| D1 | **App detail page enhancements** | Done | Richer layout with better spacing, structured header area, visual walkthrough section, detailed description, and action area. |
+| D2 | **Inline email capture on detail pages** | Done | For coming-soon tools. Name + email "Notify me" form on `/apps/:id` pages. `POST /apps/:app_id/notify` creates interest_signup with context `tool:{tool_id}`. Success state via `?subscribed=true` query param. |
+| D3 | **SEO & social sharing** | Done | Meta description, `og:title`, `og:description`, `og:type`, `og:site_name` in root layout with per-page overrides via assigns. Title suffix changed to em dash (" — OOSTKit"). App detail pages pass tool description as `meta_description`. |
+| D4 | **Header integration in Pulse/WRT** | Deferred | Breadcrumb app name in the shared header across apps. Lower priority. |
+| D5 | **Admin dashboard trends** | Deferred | Charts and time-series once there's enough data. Not enough data volume yet. |
 
-**Result:** Polished product pages, better discoverability, consistent header across
-the entire platform.
+**Result:** Polished product pages with inline email capture, better SEO and social sharing
+discoverability. Header integration and admin trends deferred for later.
 
 ---
 
