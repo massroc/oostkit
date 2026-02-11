@@ -7,6 +7,9 @@ import Config
 # before starting your production server.
 config :portal, PortalWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
+# Configure Swoosh API client (uses Finch, not hackney)
+config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Portal.Finch
+
 # Do not print debug messages in production
 config :logger, level: :info
 
