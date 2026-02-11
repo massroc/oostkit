@@ -240,13 +240,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
 
         <%= if length(@popup_question.discussion_prompts) > 0 do %>
           <div class="mt-4 pt-4 border-t border-ink-blue/10">
-            <h3 class="text-xs font-semibold text-accent-purple uppercase tracking-wide mb-2">
+            <h3 class="text-xs font-semibold text-accent-magenta uppercase tracking-wide mb-2">
               Discussion Tips
             </h3>
             <ul class="space-y-1.5">
               <%= for prompt <- @popup_question.discussion_prompts do %>
                 <li class="flex gap-2 text-ink-blue/60 text-sm">
-                  <span class="text-accent-purple shrink-0">•</span>
+                  <span class="text-accent-magenta shrink-0">•</span>
                   <span>{prompt}</span>
                 </li>
               <% end %>

@@ -154,7 +154,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
           <%= if @participant.is_facilitator and @scores_revealed do %>
             <div class="pointer-events-auto text-sm font-brand mr-auto bg-surface-sheet rounded-lg px-3 py-2 shadow-md">
               <%= if @all_ready do %>
-                <span class="text-traffic-green">✓</span>
+                <span class="text-accent-gold">✓</span>
                 <span class="text-ink-blue/70">All participants ready</span>
               <% else %>
                 <span class="text-ink-blue/70">
@@ -205,7 +205,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
           <%= if not @participant.is_facilitator and @scores_revealed and not @participant_was_skipped and not (@is_my_turn and not @my_turn_locked) do %>
             <%= if @participant.is_ready do %>
               <div class="pointer-events-auto btn-workshop btn-workshop-secondary opacity-70 cursor-default">
-                <span class="text-traffic-green">✓</span> Ready
+                <span class="text-accent-gold">✓</span> Ready
               </div>
             <% else %>
               <button

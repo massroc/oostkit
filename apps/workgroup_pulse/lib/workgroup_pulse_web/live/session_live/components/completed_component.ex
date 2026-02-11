@@ -115,16 +115,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
 
           <%!-- Concerns --%>
           <%= if length(@concerns) > 0 do %>
-            <div class="bg-traffic-red/5 border border-traffic-red/30 rounded-lg p-3">
-              <h3 class="text-sm font-semibold text-traffic-red mb-2 font-brand">
+            <div class="bg-accent-red/5 border border-accent-red/30 rounded-lg p-3">
+              <h3 class="text-sm font-semibold text-accent-red mb-2 font-brand">
                 Areas of Concern ({length(@concerns)})
               </h3>
               <ul class="space-y-1.5">
                 <%= for item <- @concerns do %>
                   <li class="flex items-center gap-2 text-sm text-ink-blue/70">
-                    <span class="text-traffic-red text-xs">!</span>
+                    <span class="text-accent-red text-xs">!</span>
                     <span class="font-workshop">{item.title}</span>
-                    <span class="text-traffic-red font-semibold ml-auto font-workshop text-sm">
+                    <span class="text-accent-red font-semibold ml-auto font-workshop text-sm">
                       {round(item.combined_team_value)}/10
                     </span>
                   </li>
@@ -136,8 +136,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
       <% end %>
 
       <%!-- Actions --%>
-      <div class="bg-accent-purple/5 border border-accent-purple/30 rounded-lg p-3 mb-5">
-        <h3 class="text-sm font-semibold text-accent-purple mb-2 font-brand">
+      <div class="bg-accent-magenta/5 border border-accent-magenta/30 rounded-lg p-3 mb-5">
+        <h3 class="text-sm font-semibold text-accent-magenta mb-2 font-brand">
           Action Items
           <%= if @action_count > 0 do %>
             ({@action_count})
@@ -152,7 +152,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
             phx-change="update_action_input"
             phx-debounce="300"
             placeholder="Add an action item..."
-            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-magenta focus:ring-1 focus:ring-accent-magenta font-workshop"
           />
         </form>
 
@@ -160,7 +160,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
           <ul class="space-y-1.5">
             <%= for action <- @all_actions do %>
               <li class="flex items-start gap-2 text-sm text-ink-blue/70 group">
-                <span class="text-accent-purple text-xs mt-0.5">→</span>
+                <span class="text-accent-magenta text-xs mt-0.5">→</span>
                 <span class="font-workshop flex-1">{action.description}</span>
                 <button
                   type="button"

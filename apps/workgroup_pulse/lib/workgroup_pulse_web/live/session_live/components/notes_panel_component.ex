@@ -123,7 +123,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.NotesPanelComponent do
             phx-change="update_note_input"
             phx-debounce="300"
             placeholder="Add a note..."
-            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-magenta focus:ring-1 focus:ring-accent-magenta font-workshop"
           />
         </form>
 
@@ -172,7 +172,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.NotesPanelComponent do
             phx-change="update_action_input"
             phx-debounce="300"
             placeholder="Add an action..."
-            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-purple focus:ring-1 focus:ring-accent-purple font-workshop"
+            class="w-full bg-surface-sheet border border-ink-blue/10 rounded-lg px-3 py-2 text-sm text-ink-blue placeholder-ink-blue/40 focus:outline-none focus:border-accent-magenta focus:ring-1 focus:ring-accent-magenta font-workshop"
           />
         </form>
 

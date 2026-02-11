@@ -222,6 +222,29 @@ Facilitator-only countdown timer, positioned top-right with fixed positioning.
 
 Traffic light score display with colour coding.
 
+### Accent Color Classes
+
+Three Tailwind token classes provide accent colours across all phase components. See [ux-design.md](ux-design.md) for the design rationale.
+
+| Token | Hex | Tailwind Classes Used |
+|-------|-----|----------------------|
+| `accent-magenta` | `#BC45F4` | `text-accent-magenta`, `bg-accent-magenta`, `bg-accent-magenta/5`, `border-accent-magenta/30`, `focus:border-accent-magenta`, `focus:ring-accent-magenta` |
+| `accent-gold` | `#F4B945` | `text-accent-gold`, `bg-accent-gold`, `bg-accent-gold/10`, `border-accent-gold` |
+| `accent-red` | `#F44545` | `text-accent-red`, `bg-accent-red/5`, `border-accent-red/30` |
+
+**Per-component usage:**
+
+| Component | Magenta | Gold | Accent-red |
+|-----------|---------|------|------------|
+| `NotesPanelComponent` | Focus ring on notes and actions inputs | — | — |
+| `CompletedComponent` | Actions section (header, input focus, arrow bullets) | — | Concerns section (header, icon, background) |
+| `ScoreOverlayComponent` | Discussion tips heading and bullet points | — | — |
+| `LobbyComponent` | "You" badge (`bg-accent-magenta text-white`) | — | — |
+| `IntroComponent` | — | Welcome blockquote border | Scale endpoint labels (-5/+5, 0) |
+| `FloatingButtonsComponent` | — | Ready checkmarks (individual and all-ready) | — |
+| `new.ex` (New Workshop) | — | Timer active icon (`bg-accent-gold`) | — |
+| `home_live.ex` (Home) | — | New workshop "+" icon (`text-accent-gold`, `bg-accent-gold/10`) | — |
+
 ---
 
 ## 6. Responsive Design
@@ -271,6 +294,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.2 — Intro slide 3 changed from Safe Space to Maximal Scale; export reports simplified (no author/owner fields); team report excludes notes*
+*Document Version: 1.3 — Accent color classes and per-component usage documented*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

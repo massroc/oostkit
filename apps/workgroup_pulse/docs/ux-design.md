@@ -118,11 +118,23 @@ All workshop apps use a **light theme** with warm off-white backgrounds, replaci
 | UI Text | Dark gray | `#333333` |
 | Primary Accent | Purple | `#7245F4` |
 | Secondary Accent | Magenta | `#BC45F4` |
-| Score High / Success | Gold | `#F4B945` |
-| Score Low / Warning | Red | `#F44545` |
+| Warm Accent | Gold | `#F4B945` |
+| Alert Accent | Accent-red | `#F44545` |
 | Traffic Green | Green | `#22c55e` |
 | Traffic Amber | Amber | `#f59e0b` |
 | Traffic Red | Red | `#ef4444` |
+
+#### Accent Color Usage
+
+The three accent colors (magenta, gold, accent-red) serve distinct semantic roles across the UI:
+
+| Accent | Semantic Role | Used In |
+|--------|--------------|---------|
+| **Magenta** (`accent-magenta`) | Interactive focus / user identity | Input focus rings (notes, actions), action items section header and bullets, discussion tips in score overlay, "You" badge in lobby |
+| **Gold** (`accent-gold`) | Warmth / readiness / positive status | Welcome blockquote border, ready checkmarks (individual and all-ready), timer active state icon, new workshop "+" icon |
+| **Accent-red** (`accent-red`) | Concerns / warnings / emphasis | Concerns section (header, icons, background), scale endpoint labels (balance -5/+5, maximal 0), error messages |
+
+**Note:** Accent-red (`#F44545`) is semantically distinct from traffic-red (`#ef4444`). Traffic-red is reserved for score traffic-light indicators; accent-red is used for concerns, warnings, and emphasis in non-scoring contexts.
 
 See `/docs/brand-colors.md` for the complete palette.
 
@@ -217,6 +229,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.1 — Intro slide 3 changed from Safe Space to Maximal Scale*
+*Document Version: 1.2 — Accent color roles documented (magenta, gold, accent-red)*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

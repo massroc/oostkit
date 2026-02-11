@@ -69,7 +69,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
                     </span>
                   <% end %>
                   <%= if p.id == @participant.id do %>
-                    <span class="text-xs bg-accent-purple text-white px-2 py-0.5 rounded font-brand">
+                    <span class="text-xs bg-accent-magenta text-white px-2 py-0.5 rounded font-brand">
                       You
                     </span>
                   <% end %>

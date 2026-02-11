@@ -210,7 +210,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
               <div class={[
                 "w-8 h-8 rounded-md flex items-center justify-center transition-colors",
                 if(@duration_option != "none",
-                  do: "bg-accent-purple text-white",
+                  do: "bg-accent-gold text-white",
                   else: "bg-ink-blue/10 text-ink-blue/40"
                 )
               ]}>
