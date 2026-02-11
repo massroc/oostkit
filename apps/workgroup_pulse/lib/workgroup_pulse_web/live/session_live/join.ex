@@ -46,7 +46,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-surface-wall flex flex-col items-center justify-center px-4">
+    <div class="flex-1 flex flex-col items-center justify-center px-4 py-8">
       <.sheet class="shadow-sheet p-sheet-padding w-[520px]">
         <div class="text-center mb-5">
           <.link

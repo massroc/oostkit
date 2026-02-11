@@ -17,11 +17,10 @@ defmodule WorkgroupPulseWeb.Router do
   scope "/", WorkgroupPulseWeb do
     pipe_through :browser
 
-    # Home page - create new session
-    live "/", HomeLive, :index
+    # Create new session (home page)
+    live "/", SessionLive.New, :new
 
     # Session routes
-    live "/session/new", SessionLive.New, :new
     live "/session/:code", SessionLive.Show, :show
     live "/session/:code/join", SessionLive.Join, :join
 

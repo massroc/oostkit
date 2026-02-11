@@ -755,5 +755,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 4.3 — Simplified notes (session-level, no author/question), simplified actions (no owner), replaced Safe Space intro with Maximal Scale, home page simplified (no join-by-code), team report header*
+*Document Version: 4.4 — Merged home and create session into single page at `/`; "Intrinsic Motivator Assessment" subtitle; removed standalone entry screen*
 *Last Updated: 2026-02-12*
