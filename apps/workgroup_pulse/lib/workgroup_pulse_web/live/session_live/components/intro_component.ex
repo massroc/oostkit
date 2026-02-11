@@ -11,7 +11,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
 
   def slide_welcome(assigns) do
-    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[720px] h-full" end)
+    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[960px] h-full" end)
 
     ~H"""
     <.sheet class={@class}>
@@ -40,7 +40,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   end
 
   def slide_how_it_works(assigns) do
-    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[720px] h-full" end)
+    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[960px] h-full" end)
 
     ~H"""
     <.sheet class={@class}>
@@ -75,7 +75,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   end
 
   def slide_balance_scale(assigns) do
-    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[720px] h-full" end)
+    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[960px] h-full" end)
 
     ~H"""
     <.sheet class={@class}>
@@ -123,7 +123,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
   end
 
   def slide_maximal_scale(assigns) do
-    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[720px] h-full" end)
+    assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[960px] h-full" end)
 
     ~H"""
     <.sheet class={@class}>

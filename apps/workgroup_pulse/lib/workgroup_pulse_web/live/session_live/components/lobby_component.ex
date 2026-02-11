@@ -18,7 +18,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
     assigns = assign(assigns, :join_url, join_url)
 
     ~H"""
-    <.sheet class="shadow-sheet p-6 w-[720px] h-full">
+    <.sheet class="shadow-sheet p-6 w-[960px] h-full">
       <div class="text-center max-w-lg mx-auto">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
           Waiting Room

@@ -7,7 +7,7 @@ defmodule WorkgroupPulseWeb.SessionLive.GridHelpers do
   import Phoenix.Component, only: [assign: 3]
 
   # Fixed number of participant column slots to maintain consistent grid width
-  @grid_participant_slots 7
+  @grid_participant_slots 10
 
   # Questions that are first of a paired criterion — emit a header row before them
   @first_of_pair MapSet.new(["2a", "5a"])

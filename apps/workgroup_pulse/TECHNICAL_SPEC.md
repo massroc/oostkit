@@ -238,7 +238,7 @@ show_score_overlay: turn_state.is_my_turn and my_score == nil
 **Purpose:** Shared helpers for scoring grid rendering, used by `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent`. Eliminates duplicated grid logic across these three components.
 
 **Key Functions:**
-- `prepare_grid_assigns/1` — Prepares common grid assigns: filters active participants, splits questions by scale type (balance/maximal), calculates empty column slots and total columns. Fixed at 7 participant column slots for consistent grid width.
+- `prepare_grid_assigns/1` — Prepares common grid assigns: filters active participants, splits questions by scale type (balance/maximal), calculates empty column slots and total columns. Fixed at 10 participant column slots for consistent grid width.
 - `sub_label/1` — Returns "a" or "b" suffix for paired criteria questions, nil otherwise
 - `first_of_pair?/1` — Returns true if a question starts a paired criterion group (e.g., "2a", "5a")
 - `format_score_value/2` — Formats score for display; balance values > 0 get a "+" prefix

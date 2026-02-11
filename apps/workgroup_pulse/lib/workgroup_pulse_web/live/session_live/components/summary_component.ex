@@ -22,7 +22,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
 
   def render(assigns) do
     ~H"""
-    <.sheet class="shadow-sheet p-sheet-padding w-[720px] h-full">
+    <.sheet class="shadow-sheet p-sheet-padding w-[960px] h-full">
       <%!-- Header --%>
       <div class="text-center mb-5 pb-3 border-b border-ink-blue/10">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-1">

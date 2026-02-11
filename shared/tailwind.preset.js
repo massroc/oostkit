@@ -208,7 +208,7 @@ module.exports = {
       // ===================
       // Reference: Post-it Easel Pad 635mm × 775mm = 0.819 ratio (W:H)
       aspectRatio: {
-        'sheet': '0.819',            // Width ÷ Height
+        'sheet': '1.221',            // Width ÷ Height
       },
 
       // Chrome heights

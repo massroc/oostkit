@@ -109,7 +109,7 @@ All phases (except lobby) share a single **unified carousel** — a click-only h
 The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
 
 **Unified Slide Map (up to 7 slides, progressively appended):**
-- **Slides 0-3: Intro slides** — Welcome, how-it-works, balance scale, maximal scale (always rendered, full 720px)
+- **Slides 0-3: Intro slides** — Welcome, how-it-works, balance scale, maximal scale (always rendered, full 960px)
 - **Slide 4: Scoring Grid** — The full 8-question scoring grid (rendered in scoring/summary/completed)
 - **Slide 5: Summary** — Overview of all scores and notes (rendered in summary/completed)
 - **Slide 6: Wrap-up** — Action planning and export (rendered in completed)
