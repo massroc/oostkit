@@ -55,7 +55,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
       end
     end)
     |> load_scores(session, question_index)
-    |> load_notes(session, question_index)
+    |> load_notes(session)
     |> load_all_questions_scores(session, template)
     |> load_actions_data(session)
   end
@@ -286,10 +286,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
   end
 
   @doc """
-  Loads notes for a specific question.
+  Loads all notes for a session.
   """
-  def load_notes(socket, session, question_index) do
-    notes = Notes.list_notes_for_question(session, question_index)
+  def load_notes(socket, session) do
+    notes = Notes.list_all_notes(session)
     assign(socket, question_notes: notes)
   end
 
@@ -344,9 +344,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
       participants = socket.assigns.participants
       individual_scores = Scoring.get_all_individual_scores(session, participants, template)
 
-      # Group notes by question_index
-      notes_by_question = Enum.group_by(all_notes, & &1.question_index)
-
       # Single pass grouping instead of triple filtering
       grouped = Enum.group_by(scores_summary, & &1.color)
 
@@ -355,7 +352,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
       |> assign(scores_summary: scores_summary)
       |> assign(all_notes: all_notes)
       |> assign(individual_scores: individual_scores)
-      |> assign(notes_by_question: notes_by_question)
       |> assign(strengths: Map.get(grouped, :green, []))
       |> assign(concerns: Map.get(grouped, :red, []))
       |> assign(neutral: Map.get(grouped, :amber, []))
@@ -365,7 +361,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
       |> assign(scores_summary: [])
       |> assign(all_notes: [])
       |> assign(individual_scores: %{})
-      |> assign(notes_by_question: %{})
       |> assign(strengths: [])
       |> assign(concerns: [])
       |> assign(neutral: [])

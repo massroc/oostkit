@@ -124,8 +124,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_info({:note_updated, question_index}, socket) do
-    {:noreply, MessageHandlers.handle_note_updated(socket, question_index)}
+  def handle_info(:note_updated, socket) do
+    {:noreply, MessageHandlers.handle_note_updated(socket)}
   end
 
   @impl true
@@ -271,8 +271,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     do: ContentHandlers.handle_update_note_input(socket, value)
 
   @impl true
-  def handle_event("add_note", _params, socket),
-    do: ContentHandlers.handle_add_note(socket)
+  def handle_event("add_note", %{"note" => content}, socket),
+    do: ContentHandlers.handle_add_note(socket, content)
 
   @impl true
   def handle_event("delete_note", %{"id" => note_id}, socket),
@@ -283,8 +283,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     do: ContentHandlers.handle_update_action_input(socket, value)
 
   @impl true
-  def handle_event("add_action", _params, socket),
-    do: ContentHandlers.handle_add_action(socket)
+  def handle_event("add_action", %{"action" => description}, socket),
+    do: ContentHandlers.handle_add_action(socket, description)
 
   @impl true
   def handle_event("delete_action", %{"id" => action_id}, socket),
@@ -413,7 +413,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
         <IntroComponent.slide_balance_scale />
       </div>
       <div class="sheet-stack-slide" data-slide="3">
-        <IntroComponent.slide_safe_space />
+        <IntroComponent.slide_maximal_scale />
       </div>
 
       <%!-- Slide 4: scoring grid (when scoring/summary/completed) --%>
@@ -444,7 +444,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             participants={@participants}
             scores_summary={@scores_summary}
             individual_scores={@individual_scores}
-            notes_by_question={@notes_by_question}
             all_questions={
               case @summary_template || @template do
                 %{questions: q} -> q
@@ -467,7 +466,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
             strengths={@strengths}
             concerns={@concerns}
             all_notes={@all_notes}
-            notes_by_question={@notes_by_question}
             all_actions={@all_actions}
             action_count={@action_count}
             action_input={@action_input}

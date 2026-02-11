@@ -3,8 +3,6 @@ defmodule WorkgroupPulse.Notes.Note do
   Schema for discussion notes.
 
   Notes capture discussion points and observations during the workshop.
-  They can be associated with a specific question (via question_index)
-  or be general session-wide notes (when question_index is nil).
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -12,9 +10,7 @@ defmodule WorkgroupPulse.Notes.Note do
   alias WorkgroupPulse.Sessions.Session
 
   schema "notes" do
-    field :question_index, :integer
     field :content, :string
-    field :author_name, :string
 
     belongs_to :session, Session
 
@@ -24,18 +20,17 @@ defmodule WorkgroupPulse.Notes.Note do
   @doc false
   def changeset(note, attrs) do
     note
-    |> cast(attrs, [:question_index, :content, :author_name])
+    |> cast(attrs, [:content])
     |> validate_required([:content])
     |> validate_length(:content, min: 1, max: 2000)
-    |> validate_length(:author_name, max: 100)
   end
 
   @doc """
   Changeset for creating a note.
   """
-  def create_changeset(note, session, question_index, attrs) do
+  def create_changeset(note, session, attrs) do
     note
-    |> changeset(Map.put(attrs, :question_index, question_index))
+    |> changeset(attrs)
     |> put_assoc(:session, session)
   end
 end

@@ -22,7 +22,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   attr :strengths, :list, required: true
   attr :concerns, :list, required: true
   attr :all_notes, :list, required: true
-  attr :notes_by_question, :map, required: true
   attr :all_actions, :list, required: true
   attr :action_count, :integer, required: true
   attr :action_input, :string, required: true
@@ -163,11 +162,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
               <li class="flex items-start gap-2 text-sm text-ink-blue/70 group">
                 <span class="text-accent-purple text-xs mt-0.5">→</span>
                 <span class="font-workshop flex-1">{action.description}</span>
-                <%= if action.owner_name do %>
-                  <span class="text-[10px] text-ink-blue/40 font-brand whitespace-nowrap">
-                    {action.owner_name}
-                  </span>
-                <% end %>
                 <button
                   type="button"
                   phx-click="delete_action"
@@ -215,7 +209,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
       strengths={@strengths}
       concerns={@concerns}
       all_notes={@all_notes}
-      notes_by_question={@notes_by_question}
       all_actions={@all_actions}
       summary_template={@summary_template}
     />

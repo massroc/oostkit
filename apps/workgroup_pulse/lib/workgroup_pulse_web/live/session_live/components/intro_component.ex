@@ -122,40 +122,44 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     """
   end
 
-  def slide_safe_space(assigns) do
+  def slide_maximal_scale(assigns) do
     assigns = assign_new(assigns, :class, fn -> "shadow-sheet p-6 w-[720px] h-full" end)
 
     ~H"""
     <.sheet class={@class}>
       <div class="text-center">
         <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
-          Creating a Safe Space
+          Understanding the Maximal Scale
         </h1>
 
         <div class="text-ink-blue/80 text-lg text-left leading-relaxed">
           <p class="mb-4">
-            This workshop operates under the <span class="text-ink-blue font-semibold">Prime Directive</span>:
+            The last four questions use a
+            <span class="text-ink-blue font-semibold">maximal scale</span>
+            from 0 to 10:
           </p>
 
-          <blockquote class="italic text-ink-blue/70 border-l-4 border-accent-purple pl-4 my-4">
-            "Regardless of what we discover, we understand and truly believe that everyone did the best job they could, given what they knew at the time, their skills and abilities, the resources available, and the situation at hand."
-            <span class="block text-sm mt-2 not-italic text-ink-blue/50">— Norm Kerth</span>
-          </blockquote>
+          <div class="bg-surface-wall rounded-lg p-6 my-4">
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-accent-red font-semibold font-workshop text-xl">0</span>
+              <span class="text-traffic-green font-semibold text-2xl font-workshop">10</span>
+            </div>
 
-          <p class="mb-4 text-ink-blue/70">
-            Your scores reflect the <span class="text-ink-blue">system and environment</span>
-            — not individual failings. Low scores aren't accusations; they're opportunities to improve how work is structured.
-          </p>
+            <div class="flex justify-between items-center text-sm text-ink-blue/60">
+              <span>None at all</span>
+              <span>As much as possible</span>
+            </div>
+          </div>
 
           <ul class="space-y-1.5 pl-4 text-ink-blue/70">
+            <li>• For these criteria, <span class="text-traffic-green font-semibold">more is always better</span></li>
             <li>
-              • <span class="text-ink-blue">Be honest</span>
-              — this only works if people share their real experience
+              • <span class="text-ink-blue font-semibold">10 is optimal</span>
+              — the ideal to strive for
             </li>
-            <li>• There are no right or wrong scores</li>
-            <li>• Differences are expected — they reveal different experiences</li>
-            <li>• Your individual scores are visible only to this team</li>
+            <li>• Lower scores highlight areas where the team needs more</li>
           </ul>
+
         </div>
       </div>
     </.sheet>

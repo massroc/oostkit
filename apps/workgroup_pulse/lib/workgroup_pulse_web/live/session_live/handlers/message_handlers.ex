@@ -147,13 +147,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers do
 
   @doc """
   Handles note_updated message from other participants.
-  Reloads notes if in scoring state for the relevant question.
+  Reloads notes if in a state that shows notes.
   """
-  def handle_note_updated(socket, question_index) do
+  def handle_note_updated(socket) do
     session = socket.assigns.session
 
-    if session.state == "scoring" and session.current_question_index == question_index do
-      DataLoaders.load_notes(socket, session, question_index)
+    if session.state in ["scoring", "summary", "completed"] do
+      DataLoaders.load_notes(socket, session)
     else
       socket
     end

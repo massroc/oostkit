@@ -185,8 +185,8 @@ The following handler modules have been extracted from SessionLive.Show to impro
 - `handle_focus_sheet/2` — Brings specified sheet panel to front (`:main` → carousel index 4; `:notes` → sets `notes_revealed: true`)
 - `handle_reveal_notes/1` / `handle_hide_notes/1` — Toggle the fixed-position notes panel
 - `handle_dismiss_prompt/2` — Dismisses any prompt type (discuss, team_discuss)
-- `handle_add_note/1` / `handle_delete_note/2` — Note CRUD
-- `handle_add_action/1` / `handle_delete_action/2` — Action CRUD
+- `handle_add_note/2` / `handle_delete_note/2` — Note CRUD (content read from form params)
+- `handle_add_action/2` / `handle_delete_action/2` — Action CRUD (description read from form params)
 - `handle_export/2` — Generates CSV or triggers PDF export via JS hook
 - `handle_show_criterion_info/2` / `handle_close_criterion_info/1` — Criterion popup toggle
 
@@ -214,8 +214,8 @@ The following handler modules have been extracted from SessionLive.Show to impro
 - `load_scoring_data/3` — Loads all scoring state for scoring/summary/completed states. Uses a single clause with guard for active states, falling back to `reset_scoring_assigns/1` for others. Delegates common assigns to `assign_common_scoring/5`.
 - `load_scores/3` — Loads scores for a specific question, builds participant score grid, calculates readiness
 - `load_all_questions_scores/3` — Loads scores for all 8 questions (for the full grid display)
-- `load_notes/3` — Loads notes for a specific question
-- `load_summary_data/2` — Loads summary state: scores summary, individual scores, notes by question, strengths/concerns
+- `load_notes/2` — Loads all notes for a session (session-level, not per-question)
+- `load_summary_data/2` — Loads summary state: scores summary, individual scores, all notes, strengths/concerns
 - `load_actions_data/2` — Loads actions for wrap-up phase
 - `get_or_load_template/2` — Template caching (reuses from socket assigns)
 - `reset_scoring_assigns/1` — Resets all scoring-related assigns to defaults
@@ -334,7 +334,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
 
      # Summary state (via DataLoaders.load_summary_data/2)
      # summary_template, scores_summary, all_notes, individual_scores,
-     # notes_by_question, strengths, concerns, neutral
+     # all_notes, strengths, concerns, neutral
 
      # Actions state (via DataLoaders.load_actions_data/2)
      # all_actions, action_count
@@ -346,8 +346,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     do: ScoringHandlers.handle_select_score(socket, params)
   def handle_event("go_back", _params, socket),
     do: NavigationHandlers.handle_go_back(socket)
-  def handle_event("add_note", _params, socket),
-    do: ContentHandlers.handle_add_note(socket)
+  def handle_event("add_note", %{"note" => content}, socket),
+    do: ContentHandlers.handle_add_note(socket, content)
 
   # PubSub messages delegate to MessageHandlers
   def handle_info({:score_submitted, pid, qi}, socket),
@@ -531,9 +531,8 @@ From any LiveView, you can track custom events:
 All text input fields use `phx-debounce="300"` to reduce server round-trips during typing:
 - Note input field
 - Action description input
-- Action owner input
 
-This reduces WebSocket messages by ~80-90% during typing.
+Note and action form submissions read content directly from form params (not from debounced socket assigns), ensuring that pressing Enter always saves the current input value regardless of debounce timing.
 
 ### Optimized Data Loading
 
@@ -545,5 +544,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.2 — Split EventHandlers into NavigationHandlers/ScoringHandlers/ContentHandlers; added GridHelpers module; removed ActionFormComponent*
-*Last Updated: 2026-02-11*
+*Document Version: 1.3 — Simplified notes/actions handlers (content from form params); notes load session-level; intro slide_safe_space replaced with slide_maximal_scale*
+*Last Updated: 2026-02-12*

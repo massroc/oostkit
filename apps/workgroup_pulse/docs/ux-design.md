@@ -63,7 +63,7 @@ All workshop phases (except lobby) share a single unified carousel. Slides are p
 | 0 | Welcome | 720px | always (carousel shown when state != "lobby") |
 | 1 | How It Works | 720px | always |
 | 2 | Balance Scale | 720px | always |
-| 3 | Safe Space | 720px | always |
+| 3 | Maximal Scale | 720px | always |
 | 4 | Scoring Grid | 720px | state in scoring/summary/completed |
 | 5 | Summary | 720px | state in summary/completed |
 | 6 | Wrap-up | 720px | state == completed |
@@ -217,5 +217,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 1.1 — Intro slide 3 changed from Safe Space to Maximal Scale*
 *Created: 2026-02-07*
+*Updated: 2026-02-12*

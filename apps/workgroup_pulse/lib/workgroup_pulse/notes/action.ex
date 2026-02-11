@@ -12,7 +12,6 @@ defmodule WorkgroupPulse.Notes.Action do
 
   schema "actions" do
     field :description, :string
-    field :owner_name, :string
     field :completed, :boolean, default: false
 
     belongs_to :session, Session
@@ -23,10 +22,9 @@ defmodule WorkgroupPulse.Notes.Action do
   @doc false
   def changeset(action, attrs) do
     action
-    |> cast(attrs, [:description, :owner_name, :completed])
+    |> cast(attrs, [:description, :completed])
     |> validate_required([:description])
     |> validate_length(:description, min: 1, max: 1000)
-    |> validate_length(:owner_name, max: 100)
   end
 
   @doc """

@@ -44,7 +44,7 @@ Slides are progressively appended as the workshop advances. Indices are stable �
 | 0 | Welcome | 720px | always |
 | 1 | How It Works | 720px | always |
 | 2 | Balance Scale | 720px | always |
-| 3 | Safe Space | 720px | always |
+| 3 | Maximal Scale | 720px | always |
 | 4 | Scoring Grid | 720px | state in scoring/summary/completed |
 | 5 | Summary | 720px | state in summary/completed |
 | 6 | Wrap-up | 720px | state == completed |
@@ -61,7 +61,7 @@ Slides are progressively appended as the workshop advances. Indices are stable �
 - `IntroComponent.slide_welcome/1`
 - `IntroComponent.slide_how_it_works/1`
 - `IntroComponent.slide_balance_scale/1`
-- `IntroComponent.slide_safe_space/1`
+- `IntroComponent.slide_maximal_scale/1`
 
 Each accepts an optional `class` attr (defaults to `"shadow-sheet p-6 w-[720px] h-full"`). All slides render at full 720px in the unified carousel.
 
@@ -262,8 +262,8 @@ Replaces the previous `FileDownload` hook. Attached to the export button contain
 
 Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook reveals a clone for capture. Renders static inline-styled HTML (no Tailwind classes) sized at 960px wide with `box-sizing: border-box`. Content switches based on `export_report_type`:
 
-- **Full Report** — participants table, individual scores grid with traffic-light cell backgrounds, team score cards, strengths/concerns, notes with authors, actions with owners.
-- **Team Report** — team score cards, strengths/concerns, notes without authors, actions without owners. No participants or individual scores.
+- **Full Report** — participants table, individual scores grid with traffic-light cell backgrounds, team score cards, strengths/concerns, notes, and actions.
+- **Team Report** — "TEAM REPORT / No individual scores, names or notes" header, team score cards, strengths/concerns, and actions. No participants, individual scores, or notes.
 
 ### Vendor Dependency
 
@@ -271,5 +271,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.1 — Added export & PDF generation section*
+*Document Version: 1.2 — Intro slide 3 changed from Safe Space to Maximal Scale; export reports simplified (no author/owner fields); team report excludes notes*
 *Created: 2026-02-07*
+*Updated: 2026-02-12*

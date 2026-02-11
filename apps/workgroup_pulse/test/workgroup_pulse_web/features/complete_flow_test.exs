@@ -67,7 +67,7 @@ defmodule WorkgroupPulseWeb.Features.CompleteFlowTest do
       assert render(view) =~ "balance"
 
       view |> render_click("intro_next")
-      assert render(view) =~ "Safe Space" or render(view) =~ "honest"
+      assert render(view) =~ "Maximal Scale" or render(view) =~ "more is always better"
 
       # Continue to scoring
       view |> render_click("continue_to_scoring")

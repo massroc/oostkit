@@ -145,9 +145,7 @@ defmodule WorkgroupPulse.Factory do
   # Note factory
   def note_factory do
     %Note{
-      question_index: 0,
       content: sequence(:note_content, &"Discussion note #{&1}"),
-      author_name: "Test Author",
       session: build(:session)
     }
   end
@@ -156,7 +154,6 @@ defmodule WorkgroupPulse.Factory do
   def action_factory do
     %Action{
       description: sequence(:action_description, &"Action item #{&1}"),
-      owner_name: nil,
       completed: false,
       session: build(:session)
     }
