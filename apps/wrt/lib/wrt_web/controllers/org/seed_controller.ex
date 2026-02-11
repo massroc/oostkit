@@ -5,7 +5,6 @@ defmodule WrtWeb.Org.SeedController do
   alias Wrt.People
 
   plug WrtWeb.Plugs.TenantPlug
-  plug WrtWeb.Plugs.RequireOrgAdmin
 
   def index(conn, %{"campaign_id" => campaign_id}) do
     tenant = conn.assigns.tenant

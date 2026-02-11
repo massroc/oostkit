@@ -14,13 +14,14 @@ defmodule WrtWeb.Router do
     plug :accepts, ["json"]
   end
 
-  pipeline :portal_auth do
+  pipeline :require_portal_super_admin do
     plug WrtWeb.Plugs.PortalAuth
+    plug WrtWeb.Plugs.RequirePortalSuperAdmin
   end
 
-  pipeline :require_portal_or_wrt_super_admin do
+  pipeline :require_portal_user do
     plug WrtWeb.Plugs.PortalAuth
-    plug WrtWeb.Plugs.RequirePortalOrWrtSuperAdmin
+    plug WrtWeb.Plugs.RequirePortalUser
   end
 
   # Health check routes (no auth required)
@@ -31,27 +32,16 @@ defmodule WrtWeb.Router do
     get "/ready", HealthController, :ready
   end
 
-  # Public routes
+  # Root redirect — users arrive via Portal, already authenticated
   scope "/", WrtWeb do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/register", RegistrationController, :new
-    post "/register", RegistrationController, :create
   end
 
-  # Super admin auth routes (no auth required)
+  # Super admin routes (Portal auth required)
   scope "/admin", WrtWeb.SuperAdmin, as: :super_admin do
-    pipe_through :browser
-
-    get "/login", SessionController, :new
-    post "/login", SessionController, :create
-    delete "/logout", SessionController, :delete
-  end
-
-  # Super admin protected routes (Portal or WRT auth required)
-  scope "/admin", WrtWeb.SuperAdmin, as: :super_admin do
-    pipe_through [:browser, :require_portal_or_wrt_super_admin]
+    pipe_through [:browser, :require_portal_super_admin]
 
     get "/dashboard", DashboardController, :index
     get "/orgs", OrgController, :index
@@ -61,16 +51,10 @@ defmodule WrtWeb.Router do
     post "/orgs/:id/suspend", OrgController, :suspend
   end
 
-  # Org-scoped routes
+  # Org-scoped routes (Portal auth required)
   scope "/org/:org_slug", WrtWeb.Org, as: :org do
-    pipe_through :browser
+    pipe_through [:browser, :require_portal_user]
 
-    # Auth routes
-    get "/login", SessionController, :new
-    post "/login", SessionController, :create
-    delete "/logout", SessionController, :delete
-
-    # Protected org routes (will add auth plug later)
     get "/dashboard", DashboardController, :index
 
     # Campaign routes

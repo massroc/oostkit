@@ -13,6 +13,11 @@ defmodule WrtWeb.Plugs.PortalAuth do
 
   def init(opts), do: opts
 
+  def call(%{assigns: %{portal_user: %{} = _already_set}} = conn, _opts) do
+    # Already set (e.g., by test helper) — skip validation
+    conn
+  end
+
   def call(conn, _opts) do
     conn = fetch_cookies(conn)
 

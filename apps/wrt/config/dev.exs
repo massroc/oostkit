@@ -47,7 +47,7 @@ config :phoenix, :plug_init_mode, :runtime
 # Portal cross-app auth
 config :wrt, :portal_api_url, "http://localhost:4002"
 config :wrt, :portal_api_key, "dev_internal_api_key"
-config :wrt, :portal_login_url, "/admin/login"
+config :wrt, :portal_login_url, "http://localhost:4002/users/log-in"
 
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false

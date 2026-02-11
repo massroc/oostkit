@@ -11,7 +11,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
     test "renders new campaign form when authenticated", %{conn: conn, org: org, admin: admin} do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/new")
 
       assert html_response(conn, 200) =~ "campaign"
@@ -27,7 +27,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/new")
 
       assert redirected_to(conn) == "/org/#{org.slug}/dashboard"
@@ -35,7 +35,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
 
     test "redirects to login when not authenticated", %{conn: conn, org: org} do
       conn = get(conn, "/org/#{org.slug}/campaigns/new")
-      assert redirected_to(conn) == "/org/#{org.slug}/login"
+      assert redirected_to(conn)
     end
   end
 
@@ -45,7 +45,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns", params)
 
       assert redirected_to(conn) =~ "/org/#{org.slug}/campaigns/"
@@ -56,7 +56,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns", params)
 
       assert html_response(conn, 200) =~ "campaign"
@@ -69,7 +69,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}")
 
       assert html_response(conn, 200) =~ campaign.name

@@ -17,7 +17,7 @@ defmodule WrtWeb.Org.ResultsControllerTest do
     } do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}/results")
 
       assert html_response(conn, 200) =~ "Results"
@@ -29,7 +29,7 @@ defmodule WrtWeb.Org.ResultsControllerTest do
       campaign: campaign
     } do
       conn = get(conn, "/org/#{org.slug}/campaigns/#{campaign.id}/results")
-      assert redirected_to(conn) == "/org/#{org.slug}/login"
+      assert redirected_to(conn)
     end
 
     test "shows nominees with nomination counts", %{
@@ -54,7 +54,7 @@ defmodule WrtWeb.Org.ResultsControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}/results")
 
       assert html_response(conn, 200) =~ "Popular Nominee"

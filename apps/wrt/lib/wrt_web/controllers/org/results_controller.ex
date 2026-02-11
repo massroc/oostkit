@@ -6,7 +6,6 @@ defmodule WrtWeb.Org.ResultsController do
   alias Wrt.Rounds
 
   plug WrtWeb.Plugs.TenantPlug
-  plug WrtWeb.Plugs.RequireOrgAdmin
 
   def index(conn, %{"campaign_id" => campaign_id}) do
     tenant = conn.assigns.tenant

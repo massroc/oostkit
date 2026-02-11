@@ -13,7 +13,6 @@ defmodule WrtWeb.Org.ExportController do
   alias Wrt.Rounds
 
   plug WrtWeb.Plugs.TenantPlug
-  plug WrtWeb.Plugs.RequireOrgAdmin
 
   @doc """
   Exports campaign data as CSV.
