@@ -154,6 +154,8 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - `INTERNAL_API_KEY` -- Shared secret for internal API auth (used by WRT as `PORTAL_API_KEY`)
 - `POSTMARK_API_KEY` -- Postmark API key for email delivery
 - `MAIL_FROM` -- Configurable email from-address (e.g., `noreply@oostkit.com`)
+- `PULSE_URL` -- Override Pulse URL in production (default: `https://pulse.oostkit.com`)
+- `WRT_URL` -- Override WRT URL in production (default: `https://wrt.oostkit.com`)
 
 ## Deployment
 
@@ -180,6 +182,15 @@ GitHub Actions with path filtering:
 - Development: Docker Compose (local)
 - Production: Fly.io with secrets management
 - Database URLs, secrets injected via environment
+
+### Tool URL Resolution
+
+Portal's tool catalogue stores production URLs in the database (e.g., `https://pulse.oostkit.com`). The `config :portal, :tool_urls` setting allows per-environment overrides so that links point to the correct host in dev, test, and production:
+
+- **Dev/test:** `tool_urls` maps tool IDs to `localhost` ports (Pulse → `http://localhost:4000`, WRT → `http://localhost:4001`)
+- **Production:** `tool_urls` defaults to production subdomain URLs, overridable via `PULSE_URL` and `WRT_URL` env vars
+
+The `Portal.Tools` context applies these overrides transparently via `apply_config_url/1`, which is piped through all query functions (`list_tools`, `get_tool`, `get_tool!`). Any `@tool.url` reference in templates automatically resolves to the correct environment-specific URL.
 
 ## Inter-App Communication
 

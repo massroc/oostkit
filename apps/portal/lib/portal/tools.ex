@@ -10,14 +10,18 @@ defmodule Portal.Tools do
     Tool
     |> order_by(:sort_order)
     |> Repo.all()
+    |> Enum.map(&apply_config_url/1)
   end
 
   def get_tool(id) do
-    Repo.get(Tool, id)
+    case Repo.get(Tool, id) do
+      nil -> nil
+      tool -> apply_config_url(tool)
+    end
   end
 
   def get_tool!(id) do
-    Repo.get!(Tool, id)
+    Tool |> Repo.get!(id) |> apply_config_url()
   end
 
   def create_tool(attrs) do
@@ -43,5 +47,12 @@ defmodule Portal.Tools do
 
   def toggle_admin_enabled(%Tool{} = tool) do
     update_tool(tool, %{admin_enabled: !tool.admin_enabled})
+  end
+
+  defp apply_config_url(%Tool{id: id} = tool) do
+    case Application.get_env(:portal, :tool_urls, %{}) do
+      urls when is_map(urls) -> %{tool | url: Map.get(urls, id, tool.url)}
+      _ -> tool
+    end
   end
 end

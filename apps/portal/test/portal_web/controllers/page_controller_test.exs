@@ -60,7 +60,7 @@ defmodule PortalWeb.PageControllerTest do
       conn = get(conn, ~p"/home")
 
       assert html_response(conn, 200) =~ "Launch"
-      assert html_response(conn, 200) =~ "pulse.oostkit.com"
+      assert html_response(conn, 200) =~ "localhost:4000"
     end
 
     test "shows Coming soon badge for coming_soon tools", %{conn: conn} do
