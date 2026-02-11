@@ -1,6 +1,6 @@
 # OOSTKit Platform Roadmap
 
-Last updated: 2026-02-10
+Last updated: 2026-02-12
 
 ## Platform Overview
 
@@ -8,7 +8,7 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 
 | App | Purpose | Status | Port |
 |-----|---------|--------|------|
-| **Portal** | Landing page & auth hub | Phase 1 complete | 4002 |
+| **Portal** | Landing page, auth hub & admin | Feature-complete | 4002 |
 | **Workgroup Pulse** | 6 Criteria workshop (self-guided) | MVP + UX redesign + export complete | 4000 |
 | **WRT** | Workshop Referral Tool (facilitator) | All 6 phases complete | 4001 |
 
@@ -18,21 +18,24 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 
 ### Portal
 
-**Phase 1: Foundation** - Complete
+**Feature-complete** — marketing landing page, dashboard, auth, onboarding, admin hub, app detail pages, SEO.
 
-- User authentication (password + magic link)
-- Super admin user management (CRUD)
-- Landing page with app cards (split by audience)
-- Session-based auth with sudo mode
-- Role system (Super Admin, Session Manager)
-- OOSTKit design system applied (branded semantic tokens, DM Sans, brand stripe, navigation header)
+- Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
+- Dashboard (`/home`) with DB-backed tool cards (11 tools, three states)
+- Self-service registration (name + email, magic link confirmation)
+- Login with magic link (primary) and password (secondary)
+- First-visit onboarding card (org, referral source, tool interests)
+- Settings page with profile editing and dynamic password label
+- Admin dashboard (`/admin`) with stats cards and quick links
+- Admin email signups (`/admin/signups`) with search, delete, CSV export
+- Admin tool management (`/admin/tools`) with kill switch toggle
+- Admin user management (`/admin/users`) with org, registered date, last login columns
+- App detail pages (`/apps/:id`) with inline email capture for coming-soon tools
+- SEO/Open Graph meta tags with per-page overrides
+- Cross-app auth via subdomain cookie + internal validation API
+- OOSTKit design system applied (branded semantic tokens, DM Sans, brand stripe)
 
-**Test coverage**: 787 lines across 9 test files
-
-**Next milestone**: Phase 2 - Unified Experience
-- Integrate shared header into Pulse and WRT
-- Subdomain cookie auth across apps
-- Migrate WRT to use Portal authentication
+**Deferred:** Header breadcrumbs in Pulse/WRT, admin dashboard trends/charts.
 
 ### Workgroup Pulse
 
@@ -150,40 +153,30 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 - [ ] Feedback button
 - [ ] Participant dropout handling (greyed out visual)
 
-### Visual Design Alignment — Done (all apps)
-
-- [x] Apply OOSTKit design system to Pulse (original design system target)
-- [x] Apply OOSTKit design system to WRT (PR #108)
-- [x] Apply OOSTKit design system to Portal (PR #109)
-
 ---
 
 ## Future Roadmap
 
-### Portal Phase 2: Unified Experience
-
-- Shared header component across all apps
-- Subdomain routing (oostkit.com, pulse.oostkit.com, wrt.oostkit.com)
-- Cross-subdomain cookie authentication
-- WRT migrates to Portal auth (replaces its own auth)
-
 ### Pulse Phase 2: Enhanced Features
 
-- ~~Export (CSV, PDF)~~ — Shipped (PR #105)
 - Integration with Portal authentication
 - Persistent teams (requires accounts)
 - Historical session comparison
 
 ### WRT Enhancements
 
-- Full Portal auth integration
-- ~~Visual design alignment with design system~~ — Shipped
-- ~~Expanded test coverage~~ — Shipped (PRs #103, #104)
+- Full Portal auth integration (remove transitional dual-auth)
+
+### Portal Enhancements
+
+- Header breadcrumb integration in Pulse/WRT
+- Admin dashboard trends/charts (once there's enough data)
+- Content expansion ("Learn about OST" section, richer app pages)
+- Billing integration (platform subscription)
 
 ### Platform-Wide
 
 - Usage analytics dashboards
-- Self-service registration (currently admin-only)
 - Organization/team management
 
 ---
@@ -219,5 +212,4 @@ All apps follow TDD:
 - [Architecture](./architecture.md) - Technical architecture
 - [Design System](./design-system.md) - Visual design specification
 - [Portal Requirements](./portal-requirements.md) - Portal feature spec
-- [Portal Implementation Plan](./portal-implementation-plan.md) - Portal technical plan
 - App-specific docs in `apps/*/REQUIREMENTS.md` and `apps/*/SOLUTION_DESIGN.md`
