@@ -1,23 +1,14 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between py-3 text-sm">
+<header class="bg-ok-purple-900">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+    <a href="https://oostkit.com" class="text-lg font-semibold text-white">
+      OOSTKit
+    </a>
     <div class="flex items-center gap-4">
-      <a href="/" class="text-lg font-semibold text-ok-purple-900">
-        Workshop Referral Tool
-      </a>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <%= if assigns[:current_admin] do %>
-        <span class="text-zinc-500">{@current_admin.email}</span>
-        <.link
-          href={~p"/admin/logout"}
-          method="delete"
-          class="text-ok-purple-600 hover:text-ok-purple-800"
-        >
-          Log out
-        </.link>
+      <%= if assigns[:portal_user] do %>
+        <span class="text-sm text-ok-purple-300">{@portal_user["email"]}</span>
       <% end %>
     </div>
-  </div>
+  </nav>
 </header>
 <div class="brand-stripe"></div>
 <main class="px-4 py-20 sm:px-6 lg:px-8">

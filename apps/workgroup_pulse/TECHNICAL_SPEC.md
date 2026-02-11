@@ -53,10 +53,14 @@ SessionLive.Show (root LiveView)
 │   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
 │
 ├── Shared (in CoreComponents)
-│   ├── .app_header           # App header with gradient accent
+│   ├── .app_header           # OOSTKit brand header (dark purple, brand link + app name)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
 │   └── .score_indicator      # Traffic light score display
+│
+├── Layouts
+│   ├── app.html.heex         # Standard layout with OOSTKit header + brand stripe (Home, Join, Create)
+│   └── session.html.heex     # Bare layout for session pages (no header — session uses .app_header inline)
 │
 └── Other LiveViews
     ├── SessionLive.New        # Create new session
@@ -544,5 +548,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.3 — Simplified notes/actions handlers (content from form params); notes load session-level; intro slide_safe_space replaced with slide_maximal_scale*
+*Document Version: 1.4 — OOSTKit brand header; `:session` layout for workshop pages (no duplicate header); `:app` layout for non-session pages*
 *Last Updated: 2026-02-12*

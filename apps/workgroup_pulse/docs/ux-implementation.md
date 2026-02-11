@@ -94,7 +94,7 @@ During scoring and later phases, the intro slides are hidden (not visible as sta
 ### Standard Dimensions
 
 - **Width**: 960px (all primary sheets, landscape orientation), 480px (notes side panel)
-- **Height**: `calc(100vh - 52px - 3rem)` — fills available viewport minus header (52px) and carousel padding (1.5rem x 2)
+- **Height**: `100%` — fills available space within the flex layout container (parent handles header offset)
 - **Min-height**: 786px — landscape ratio floor (960/1.221 = 786)
 
 ### CSS Overflow Rules
@@ -184,11 +184,22 @@ Shared components in `lib/workgroup_pulse_web/components/core_components.ex`:
 
 ### `<.app_header>`
 
-App header with gradient accent stripe.
+OOSTKit brand header shared across all apps. Dark purple background (`bg-ok-purple-900`) with "OOSTKit" brand link on the left (links to `https://oostkit.com`) and optional session name on the right. A magenta-to-purple gradient brand stripe (`.brand-stripe`) renders below the header.
 
 ```elixir
 <.app_header session_name="Six Criteria Assessment" />
 ```
+
+### Layouts
+
+Two Phoenix layouts control header presence:
+
+| Layout | Used By | Header |
+|--------|---------|--------|
+| `:app` | Home, Join, Create pages | OOSTKit header + brand stripe in layout (no inline `.app_header`) |
+| `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders `.app_header` inline |
+
+The `:session` layout prevents duplicate headers when the session LiveView renders its own `app_header` component (which includes the session name).
 
 ### `<.sheet>`
 
@@ -295,6 +306,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.4 — Gold accent expanded: strengths, scoring prompt, intro dots, duration buttons, PDF export*
+*Document Version: 1.5 — OOSTKit brand header; `:app`/`:session` layout split; sheet height changed to `100%`*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

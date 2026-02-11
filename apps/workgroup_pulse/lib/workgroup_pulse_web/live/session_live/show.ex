@@ -76,7 +76,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> DataLoaders.load_scoring_data(workshop_session, participant)
      |> DataLoaders.load_summary_data(workshop_session)
      |> DataLoaders.load_actions_data(workshop_session)
-     |> TimerHandler.maybe_start_timer()}
+     |> TimerHandler.maybe_start_timer(),
+     layout: {WorkgroupPulseWeb.Layouts, :session}}
   end
 
   # ═══════════════════════════════════════════════════════════════════════════

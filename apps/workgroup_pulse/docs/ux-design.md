@@ -40,7 +40,7 @@ All phases use the same **sheet carousel** layout — a scroll-snap horizontal c
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Header (app name, gradient accent)                              │
+│  Header (OOSTKit brand link + app name, dark purple + brand stripe) │
 ├─────────────────────────────────────────────────────────────────┤
 │  SHEET CAROUSEL (bg: warm taupe #E8E4DF)                         │
 │                                                                   │
@@ -229,6 +229,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.3 — Gold accent expanded across strengths, scoring prompt, intro dots, duration buttons, PDF export*
+*Document Version: 1.4 — OOSTKit brand header (dark purple with brand link + brand stripe); session layout split (`:app` for non-session pages, `:session` bare layout for workshop)*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

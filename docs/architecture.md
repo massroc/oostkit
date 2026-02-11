@@ -91,7 +91,8 @@ All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
 - **Semantic color tokens**: `ok-purple`, `ok-green`, `ok-red`, `ok-gold`, `ok-blue` (branded), plus surface and text tokens (`bg-surface-wall`, `bg-surface-sheet`, `text-text-dark`)
 - **Typography**: DM Sans (UI chrome) loaded via Google Fonts, with `font-brand` utility
 - **Shadows**: `shadow-sheet` for card-like surfaces
-- **Brand stripe**: Magenta-to-purple gradient bar below headers
+- **OOSTKit header**: Consistent dark purple header across all apps — "OOSTKit" brand link on the left (links to `https://oostkit.com`), app-specific content on the right
+- **Brand stripe**: Magenta-to-purple gradient bar below the header
 
 Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
 
