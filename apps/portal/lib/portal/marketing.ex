@@ -3,8 +3,8 @@ defmodule Portal.Marketing do
   Context for marketing features — interest signups and email capture.
   """
   import Ecto.Query
-  alias Portal.Repo
   alias Portal.Marketing.InterestSignup
+  alias Portal.Repo
 
   def create_interest_signup(attrs) do
     %InterestSignup{}

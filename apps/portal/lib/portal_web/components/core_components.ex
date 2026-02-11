@@ -15,6 +15,7 @@ defmodule PortalWeb.CoreComponents do
 
   alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
+  alias Portal.Tools.Tool
 
   @doc """
   Renders flash notices.
@@ -83,7 +84,7 @@ defmodule PortalWeb.CoreComponents do
   attr :current_scope, :any, default: nil
 
   def tool_card(assigns) do
-    assigns = assign(assigns, :status, Portal.Tools.Tool.effective_status(assigns.tool))
+    assigns = assign(assigns, :status, Tool.effective_status(assigns.tool))
 
     ~H"""
     <div class={[
