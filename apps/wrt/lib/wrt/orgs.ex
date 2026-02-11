@@ -57,15 +57,6 @@ defmodule Wrt.Orgs do
   end
 
   @doc """
-  Updates an org admin.
-  """
-  def update_org_admin(tenant, %OrgAdmin{} = org_admin, attrs) do
-    org_admin
-    |> OrgAdmin.update_changeset(attrs)
-    |> Repo.update(prefix: tenant)
-  end
-
-  @doc """
   Deletes an org admin.
   """
   def delete_org_admin(tenant, %OrgAdmin{} = org_admin) do
@@ -90,12 +81,5 @@ defmodule Wrt.Orgs do
         Bcrypt.no_user_verify()
         {:error, :not_found}
     end
-  end
-
-  @doc """
-  Returns a changeset for tracking org admin changes.
-  """
-  def change_org_admin(%OrgAdmin{} = org_admin, attrs \\ %{}) do
-    OrgAdmin.changeset(org_admin, attrs)
   end
 end

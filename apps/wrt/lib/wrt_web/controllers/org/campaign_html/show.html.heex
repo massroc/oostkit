@@ -1,7 +1,7 @@
 <.header>
   {@campaign.name}
   <:subtitle>
-    <span class={"px-2 py-1 text-xs rounded-full #{status_class(@campaign.status)}"}>
+    <span class={"px-2 py-1 text-xs rounded-full #{campaign_status_class(@campaign.status)}"}>
       {@campaign.status}
     </span>
     <%= if @campaign.description do %>

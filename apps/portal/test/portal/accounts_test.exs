@@ -49,38 +49,39 @@ defmodule Portal.AccountsTest do
   end
 
   describe "register_user/1" do
-    test "requires email to be set" do
+    test "requires email and name to be set" do
       {:error, changeset} = Accounts.register_user(%{})
 
-      assert %{email: ["can't be blank"]} = errors_on(changeset)
+      assert %{email: ["can't be blank"], name: ["can't be blank"]} = errors_on(changeset)
     end
 
     test "validates email when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid"})
+      {:error, changeset} = Accounts.register_user(%{email: "not valid", name: "Test"})
 
       assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
     end
 
     test "validates maximum values for email for security" do
       too_long = String.duplicate("db", 100)
-      {:error, changeset} = Accounts.register_user(%{email: too_long})
+      {:error, changeset} = Accounts.register_user(%{email: too_long, name: "Test"})
       assert "should be at most 160 character(s)" in errors_on(changeset).email
     end
 
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
-      {:error, changeset} = Accounts.register_user(%{email: email})
+      {:error, changeset} = Accounts.register_user(%{email: email, name: "Test"})
       assert "has already been taken" in errors_on(changeset).email
 
       # Now try with the uppercased email too, to check that email case is ignored.
-      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
+      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email), name: "Test"})
       assert "has already been taken" in errors_on(changeset).email
     end
 
-    test "registers users without password" do
+    test "registers users with email and name, without password" do
       email = unique_user_email()
       {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
       assert user.email == email
+      assert user.name == "Test User"
       assert is_nil(user.hashed_password)
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
@@ -392,6 +393,80 @@ defmodule Portal.AccountsTest do
   describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
+    end
+  end
+
+  describe "register_user/1 with name" do
+    test "registers user with email and name" do
+      email = unique_user_email()
+      {:ok, user} = Accounts.register_user(%{email: email, name: "Test User"})
+      assert user.email == email
+      assert user.name == "Test User"
+    end
+
+    test "requires name" do
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email()})
+      assert %{name: ["can't be blank"]} = errors_on(changeset)
+    end
+  end
+
+  describe "update_user_profile/2" do
+    test "updates profile fields" do
+      user = user_fixture()
+
+      {:ok, updated} =
+        Accounts.update_user_profile(user, %{
+          name: "New Name",
+          organisation: "Acme",
+          referral_source: "Google"
+        })
+
+      assert updated.name == "New Name"
+      assert updated.organisation == "Acme"
+      assert updated.referral_source == "Google"
+    end
+
+    test "requires name" do
+      user = user_fixture()
+      {:error, changeset} = Accounts.update_user_profile(user, %{name: ""})
+      assert %{name: ["can't be blank"]} = errors_on(changeset)
+    end
+  end
+
+  describe "complete_onboarding/3" do
+    test "marks onboarding complete and saves tool interests" do
+      user = user_fixture()
+      refute user.onboarding_completed
+
+      {:ok, updated} =
+        Accounts.complete_onboarding(
+          user,
+          %{"organisation" => "Acme", "referral_source" => "Web"},
+          ["workgroup_pulse", "wrt"]
+        )
+
+      assert updated.onboarding_completed
+      assert updated.organisation == "Acme"
+
+      interests = Accounts.list_user_tool_interests(user.id)
+      assert length(interests) == 2
+      assert "workgroup_pulse" in interests
+    end
+  end
+
+  describe "skip_onboarding/1" do
+    test "marks onboarding complete without profile data" do
+      user = user_fixture()
+      {:ok, updated} = Accounts.skip_onboarding(user)
+      assert updated.onboarding_completed
+      assert is_nil(updated.organisation)
+    end
+  end
+
+  describe "list_user_tool_interests/1" do
+    test "returns empty list when no interests" do
+      user = user_fixture()
+      assert Accounts.list_user_tool_interests(user.id) == []
     end
   end
 

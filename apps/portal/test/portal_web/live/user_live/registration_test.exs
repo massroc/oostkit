@@ -5,10 +5,11 @@ defmodule PortalWeb.UserLive.RegistrationTest do
   import Portal.AccountsFixtures
 
   describe "Registration page" do
-    test "renders registration page", %{conn: conn} do
+    test "renders registration page with facilitator messaging", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/register")
 
-      assert html =~ "Register"
+      assert html =~ "Start running workshops with OOSTKit"
+      assert html =~ "facilitator account"
       assert html =~ "Log in"
     end
 
@@ -28,19 +29,20 @@ defmodule PortalWeb.UserLive.RegistrationTest do
       result =
         lv
         |> element("#registration_form")
-        |> render_change(user: %{"email" => "with spaces"})
+        |> render_change(user: %{"email" => "with spaces", "name" => ""})
 
-      assert result =~ "Register"
       assert result =~ "must have the @ sign and no spaces"
     end
   end
 
   describe "register user" do
-    test "creates account but does not log in", %{conn: conn} do
+    test "creates account with name and email", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
       email = unique_user_email()
-      form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
+
+      form =
+        form(lv, "#registration_form", user: %{"email" => email, "name" => "Test Facilitator"})
 
       {:ok, _lv, html} =
         render_submit(form)
@@ -48,6 +50,17 @@ defmodule PortalWeb.UserLive.RegistrationTest do
 
       assert html =~
                ~r/An email was sent to .*, please access it to confirm your account/
+    end
+
+    test "requires name", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/register")
+
+      result =
+        lv
+        |> form("#registration_form", user: %{"email" => unique_user_email(), "name" => ""})
+        |> render_submit()
+
+      assert result =~ "can&#39;t be blank"
     end
 
     test "renders errors for duplicated email", %{conn: conn} do
@@ -58,7 +71,7 @@ defmodule PortalWeb.UserLive.RegistrationTest do
       result =
         lv
         |> form("#registration_form",
-          user: %{"email" => user.email}
+          user: %{"email" => user.email, "name" => "Test"}
         )
         |> render_submit()
 
@@ -76,7 +89,7 @@ defmodule PortalWeb.UserLive.RegistrationTest do
         |> render_click()
         |> follow_redirect(conn, ~p"/users/log-in")
 
-      assert login_html =~ "Log in"
+      assert login_html =~ "Welcome back"
     end
   end
 end

@@ -68,11 +68,4 @@ defmodule Wrt.Auth do
   def authenticate_org_admin(tenant, email, password) do
     Orgs.authenticate_org_admin(tenant, email, password)
   end
-
-  @doc """
-  Gets an org admin by ID.
-  """
-  def get_org_admin(tenant, id) do
-    Orgs.get_org_admin(tenant, id)
-  end
 end

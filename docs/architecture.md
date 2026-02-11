@@ -82,7 +82,7 @@ Shared services (e.g., future auth) would have their own database.
 Portal's database is expanding beyond user accounts to include:
 - `tools` -- tool catalogue (11 tools, read by dashboard, managed via admin kill switch)
 - `interest_signups` -- email captures from coming-soon pages
-- `user_tool_interests` -- onboarding data (future)
+- `user_tool_interests` -- onboarding tool interest data (user_id + tool_id join table)
 
 ## Shared Design System
 
@@ -109,31 +109,37 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 
 ### Portal
 
-Implemented in `apps/portal/` (Phases 1-2, A, and B complete, Phase C next). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
+Implemented in `apps/portal/` (Phases 1-2, A, B, and C complete, Phase D next). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
 
-**Current state (through Phase B):**
+**Current state (through Phase C):**
 - User authentication (password + magic link)
+- Self-service registration (name + email, magic link confirmation, facilitator-focused messaging)
 - Role system (Super Admin, Session Manager)
 - Cross-app auth: subdomain cookie + internal validation API
 - Mail delivery: Swoosh configured to use Finch API client (not hackney) in production
 - Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
 - Dashboard (`/home`) with DB-backed tool cards (11 tools, three states: live, coming soon, maintenance)
+- First-visit onboarding card on dashboard (org, referral source, tool interest checkboxes)
 - `tools` table in DB replacing hardcoded app config, seeded with 11 tools
 - `interest_signups` table for email capture from coming-soon pages
+- `user_tool_interests` table for onboarding tool interest data
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
-- Three-zone header redesign with Sign Up / Log In buttons pointing to `/coming-soon`
+- Three-zone header with Sign Up / Log In buttons pointing to real auth pages (`/users/register`, `/users/log-in`)
 - Route restructure: `/` redirects logged-in users to `/home`
+- Login page with "Welcome back" heading, magic link primary, password secondary
+- Settings page with profile editing (name, org, referral source) and dynamic password label
 - Admin dashboard (`/admin`) with stats cards and quick links
 - Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export
 - Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle
-- Enhanced user management (`/admin/users`) with Registered date and Last Login columns
+- Enhanced user management (`/admin/users`) with Registered date, Last Login, and Organisation columns
 
-**Phase C (next):** Self-service registration, facilitator onboarding flow, profile fields.
+**Phase D (next):** App detail page enhancements, inline email capture, SEO, header integration in apps.
 
 **Data model additions:**
 - `tools` table -- 11 tools with name, tagline, status, URL, audience, sort_order, admin kill switch
 - `interest_signups` table -- email captures from coming-soon page
-- `user_tool_interests` table -- onboarding tool interest (Phase C)
+- `user_tool_interests` table -- onboarding tool interest (user_id + tool_id join table)
+- `users` table extensions -- `organisation`, `referral_source`, `onboarding_completed` fields
 
 ## Deployment
 

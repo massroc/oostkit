@@ -9,7 +9,7 @@ defmodule PortalWeb.UserLive.Login do
     <div class="mx-auto max-w-sm space-y-4">
       <div class="text-center">
         <.header>
-          <p>Log in</p>
+          <p>{if @current_scope, do: "Re-authenticate", else: "Welcome back"}</p>
           <:subtitle>
             <%= if @current_scope do %>
               You need to reauthenticate to perform sensitive actions on your account.
@@ -51,11 +51,11 @@ defmodule PortalWeb.UserLive.Login do
           phx-mounted={JS.focus()}
         />
         <.button class="btn btn-primary w-full">
-          Log in with email <span aria-hidden="true">→</span>
+          Send me a login link <span aria-hidden="true">&rarr;</span>
         </.button>
       </.form>
 
-      <div class="divider">or</div>
+      <div class="divider text-zinc-400">or use a password</div>
 
       <.form
         :let={f}
@@ -64,6 +64,7 @@ defmodule PortalWeb.UserLive.Login do
         action={~p"/users/log-in"}
         phx-submit="submit_password"
         phx-trigger-action={@trigger_submit}
+        class="opacity-75 focus-within:opacity-100 transition-opacity"
       >
         <.field
           readonly={!!@current_scope}
@@ -79,11 +80,8 @@ defmodule PortalWeb.UserLive.Login do
           label="Password"
           autocomplete="current-password"
         />
-        <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-          Log in and stay logged in <span aria-hidden="true">→</span>
-        </.button>
-        <.button class="btn btn-primary btn-soft w-full mt-2">
-          Log in only this time
+        <.button class="btn btn-primary btn-soft w-full" name={@form[:remember_me].name} value="true">
+          Log in with password <span aria-hidden="true">&rarr;</span>
         </.button>
       </.form>
     </div>

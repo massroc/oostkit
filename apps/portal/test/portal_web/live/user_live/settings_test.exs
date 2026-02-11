@@ -6,14 +6,36 @@ defmodule PortalWeb.UserLive.SettingsTest do
   import Portal.AccountsFixtures
 
   describe "Settings page" do
-    test "renders settings page", %{conn: conn} do
+    test "renders settings page with profile, email, and password sections", %{conn: conn} do
       {:ok, _lv, html} =
         conn
         |> log_in_user(user_fixture())
         |> live(~p"/users/settings")
 
+      assert html =~ "Save Profile"
       assert html =~ "Change Email"
-      assert html =~ "Save Password"
+      assert html =~ "Organisation"
+      assert html =~ "How did you hear about OOSTKit?"
+    end
+
+    test "shows 'Add a password' when user has no password", %{conn: conn} do
+      {:ok, _lv, html} =
+        conn
+        |> log_in_user(user_fixture())
+        |> live(~p"/users/settings")
+
+      assert html =~ "Add a password"
+    end
+
+    test "shows 'Change password' when user has a password", %{conn: conn} do
+      user = user_fixture() |> set_password()
+
+      {:ok, _lv, html} =
+        conn
+        |> log_in_user(user)
+        |> live(~p"/users/settings")
+
+      assert html =~ "Change password"
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
@@ -34,6 +56,41 @@ defmodule PortalWeb.UserLive.SettingsTest do
         |> follow_redirect(conn, ~p"/users/log-in")
 
       assert conn.resp_body =~ "You must re-authenticate to access this page."
+    end
+  end
+
+  describe "update profile form" do
+    setup %{conn: conn} do
+      user = user_fixture()
+      %{conn: log_in_user(conn, user), user: user}
+    end
+
+    test "updates name, organisation, and referral source", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#profile_form", %{
+          "user" => %{
+            "name" => "Updated Name",
+            "organisation" => "Acme Corp",
+            "referral_source" => "Conference"
+          }
+        })
+        |> render_submit()
+
+      assert result =~ "Profile updated successfully."
+    end
+
+    test "validates name is required", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> element("#profile_form")
+        |> render_change(%{"user" => %{"name" => ""}})
+
+      assert result =~ "can&#39;t be blank"
     end
   end
 
@@ -136,7 +193,6 @@ defmodule PortalWeb.UserLive.SettingsTest do
           }
         })
 
-      assert result =~ "Save Password"
       assert result =~ "should be at least 12 character(s)"
       assert result =~ "does not match password"
     end
@@ -154,7 +210,6 @@ defmodule PortalWeb.UserLive.SettingsTest do
         })
         |> render_submit()
 
-      assert result =~ "Save Password"
       assert result =~ "should be at least 12 character(s)"
       assert result =~ "does not match password"
     end

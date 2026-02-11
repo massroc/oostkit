@@ -166,11 +166,12 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 ### Initial Scope
 
 For the first release:
-- Super Admin can create Session Manager accounts (invite-only phase)
+- Self-service registration for facilitators (email + name, magic link confirmation)
+- Super Admin can also create Session Manager accounts via admin panel
 - Session Managers log in to access WRT
 - Workgroup Pulse remains free and open (no login required) -- the top-of-funnel discovery tool
 - Participants access sessions via links (no account, no friction)
-- Sign Up and Log In buttons point to `/coming-soon` with email capture
+- Sign Up and Log In buttons link to real auth pages (`/users/register` and `/users/log-in`)
 
 ### Account Management
 
@@ -182,7 +183,6 @@ Admin hub for super admins:
 
 ### Future Considerations
 
-- Self-service registration (Phase C of rollout)
 - Platform subscription billing (one price unlocks all paid tools)
 - Organisation-level accounts if demand emerges (solo facilitators only for now)
 - Persistent data access requiring authentication
@@ -204,8 +204,8 @@ Admin hub for super admins:
         │        ├── Coming soon tool → "Coming soon" badge (no action)
         │        └── "Learn more" → [App Detail Page /apps/:id]
         │
-        ├── "Sign Up" → [/coming-soon] (pre-launch) or [/users/register] (when live)
-        └── "Log In" → [/coming-soon] (pre-launch) or [/users/log-in] (when live)
+        ├── "Sign Up" → [/users/register]
+        └── "Log In" → [/users/log-in]
 
 [Logged-in user hits /] → auto-redirect to [/home]
 ```
@@ -367,14 +367,14 @@ Operational control panel for platform management.
 - B3: Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle per tool
 - B4: Enhanced user management -- added Registered date and Last Login columns to `/admin/users`
 
-#### Phase C: Auth & Onboarding
-When ready for first facilitator users.
-- C1: User profile fields (DB migration: organisation, referral_source, onboarding_completed)
-- C2: Registration flow update (email + name, magic link, facilitator-focused messaging)
-- C3: Login page messaging ("Welcome back", magic link primary, password secondary)
-- C4: Settings page update (name, org, profile info)
-- C5: First-visit onboarding (dashboard card: org, referral source, tool interests)
-- C6: Flip the switch (Sign Up / Log In buttons from `/coming-soon` to real auth pages)
+#### Phase C: Auth & Onboarding (Complete)
+Self-service registration and facilitator onboarding live.
+- C1: User profile fields -- DB migration adding `organisation`, `referral_source`, `onboarding_completed` to users + `user_tool_interests` join table. New `UserToolInterest` schema.
+- C2: Registration flow update -- email + name form with `registration_changeset`, magic link confirmation, facilitator-focused messaging ("Start running workshops with OOSTKit")
+- C3: Login page messaging -- "Welcome back" heading, magic link as primary login method, password as secondary
+- C4: Settings page update -- profile editing (name, org, referral source) via `profile_changeset`, dynamic password label ("Add a password" vs "Change password")
+- C5: First-visit onboarding -- dashboard card with org, referral source, tool interest checkboxes. `OnboardingController` for form POST. `onboarding_changeset` saves data. Dismissable via skip.
+- C6: Flip the switch -- Sign Up / Log In header buttons now point to `/users/register` and `/users/log-in` instead of `/coming-soon`. Organisation column added to admin users table.
 
 #### Phase D: Polish & Detail
 Enhancements once core platform is running.

@@ -226,7 +226,7 @@ A record of one person nominating another:
 - ✅ Oban workers for async sending
 
 #### F7.3: Email Tracking ✅
-- ✅ Track: sent, delivered, opened, clicked
+- ✅ Track: sent, delivered, opened, clicked, bounced, spam
 - ✅ Webhook handlers for Postmark and SendGrid
 - ✅ Aggregate stats per round (Reports context)
 
@@ -322,7 +322,7 @@ contacts
 - person_id
 - round_id
 - invited_at
-- email_status (sent, delivered, opened, clicked)
+- email_status (pending, sent, delivered, opened, clicked, bounced, spam)
 - responded_at
 
 nominations

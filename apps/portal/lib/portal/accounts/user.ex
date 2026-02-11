@@ -14,6 +14,9 @@ defmodule Portal.Accounts.User do
     field :name, :string
     field :role, :string, default: "session_manager"
     field :enabled, :boolean, default: true
+    field :organisation, :string
+    field :referral_source, :string
+    field :onboarding_completed, :boolean, default: false
 
     timestamps(type: :utc_datetime)
   end
@@ -34,6 +37,39 @@ defmodule Portal.Accounts.User do
   Returns the list of valid roles.
   """
   def roles, do: @roles
+
+  @doc """
+  A user changeset for registration (email + name).
+  """
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :name])
+    |> validate_required([:name])
+    |> validate_length(:name, min: 1, max: 255)
+    |> validate_email(opts)
+  end
+
+  @doc """
+  A user changeset for updating profile fields (name, organisation, referral_source).
+  """
+  def profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:name, :organisation, :referral_source])
+    |> validate_required([:name])
+    |> validate_length(:name, min: 1, max: 255)
+    |> validate_length(:organisation, max: 255)
+    |> validate_length(:referral_source, max: 255)
+  end
+
+  @doc """
+  A user changeset for completing onboarding.
+  """
+  def onboarding_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:organisation, :referral_source, :onboarding_completed])
+    |> validate_length(:organisation, max: 255)
+    |> validate_length(:referral_source, max: 255)
+  end
 
   @doc """
   A user changeset for registering or changing the email.

@@ -89,6 +89,8 @@ defmodule PortalWeb.Router do
     end
 
     post "/users/update-password", UserSessionController, :update_password
+    post "/onboarding", OnboardingController, :save
+    post "/onboarding/skip", OnboardingController, :skip
   end
 
   scope "/", PortalWeb do

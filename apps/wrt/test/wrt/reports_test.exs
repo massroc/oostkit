@@ -238,17 +238,17 @@ defmodule Wrt.ReportsTest do
     end
   end
 
-  describe "get_convergence_stats/1" do
+  describe "get_convergence_stats/2" do
     setup do
       tenant = create_test_tenant()
       campaign = insert_in_tenant(tenant, :campaign)
       round = insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 1})
 
-      %{tenant: tenant, round: round}
+      %{tenant: tenant, campaign: campaign, round: round}
     end
 
-    test "returns zero stats when no nominations exist", %{tenant: tenant} do
-      stats = Reports.get_convergence_stats(tenant)
+    test "returns zero stats when no nominations exist", %{tenant: tenant, campaign: campaign} do
+      stats = Reports.get_convergence_stats(tenant, campaign.id)
 
       assert stats.max == 0
       assert stats.avg == 0.0
@@ -257,7 +257,11 @@ defmodule Wrt.ReportsTest do
       assert stats.distribution == []
     end
 
-    test "calculates convergence metrics correctly", %{tenant: tenant, round: round} do
+    test "calculates convergence metrics correctly", %{
+      tenant: tenant,
+      campaign: campaign,
+      round: round
+    } do
       nominators = for _ <- 1..5, do: insert_in_tenant(tenant, :person)
       nominees = for _ <- 1..5, do: insert_in_tenant(tenant, :person)
 
@@ -281,7 +285,7 @@ defmodule Wrt.ReportsTest do
         end)
       end)
 
-      stats = Reports.get_convergence_stats(tenant)
+      stats = Reports.get_convergence_stats(tenant, campaign.id)
 
       assert stats.max == 5
       assert stats.avg == 2.4
@@ -289,52 +293,6 @@ defmodule Wrt.ReportsTest do
       assert stats.median == 2
       # Top 5 threshold (5th element in sorted desc list)
       assert stats.top_5_threshold == 1
-    end
-  end
-
-  describe "get_round_stats/2" do
-    setup do
-      tenant = create_test_tenant()
-      campaign = insert_in_tenant(tenant, :campaign)
-      round = insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 1})
-
-      %{tenant: tenant, round: round}
-    end
-
-    test "returns all stat categories", %{tenant: tenant, round: round} do
-      stats = Reports.get_round_stats(tenant, round.id)
-
-      assert Map.has_key?(stats, :contacts)
-      assert Map.has_key?(stats, :nominations)
-      assert Map.has_key?(stats, :email_funnel)
-    end
-
-    test "calculates round-specific contact stats", %{tenant: tenant, round: round} do
-      now = DateTime.utc_now() |> DateTime.truncate(:second)
-
-      # Create some contacts
-      for i <- 1..5 do
-        person = insert_in_tenant(tenant, :person)
-
-        if i <= 2 do
-          Wrt.Repo.insert!(
-            %Contact{person_id: person.id, round_id: round.id, responded_at: now},
-            prefix: tenant
-          )
-        else
-          Wrt.Repo.insert!(
-            %Contact{person_id: person.id, round_id: round.id},
-            prefix: tenant
-          )
-        end
-      end
-
-      stats = Reports.get_round_stats(tenant, round.id)
-
-      assert stats.contacts.total == 5
-      assert stats.contacts.responded == 2
-      assert stats.contacts.pending == 3
-      assert stats.contacts.response_rate == 40.0
     end
   end
 
@@ -401,56 +359,6 @@ defmodule Wrt.ReportsTest do
 
       assert length(Reports.get_top_nominees(tenant, 5)) == 5
       assert length(Reports.get_top_nominees(tenant, 10)) == 10
-    end
-  end
-
-  describe "get_top_nominators/2" do
-    setup do
-      tenant = create_test_tenant()
-      campaign = insert_in_tenant(tenant, :campaign)
-      round = insert_in_tenant(tenant, :round, %{campaign_id: campaign.id, round_number: 1})
-
-      %{tenant: tenant, round: round}
-    end
-
-    test "returns empty list when no nominations exist", %{tenant: tenant} do
-      assert Reports.get_top_nominators(tenant) == []
-    end
-
-    test "returns nominators ordered by nominations made", %{tenant: tenant, round: round} do
-      top_nominator = insert_in_tenant(tenant, :person, %{name: "Active Nominator"})
-      second_nominator = insert_in_tenant(tenant, :person, %{name: "Less Active"})
-      nominees = for _ <- 1..5, do: insert_in_tenant(tenant, :person)
-
-      # Top nominator makes 5 nominations
-      Enum.each(nominees, fn nominee ->
-        Wrt.Repo.insert!(
-          %Nomination{round_id: round.id, nominator_id: top_nominator.id, nominee_id: nominee.id},
-          prefix: tenant
-        )
-      end)
-
-      # Second nominator makes 2 nominations
-      nominees
-      |> Enum.take(2)
-      |> Enum.each(fn nominee ->
-        Wrt.Repo.insert!(
-          %Nomination{
-            round_id: round.id,
-            nominator_id: second_nominator.id,
-            nominee_id: nominee.id
-          },
-          prefix: tenant
-        )
-      end)
-
-      result = Reports.get_top_nominators(tenant, 2)
-
-      assert length(result) == 2
-      assert hd(result).name == "Active Nominator"
-      assert hd(result).nominations_made == 5
-      assert Enum.at(result, 1).name == "Less Active"
-      assert Enum.at(result, 1).nominations_made == 2
     end
   end
 end

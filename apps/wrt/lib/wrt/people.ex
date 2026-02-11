@@ -50,13 +50,6 @@ defmodule Wrt.People do
   end
 
   @doc """
-  Gets a person by ID.
-  """
-  def get_person(tenant, id) do
-    Repo.get(Person, id, prefix: tenant)
-  end
-
-  @doc """
   Gets a person by ID, raising if not found.
   """
   def get_person!(tenant, id) do
