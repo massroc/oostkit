@@ -263,7 +263,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                     class={[
                       "py-2 rounded-md border text-center text-sm font-brand font-medium transition-all",
                       if(@duration_option == "none",
-                        do: "bg-accent-purple border-accent-purple text-white",
+                        do: "bg-accent-gold border-accent-gold text-white",
                         else:
                           "bg-surface-wall border-ink-blue/10 text-ink-blue/70 hover:border-ink-blue/20"
                       )
@@ -278,7 +278,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                     class={[
                       "py-2 rounded-md border text-center text-sm font-brand font-medium transition-all",
                       if(@duration_option == "120",
-                        do: "bg-accent-purple border-accent-purple text-white",
+                        do: "bg-accent-gold border-accent-gold text-white",
                         else:
                           "bg-surface-wall border-ink-blue/10 text-ink-blue/70 hover:border-ink-blue/20"
                       )
@@ -293,7 +293,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                     class={[
                       "py-2 rounded-md border text-center text-sm font-brand font-medium transition-all",
                       if(@duration_option == "210",
-                        do: "bg-accent-purple border-accent-purple text-white",
+                        do: "bg-accent-gold border-accent-gold text-white",
                         else:
                           "bg-surface-wall border-ink-blue/10 text-ink-blue/70 hover:border-ink-blue/20"
                       )
@@ -308,7 +308,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                     class={[
                       "py-2 rounded-md border text-center text-sm font-brand font-medium transition-all",
                       if(@duration_option == "custom",
-                        do: "bg-accent-purple border-accent-purple text-white",
+                        do: "bg-accent-gold border-accent-gold text-white",
                         else:
                           "bg-surface-wall border-ink-blue/10 text-ink-blue/70 hover:border-ink-blue/20"
                       )

@@ -58,7 +58,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
         </h3>
 
         <div class="text-center mb-3">
-          <div class="text-traffic-green text-lg font-semibold font-brand">
+          <div class="text-accent-gold text-lg font-semibold font-brand">
             <%= if @has_submitted do %>
               Discuss your score
             <% else %>
