@@ -135,6 +135,9 @@ defmodule PortalWeb.Admin.UsersLive do
               <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                 Last Login
               </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                Organisation
+              </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -171,6 +174,9 @@ defmodule PortalWeb.Admin.UsersLive do
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
                 {format_last_login(@last_logins[user.id])}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
+                {user.organisation || "-"}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                 <.link

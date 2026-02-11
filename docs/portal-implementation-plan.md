@@ -255,35 +255,43 @@ Operational control panel for platform management.
 - Last login data sourced from `Accounts.last_login_map/0`
 - Organisation column deferred to Phase C (requires user profile fields migration)
 
-## New Rollout: Phase C -- Auth & Onboarding
+## New Rollout: Phase C -- Auth & Onboarding (Complete)
 
-When ready for first facilitator users.
+Self-service registration and facilitator onboarding live.
 
-**Task C1: User profile fields**
-- DB migration: add organisation, referral_source, onboarding_completed to users
-- New `user_tool_interests` join table
+**Task C1: User profile fields** (Done)
+- DB migration `20260212000001_add_onboarding_fields_to_users`: adds `organisation` (text), `referral_source` (text), `onboarding_completed` (boolean) to users table
+- New `user_tool_interests` join table (user_id + tool_id composite PK)
+- New `Portal.Accounts.UserToolInterest` schema
 
-**Task C2: Registration flow update**
-- Email + name form (no password at registration)
-- Magic link confirmation flow
-- Facilitator-focused messaging: "Start running workshops with OOSTKit"
+**Task C2: Registration flow update** (Done)
+- `PortalWeb.UserLive.Registration` updated with name field + facilitator-focused messaging ("Start running workshops with OOSTKit")
+- New `registration_changeset/2` on User schema (validates name + email, no password at registration)
+- New context functions: `Accounts.change_user_registration/2`
+- Magic link confirmation flow sends email with login token
 
-**Task C3: Login page messaging**
-- "Welcome back" heading
-- Magic link as primary login method
-- Password as secondary (below, visually secondary)
+**Task C3: Login page messaging** (Done)
+- `PortalWeb.UserLive.Login` updated with "Welcome back" heading
+- Magic link as primary login method, password section below as secondary
+- Clean visual hierarchy with magic link prominent
 
-**Task C4: Settings page update**
-- Add name, organisation, referral source editing
-- Password framed as "Add a password" if not set
+**Task C4: Settings page update** (Done)
+- `PortalWeb.UserLive.Settings` updated with profile editing section (name, organisation, referral source)
+- New `profile_changeset/2` on User schema for profile field validation
+- New context functions: `Accounts.change_user_profile/2`, `Accounts.update_user_profile/2`
+- Dynamic password label: "Add a password" when no password set, "Change password" when password exists
 
-**Task C5: First-visit onboarding**
-- Dashboard card (not modal): org, referral source, tool interest checkboxes
-- Dismissable, data saved to user profile
-- Appears on first visit to `/home` after registration
+**Task C5: First-visit onboarding** (Done)
+- Dashboard (`/home`) shows onboarding card at top for users with `onboarding_completed == false`
+- Card contains: organisation field, referral source field, tool interest checkboxes (from tools DB)
+- New `PortalWeb.OnboardingController` handles form POST
+- New `onboarding_changeset/2` on User schema for onboarding field validation
+- New context functions: `Accounts.complete_onboarding/3`, `Accounts.skip_onboarding/1`, `Accounts.list_user_tool_interests/1`
+- "Save" submits data, "Skip for now" marks onboarding complete without data
 
-**Task C6: Flip the switch**
-- Sign Up / Log In buttons change from `/coming-soon` to real auth pages
+**Task C6: Flip the switch** (Done)
+- Header buttons in `root.html.heex` changed from `/coming-soon?context=signup` and `/coming-soon?context=login` to `/users/register` and `/users/log-in`
+- Organisation column added to admin users table (`PortalWeb.Admin.UsersLive`)
 
 ## New Rollout: Phase D -- Polish & Detail
 
@@ -391,10 +399,12 @@ GET  /coming-soon         Holding page with email capture
 POST /coming-soon         Submit email capture form
 
 # Auth
-GET  /users/register      Registration (Phase C; pre-launch redirects to /coming-soon)
-GET  /users/log-in        Login (pre-launch: super admin direct URL only)
+GET  /users/register      Registration (name + email, magic link confirmation)
+GET  /users/log-in        Login (magic link primary, password secondary)
 GET  /users/log-in/:token Magic link handler
-GET  /users/settings      Account settings (authenticated)
+GET  /users/settings      Account settings (profile, email, password)
+POST /onboarding/complete First-visit onboarding form submission
+POST /onboarding/skip     Skip onboarding
 
 # Admin (super admin only)
 GET  /admin               Admin dashboard with stats
@@ -485,12 +495,8 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 - Tool management admin: Small-Medium
 - Enhanced user management: Small
 
-### Phase C: Auth & Onboarding
-- User profile fields: Small
-- Registration flow update: Medium
-- Login page + settings: Small-Medium
-- Onboarding flow: Medium
-- Flip the switch: Small
+### Phase C: Auth & Onboarding (Complete)
+- All tasks (C1-C6) delivered
 
 ### Phase D: Polish & Detail
 - App detail enhancements: Medium
@@ -502,11 +508,10 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 
 ## Next Steps
 
-Phases A and B are complete. Next priority is Phase C (Auth & Onboarding):
+Phases A, B, and C are complete. Next priority is Phase D (Polish & Detail):
 
-1. C1: User profile fields (DB migration: organisation, referral_source, onboarding_completed, user_tool_interests)
-2. C2: Registration flow update (email + name, magic link, facilitator-focused messaging)
-3. C3: Login page messaging ("Welcome back", magic link primary, password secondary)
-4. C4: Settings page update (name, org, profile info editing)
-5. C5: First-visit onboarding (dashboard card: org, referral source, tool interests)
-6. C6: Flip the switch (Sign Up / Log In buttons from `/coming-soon` to real auth pages)
+1. D1: App detail page enhancements (screenshots, visual walkthroughs per tool)
+2. D2: Inline email capture on detail pages (for coming-soon tools on `/apps/:id` pages)
+3. D3: SEO & social sharing (Open Graph tags, meta descriptions, clean titles)
+4. D4: Header integration in Pulse/WRT (breadcrumb app name in shared header)
+5. D5: Admin dashboard trends (charts and time-series once there's enough data)

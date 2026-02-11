@@ -87,7 +87,7 @@ Links to "Learn more about OST" (future dedicated page, or external resource for
 #### Section 4: Footer / Sign Up Prompt
 
 - Email capture: *"More tools coming soon. Leave your email to be notified."*
-- Sign Up and Log In buttons (pointing to `/coming-soon` for now)
+- Sign Up and Log In buttons (linking to `/users/register` and `/users/log-in`)
 - Basic footer info (branding, links)
 
 **Future additions:**
@@ -243,23 +243,16 @@ or "Get started as a facilitator" — not generic "create an account" language.
 
 ## Authentication & Access Model
 
-### Current State (Pre-Launch)
+### Current State (Auth Live — Phase C Complete)
 
-- **Sign Up button**: Visible in UI, leads to "coming soon" holding page with email capture
-- **Log In button**: Visible in UI, leads to "coming soon" holding page with email capture
-- **Super admin**: Can still access login directly at `/users/log-in` (not linked from public nav)
-- **Admin panel**: Super admin manages the platform at `/admin` (dashboard with links to users, signups, tools)
+- **Sign Up button**: Links to `/users/register` — self-service registration with name + email, magic link confirmation
+- **Log In button**: Links to `/users/log-in` — "Welcome back" page with magic link (primary) and password (secondary)
+- **First-visit onboarding**: Dashboard shows onboarding card for new users (org, referral source, tool interests)
+- **Settings**: Facilitators can edit profile (name, org, referral source) and manage password at `/users/settings`
+- **Admin panel**: Super admin manages the platform at `/admin` (dashboard with links to users, signups, tools). Users table includes Organisation column.
 
-### Soft Launch (First Users)
+### Next: Subscription
 
-- Super admin creates first user accounts manually via admin panel
-- Login functionality enabled — login button becomes active
-- Sign Up remains disabled (invite-only phase)
-
-### Public Launch
-
-- Self-registration opens — Sign Up button goes live
-- Facilitators sign up, get access to the dashboard
 - Platform subscription unlocks paid tools
 - Pulse remains free to use without login (for now)
 
@@ -336,10 +329,9 @@ Adapts based on authentication state:
 
 | State | Right Zone Content |
 |-------|-------------------|
-| **Anonymous** | "Sign Up" (primary button) + "Log In" (secondary/text) |
+| **Anonymous** | "Sign Up" (primary button → `/users/register`) + "Log In" (secondary/text → `/users/log-in`) |
 | **Logged in** | User name/email + Settings link + "Log Out" |
 | **Super admin** | Same as logged in + "Admin" link |
-| **Pre-launch** | Sign Up + Log In buttons present but link to `/coming-soon` |
 
 ### Brand Stripe
 
@@ -363,9 +355,7 @@ enough to sign up; make it easy and welcoming.
 
 ### Registration (`/users/register`)
 
-**Pre-launch:** Not linked from public nav. Points to `/coming-soon` via Sign Up buttons.
-
-**When live:** A low-friction two-field form.
+**Status:** Live. Linked from header Sign Up button.
 
 #### Registration Form
 
@@ -394,9 +384,7 @@ Speak directly to facilitators:
 
 ### Login (`/users/log-in`)
 
-**Pre-launch:** Not linked from public nav. Super admin accesses directly via URL.
-
-**When live:** Two login methods, magic link as primary.
+**Status:** Live. Linked from header Log In button. Two login methods, magic link as primary.
 
 #### Magic Link (Primary)
 
@@ -605,9 +593,9 @@ This replaces the current hardcoded app config and gives the admin full control.
 | `/` | Marketing landing | No | Brochure/sales page. Redirects to `/home` if logged in. |
 | `/home` | Dashboard | No | Tool hub. Shows all tools, lock state varies by auth. |
 | `/apps/:id` | App detail / product page | No | Visual walkthrough, full description, launch or email capture. Shareable URL. |
-| `/users/log-in` | Login | No | Magic link (primary) + password (secondary). Pre-launch: super admin only via direct URL. |
-| `/users/register` | Registration | No | Email + name, magic link confirmation. Pre-launch: links to `/coming-soon`. |
-| `/users/settings` | Account settings | Yes | Email, password, name, organisation, referral source. |
+| `/users/log-in` | Login | No | "Welcome back" heading. Magic link (primary) + password (secondary). |
+| `/users/register` | Registration | No | Name + email form, magic link confirmation. Facilitator-focused messaging. |
+| `/users/settings` | Account settings | Yes | Profile (name, org, referral source), email change, password (add/change). |
 | `/admin` | Admin dashboard | Super Admin | Stats overview: signup counts, user counts, tool status. |
 | `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View onboarding data. |
 | `/admin/signups` | Email signups | Super Admin | View/export coming-soon email capture list. |
@@ -810,18 +798,18 @@ Operational control panel for managing the platform.
 **Result:** Super admin has full visibility and operational control. Can toggle tools
 off in an emergency, export the email list, and see platform health at a glance.
 
-### Phase C: Auth & Onboarding
+### Phase C: Auth & Onboarding (Complete)
 
-When ready for the first facilitator users.
+Self-service registration and facilitator onboarding live.
 
-| Step | What | Notes |
-|------|------|-------|
-| C1 | **User profile fields** | DB migration: organisation, referral_source, onboarding_completed, user_tool_interests table. |
-| C2 | **Registration flow update** | Email + name form, magic link confirmation, facilitator-focused messaging. |
-| C3 | **Login page messaging** | "Welcome back", magic link primary, password secondary. |
-| C4 | **Settings page update** | Add name, org, profile info editing. Password framed as "Add a password" if not set. |
-| C5 | **First-visit onboarding** | Dashboard card: org, referral source, tool interests. Dismissable. |
-| C6 | **Flip the switch** | Change Sign Up / Log In buttons from `/coming-soon` to real auth pages. |
+| Step | What | Status | Notes |
+|------|------|--------|-------|
+| C1 | **User profile fields** | Done | DB migration `20260212000001`: adds `organisation`, `referral_source`, `onboarding_completed` to users + `user_tool_interests` join table. New `UserToolInterest` schema. |
+| C2 | **Registration flow update** | Done | Name + email form with `registration_changeset`, magic link confirmation, facilitator-focused messaging ("Start running workshops with OOSTKit"). |
+| C3 | **Login page messaging** | Done | "Welcome back" heading, magic link as primary method, password section below as secondary. |
+| C4 | **Settings page update** | Done | Profile editing (name, org, referral source) via `profile_changeset`. Dynamic password label ("Add a password" vs "Change password"). |
+| C5 | **First-visit onboarding** | Done | Dashboard card with org, referral source, tool interest checkboxes. `OnboardingController` handles POST. Dismissable via "Skip for now". |
+| C6 | **Flip the switch** | Done | Header Sign Up / Log In buttons now point to `/users/register` and `/users/log-in`. Organisation column added to admin users table. |
 
 **Result:** Facilitators can sign up, log in, complete onboarding, and access tools.
 Auth is live. The coming-soon gate is removed for auth (but stays for coming-soon tools).

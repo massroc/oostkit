@@ -6,7 +6,7 @@ defmodule Portal.Accounts do
   import Ecto.Query, warn: false
   alias Portal.Repo
 
-  alias Portal.Accounts.{User, UserNotifier, UserToken}
+  alias Portal.Accounts.{User, UserNotifier, UserToken, UserToolInterest}
 
   ## Stats
 
@@ -111,8 +111,15 @@ defmodule Portal.Accounts do
   """
   def register_user(attrs) do
     %User{}
-    |> User.email_changeset(attrs)
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for registration (email + name).
+  """
+  def change_user_registration(user, attrs \\ %{}, opts \\ []) do
+    User.registration_changeset(user, attrs, opts)
   end
 
   @doc """
@@ -182,6 +189,68 @@ defmodule Portal.Accounts do
   """
   def disable_user(%User{} = user) do
     update_user(user, %{enabled: false})
+  end
+
+  ## Profile & Onboarding
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user profile.
+  """
+  def change_user_profile(user, attrs \\ %{}) do
+    User.profile_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user's profile fields (name, organisation, referral_source).
+  """
+  def update_user_profile(%User{} = user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Completes user onboarding, saving optional profile data and tool interests.
+  """
+  def complete_onboarding(%User{} = user, attrs, tool_ids \\ []) do
+    Repo.transact(fn ->
+      with {:ok, user} <-
+             user
+             |> User.onboarding_changeset(Map.put(attrs, "onboarding_completed", true))
+             |> Repo.update() do
+        save_tool_interests(user, tool_ids)
+        {:ok, user}
+      end
+    end)
+  end
+
+  @doc """
+  Skips onboarding by marking it as completed without saving profile data.
+  """
+  def skip_onboarding(%User{} = user) do
+    user
+    |> Ecto.Changeset.change(onboarding_completed: true)
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns the list of tool interest IDs for a user.
+  """
+  def list_user_tool_interests(user_id) do
+    from(uti in UserToolInterest, where: uti.user_id == ^user_id, select: uti.tool_id)
+    |> Repo.all()
+  end
+
+  defp save_tool_interests(user, tool_ids) do
+    # Delete existing interests
+    from(uti in UserToolInterest, where: uti.user_id == ^user.id) |> Repo.delete_all()
+
+    # Insert new ones
+    Enum.each(tool_ids, fn tool_id ->
+      %UserToolInterest{}
+      |> UserToolInterest.changeset(%{user_id: user.id, tool_id: tool_id})
+      |> Repo.insert!()
+    end)
   end
 
   ## Settings

@@ -70,6 +70,33 @@ defmodule PortalWeb.PageControllerTest do
     end
   end
 
+  describe "GET /home onboarding card" do
+    test "shows onboarding card for logged-in user who hasn't completed onboarding", %{
+      conn: conn
+    } do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+      conn = get(conn, ~p"/home")
+
+      assert html_response(conn, 200) =~ "Tell us a bit about yourself"
+      assert html_response(conn, 200) =~ "Organisation"
+      assert html_response(conn, 200) =~ "Skip for now"
+    end
+
+    test "hides onboarding card for anonymous users", %{conn: conn} do
+      conn = get(conn, ~p"/home")
+
+      refute html_response(conn, 200) =~ "Tell us a bit about yourself"
+    end
+
+    test "hides onboarding card after onboarding is completed", %{conn: conn} do
+      %{conn: conn, user: user} = register_and_log_in_user(%{conn: conn})
+      Portal.Accounts.skip_onboarding(user)
+      conn = get(conn, ~p"/home")
+
+      refute html_response(conn, 200) =~ "Tell us a bit about yourself"
+    end
+  end
+
   describe "GET /apps/:app_id" do
     test "renders app detail page for valid tool", %{conn: conn} do
       conn = get(conn, ~p"/apps/workgroup_pulse")

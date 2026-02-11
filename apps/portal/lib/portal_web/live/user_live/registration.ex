@@ -10,29 +10,37 @@ defmodule PortalWeb.UserLive.Registration do
     <div class="mx-auto max-w-sm">
       <div class="text-center">
         <.header>
-          Register for an account
+          Start running workshops with OOSTKit
           <:subtitle>
-            Already registered?
+            Create your facilitator account to access the full toolkit. <br />
+            Already have an account?
             <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
               Log in
             </.link>
-            to your account now.
           </:subtitle>
         </.header>
       </div>
 
       <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
         <.field
+          field={@form[:name]}
+          type="text"
+          label="Your name"
+          autocomplete="name"
+          required
+          phx-mounted={JS.focus()}
+        />
+
+        <.field
           field={@form[:email]}
           type="email"
           label="Email"
           autocomplete="username"
           required
-          phx-mounted={JS.focus()}
         />
 
         <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
-          Create an account
+          Get started
         </.button>
       </.form>
     </div>
@@ -46,7 +54,7 @@ defmodule PortalWeb.UserLive.Registration do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Accounts.change_user_email(%User{}, %{}, validate_unique: false)
+    changeset = Accounts.change_user_registration(%User{}, %{}, validate_unique: false)
 
     {:ok, assign_form(socket, changeset), temporary_assigns: [form: nil]}
   end
@@ -75,7 +83,7 @@ defmodule PortalWeb.UserLive.Registration do
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
-    changeset = Accounts.change_user_email(%User{}, user_params, validate_unique: false)
+    changeset = Accounts.change_user_registration(%User{}, user_params, validate_unique: false)
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 

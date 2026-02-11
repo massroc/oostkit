@@ -5,12 +5,19 @@ defmodule PortalWeb.UserLive.LoginTest do
   import Portal.AccountsFixtures
 
   describe "login page" do
-    test "renders login page", %{conn: conn} do
+    test "renders login page with welcome back heading", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
-      assert html =~ "Log in"
+      assert html =~ "Welcome back"
       assert html =~ "Sign up"
-      assert html =~ "Log in with email"
+      assert html =~ "Send me a login link"
+    end
+
+    test "shows password form as secondary", %{conn: conn} do
+      {:ok, _lv, html} = live(conn, ~p"/users/log-in")
+
+      assert html =~ "or use a password"
+      assert html =~ "Log in with password"
     end
   end
 
@@ -76,7 +83,7 @@ defmodule PortalWeb.UserLive.LoginTest do
   end
 
   describe "login navigation" do
-    test "redirects to registration page when the Register button is clicked", %{conn: conn} do
+    test "redirects to registration page when the Sign up button is clicked", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
       {:ok, _login_live, login_html} =
@@ -85,7 +92,7 @@ defmodule PortalWeb.UserLive.LoginTest do
         |> render_click()
         |> follow_redirect(conn, ~p"/users/register")
 
-      assert login_html =~ "Register"
+      assert login_html =~ "Start running workshops"
     end
   end
 
@@ -95,12 +102,13 @@ defmodule PortalWeb.UserLive.LoginTest do
       %{user: user, conn: log_in_user(conn, user)}
     end
 
-    test "shows login page with email filled in", %{conn: conn, user: user} do
+    test "shows re-authenticate heading", %{conn: conn, user: user} do
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
+      assert html =~ "Re-authenticate"
       assert html =~ "You need to reauthenticate"
-      refute html =~ "Register"
-      assert html =~ "Log in with email"
+      refute html =~ "Sign up"
+      assert html =~ "Send me a login link"
 
       assert html =~
                ~s(<input type="email" name="user[email]" id="login_form_magic_email" value="#{user.email}")

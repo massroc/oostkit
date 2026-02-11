@@ -21,10 +21,16 @@ defmodule PortalWeb.PageController do
 
   def home(conn, _params) do
     tools = Tools.list_tools()
+    user = get_in(conn.assigns, [:current_scope, Access.key(:user)])
+
+    show_onboarding =
+      user != nil and user.onboarding_completed == false
 
     render(conn, :home,
       page_title: "Home",
-      tools: tools
+      tools: tools,
+      show_onboarding: show_onboarding,
+      onboarding_tools: tools
     )
   end
 
