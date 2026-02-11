@@ -47,5 +47,11 @@ config :phoenix, :plug_init_mode, :runtime
 # Internal API key for cross-app auth
 config :portal, :internal_api_key, "dev_internal_api_key"
 
+# Tool URLs for local development
+config :portal, :tool_urls, %{
+  "workgroup_pulse" => "http://localhost:4000",
+  "wrt" => "http://localhost:4001"
+}
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false

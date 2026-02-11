@@ -24,6 +24,12 @@ config :portal, Portal.Mailer, adapter: Swoosh.Adapters.Test
 # Internal API key for cross-app auth
 config :portal, :internal_api_key, "test_internal_api_key"
 
+# Tool URLs for test environment
+config :portal, :tool_urls, %{
+  "workgroup_pulse" => "http://localhost:4000",
+  "wrt" => "http://localhost:4001"
+}
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 

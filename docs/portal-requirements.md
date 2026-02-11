@@ -309,6 +309,18 @@ Key requirements (all met):
 - Cross-subdomain cookie support via configurable `COOKIE_DOMAIN`
 - Internal API for token validation by other apps
 
+### Tool URL Resolution
+
+Tool URLs are stored in the database (production subdomain URLs), but Portal overrides them per environment via `config :portal, :tool_urls`. The `Portal.Tools` context applies overrides transparently through `apply_config_url/1` on all query functions, so templates always get the correct URL from `@tool.url`.
+
+| Environment | Pulse URL | WRT URL | Source |
+|-------------|-----------|---------|--------|
+| Dev | `http://localhost:4000` | `http://localhost:4001` | `config/dev.exs` |
+| Test | `http://localhost:4000` | `http://localhost:4001` | `config/test.exs` |
+| Prod | `https://pulse.oostkit.com` | `https://wrt.oostkit.com` | `config/runtime.exs` (overridable via `PULSE_URL`, `WRT_URL` env vars) |
+
+The landing page uses a `pulse_url/1` helper (in `PageHTML`) that reads the URL from the live tool list, replacing previously hardcoded production URLs.
+
 ---
 
 ## Decisions

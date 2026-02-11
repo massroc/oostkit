@@ -75,6 +75,12 @@ if config_env() == :prod do
   cookie_domain = System.get_env("COOKIE_DOMAIN")
   if cookie_domain, do: config(:portal, :cookie_domain, cookie_domain)
 
+  # Tool URLs (overridable via env vars)
+  config :portal, :tool_urls, %{
+    "workgroup_pulse" => System.get_env("PULSE_URL", "https://pulse.oostkit.com"),
+    "wrt" => System.get_env("WRT_URL", "https://wrt.oostkit.com")
+  }
+
   # Configurable from-address
   config :portal, :mail_from,
     name: System.get_env("MAIL_FROM_NAME", "OOSTKit"),
