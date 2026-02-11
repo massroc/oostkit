@@ -152,14 +152,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
           </div>
 
           <ul class="space-y-1.5 pl-4 text-ink-blue/70">
-            <li>• For these criteria, <span class="text-traffic-green font-semibold">more is always better</span></li>
+            <li>
+              • For these criteria,
+              <span class="text-traffic-green font-semibold">more is always better</span>
+            </li>
             <li>
               • <span class="text-ink-blue font-semibold">10 is optimal</span>
               — the ideal to strive for
             </li>
             <li>• Lower scores highlight areas where the team needs more</li>
           </ul>
-
         </div>
       </div>
     </.sheet>
