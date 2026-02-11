@@ -27,7 +27,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
     ~H"""
     <!-- Main Sheet with scoring grid -->
     <.sheet
-      class="p-5 w-[960px] h-full shadow-sheet-lifted transition-all duration-300"
+      class="p-3 w-[960px] h-full shadow-sheet-lifted transition-all duration-300"
       phx-click="focus_sheet"
       phx-value-sheet="main"
     >

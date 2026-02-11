@@ -11635,6 +11635,10 @@ input::-webkit-datetime-edit {
   border-color: rgb(244 185 69 / var(--tw-border-opacity, 1));
 }
 
+.border-accent-gold\/30 {
+  border-color: rgb(244 185 69 / 0.3);
+}
+
 .border-accent-magenta\/30 {
   border-color: rgb(188 69 244 / 0.3);
 }
@@ -11686,10 +11690,6 @@ input::-webkit-datetime-edit {
   border-color: rgb(34 197 94 / var(--tw-border-opacity, 1));
 }
 
-.border-traffic-green\/30 {
-  border-color: rgb(34 197 94 / 0.3);
-}
-
 .border-traffic-red {
   --tw-border-opacity: 1;
   border-color: rgb(239 68 68 / var(--tw-border-opacity, 1));
@@ -11707,6 +11707,10 @@ input::-webkit-datetime-edit {
 
 .bg-accent-gold\/10 {
   background-color: rgb(244 185 69 / 0.1);
+}
+
+.bg-accent-gold\/5 {
+  background-color: rgb(244 185 69 / 0.05);
 }
 
 .bg-accent-magenta {
@@ -11836,10 +11840,6 @@ input::-webkit-datetime-edit {
 .bg-traffic-green {
   --tw-bg-opacity: 1;
   background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1));
-}
-
-.bg-traffic-green\/5 {
-  background-color: rgb(34 197 94 / 0.05);
 }
 
 .bg-ui-header-bg {
@@ -12615,7 +12615,7 @@ input::-webkit-datetime-edit {
 
 .scoring-grid th,
 .scoring-grid td {
-  padding: 8px 4px;
+  padding: 6px 4px;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid rgba(26, 58, 107, 0.06);
@@ -12626,7 +12626,7 @@ input::-webkit-datetime-edit {
   font-size: 18px;
   font-weight: 600;
   color: #1a3a6b;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 2px solid rgba(26, 58, 107, 0.12);
   position: sticky;
   top: 0;
@@ -12699,7 +12699,7 @@ th.active-col-header {
   color: #888888;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 6px 0 2px 0;
+  padding: 4px 0 0 0;
   text-align: center;
   border-bottom: none;
 }
@@ -12739,7 +12739,7 @@ th.active-col-header {
   text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.01em;
-  padding: 10px 0 2px 8px;
+  padding: 8px 0 0 8px;
   border-bottom: none;
 }
 
@@ -12750,7 +12750,7 @@ th.active-col-header {
   font-size: 24px;
   font-weight: 700;
   color: #1a3a6b;
-  padding: 6px 1px;
+  padding: 4px 1px;
   width: 68px;
   max-width: 68px;
 }
@@ -12797,8 +12797,8 @@ th.active-col-header {
 .sheet-stack {
   width: 100%;
   height: 100%;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   position: relative;
   display: flex;
   justify-content: center;
@@ -12809,7 +12809,7 @@ th.active-col-header {
   display: none;
   min-width: 0;
   width: 100%;
-  height: calc(100vh - 52px - 3rem);
+  height: calc(100vh - 52px - 2rem);
   align-items: flex-start;
   justify-content: center;
 }
@@ -12840,7 +12840,7 @@ th.active-col-header {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 5rem;
+  padding-bottom: 3rem;
   /* Firefox thin scrollbar */
   scrollbar-width: thin;
   scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
