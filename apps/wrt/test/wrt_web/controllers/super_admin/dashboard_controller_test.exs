@@ -7,18 +7,18 @@ defmodule WrtWeb.SuperAdmin.DashboardControllerTest do
   end
 
   describe "GET /admin/dashboard" do
-    test "renders dashboard when authenticated via Portal", %{conn: conn, admin: admin} do
+    test "renders dashboard when authenticated", %{conn: conn, admin: admin} do
       conn =
         conn
-        |> log_in_portal_super_admin(admin)
+        |> log_in_super_admin(admin)
         |> get("/admin/dashboard")
 
       assert html_response(conn, 200) =~ "Dashboard"
     end
 
-    test "redirects to Portal login when not authenticated", %{conn: conn} do
+    test "redirects to login when not authenticated", %{conn: conn} do
       conn = get(conn, "/admin/dashboard")
-      assert redirected_to(conn)
+      assert redirected_to(conn) == "/admin/login"
     end
   end
 end
