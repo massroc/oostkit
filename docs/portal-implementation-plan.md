@@ -293,24 +293,34 @@ Self-service registration and facilitator onboarding live.
 - Header buttons in `root.html.heex` changed from `/coming-soon?context=signup` and `/coming-soon?context=login` to `/users/register` and `/users/log-in`
 - Organisation column added to admin users table (`PortalWeb.Admin.UsersLive`)
 
-## New Rollout: Phase D -- Polish & Detail
+## New Rollout: Phase D -- Polish & Detail (D1-D3 Complete, D4-D5 Deferred)
 
 Enhancements once core platform is running.
 
-**Task D1: App detail page enhancements**
-- Screenshots, visual walkthroughs per tool
+**Task D1: App detail page enhancements** (Done)
+- Richer layout on `/apps/:id` with better spacing, structured header area, visual walkthrough section, detailed description, and action area
+- Enhanced card-style layout consistent with the rest of the design system
 
-**Task D2: Inline email capture on detail pages**
+**Task D2: Inline email capture on detail pages** (Done)
 - For coming-soon tools on their `/apps/:id` pages
+- Inline form with name + email fields and "Notify me" button
+- New route: `POST /apps/:app_id/notify` in `PageController`
+- Creates `interest_signup` record with context `tool:{tool_id}`
+- Success state: redirects back with `?subscribed=true` query param, showing "Thanks! We'll let you know when it's ready."
 
-**Task D3: SEO & social sharing**
-- Open Graph tags, meta descriptions, clean titles
+**Task D3: SEO & social sharing** (Done)
+- Added `<meta name="description">` tag to root layout with per-page override via `@meta_description` assign
+- Added Open Graph tags: `og:title` (from `@page_title`), `og:description` (from `@meta_description`), `og:type` ("website"), `og:site_name` ("OOSTKit")
+- App detail pages pass tool description as `meta_description` for page-specific SEO
+- Title suffix changed from " - OOSTKit" to " — OOSTKit" (em dash)
 
-**Task D4: Header integration in Pulse/WRT**
+**Task D4: Header integration in Pulse/WRT** (Deferred)
 - Breadcrumb app name in shared header across apps
+- Deferred: lower priority, requires changes in Pulse and WRT apps
 
-**Task D5: Admin dashboard trends**
+**Task D5: Admin dashboard trends** (Deferred)
 - Charts and time-series once there's enough data
+- Deferred: not enough data volume yet to justify implementation
 
 ## Future: Enhanced Features
 
@@ -395,6 +405,7 @@ user_tool_interests (Phase C — onboarding tool interest)
 GET  /                    Marketing landing page (redirects to /home if logged in)
 GET  /home                Dashboard (tool hub)
 GET  /apps/:id            App detail / product page
+POST /apps/:app_id/notify Submit inline email capture from app detail page (Phase D)
 GET  /coming-soon         Holding page with email capture
 POST /coming-soon         Submit email capture form
 
@@ -498,20 +509,23 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 ### Phase C: Auth & Onboarding (Complete)
 - All tasks (C1-C6) delivered
 
-### Phase D: Polish & Detail
-- App detail enhancements: Medium
-- SEO & social sharing: Small
-- Header integration in apps: Small-Medium
-- Admin trends: Medium
+### Phase D: Polish & Detail (D1-D3 Complete, D4-D5 Deferred)
+- App detail enhancements: Medium — Done
+- Inline email capture: Small — Done
+- SEO & social sharing: Small — Done
+- Header integration in apps: Small-Medium — Deferred
+- Admin trends: Medium — Deferred
 
 ---
 
 ## Next Steps
 
-Phases A, B, and C are complete. Next priority is Phase D (Polish & Detail):
+Phases A, B, C, and D (D1-D3) are complete. Remaining deferred items:
 
-1. D1: App detail page enhancements (screenshots, visual walkthroughs per tool)
-2. D2: Inline email capture on detail pages (for coming-soon tools on `/apps/:id` pages)
-3. D3: SEO & social sharing (Open Graph tags, meta descriptions, clean titles)
-4. D4: Header integration in Pulse/WRT (breadcrumb app name in shared header)
-5. D5: Admin dashboard trends (charts and time-series once there's enough data)
+1. D4: Header integration in Pulse/WRT (breadcrumb app name in shared header) — lower priority
+2. D5: Admin dashboard trends (charts and time-series once there's enough data) — needs data volume
+
+Future priorities beyond Phase D:
+- Content expansion (Learn about OST section, richer app pages)
+- Billing integration (platform subscription)
+- Analytics (page view and tool launch tracking)

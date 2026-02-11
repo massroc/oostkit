@@ -106,11 +106,29 @@ defmodule PortalWeb.PageControllerTest do
       assert html_response(conn, 200) =~ "Launch"
     end
 
-    test "renders coming soon state for coming_soon tool", %{conn: conn} do
+    test "renders inline email capture for coming_soon tool", %{conn: conn} do
       conn = get(conn, ~p"/apps/wrt")
 
-      assert html_response(conn, 200) =~ "Workshop Referral Tool"
-      assert html_response(conn, 200) =~ "coming soon"
+      html = html_response(conn, 200)
+      assert html =~ "Workshop Referral Tool"
+      assert html =~ "Notify me"
+      assert html =~ "notify_email"
+    end
+
+    test "shows success state after subscribing", %{conn: conn} do
+      conn = get(conn, ~p"/apps/wrt?subscribed=true")
+
+      html = html_response(conn, 200)
+      assert html =~ "let you know when"
+      refute html =~ "Notify me"
+    end
+
+    test "includes Open Graph meta tags", %{conn: conn} do
+      conn = get(conn, ~p"/apps/workgroup_pulse")
+
+      html = html_response(conn, 200)
+      assert html =~ ~s(property="og:title")
+      assert html =~ ~s(property="og:description")
     end
 
     test "redirects to home for invalid app", %{conn: conn} do
@@ -118,6 +136,41 @@ defmodule PortalWeb.PageControllerTest do
 
       assert redirected_to(conn) == ~p"/home"
       assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Application not found"
+    end
+  end
+
+  describe "POST /apps/:app_id/notify" do
+    test "creates interest signup and redirects with subscribed flag", %{conn: conn} do
+      conn =
+        post(conn, ~p"/apps/wrt/notify", %{
+          "signup" => %{"name" => "Test", "email" => "test@example.com"}
+        })
+
+      assert redirected_to(conn) == "/apps/wrt?subscribed=true"
+
+      signups = Portal.Marketing.list_interest_signups()
+      assert length(signups) == 1
+      assert hd(signups).context == "tool:wrt"
+      assert hd(signups).email == "test@example.com"
+    end
+
+    test "redirects with error for invalid email", %{conn: conn} do
+      conn =
+        post(conn, ~p"/apps/wrt/notify", %{
+          "signup" => %{"name" => "Test", "email" => ""}
+        })
+
+      assert redirected_to(conn) == "/apps/wrt"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "valid email"
+    end
+
+    test "redirects to home for invalid app", %{conn: conn} do
+      conn =
+        post(conn, ~p"/apps/nonexistent/notify", %{
+          "signup" => %{"email" => "test@example.com"}
+        })
+
+      assert redirected_to(conn) == ~p"/home"
     end
   end
 end

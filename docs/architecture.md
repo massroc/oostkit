@@ -109,9 +109,9 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 
 ### Portal
 
-Implemented in `apps/portal/` (Phases 1-2, A, B, and C complete, Phase D next). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
+Implemented in `apps/portal/` (Phases 1-2, A, B, C complete; Phase D: D1-D3 complete, D4-D5 deferred). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
 
-**Current state (through Phase C):**
+**Current state (through Phase D):**
 - User authentication (password + magic link)
 - Self-service registration (name + email, magic link confirmation, facilitator-focused messaging)
 - Role system (Super Admin, Session Manager)
@@ -121,7 +121,7 @@ Implemented in `apps/portal/` (Phases 1-2, A, B, and C complete, Phase D next). 
 - Dashboard (`/home`) with DB-backed tool cards (11 tools, three states: live, coming soon, maintenance)
 - First-visit onboarding card on dashboard (org, referral source, tool interest checkboxes)
 - `tools` table in DB replacing hardcoded app config, seeded with 11 tools
-- `interest_signups` table for email capture from coming-soon pages
+- `interest_signups` table for email capture from coming-soon pages and app detail pages
 - `user_tool_interests` table for onboarding tool interest data
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
 - Three-zone header with Sign Up / Log In buttons pointing to real auth pages (`/users/register`, `/users/log-in`)
@@ -132,8 +132,10 @@ Implemented in `apps/portal/` (Phases 1-2, A, B, and C complete, Phase D next). 
 - Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export
 - Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle
 - Enhanced user management (`/admin/users`) with Registered date, Last Login, and Organisation columns
+- App detail pages (`/apps/:id`) with richer layout, inline email capture for coming-soon tools (`POST /apps/:app_id/notify`)
+- SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
 
-**Phase D (next):** App detail page enhancements, inline email capture, SEO, header integration in apps.
+**Deferred:** D4 (header breadcrumbs in Pulse/WRT), D5 (admin dashboard trends/charts).
 
 **Data model additions:**
 - `tools` table -- 11 tools with name, tagline, status, URL, audience, sort_order, admin kill switch
