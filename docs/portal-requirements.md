@@ -4,59 +4,90 @@ This document captures the requirements for the OOSTKit portal - the front end t
 
 ## Overview
 
-The portal is a landing page and authentication hub that:
-- Introduces OOSTKit and its purpose
-- Routes users to the appropriate tool
-- Provides shared authentication across all apps
-- Maintains a consistent design language
+The portal serves two fundamentally different experiences:
+
+1. **Marketing landing page (`/`)** -- a bright, values-driven introduction to OOSTKit for new visitors
+2. **Dashboard (`/home`)** -- the functional tool hub for browsing and launching tools
+
+It also provides:
+- Shared authentication across all apps (facilitators only)
+- Admin hub for platform management
+- Coming-soon pages with email capture as soft feature gates
+- A consistent design language across the platform
+
+See also: [Portal UX Design](../apps/portal/docs/ux-design.md) for detailed design specifications.
 
 ## Goals
 
-1. Help users find and access the right tool quickly
-2. Provide a unified OOSTKit identity across apps
-3. Centralize authentication for apps that require it
-4. Present tools organized by audience
+1. Present OOSTKit with a bold, values-driven marketing page
+2. Provide a functional dashboard where users find and launch tools
+3. Centralize authentication for facilitators (participants never need accounts)
+4. Give super admins operational control via an admin hub
+5. Capture email interest for features not yet live
 
 ## Non-Goals (for initial release)
 
 - Aggregated dashboards or cross-app data views
 - Persistent workshop data storage
-- Self-service account registration
+- Organisation or team accounts (solo facilitators only for now)
 - Deep integration between apps
 
 ---
 
 ## Information Architecture
 
-### Landing Page
+### Marketing Landing Page (`/`)
 
-A split-view design organized by audience:
+A bold, aspirational page for new visitors. Redirects logged-in users to `/home`.
 
-| Tools for Facilitators | Tools for Teams |
-|------------------------|-----------------|
-| Workshop Referral Tool | Workgroup Pulse |
-| (future tools...)      | (future tools...) |
+**Sections:**
+1. **Hero** -- Bold headline ("Tools for building democratic workplaces"), subheadline grounding in OST, primary CTA to Pulse, secondary CTA to dashboard
+2. **What's in the Kit** -- Compact showcase of each tool with status and CTA
+3. **OST Context** -- Brief paragraph for unfamiliar visitors, link to learn more
+4. **Footer / Sign Up Prompt** -- Email capture, Sign Up / Log In buttons
 
-**Content:**
-- Brief introduction to OOSTKit and its purpose
-- Tool cards with name, short description, and link
-- "Learn more" links to dedicated app pages
-- Future: "Learn about OST" section
+**Tone:** Punchy, aspirational, DP2 language front and centre. Not corporate-safe.
 
-**Design principle:** The front page is for people who know what they want - quick selection, minimal friction.
+### Dashboard (`/home`)
 
-### App Detail Pages
+The functional tool hub. Accessible to everyone (anonymous and logged-in).
 
-One page per app with:
-- Longer description of the tool
-- Use cases / when to use it
-- Link to launch the app
-- (Future: screenshots, video, documentation links)
+**Layout:** Vertical stack of rich, full-width tool cards (11 total). No audience grouping -- flat list ordered by sort_order.
+
+**Card states:**
+| State | When | Button | Visual |
+|-------|------|--------|--------|
+| Live & open | Pulse now | "Launch" | Full colour |
+| Coming soon | Most tools now | "Coming soon" badge | Muted/greyed |
+| Live & locked | WRT later | "Log in to access" (anon) / "Launch" (logged in) | Full colour, lock icon for anon |
+
+**Tool catalogue (11 tools):**
+| Tool | Status |
+|------|--------|
+| Workgroup Pulse | Live & open |
+| Workshop Referral Tool | Coming soon |
+| Search Conference | Coming soon |
+| Team Kick-off | Coming soon |
+| Team Design | Coming soon |
+| Org Design | Coming soon |
+| Skill Matrix | Coming soon |
+| DP1 Briefing | Coming soon |
+| DP2 Briefing | Coming soon |
+| Collaboration Designer | Coming soon |
+| Org Cadence | Coming soon |
+
+### App Detail Pages (`/apps/:id`)
+
+Product page per tool. Shareable URL. Includes visual walkthrough, detailed description, and context-appropriate action (launch button or inline email capture for coming-soon tools).
+
+### Coming Soon Page (`/coming-soon`)
+
+Context-aware holding page with email capture. Serves as the soft gate for features not yet live (Sign Up, Log In, locked tools). Query parameters drive contextual messaging.
 
 ### Future Pages
 
 - Learn about OST / methodology background
-- Pricing (when apps become paid)
+- Pricing section (platform subscription model)
 - About / Contact
 
 ---
@@ -115,35 +146,45 @@ Rather than embedding apps in iframes, we use a hybrid model:
 
 ### User Types
 
+Only two types of people interact with OOSTKit:
+
+| | Facilitator | Participant |
+|---|---|---|
+| **Role** | Creates & manages sessions/workshops | Joins via link |
+| **Account** | Yes -- logs in | Never -- no account needed |
+| **Pays** | Yes (platform subscription) | No |
+| **Examples** | OST practitioners, consultants | Team members, workshop attendees |
+
+This pattern is consistent across every tool: facilitator logs in to create/manage, participants join via links with no friction.
+
+**System roles:**
 | Role | Description | Access |
 |------|-------------|--------|
-| Super Admin | Platform owner | All apps, account management, platform settings |
+| Super Admin | Platform owner | All apps, admin hub, platform settings |
 | Session Manager | Facilitator running workshops | Apps they have access to (e.g., WRT) |
-| Participant | Invited via email/link | Session-specific access, no account needed |
-
-**Note on terminology:** OST uses "manager" rather than "facilitator" - these are session managers.
 
 ### Initial Scope
 
 For the first release:
-- Super Admin can create Session Manager accounts
+- Super Admin can create Session Manager accounts (invite-only phase)
 - Session Managers log in to access WRT
-- Workgroup Pulse remains open (no login required)
-- Participants access sessions via magic links (no account)
+- Workgroup Pulse remains free and open (no login required) -- the top-of-funnel discovery tool
+- Participants access sessions via links (no account, no friction)
+- Sign Up and Log In buttons point to `/coming-soon` with email capture
 
 ### Account Management
 
-Portal admin page for:
-- Creating session manager accounts
-- Viewing/editing existing accounts
-- Disabling/enabling accounts
-- (Future: self-service registration, organization management)
+Admin hub for super admins:
+- **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest)
+- **User management** (`/admin/users`) -- create/edit/disable accounts, view onboarding data
+- **Email signups** (`/admin/signups`) -- view/export coming-soon email capture list, CSV export
+- **Tool management** (`/admin/tools`) -- view tool status, kill switch toggle per tool
 
 ### Future Considerations
 
-- Self-service account creation (when apps are paid)
-- Organization-level accounts and billing
-- Role-based access to specific apps
+- Self-service registration (Phase C of rollout)
+- Platform subscription billing (one price unlocks all paid tools)
+- Organisation-level accounts if demand emerges (solo facilitators only for now)
 - Persistent data access requiring authentication
 
 ---
@@ -153,35 +194,40 @@ Portal admin page for:
 ### Navigation Flow
 
 ```
-[Portal Landing Page]
+[Marketing Landing Page /]
         |
-        ├── Click tool card → [App launches with shared header]
-        │                            |
-        │                            └── Click "Home" → [Portal Landing Page]
+        ├── "Try Workgroup Pulse" → [pulse.oostkit.com]
+        ├── "Explore all tools" → [Dashboard /home]
+        │        |
+        │        ├── Live tool → "Launch" → [App on subdomain]
+        │        ├── Locked tool → "Log in to access" → [Login or /coming-soon]
+        │        ├── Coming soon tool → "Coming soon" badge (no action)
+        │        └── "Learn more" → [App Detail Page /apps/:id]
         │
-        ├── Click "Learn more" → [App Detail Page]
-        │                            |
-        │                            └── Click "Launch" → [App]
-        │
-        └── Click "Login" → [Login Page]
-                                |
-                                └── Success → [Portal with authenticated state]
+        ├── "Sign Up" → [/coming-soon] (pre-launch) or [/users/register] (when live)
+        └── "Log In" → [/coming-soon] (pre-launch) or [/users/log-in] (when live)
+
+[Logged-in user hits /] → auto-redirect to [/home]
 ```
 
 ### Login-Required Apps
 
 When a user clicks on an app that requires authentication:
 1. If logged in → App launches
-2. If not logged in → Redirect to portal login
+2. If not logged in → Redirect to portal login (or `/coming-soon` pre-launch)
 3. After login → Redirect back to requested app
 
 ### Consistent Header
 
-All apps display a shared header:
-- OOSTKit logo (links to portal home)
-- Navigation options (TBD)
-- Login/account status
-- App-specific content appears below
+Three-zone layout across the entire platform (marketing page, dashboard, inside apps):
+
+```
+[Left: Brand + Context]    [Centre: Nav]    [Right: User/Auth]
+```
+
+- **Left:** OOSTKit wordmark (links to `/`). Inside apps: breadcrumb `OOSTKit > App Name`
+- **Centre:** "Home" link to `/home` (shown when inside an app)
+- **Right:** Sign Up + Log In (anonymous) / User name + Settings + Log Out (authenticated) / + Admin link (super admin)
 
 ---
 
@@ -213,20 +259,25 @@ All apps display a shared header:
 
 ---
 
-## App Visibility
+## App Visibility & Tool Management
 
-### Public Apps (no login required to see or use)
+Tool visibility on the dashboard is determined by two layers:
 
-- Workgroup Pulse - anyone can create/join a session
+- **Default status** (from database): `live` or `coming_soon`
+- **Admin override** (kill switch): `enabled` (default) or `disabled`
 
-### Login-Required Apps (visible to all, require login to use)
+Effective status:
+- Config = live + Admin = enabled → Live (launchable)
+- Config = live + Admin = disabled → Maintenance (temporarily unavailable)
+- Config = coming_soon + Admin = any → Coming soon
 
-- Workshop Referral Tool - session managers only
+The admin toggle is an operational kill switch -- if something goes wrong with an app, disable it from the admin panel without needing a deploy.
 
-### Future: Role-Gated Apps
+### Free vs Paid Strategy
 
-- Some apps may only be visible to certain roles
-- Logged-in users may see additional apps
+- **Free without account:** Workgroup Pulse (top-of-funnel discovery tool, may eventually require facilitator login)
+- **Paid (platform subscription):** WRT and future facilitator tools. One subscription unlocks everything.
+- Participants always join free via links, regardless of tool
 
 ---
 
@@ -265,40 +316,80 @@ Key requirements (all met):
 ## Decisions
 
 1. **Domain:** oostkit.com (registered)
-2. **Branding:** Use placeholder logo/assets initially, create proper branding later
+2. **Branding:** Simple icon + wordmark for now, proper logo in progress
 3. **WRT integration:** Replace WRT's auth entirely when portal auth is ready
-4. **App metadata:** Config file versioned in git (simple, easy to update)
+4. **App metadata:** Tools table in database (replaces hardcoded app config), seeded with 11 tools
 5. **Analytics:** Nice to have, implement later (not in initial phases)
+6. **Pricing model:** Platform subscription -- one price unlocks all paid tools
+7. **Org/team accounts:** Solo facilitators only for now; org accounts if demand emerges
+8. **Who logs in:** Facilitators only. Participants never need accounts.
+9. **Pulse free forever?** Free for now, not necessarily forever. May require facilitator login later.
+10. **Coming-soon gate:** Email capture as soft gate for features not yet live
 
 ---
 
 ## Phases
 
-### Phase 1: Foundation
-- Portal app with landing page
-- App cards linking to existing apps
+### Completed Phases
+
+#### Phase 1: Foundation (Complete)
+- Portal app with landing page and app cards
 - Basic authentication (super admin + session managers)
 - Account management for super admin
-- Shared header styles (portal only initially)
+- Shared header styles
 
-### Phase 2: Unified Experience (In Progress)
+#### Phase 2: Unified Experience (Complete)
 - App detail pages
 - Shared header integrated into Workgroup Pulse and WRT
-- Subdomain cookie authentication working across apps (implemented: `_oostkit_token` cookie + `COOKIE_DOMAIN`)
+- Subdomain cookie authentication (`_oostkit_token` cookie + `COOKIE_DOMAIN`)
 - Internal auth validation API (`POST /api/internal/auth/validate` with `ApiAuth` plug)
 - WRT integration: `PortalAuthClient` + `PortalAuth` plug + transitional `RequirePortalOrWrtSuperAdmin` plug
 - Configurable email from-address for Postmark production sender signatures
 
-### Phase 3: Enhanced Features
-- "Learn about OST" content section
-- Self-service registration (if/when needed)
-- Organization management
-- Usage analytics
+### New Rollout Plan
+
+Four phases, each independently deployable. See [Portal UX Design](../apps/portal/docs/ux-design.md) for full detail.
+
+#### Phase A: Foundation + Public Face
+Gets the new public experience live. Replaces the current landing page.
+- A1: Tools table + seed data (DB migration, 11 tools)
+- A2: Interest signups table (DB migration for email capture)
+- A3: Route restructure (current landing → `/home`, new marketing page → `/`, `/coming-soon` route)
+- A4: Coming-soon page (email capture, context-aware messaging)
+- A5: Header redesign (three-zone layout, breadcrumb app name)
+- A6: Dashboard (`/home`) (tool cards from DB, three states, 11 cards)
+- A7: Marketing landing page (`/`) (hero, tool highlights, OST context, footer CTA)
+
+#### Phase B: Admin Hub
+Operational control panel for platform management.
+- B1: Admin dashboard (`/admin`) with stats cards
+- B2: Email signups admin (`/admin/signups`) with list, search, CSV export
+- B3: Tool management admin (`/admin/tools`) with kill switch toggle
+- B4: Enhanced user management (onboarding data columns, last login)
+
+#### Phase C: Auth & Onboarding
+When ready for first facilitator users.
+- C1: User profile fields (DB migration: organisation, referral_source, onboarding_completed)
+- C2: Registration flow update (email + name, magic link, facilitator-focused messaging)
+- C3: Login page messaging ("Welcome back", magic link primary, password secondary)
+- C4: Settings page update (name, org, profile info)
+- C5: First-visit onboarding (dashboard card: org, referral source, tool interests)
+- C6: Flip the switch (Sign Up / Log In buttons from `/coming-soon` to real auth pages)
+
+#### Phase D: Polish & Detail
+Enhancements once core platform is running.
+- D1: App detail page enhancements (screenshots, visual walkthroughs)
+- D2: Inline email capture on detail pages for coming-soon tools
+- D3: SEO & social sharing (Open Graph tags, meta descriptions)
+- D4: Header integration in Pulse/WRT (breadcrumb app name)
+- D5: Admin dashboard trends (charts/time-series)
 
 ---
 
 ## Related Documents
 
+- [Portal UX Design](../apps/portal/docs/ux-design.md)
+- [Portal Implementation Plan](portal-implementation-plan.md)
 - [Product Vision](product-vision.md)
 - [Architecture](architecture.md)
 - [WRT Requirements](../apps/wrt/REQUIREMENTS.md)

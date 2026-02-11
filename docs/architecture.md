@@ -79,6 +79,11 @@ Shared services (e.g., future auth) would have their own database.
 | workgroup_pulse | `workgroup_pulse_dev` | `workgroup_pulse_test` | 5432/5433 |
 | wrt | `wrt_dev` | `wrt_test` | 5434/5435 |
 
+Portal's database is expanding beyond user accounts to include:
+- `tools` -- tool catalogue (11 tools, read by dashboard, managed via admin kill switch)
+- `interest_signups` -- email captures from coming-soon pages
+- `user_tool_interests` -- onboarding data (future)
+
 ## Shared Design System
 
 All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
@@ -102,15 +107,28 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 - **Shared `SECRET_KEY_BASE`** across Portal and all consuming apps ensures cookie signing compatibility.
 - **Mail delivery** uses a configurable `mail_from` address (supports Postmark sender signatures in production).
 
-### Portal/Landing Page
+### Portal
 
-Implemented in `apps/portal/` (Phase 1 complete, Phase 2 in progress):
+Implemented in `apps/portal/` (Phases 1-2 complete, Phase A next). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
+
+**Current state:**
 - User authentication (password + magic link)
-- Landing page with app cards (split by audience)
+- Landing page with app cards
 - Role system (Super Admin, Session Manager)
 - Admin user management (`/admin/users` LiveView)
-- Cross-app auth: subdomain cookie + internal validation API (Phase 2)
+- Cross-app auth: subdomain cookie + internal validation API
 - Mail delivery: Swoosh configured to use Finch API client (not hackney) in production
+
+**Phase A (next):** Two-experience model with marketing page (`/`) and dashboard (`/home`), `tools` table in DB replacing hardcoded app config, coming-soon page with email capture, three-zone header redesign, 11 tool cards on dashboard.
+
+**Phase B:** Admin hub with stats dashboard, email signup management, tool kill switch toggle.
+
+**Phase C:** Self-service registration, facilitator onboarding flow, profile fields.
+
+**Data model additions:**
+- `tools` table -- 11 tools with name, tagline, status, URL, audience, sort_order, admin kill switch
+- `interest_signups` table -- email captures from coming-soon page
+- `user_tool_interests` table -- onboarding tool interest (Phase C)
 
 ## Deployment
 
