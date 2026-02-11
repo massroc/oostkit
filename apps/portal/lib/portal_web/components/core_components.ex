@@ -102,7 +102,7 @@ defmodule PortalWeb.CoreComponents do
                 Live
               </span>
             <% else %>
-              <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+              <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2.5 py-0.5 text-xs font-medium text-ok-gold-800">
                 Coming soon
               </span>
             <% end %>

@@ -110,7 +110,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
             <div class={[
               "w-2 h-2 rounded-full transition-colors",
               if(i == @carousel_index,
-                do: "bg-accent-purple",
+                do: "bg-accent-gold",
                 else: "bg-ink-blue/20"
               )
             ]} />

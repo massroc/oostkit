@@ -131,7 +131,7 @@ The three accent colors (magenta, gold, accent-red) serve distinct semantic role
 | Accent | Semantic Role | Used In |
 |--------|--------------|---------|
 | **Magenta** (`accent-magenta`) | Interactive focus / user identity | Input focus rings (notes, actions), action items section header and bullets, discussion tips in score overlay, "You" badge in lobby |
-| **Gold** (`accent-gold`) | Warmth / readiness / positive status | Welcome blockquote border, ready checkmarks (individual and all-ready), timer active state icon, new workshop "+" icon |
+| **Gold** (`accent-gold`) | Warmth / readiness / positive status / strengths | Welcome blockquote border, ready checkmarks (individual and all-ready), timer active state icon, new workshop "+" icon, "your turn to score" prompt, intro carousel progress dots, duration button selected state, strengths section (header, icons, background), PDF export strengths |
 | **Accent-red** (`accent-red`) | Concerns / warnings / emphasis | Concerns section (header, icons, background), scale endpoint labels (balance -5/+5, maximal 0), error messages |
 
 **Note:** Accent-red (`#F44545`) is semantically distinct from traffic-red (`#ef4444`). Traffic-red is reserved for score traffic-light indicators; accent-red is used for concerns, warnings, and emphasis in non-scoring contexts.
@@ -229,6 +229,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.2 — Accent color roles documented (magenta, gold, accent-red)*
+*Document Version: 1.3 — Gold accent expanded across strengths, scoring prompt, intro dots, duration buttons, PDF export*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

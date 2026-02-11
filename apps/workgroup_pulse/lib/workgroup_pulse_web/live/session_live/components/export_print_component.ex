@@ -197,14 +197,14 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
     <%= if length(@strengths) > 0 or length(@concerns) > 0 do %>
       <div style="display:flex;gap:12px;margin-bottom:20px;page-break-inside:avoid;">
         <%= if length(@strengths) > 0 do %>
-          <div style="flex:1;border:1px solid #86efac;border-radius:6px;padding:10px;background:#f0fdf4;">
-            <h3 style="font-size:13px;font-weight:600;color:#16a34a;margin:0 0 6px 0;">
+          <div style="flex:1;border:1px solid #efc36c;border-radius:6px;padding:10px;background:#fbf9f3;">
+            <h3 style="font-size:13px;font-weight:600;color:#9d7015;margin:0 0 6px 0;">
               Strengths ({length(@strengths)})
             </h3>
             <%= for item <- @strengths do %>
               <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;">
                 <span>{item.title}</span>
-                <span style="color:#16a34a;font-weight:600;">
+                <span style="color:#9d7015;font-weight:600;">
                   {round(item.combined_team_value)}/10
                 </span>
               </div>

@@ -95,16 +95,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
           <%!-- Strengths --%>
           <%= if length(@strengths) > 0 do %>
-            <div class="bg-traffic-green/5 border border-traffic-green/30 rounded-lg p-3">
-              <h3 class="text-sm font-semibold text-traffic-green mb-2 font-brand">
+            <div class="bg-accent-gold/5 border border-accent-gold/30 rounded-lg p-3">
+              <h3 class="text-sm font-semibold text-accent-gold mb-2 font-brand">
                 Strengths ({length(@strengths)})
               </h3>
               <ul class="space-y-1.5">
                 <%= for item <- @strengths do %>
                   <li class="flex items-center gap-2 text-sm text-ink-blue/70">
-                    <span class="text-traffic-green text-xs">✓</span>
+                    <span class="text-accent-gold text-xs">✓</span>
                     <span class="font-workshop">{item.title}</span>
-                    <span class="text-traffic-green font-semibold ml-auto font-workshop text-sm">
+                    <span class="text-accent-gold font-semibold ml-auto font-workshop text-sm">
                       {round(item.combined_team_value)}/10
                     </span>
                   </li>

@@ -130,7 +130,7 @@ Cards have three possible states:
 | State | When | Button | Visual Treatment |
 |-------|------|--------|-----------------|
 | **Live & open** | Pulse now | "Launch" → direct link | Full colour, active |
-| **Coming soon** | WRT, Search Conference now | No action button, "Coming soon" badge | Muted/greyed, still readable |
+| **Coming soon** | WRT, Search Conference now | No action button, "Coming soon" badge (gold: `bg-ok-gold-100 text-ok-gold-800`) | Muted/greyed, still readable |
 | **Live & locked** | WRT later (when auth is live) | "Log in to access" (anon) / "Launch" (logged in) | Full colour, lock icon for anon |
 
 #### Initial Cards
@@ -434,6 +434,7 @@ and can be completed or dismissed.
 - **How did you hear about OOSTKit?** (text field or dropdown, optional)
 - **Which tools are you interested in?** (checkboxes of available tools, optional)
 - "Save" button + "Skip for now" dismiss link
+- **Visual:** Gold border (`border-ok-gold-300`) to draw attention as an onboarding prompt
 
 #### Behaviour
 
@@ -744,6 +745,15 @@ The portal extends the aesthetic established in Workgroup Pulse:
 - Not a cold/corporate SaaS feel — approachable, human, collaborative
 
 The marketing page pushes this further with more visual richness (illustrations, animations, bolder typography). The dashboard is more restrained and functional.
+
+### Gold Accent Usage
+
+Gold (`ok-gold`) is used prominently across the portal for warmth and visual consistency with the Pulse app:
+
+| Element | Classes | Context |
+|---------|---------|---------|
+| "Coming soon" badges | `bg-ok-gold-100 text-ok-gold-800` | Landing page, dashboard tool cards, app detail pages, admin tools page |
+| Onboarding card border | `border-ok-gold-300` | Dashboard first-visit onboarding prompt |
 
 ---
 

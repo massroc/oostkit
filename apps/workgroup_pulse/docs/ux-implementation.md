@@ -139,7 +139,7 @@ Floating action buttons are rendered by `FloatingButtonsComponent` — a pure fu
 | ← Back | Intro (slides 1-3) | Not on first intro slide | Secondary |
 | Next → | Intro (slides 0-2) | Before last intro slide | Primary (gradient) |
 | Start Scoring → | Intro (slide 3) | Last intro slide | Primary (gradient) |
-| Progress dots | Intro | All intro slides | 4 dots, active = accent-purple |
+| Progress dots | Intro | All intro slides | 4 dots, active = accent-gold |
 | Done | Scoring | Current turn participant, after scoring | Primary (gradient) |
 | ← Prev Question | Scoring | Facilitator, after Q1 | Secondary |
 | Next Question | Scoring | Facilitator, all participants ready | Primary |
@@ -229,7 +229,7 @@ Three Tailwind token classes provide accent colours across all phase components.
 | Token | Hex | Tailwind Classes Used |
 |-------|-----|----------------------|
 | `accent-magenta` | `#BC45F4` | `text-accent-magenta`, `bg-accent-magenta`, `bg-accent-magenta/5`, `border-accent-magenta/30`, `focus:border-accent-magenta`, `focus:ring-accent-magenta` |
-| `accent-gold` | `#F4B945` | `text-accent-gold`, `bg-accent-gold`, `bg-accent-gold/10`, `border-accent-gold` |
+| `accent-gold` | `#F4B945` | `text-accent-gold`, `bg-accent-gold`, `bg-accent-gold/5`, `bg-accent-gold/10`, `border-accent-gold`, `border-accent-gold/30` |
 | `accent-red` | `#F44545` | `text-accent-red`, `bg-accent-red/5`, `border-accent-red/30` |
 
 **Per-component usage:**
@@ -237,13 +237,14 @@ Three Tailwind token classes provide accent colours across all phase components.
 | Component | Magenta | Gold | Accent-red |
 |-----------|---------|------|------------|
 | `NotesPanelComponent` | Focus ring on notes and actions inputs | — | — |
-| `CompletedComponent` | Actions section (header, input focus, arrow bullets) | — | Concerns section (header, icon, background) |
-| `ScoreOverlayComponent` | Discussion tips heading and bullet points | — | — |
+| `CompletedComponent` | Actions section (header, input focus, arrow bullets) | Strengths section (header, checkmarks, scores, background/border) | Concerns section (header, icon, background) |
+| `ScoreOverlayComponent` | Discussion tips heading and bullet points | "Your turn to score" / "Discuss your score" prompt | — |
 | `LobbyComponent` | "You" badge (`bg-accent-magenta text-white`) | — | — |
 | `IntroComponent` | — | Welcome blockquote border | Scale endpoint labels (-5/+5, 0) |
-| `FloatingButtonsComponent` | — | Ready checkmarks (individual and all-ready) | — |
-| `new.ex` (New Workshop) | — | Timer active icon (`bg-accent-gold`) | — |
+| `FloatingButtonsComponent` | — | Intro progress dots (active dot), ready checkmarks (individual and all-ready) | — |
+| `new.ex` (New Workshop) | — | Timer active icon, duration button selected state (`bg-accent-gold border-accent-gold text-white`) | — |
 | `home_live.ex` (Home) | — | New workshop "+" icon (`text-accent-gold`, `bg-accent-gold/10`) | — |
+| `ExportPrintComponent` | — | Strengths section (inline gold border/background/text for PDF) | Concerns section (inline red border/background/text for PDF) |
 
 ---
 
@@ -294,6 +295,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.3 — Accent color classes and per-component usage documented*
+*Document Version: 1.4 — Gold accent expanded: strengths, scoring prompt, intro dots, duration buttons, PDF export*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

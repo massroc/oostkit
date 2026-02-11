@@ -54,7 +54,7 @@ defmodule PortalWeb.Admin.ToolsLive do
                 <span class={[
                   "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
                   tool.default_status == "live" && "bg-ok-green-100 text-ok-green-800",
-                  tool.default_status == "coming_soon" && "bg-zinc-100 text-zinc-700"
+                  tool.default_status == "coming_soon" && "bg-ok-gold-100 text-ok-gold-800"
                 ]}>
                   {format_default_status(tool.default_status)}
                 </span>
@@ -83,7 +83,7 @@ defmodule PortalWeb.Admin.ToolsLive do
                 <span class={[
                   "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
                   Tool.effective_status(tool) == :live && "bg-ok-green-100 text-ok-green-800",
-                  Tool.effective_status(tool) == :coming_soon && "bg-zinc-100 text-zinc-700",
+                  Tool.effective_status(tool) == :coming_soon && "bg-ok-gold-100 text-ok-gold-800",
                   Tool.effective_status(tool) == :maintenance && "bg-ok-red-100 text-ok-red-800"
                 ]}>
                   {format_effective_status(Tool.effective_status(tool))}
