@@ -8,6 +8,41 @@ defmodule Portal.Accounts do
 
   alias Portal.Accounts.{User, UserNotifier, UserToken}
 
+  ## Stats
+
+  @doc """
+  Returns the total number of registered users.
+  """
+  def count_users do
+    Repo.aggregate(User, :count)
+  end
+
+  @doc """
+  Returns the number of users who have had a session in the last `days` days.
+  """
+  def count_active_users(days \\ 30) do
+    cutoff = DateTime.utc_now() |> DateTime.add(-days, :day)
+
+    from(t in UserToken,
+      where: t.context == "session" and t.inserted_at >= ^cutoff,
+      select: count(t.user_id, :distinct)
+    )
+    |> Repo.one()
+  end
+
+  @doc """
+  Returns a map of user_id => last login DateTime, based on most recent session token.
+  """
+  def last_login_map do
+    from(t in UserToken,
+      where: t.context == "session",
+      group_by: t.user_id,
+      select: {t.user_id, max(t.inserted_at)}
+    )
+    |> Repo.all()
+    |> Map.new()
+  end
+
   ## Database getters
 
   @doc """

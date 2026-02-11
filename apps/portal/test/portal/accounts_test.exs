@@ -394,4 +394,48 @@ defmodule Portal.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "count_users/0" do
+    test "returns 0 when no users" do
+      assert Accounts.count_users() == 0
+    end
+
+    test "returns the number of users" do
+      user_fixture()
+      user_fixture()
+      assert Accounts.count_users() == 2
+    end
+  end
+
+  describe "count_active_users/1" do
+    test "returns 0 when no sessions" do
+      assert Accounts.count_active_users() == 0
+    end
+
+    test "counts users with recent session tokens" do
+      user = user_fixture()
+      _token = Accounts.generate_user_session_token(user)
+      assert Accounts.count_active_users() == 1
+    end
+
+    test "does not count users with only old sessions" do
+      user = user_fixture()
+      token = Accounts.generate_user_session_token(user)
+      offset_user_token(token, -31, :day)
+      assert Accounts.count_active_users(30) == 0
+    end
+  end
+
+  describe "last_login_map/0" do
+    test "returns empty map when no sessions" do
+      assert Accounts.last_login_map() == %{}
+    end
+
+    test "returns map of user_id to last login timestamp" do
+      user = user_fixture()
+      _token = Accounts.generate_user_session_token(user)
+      map = Accounts.last_login_map()
+      assert Map.has_key?(map, user.id)
+    end
+  end
 end

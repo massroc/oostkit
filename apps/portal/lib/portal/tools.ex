@@ -40,4 +40,8 @@ defmodule Portal.Tools do
       conflict_target: :id
     )
   end
+
+  def toggle_admin_enabled(%Tool{} = tool) do
+    update_tool(tool, %{admin_enabled: !tool.admin_enabled})
+  end
 end

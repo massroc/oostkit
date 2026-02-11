@@ -60,14 +60,20 @@ defmodule PortalWeb.Router do
   scope "/admin", PortalWeb do
     pipe_through [:browser, :require_authenticated_user]
 
+    # Non-LiveView admin routes (CSV export)
+    get "/signups/export", Admin.SignupsController, :export
+
     live_session :require_super_admin,
       on_mount: [
         {PortalWeb.UserAuth, :require_authenticated},
         {PortalWeb.UserAuth, :require_super_admin}
       ] do
+      live "/", Admin.DashboardLive, :index
       live "/users", Admin.UsersLive, :index
       live "/users/new", Admin.UsersLive, :new
       live "/users/:id/edit", Admin.UsersLive, :edit
+      live "/signups", Admin.SignupsLive, :index
+      live "/tools", Admin.ToolsLive, :index
     end
   end
 

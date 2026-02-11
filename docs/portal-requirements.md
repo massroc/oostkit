@@ -360,12 +360,12 @@ New public experience live. Replaced the current landing page.
 - A6: Dashboard (`/home`) -- DB-backed tool cards with three states (live, coming soon, maintenance)
 - A7: Marketing landing page (`/`) -- hero, tool highlights, OST context, footer CTA
 
-#### Phase B: Admin Hub
+#### Phase B: Admin Hub (Complete)
 Operational control panel for platform management.
-- B1: Admin dashboard (`/admin`) with stats cards
-- B2: Email signups admin (`/admin/signups`) with list, search, CSV export
-- B3: Tool management admin (`/admin/tools`) with kill switch toggle
-- B4: Enhanced user management (onboarding data columns, last login)
+- B1: Admin dashboard (`/admin`) with stats cards (email signup count, registered users, active users 30d, tool status breakdown) and quick links
+- B2: Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export via `/admin/signups/export`
+- B3: Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle per tool
+- B4: Enhanced user management -- added Registered date and Last Login columns to `/admin/users`
 
 #### Phase C: Auth & Onboarding
 When ready for first facilitator users.

@@ -227,25 +227,33 @@ Gets the new public experience live. Replaces the current landing page.
 - Footer with email capture and auth buttons
 - Bold, aspirational marketing tone
 
-## New Rollout: Phase B -- Admin Hub
+## New Rollout: Phase B -- Admin Hub (Complete)
 
 Operational control panel for platform management.
 
-**Task B1: Admin dashboard (`/admin`)**
-- Stats cards: email signup count, registered users, active users (last 30 days), tool interest breakdown
-- Quick links to sub-pages
+**Task B1: Admin dashboard (`/admin`)** (Done)
+- `PortalWeb.Admin.DashboardLive` LiveView at `/admin`
+- Stats cards: email signup count, registered users, active users (last 30 days), tool status breakdown
+- Quick links to Manage Users, View Signups, Tool Status sub-pages
+- New context functions: `Accounts.count_users/0`, `Accounts.count_active_users/1`, `Accounts.last_login_map/0`
 
-**Task B2: Email signups admin (`/admin/signups`)**
+**Task B2: Email signups admin (`/admin/signups`)** (Done)
+- `PortalWeb.Admin.SignupsLive` LiveView at `/admin/signups`
 - Table: name, email, context, date
-- CSV export, delete individual entries, search/filter
+- Live search filtering, delete individual entries
+- CSV export via `PortalWeb.Admin.SignupsController` at `/admin/signups/export`
+- New context functions: `Marketing.get_interest_signup!/1`, `Marketing.delete_interest_signup/1`, `Marketing.search_interest_signups/1`
 
-**Task B3: Tool management admin (`/admin/tools`)**
+**Task B3: Tool management admin (`/admin/tools`)** (Done)
+- `PortalWeb.Admin.ToolsLive` LiveView at `/admin/tools`
 - Table/cards per tool: name, default status, admin override toggle (kill switch), effective status, URL
-- Kill switch: disable any tool instantly without a deploy
+- Kill switch: toggle `admin_enabled` instantly without a deploy
+- New context function: `Tools.toggle_admin_enabled/1`
 
-**Task B4: Enhanced user management**
-- Add columns: organisation (from onboarding), last login
-- View onboarding data (referral source, tool interests)
+**Task B4: Enhanced user management** (Done)
+- Added Registered date and Last Login columns to `/admin/users`
+- Last login data sourced from `Accounts.last_login_map/0`
+- Organisation column deferred to Phase C (requires user profile fields migration)
 
 ## New Rollout: Phase C -- Auth & Onboarding
 
@@ -471,7 +479,7 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 ### Phase A: Foundation + Public Face (Complete)
 - All tasks (A1-A7) delivered
 
-### Phase B: Admin Hub
+### Phase B: Admin Hub (Complete)
 - Admin dashboard: Small-Medium
 - Email signups admin: Small
 - Tool management admin: Small-Medium
@@ -494,9 +502,11 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 
 ## Next Steps
 
-Phase A is complete. Next priority is Phase B (Admin Hub):
+Phases A and B are complete. Next priority is Phase C (Auth & Onboarding):
 
-1. B1: Build admin dashboard (`/admin`) with stats cards
-2. B2: Build email signups admin (`/admin/signups`) with list, search, CSV export
-3. B3: Build tool management admin (`/admin/tools`) with kill switch toggle
-4. B4: Enhanced user management (onboarding data columns, last login)
+1. C1: User profile fields (DB migration: organisation, referral_source, onboarding_completed, user_tool_interests)
+2. C2: Registration flow update (email + name, magic link, facilitator-focused messaging)
+3. C3: Login page messaging ("Welcome back", magic link primary, password secondary)
+4. C4: Settings page update (name, org, profile info editing)
+5. C5: First-visit onboarding (dashboard card: org, referral source, tool interests)
+6. C6: Flip the switch (Sign Up / Log In buttons from `/coming-soon` to real auth pages)

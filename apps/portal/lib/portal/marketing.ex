@@ -25,4 +25,21 @@ defmodule Portal.Marketing do
   def count_interest_signups do
     Repo.aggregate(InterestSignup, :count)
   end
+
+  def get_interest_signup!(id) do
+    Repo.get!(InterestSignup, id)
+  end
+
+  def delete_interest_signup(%InterestSignup{} = signup) do
+    Repo.delete(signup)
+  end
+
+  def search_interest_signups(query) do
+    search = "%#{query}%"
+
+    InterestSignup
+    |> where([s], ilike(s.email, ^search) or ilike(s.name, ^search) or ilike(s.context, ^search))
+    |> order_by(desc: :inserted_at)
+    |> Repo.all()
+  end
 end
