@@ -100,36 +100,6 @@ defmodule WorkgroupPulse.WorkshopsTest do
     test "get_question/2 returns nil for non-existent index", %{template: template} do
       assert Workshops.get_question(template, 99) == nil
     end
-
-    test "count_questions/1 returns the number of questions", %{template: template} do
-      assert Workshops.count_questions(template) == 0
-
-      Repo.insert!(%Question{
-        template_id: template.id,
-        index: 0,
-        title: "Q1",
-        criterion_number: "1",
-        criterion_name: "C1",
-        scale_type: "balance",
-        scale_min: -5,
-        scale_max: 5,
-        explanation: "Test"
-      })
-
-      Repo.insert!(%Question{
-        template_id: template.id,
-        index: 1,
-        title: "Q2",
-        criterion_number: "2",
-        criterion_name: "C2",
-        scale_type: "balance",
-        scale_min: -5,
-        scale_max: 5,
-        explanation: "Test"
-      })
-
-      assert Workshops.count_questions(template) == 2
-    end
   end
 
   describe "get_template_with_questions/1" do

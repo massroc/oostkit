@@ -10,15 +10,6 @@ defmodule WorkgroupPulse.Facilitation do
 
   alias WorkgroupPulse.Sessions.Session
 
-  ## Suggested Durations (in seconds)
-
-  @default_durations %{
-    # 15 minutes per question
-    "question" => 900,
-    # 10 minutes
-    "summary" => 600
-  }
-
   ## Phase Utilities
 
   @doc """
@@ -94,23 +85,5 @@ defmodule WorkgroupPulse.Facilitation do
       nil -> nil
       duration -> div(duration, 10)
     end
-  end
-
-  @doc """
-  Returns the suggested duration for a phase in seconds.
-  """
-  def suggested_duration("summary"), do: @default_durations["summary"]
-
-  def suggested_duration("question_" <> _), do: @default_durations["question"]
-
-  # 5 minute default
-  def suggested_duration(_), do: 300
-
-  @doc """
-  Returns the total suggested duration for a complete workshop.
-  """
-  def total_suggested_duration(num_questions) do
-    num_questions * @default_durations["question"] +
-      @default_durations["summary"]
   end
 end

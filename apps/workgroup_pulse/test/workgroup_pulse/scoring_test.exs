@@ -142,87 +142,6 @@ defmodule WorkgroupPulse.ScoringTest do
     end
   end
 
-  describe "score aggregation" do
-    setup do
-      slug = "test-aggregation-#{System.unique_integer([:positive])}"
-
-      template =
-        Repo.insert!(%Template{
-          name: "Aggregation Workshop",
-          slug: slug,
-          version: "1.0.0",
-          default_duration_minutes: 180
-        })
-
-      Repo.insert!(%Question{
-        template_id: template.id,
-        index: 0,
-        title: "Q1",
-        criterion_number: "1",
-        criterion_name: "C1",
-        explanation: "Test",
-        scale_type: "balance",
-        scale_min: -5,
-        scale_max: 5,
-        optimal_value: 0
-      })
-
-      {:ok, session} = Sessions.create_session(template)
-      {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
-      {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-      {:ok, p3} = Sessions.join_session(session, "Carol", Ecto.UUID.generate())
-
-      %{session: session, participants: [p1, p2, p3]}
-    end
-
-    test "calculate_average/2 computes mean score", %{
-      session: session,
-      participants: [p1, p2, p3]
-    } do
-      {:ok, _} = Scoring.submit_score(session, p1, 0, 3)
-      {:ok, _} = Scoring.submit_score(session, p2, 0, 0)
-      {:ok, _} = Scoring.submit_score(session, p3, 0, -3)
-
-      assert Scoring.calculate_average(session, 0) == 0.0
-    end
-
-    test "calculate_average/2 returns nil when no scores", %{session: session} do
-      assert Scoring.calculate_average(session, 0) == nil
-    end
-
-    test "calculate_spread/2 computes min and max", %{
-      session: session,
-      participants: [p1, p2, p3]
-    } do
-      {:ok, _} = Scoring.submit_score(session, p1, 0, 3)
-      {:ok, _} = Scoring.submit_score(session, p2, 0, 0)
-      {:ok, _} = Scoring.submit_score(session, p3, 0, -3)
-
-      assert Scoring.calculate_spread(session, 0) == {-3, 3}
-    end
-
-    test "calculate_spread/2 returns nil when no scores", %{session: session} do
-      assert Scoring.calculate_spread(session, 0) == nil
-    end
-
-    test "get_score_summary/2 returns comprehensive summary", %{
-      session: session,
-      participants: [p1, p2, p3]
-    } do
-      {:ok, _} = Scoring.submit_score(session, p1, 0, 4)
-      {:ok, _} = Scoring.submit_score(session, p2, 0, 2)
-      {:ok, _} = Scoring.submit_score(session, p3, 0, 0)
-
-      summary = Scoring.get_score_summary(session, 0)
-
-      assert summary.count == 3
-      assert summary.average == 2.0
-      assert summary.min == 0
-      assert summary.max == 4
-      assert summary.spread == 4
-    end
-  end
-
   describe "traffic light colors" do
     test "balance scale - green for optimal range (±0-1)" do
       assert Scoring.traffic_light_color("balance", 0, 0) == :green
@@ -262,24 +181,6 @@ defmodule WorkgroupPulse.ScoringTest do
       assert Scoring.traffic_light_color("maximal", 1, nil) == :red
       assert Scoring.traffic_light_color("maximal", 2, nil) == :red
       assert Scoring.traffic_light_color("maximal", 3, nil) == :red
-    end
-  end
-
-  describe "color_to_grade/1" do
-    test "converts green to 2 points" do
-      assert Scoring.color_to_grade(:green) == 2
-    end
-
-    test "converts amber to 1 point" do
-      assert Scoring.color_to_grade(:amber) == 1
-    end
-
-    test "converts red to 0 points" do
-      assert Scoring.color_to_grade(:red) == 0
-    end
-
-    test "converts nil to 0 points" do
-      assert Scoring.color_to_grade(nil) == 0
     end
   end
 

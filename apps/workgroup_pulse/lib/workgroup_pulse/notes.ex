@@ -62,15 +62,6 @@ defmodule WorkgroupPulse.Notes do
     |> Repo.all()
   end
 
-  @doc """
-  Counts the total number of notes in a session.
-  """
-  def count_notes(%Session{} = session) do
-    Note
-    |> where([n], n.session_id == ^session.id)
-    |> Repo.aggregate(:count)
-  end
-
   ## Actions
 
   @doc """
@@ -125,23 +116,5 @@ defmodule WorkgroupPulse.Notes do
     |> where([a], a.session_id == ^session.id)
     |> order_by([a], a.inserted_at)
     |> Repo.all()
-  end
-
-  @doc """
-  Counts the total number of actions in a session.
-  """
-  def count_actions(%Session{} = session) do
-    Action
-    |> where([a], a.session_id == ^session.id)
-    |> Repo.aggregate(:count)
-  end
-
-  @doc """
-  Counts the number of completed actions in a session.
-  """
-  def count_completed_actions(%Session{} = session) do
-    Action
-    |> where([a], a.session_id == ^session.id and a.completed == true)
-    |> Repo.aggregate(:count)
   end
 end

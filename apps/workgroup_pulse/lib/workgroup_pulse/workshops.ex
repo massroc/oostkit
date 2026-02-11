@@ -110,19 +110,4 @@ defmodule WorkgroupPulse.Workshops do
   def get_question(%Template{} = template, index) do
     Repo.get_by(Question, template_id: template.id, index: index)
   end
-
-  @doc """
-  Gets the count of questions for a template.
-
-  ## Examples
-
-      iex> count_questions(template)
-      8
-
-  """
-  def count_questions(%Template{} = template) do
-    Question
-    |> where([q], q.template_id == ^template.id)
-    |> Repo.aggregate(:count)
-  end
 end

@@ -85,9 +85,7 @@ defmodule WorkgroupPulse.MixProject do
 
       # Testing
       {:ex_machina, "~> 2.8", only: :test},
-      {:faker, "~> 0.18", only: :test},
       {:excoveralls, "~> 0.18", only: :test},
-      {:mox, "~> 1.2", only: :test},
       {:wallaby, "~> 0.30", only: :test, runtime: false},
       {:lazy_html, ">= 0.1.0", only: :test},
 

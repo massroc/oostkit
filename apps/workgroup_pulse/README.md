@@ -76,7 +76,6 @@ The project is configured for Test-Driven Development:
 
 - **ExUnit** - Unit testing
 - **ExMachina** - Test data factories
-- **Mox** - Mocking
 - **Wallaby** - Browser/E2E testing
 - **ExCoveralls** - Code coverage
 
@@ -177,15 +176,17 @@ Set via Fly.io secrets:
 │       │   │   ├── export_modal_component.ex  # Report type + format selection
 │       │   │   └── export_print_component.ex # Print-optimized HTML for PDF
 │       │   ├── handlers/
-│       │   │   ├── event_handlers.ex       # All handle_event callbacks
+│       │   │   ├── navigation_handlers.ex  # Workshop flow & navigation events
+│       │   │   ├── scoring_handlers.ex     # Score submission & turn events
+│       │   │   ├── content_handlers.ex     # Notes, actions, export, UI toggles
 │       │   │   └── message_handlers.ex     # All handle_info (PubSub)
 │       │   ├── helpers/
 │       │   │   ├── data_loaders.ex         # Data loading & state hydration
+│       │   │   ├── grid_helpers.ex         # Shared scoring grid utilities
 │       │   │   ├── state_helpers.ex        # State transition helpers
 │       │   │   ├── operation_helpers.ex    # Standardised error handling
 │       │   │   └── score_helpers.ex        # Score color/formatting
-│       │   ├── timer_handler.ex            # Facilitator timer logic
-│       │   └── action_form_component.ex    # LiveComponent for action form
+│       │   └── timer_handler.ex            # Facilitator timer logic
 │       ├── endpoint.ex
 │       ├── router.ex
 │       └── telemetry.ex
@@ -256,8 +257,8 @@ Set via Fly.io secrets:
 - [x] Input debouncing (300ms) on text fields to reduce server round-trips
 - [x] Template caching in DataLoaders (avoids repeated DB queries)
 - [x] Optimized score loading using cached participant data
-- [x] Extracted handler modules (EventHandlers, MessageHandlers, DataLoaders)
-- [x] Extracted ActionFormComponent for local form state management
+- [x] Extracted handler modules (NavigationHandlers, ScoringHandlers, ContentHandlers, MessageHandlers, DataLoaders)
+- [x] Shared GridHelpers module for scoring grid rendering across components
 
 ### Outstanding Work
 

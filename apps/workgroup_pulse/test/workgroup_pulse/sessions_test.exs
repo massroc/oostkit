@@ -34,17 +34,13 @@ defmodule WorkgroupPulse.SessionsTest do
       assert session1.code != session2.code
     end
 
-    test "create_session/2 with custom settings", %{template: template} do
-      settings = %{"skip_intro" => true, "timer_enabled" => false}
-
+    test "create_session/2 with planned duration", %{template: template} do
       assert {:ok, %Session{} = session} =
                Sessions.create_session(template, %{
-                 planned_duration_minutes: 120,
-                 settings: settings
+                 planned_duration_minutes: 120
                })
 
       assert session.planned_duration_minutes == 120
-      assert session.settings == settings
     end
 
     test "get_session!/1 returns the session", %{template: template} do
@@ -103,21 +99,6 @@ defmodule WorkgroupPulse.SessionsTest do
       {:ok, updated} = Sessions.advance_to_completed(session)
       assert updated.state == "completed"
       assert updated.completed_at != nil
-    end
-
-    test "touch_session/1 updates last_activity_at", %{template: template} do
-      {:ok, session} = Sessions.create_session(template)
-
-      # Set an older timestamp manually to test the update
-      past_time = DateTime.add(DateTime.utc_now(), -60, :second) |> DateTime.truncate(:second)
-
-      {:ok, session} =
-        session
-        |> Ecto.Changeset.change(last_activity_at: past_time)
-        |> Repo.update()
-
-      {:ok, updated} = Sessions.touch_session(session)
-      assert DateTime.compare(updated.last_activity_at, past_time) == :gt
     end
 
     test "go_back_question/1 decrements question index", %{template: template} do
@@ -248,17 +229,6 @@ defmodule WorkgroupPulse.SessionsTest do
       assert length(participants) == 2
     end
 
-    test "list_active_participants/1 returns only active participants", %{session: session} do
-      {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
-      {:ok, _p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-
-      {:ok, _} = Sessions.update_participant_status(p1, "inactive")
-
-      active = Sessions.list_active_participants(session)
-      assert length(active) == 1
-      assert hd(active).name == "Bob"
-    end
-
     test "update_participant_status/2 changes status", %{session: session} do
       {:ok, participant} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
 
@@ -285,30 +255,6 @@ defmodule WorkgroupPulse.SessionsTest do
 
       participants = Sessions.list_participants(session)
       assert Enum.all?(participants, fn p -> p.is_ready == false end)
-    end
-
-    test "all_participants_ready?/1 checks if all active participants are ready", %{
-      session: session
-    } do
-      {:ok, p1} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
-      {:ok, p2} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-
-      refute Sessions.all_participants_ready?(session)
-
-      {:ok, _} = Sessions.set_participant_ready(p1, true)
-      refute Sessions.all_participants_ready?(session)
-
-      {:ok, _} = Sessions.set_participant_ready(p2, true)
-      assert Sessions.all_participants_ready?(session)
-    end
-
-    test "count_participants/1 returns participant count", %{session: session} do
-      assert Sessions.count_participants(session) == 0
-
-      {:ok, _} = Sessions.join_session(session, "Alice", Ecto.UUID.generate())
-      {:ok, _} = Sessions.join_session(session, "Bob", Ecto.UUID.generate())
-
-      assert Sessions.count_participants(session) == 2
     end
   end
 

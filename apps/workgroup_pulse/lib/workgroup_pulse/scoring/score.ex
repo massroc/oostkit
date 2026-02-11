@@ -90,12 +90,4 @@ defmodule WorkgroupPulse.Scoring.Score do
     score
     |> change(%{turn_locked: true})
   end
-
-  @doc """
-  Changeset for locking an entire row.
-  """
-  def lock_row_changeset(score) do
-    score
-    |> change(%{row_locked: true})
-  end
 end

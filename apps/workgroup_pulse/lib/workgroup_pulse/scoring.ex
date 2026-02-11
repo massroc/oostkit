@@ -190,54 +190,6 @@ defmodule WorkgroupPulse.Scoring do
   ## Score Aggregation
 
   @doc """
-  Calculates the average score for a question.
-  """
-  def calculate_average(%Session{} = session, question_index) do
-    result =
-      Score
-      |> where([s], s.session_id == ^session.id and s.question_index == ^question_index)
-      |> select([s], avg(s.value))
-      |> Repo.one()
-
-    case result do
-      nil -> nil
-      avg -> Float.round(Decimal.to_float(avg), 1)
-    end
-  end
-
-  @doc """
-  Calculates the spread (min, max) of scores for a question.
-  """
-  def calculate_spread(%Session{} = session, question_index) do
-    result =
-      Score
-      |> where([s], s.session_id == ^session.id and s.question_index == ^question_index)
-      |> select([s], {min(s.value), max(s.value)})
-      |> Repo.one()
-
-    case result do
-      {nil, nil} -> nil
-      spread -> spread
-    end
-  end
-
-  @doc """
-  Gets a comprehensive summary of scores for a question.
-
-  Returns a map with:
-  - `:count` - Number of scores
-  - `:average` - Mean score
-  - `:min` - Minimum score
-  - `:max` - Maximum score
-  - `:spread` - Difference between max and min
-  """
-  def get_score_summary(%Session{} = session, question_index) do
-    session
-    |> list_scores_for_question(question_index)
-    |> calculate_summary_from_scores()
-  end
-
-  @doc """
   Gets score summaries for all questions in a session.
 
   Optimized to load all scores in a single query instead of N+1 queries.
@@ -325,18 +277,6 @@ defmodule WorkgroupPulse.Scoring do
       true -> :red
     end
   end
-
-  @doc """
-  Converts a traffic light color to grade points.
-
-  - Green: 2 points (good)
-  - Amber: 1 point (medium)
-  - Red: 0 points (low)
-  """
-  def color_to_grade(:green), do: 2
-  def color_to_grade(:amber), do: 1
-  def color_to_grade(:red), do: 0
-  def color_to_grade(_), do: 0
 
   @doc """
   Calculates the Combined Team Value for a question.

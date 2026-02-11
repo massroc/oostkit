@@ -11,6 +11,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers,
     only: [text_color_class: 1]
 
+  alias WorkgroupPulseWeb.SessionLive.GridHelpers
+
   attr :session, :map, required: true
   attr :participant, :map, required: true
   attr :participants, :list, required: true
@@ -40,39 +42,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
     """
   end
 
-  # Fixed number of participant column slots to maintain consistent grid width
-  @grid_participant_slots 7
-
-  # Questions that are first of a paired criterion — emit a header row before them
-  @first_of_pair MapSet.new(["2a", "5a"])
-
-  defp sub_label(question) do
-    cn = question.criterion_number
-
-    cond do
-      String.ends_with?(cn, "a") -> "a"
-      String.ends_with?(cn, "b") -> "b"
-      true -> nil
-    end
-  end
-
   defp render_summary_grid(assigns) do
-    active_participants =
-      Enum.filter(assigns.participants, fn p -> not p.is_observer end)
-
-    balance_questions = Enum.filter(assigns.all_questions, &(&1.scale_type == "balance"))
-    maximal_questions = Enum.filter(assigns.all_questions, &(&1.scale_type == "maximal"))
-
-    empty_slots = max(@grid_participant_slots - length(active_participants), 0)
-    total_cols = 1 + length(active_participants) + empty_slots
-
-    assigns =
-      assigns
-      |> assign(:active_participants, active_participants)
-      |> assign(:balance_questions, balance_questions)
-      |> assign(:maximal_questions, maximal_questions)
-      |> assign(:empty_slots, empty_slots)
-      |> assign(:total_cols, total_cols)
+    assigns = GridHelpers.prepare_grid_assigns(assigns)
 
     ~H"""
     <table class="scoring-grid">
@@ -122,8 +93,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
     # Build a map of participant_id -> score data for this question
     scores_by_participant = Map.new(question_scores, &{&1.participant_id, &1})
 
-    is_first_of_pair = MapSet.member?(@first_of_pair, question.criterion_number)
-    label = sub_label(question)
+    is_first_of_pair = GridHelpers.first_of_pair?(question.criterion_number)
+    label = GridHelpers.sub_label(question)
 
     assigns =
       assigns
@@ -147,11 +118,11 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
       ]}>
         <span class="name">
           <%= if @sub_label do %>
-            <span style="text-transform: lowercase">{@sub_label}.</span> {format_criterion_title(
+            <span style="text-transform: lowercase">{@sub_label}.</span> {GridHelpers.format_criterion_title(
               @question.title
             )}
           <% else %>
-            {format_criterion_title(@question.title)}
+            {GridHelpers.format_criterion_title(@question.title)}
           <% end %>
         </span>
       </td>
@@ -163,7 +134,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
         ]}>
           <%= if score_data do %>
             <span class={["font-bold font-workshop", text_color_class(score_data.color)]}>
-              {format_score_value(@question.scale_type, score_data.value)}
+              {GridHelpers.format_score_value(@question.scale_type, score_data.value)}
             </span>
           <% else %>
             <span class="text-ink-blue/30">—</span>
@@ -183,13 +154,4 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   defp cell_color_class(:amber), do: "bg-amber-100 ring-2 ring-inset ring-amber-500"
   defp cell_color_class(:red), do: "bg-red-100 ring-2 ring-inset ring-traffic-red"
   defp cell_color_class(_), do: "bg-gray-100 ring-2 ring-inset ring-gray-300"
-
-  defp format_score_value("balance", value) when value > 0, do: "+#{value}"
-  defp format_score_value(_, value), do: "#{value}"
-
-  defp format_criterion_title("Mutual Support and Respect") do
-    Phoenix.HTML.raw("Mutual Support<br/><span style=\"padding-left:8px\">and Respect</span>")
-  end
-
-  defp format_criterion_title(title), do: title
 end

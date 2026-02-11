@@ -1,8 +1,8 @@
 # Workgroup Pulse - Solution Design
 
 ## Document Info
-- **Version:** 4.1
-- **Last Updated:** 2026-02-08
+- **Version:** 4.2
+- **Last Updated:** 2026-02-11
 - **Status:** Draft
 
 ---
@@ -245,9 +245,8 @@ defmodule WorkgroupPulse.Workshops do
   def get_template!(id)
   def get_template_by_slug(slug)
   def get_template_with_questions(id)
-  def list_questions(template_id)
-  def get_question(template_id, question_number)
-  def count_questions(template_id)
+  def list_questions(template)
+  def get_question(template, index)
 end
 ```
 
@@ -261,38 +260,48 @@ end
 
 ```elixir
 defmodule WorkgroupPulse.Sessions do
+  # PubSub
+  def session_topic(session)
+  def subscribe(session)
+
   # Session management
-  def create_session(template_id, opts \\ [])
+  def create_session(template, attrs \\ %{})
   def get_session!(id)
   def get_session_by_code(code)
-  def end_session(session_id)
+  def get_session_with_participants(id)
+  def get_session_with_all(id)
+  def start_session(session)
+
+  # State transitions
+  def advance_question(session)
+  def advance_to_summary(session)
+  def advance_to_completed(session)
+  def go_back_question(session)
+  def go_back_to_scoring(session, last_question_index)
+  def go_back_to_summary(session)
 
   # Participant management
-  def join_session(session_id, participant_name)
-  def leave_session(session_id, participant_id)
-  def mark_participant_ready(session_id, participant_id)
-  def mark_participant_inactive(session_id, participant_id)
-  def reactivate_participant(session_id, participant_id)
-  def get_active_participants(session_id)
-  def get_participants_in_turn_order(session_id)
+  def join_session(session, name, browser_token, opts \\ [])
+  def get_participant(session, browser_token)
+  def list_participants(session)
+  def update_participant_status(participant, status)
+  def set_participant_ready(participant, is_ready)
+  def reset_all_ready(session)
 
   # Turn-based flow management
-  def get_current_turn_participant(session_id, question_index)
-  def advance_turn(session_id, question_index)
-  def skip_turn(session_id, question_index)
-  def get_skipped_participants(session_id, question_index)
-
-  # State queries
-  def all_participants_ready?(session_id)
-  def all_active_participants_scored?(session_id, question_index)
-  def get_session_state(session_id)
+  def get_participants_in_turn_order(session)
+  def get_current_turn_participant(session)
+  def participants_turn?(session, participant)
+  def all_turns_complete?(session)
+  def advance_turn(session)
+  def skip_turn(session)
+  def get_skipped_participants(session, question_index)
 end
 ```
 
 **Entities:**
-- `Session` - Workshop instance with state, timing, settings
+- `Session` - Workshop instance with state, timing, planned duration
 - `Participant` - Person in a session with status, browser token
-- `SessionSettings` - Time allocation, participant limits
 
 **Session Persistence & Resumption:**
 
@@ -323,29 +332,29 @@ Sessions are fully persisted to the database, allowing teams to pause and resume
 ```elixir
 defmodule WorkgroupPulse.Scoring do
   # Score submission
-  def submit_score(participant_id, question_index, value)
-  def update_score(participant_id, question_index, new_value)
-  def lock_participant_turn(participant_id, question_index)
-  def lock_row(session_id, question_index)
-
-  # Score state queries
-  def turn_locked?(participant_id, question_index)
-  def row_locked?(session_id, question_index)
-  def can_edit_score?(participant_id, question_index)
+  def submit_score(session, participant, question_index, value)
+  def lock_participant_turn(session, participant, question_index)
+  def lock_row(session, question_index)
 
   # Score retrieval
-  def get_scores(session_id, question_index)
-  def get_participant_score(participant_id, question_index)
-  def get_all_session_scores(session_id)
+  def get_score(session, participant, question_index)
+  def list_scores_for_question(session, question_index)
+  def count_scores(session, question_index)
 
-  # Aggregation
-  def calculate_average(session_id, question_index)
-  def calculate_spread(session_id, question_index)
-  def get_score_summary(session_id)
+  # Score state queries
+  def can_edit_score?(session, participant, question_index)
+  def row_locked?(session, question_index)
+  def all_scored?(session, question_index)
+  def count_locked_turns(session, question_index)
+  def has_scores?(session, question_index)
+
+  # Aggregation & summary
+  def get_all_scores_summary(session, template)
+  def get_all_individual_scores(session, participants, template)
+  def calculate_combined_team_value(scores, scale_type, optimal_value)
 
   # Traffic light
-  def color_for_score(score_value, question)
-  def color_for_average(average, question)
+  def traffic_light_color(scale_type, value, optimal_value)
 end
 ```
 
@@ -360,13 +369,11 @@ end
 ```elixir
 defmodule WorkgroupPulse.Facilitation do
   # Calculation utilities
-  def phase_name(session)
+  def phase_name(phase)
   def calculate_segment_duration(session)
   def current_timer_phase(session)
   def timer_enabled?(session)
   def warning_threshold(session)
-  def suggested_duration(session)
-  def total_suggested_duration(session)
 end
 ```
 
@@ -379,19 +386,19 @@ end
 ```elixir
 defmodule WorkgroupPulse.Notes do
   # Notes
-  def add_note(session_id, question_id, content, author_id)
-  def update_note(note_id, content)
-  def delete_note(note_id)
-  def get_notes(session_id, question_id)
-  def get_all_notes(session_id)
+  def create_note(session, question_index, attrs)
+  def update_note(note, attrs)
+  def delete_note(note)
+  def list_notes_for_question(session, question_index)
+  def list_all_notes(session)
 
   # Actions
-  def add_action(session_id, content, opts \\ [])
-  def update_action(action_id, attrs)
-  def delete_action(action_id)
-  def assign_owner(action_id, owner_name)
-  def link_to_question(action_id, question_id)
-  def get_actions(session_id)
+  def create_action(session, attrs)
+  def update_action(action, attrs)
+  def complete_action(action)
+  def uncomplete_action(action)
+  def delete_action(action)
+  def list_all_actions(session)
 end
 ```
 
@@ -413,7 +420,7 @@ end
 │ name         │◄──────│ template_id  │       │ session_id   │──┐
 │ description  │       │ code         │◄──────│ name         │  │
 │ version      │       │ state        │       │ browser_token│  │
-└──────────────┘       │ settings     │       │ status       │  │
+└──────────────┘       │ planned_dur. │       │ status       │  │
        │               │ started_at   │       │ joined_at    │  │
        │               │ completed_at │       └──────────────┘  │
        ▼               └──────────────┘              │          │
@@ -464,21 +471,14 @@ defmodule WorkgroupPulse.Sessions.Session do
   schema "sessions" do
     field :code, :string  # 6-character join code
     field :state, Ecto.Enum, values: [:lobby, :scoring, :summary, :actions, :completed]
-    field :current_question, :integer, default: 0
+    field :current_question_index, :integer, default: 0
     field :current_turn_index, :integer, default: 0   # Index into turn_order for current scorer
-
-    # Settings (embedded)
-    embeds_one :settings, Settings do
-      field :total_duration_minutes, :integer, default: nil  # nil = no timer; optional presets: 120, 210, or custom
-      field :max_participants, :integer, default: 20
-      field :skip_intro, :boolean, default: false
-    end
+    field :planned_duration_minutes, :integer  # nil = no timer; validated 1-1440 when set
 
     # Timestamps
     field :started_at, :utc_datetime
     field :completed_at, :utc_datetime
     field :last_activity_at, :utc_datetime  # Updated on any participant action
-    field :expires_at, :utc_datetime        # Calculated: last_activity + 14 days (or completed + 90 days)
 
     belongs_to :template, WorkgroupPulse.Workshops.Template, type: :binary_id
     has_many :participants, WorkgroupPulse.Sessions.Participant
@@ -1417,6 +1417,6 @@ end
 
 ---
 
-*Document Version: 4.1 — Removed intro state from state machine; intro is now local carousel navigation within scoring state*
-*Previous versions: v3.x covered LiveView component structure, socket state, and timer implementation inline*
-*Last Updated: 2026-02-08*
+*Document Version: 4.2 — Updated context APIs to match actual implementation; removed unused settings embed from Session schema; added planned_duration_minutes validation*
+*Previous versions: v4.1 removed intro state from state machine; v3.x covered LiveView component structure, socket state, and timer implementation inline*
+*Last Updated: 2026-02-11*
