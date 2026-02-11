@@ -181,13 +181,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers do
   end
 
   @doc """
-  Handles reload_actions message from ActionFormComponent.
-  """
-  def handle_reload_actions(socket) do
-    DataLoaders.load_actions_data(socket, socket.assigns.session)
-  end
-
-  @doc """
   Handles turn_advanced message in turn-based scoring.
   Reloads session and scoring data.
   """

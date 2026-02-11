@@ -13,8 +13,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   alias WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent
   alias WorkgroupPulseWeb.SessionLive.Components.ScoringComponent
   alias WorkgroupPulseWeb.SessionLive.Components.SummaryComponent
-  alias WorkgroupPulseWeb.SessionLive.Handlers.EventHandlers
+  alias WorkgroupPulseWeb.SessionLive.Handlers.ContentHandlers
   alias WorkgroupPulseWeb.SessionLive.Handlers.MessageHandlers
+  alias WorkgroupPulseWeb.SessionLive.Handlers.NavigationHandlers
+  alias WorkgroupPulseWeb.SessionLive.Handlers.ScoringHandlers
   alias WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders
   alias WorkgroupPulseWeb.SessionLive.TimerHandler
 
@@ -77,6 +79,10 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
      |> TimerHandler.maybe_start_timer()}
   end
 
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PubSub message handlers
+  # ═══════════════════════════════════════════════════════════════════════════
+
   @impl true
   def handle_info({:participant_joined, participant}, socket) do
     {:noreply, MessageHandlers.handle_participant_joined(socket, participant)}
@@ -133,11 +139,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   end
 
   @impl true
-  def handle_info(:reload_actions, socket) do
-    {:noreply, MessageHandlers.handle_reload_actions(socket)}
-  end
-
-  @impl true
   def handle_info({:turn_advanced, payload}, socket) do
     {:noreply, MessageHandlers.handle_turn_advanced(socket, payload)}
   end
@@ -147,7 +148,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     {:noreply, MessageHandlers.handle_row_locked(socket, payload)}
   end
 
-  # Handle timer tick for facilitator timer countdown
   @impl true
   def handle_info(:timer_tick, socket) do
     TimerHandler.handle_timer_tick(socket)
@@ -158,180 +158,157 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_event("start_workshop", _params, socket) do
-    EventHandlers.handle_start_workshop(socket)
-  end
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Navigation events
+  # ═══════════════════════════════════════════════════════════════════════════
 
   @impl true
-  def handle_event("intro_next", _params, socket) do
-    EventHandlers.handle_intro_next(socket)
-  end
+  def handle_event("start_workshop", _params, socket),
+    do: NavigationHandlers.handle_start_workshop(socket)
 
   @impl true
-  def handle_event("intro_prev", _params, socket) do
-    EventHandlers.handle_intro_prev(socket)
-  end
+  def handle_event("intro_next", _params, socket),
+    do: NavigationHandlers.handle_intro_next(socket)
 
   @impl true
-  def handle_event("skip_intro", _params, socket) do
-    EventHandlers.handle_skip_intro(socket)
-  end
+  def handle_event("intro_prev", _params, socket),
+    do: NavigationHandlers.handle_intro_prev(socket)
 
   @impl true
-  def handle_event("carousel_navigate", %{"index" => index, "carousel" => carousel}, socket) do
-    EventHandlers.handle_carousel_navigate(socket, carousel, index)
-  end
+  def handle_event(event, _params, socket) when event in ~w(skip_intro continue_to_scoring),
+    do: NavigationHandlers.handle_skip_intro(socket)
 
   @impl true
-  def handle_event("continue_to_scoring", _params, socket) do
-    EventHandlers.handle_skip_intro(socket)
-  end
+  def handle_event("carousel_navigate", %{"index" => index, "carousel" => carousel}, socket),
+    do: NavigationHandlers.handle_carousel_navigate(socket, carousel, index)
 
   @impl true
-  def handle_event("select_score", params, socket) do
-    EventHandlers.handle_select_score(socket, params)
-  end
+  def handle_event("continue_past_transition", _params, socket),
+    do: NavigationHandlers.handle_continue_past_transition(socket)
 
   @impl true
-  def handle_event("edit_my_score", _params, socket) do
-    EventHandlers.handle_edit_my_score(socket)
-  end
+  def handle_event("next_question", _params, socket),
+    do: NavigationHandlers.handle_next_question(socket)
 
   @impl true
-  def handle_event("close_score_overlay", _params, socket) do
-    EventHandlers.handle_close_score_overlay(socket)
-  end
+  def handle_event("continue_to_wrapup", _params, socket),
+    do: NavigationHandlers.handle_continue_to_wrapup(socket)
 
   @impl true
-  def handle_event("dismiss_discuss_prompt", _params, socket) do
-    {:noreply, assign(socket, show_discuss_prompt: false)}
-  end
+  def handle_event("finish_workshop", _params, socket),
+    do: NavigationHandlers.handle_finish_workshop(socket)
 
   @impl true
-  def handle_event("dismiss_team_discuss_prompt", _params, socket) do
-    {:noreply, assign(socket, show_team_discuss_prompt: false)}
-  end
+  def handle_event("go_back", _params, socket),
+    do: NavigationHandlers.handle_go_back(socket)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Scoring events
+  # ═══════════════════════════════════════════════════════════════════════════
 
   @impl true
-  def handle_event("submit_score", _params, socket) do
-    EventHandlers.handle_submit_score(socket)
-  end
+  def handle_event("select_score", params, socket),
+    do: ScoringHandlers.handle_select_score(socket, params)
 
   @impl true
-  def handle_event("complete_turn", _params, socket) do
-    EventHandlers.handle_complete_turn(socket)
-  end
+  def handle_event("submit_score", _params, socket),
+    do: ScoringHandlers.handle_submit_score(socket)
 
   @impl true
-  def handle_event("skip_turn", _params, socket) do
-    EventHandlers.handle_skip_turn(socket)
-  end
+  def handle_event("edit_my_score", _params, socket),
+    do: ScoringHandlers.handle_edit_my_score(socket)
 
   @impl true
-  def handle_event("mark_ready", _params, socket) do
-    EventHandlers.handle_mark_ready(socket)
-  end
+  def handle_event("close_score_overlay", _params, socket),
+    do: ScoringHandlers.handle_close_score_overlay(socket)
 
   @impl true
-  def handle_event("show_criterion_info", %{"index" => index}, socket) do
-    EventHandlers.handle_show_criterion_info(socket, String.to_integer(index))
-  end
+  def handle_event("complete_turn", _params, socket),
+    do: ScoringHandlers.handle_complete_turn(socket)
 
   @impl true
-  def handle_event("close_criterion_info", _params, socket) do
-    EventHandlers.handle_close_criterion_info(socket)
-  end
+  def handle_event("skip_turn", _params, socket),
+    do: ScoringHandlers.handle_skip_turn(socket)
 
   @impl true
-  def handle_event("focus_sheet", %{"sheet" => sheet}, socket) do
-    EventHandlers.handle_focus_sheet(socket, String.to_existing_atom(sheet))
-  end
+  def handle_event("mark_ready", _params, socket),
+    do: ScoringHandlers.handle_mark_ready(socket)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Content & UI events
+  # ═══════════════════════════════════════════════════════════════════════════
 
   @impl true
-  def handle_event("reveal_notes", _params, socket) do
-    EventHandlers.handle_reveal_notes(socket)
-  end
+  def handle_event("dismiss_discuss_prompt", _params, socket),
+    do: ContentHandlers.handle_dismiss_prompt(socket, :show_discuss_prompt)
 
   @impl true
-  def handle_event("hide_notes", _params, socket) do
-    EventHandlers.handle_hide_notes(socket)
-  end
+  def handle_event("dismiss_team_discuss_prompt", _params, socket),
+    do: ContentHandlers.handle_dismiss_prompt(socket, :show_team_discuss_prompt)
 
   @impl true
-  def handle_event("update_note_input", %{"note" => value}, socket) do
-    EventHandlers.handle_update_note_input(socket, value)
-  end
+  def handle_event("show_criterion_info", %{"index" => index}, socket),
+    do: ContentHandlers.handle_show_criterion_info(socket, String.to_integer(index))
 
   @impl true
-  def handle_event("add_note", _params, socket) do
-    EventHandlers.handle_add_note(socket)
-  end
+  def handle_event("close_criterion_info", _params, socket),
+    do: ContentHandlers.handle_close_criterion_info(socket)
 
   @impl true
-  def handle_event("delete_note", %{"id" => note_id}, socket) do
-    EventHandlers.handle_delete_note(socket, note_id)
-  end
+  def handle_event("focus_sheet", %{"sheet" => sheet}, socket),
+    do: ContentHandlers.handle_focus_sheet(socket, String.to_existing_atom(sheet))
 
   @impl true
-  def handle_event("continue_past_transition", _params, socket) do
-    EventHandlers.handle_continue_past_transition(socket)
-  end
+  def handle_event("reveal_notes", _params, socket),
+    do: ContentHandlers.handle_reveal_notes(socket)
 
   @impl true
-  def handle_event("next_question", _params, socket) do
-    EventHandlers.handle_next_question(socket)
-  end
+  def handle_event("hide_notes", _params, socket),
+    do: ContentHandlers.handle_hide_notes(socket)
 
   @impl true
-  def handle_event("continue_to_wrapup", _params, socket) do
-    EventHandlers.handle_continue_to_wrapup(socket)
-  end
+  def handle_event("update_note_input", %{"note" => value}, socket),
+    do: ContentHandlers.handle_update_note_input(socket, value)
 
   @impl true
-  def handle_event("update_action_input", %{"action" => value}, socket) do
-    EventHandlers.handle_update_action_input(socket, value)
-  end
+  def handle_event("add_note", _params, socket),
+    do: ContentHandlers.handle_add_note(socket)
 
   @impl true
-  def handle_event("add_action", _params, socket) do
-    EventHandlers.handle_add_action(socket)
-  end
+  def handle_event("delete_note", %{"id" => note_id}, socket),
+    do: ContentHandlers.handle_delete_note(socket, note_id)
 
   @impl true
-  def handle_event("delete_action", %{"id" => action_id}, socket) do
-    EventHandlers.handle_delete_action(socket, action_id)
-  end
+  def handle_event("update_action_input", %{"action" => value}, socket),
+    do: ContentHandlers.handle_update_action_input(socket, value)
 
   @impl true
-  def handle_event("finish_workshop", _params, socket) do
-    EventHandlers.handle_finish_workshop(socket)
-  end
+  def handle_event("add_action", _params, socket),
+    do: ContentHandlers.handle_add_action(socket)
 
   @impl true
-  def handle_event("go_back", _params, socket) do
-    EventHandlers.handle_go_back(socket)
-  end
+  def handle_event("delete_action", %{"id" => action_id}, socket),
+    do: ContentHandlers.handle_delete_action(socket, action_id)
 
   @impl true
-  def handle_event("toggle_export_modal", _params, socket) do
-    EventHandlers.handle_toggle_export_modal(socket)
-  end
+  def handle_event("toggle_export_modal", _params, socket),
+    do: ContentHandlers.handle_toggle_export_modal(socket)
 
   @impl true
-  def handle_event("close_export_modal", _params, socket) do
-    EventHandlers.handle_close_export_modal(socket)
-  end
+  def handle_event("close_export_modal", _params, socket),
+    do: ContentHandlers.handle_close_export_modal(socket)
 
   @impl true
-  def handle_event("select_export_report_type", %{"type" => type}, socket) do
-    EventHandlers.handle_select_export_report_type(socket, type)
-  end
+  def handle_event("select_export_report_type", %{"type" => type}, socket),
+    do: ContentHandlers.handle_select_export_report_type(socket, type)
 
   @impl true
-  def handle_event("export", %{"format" => format}, socket) do
-    EventHandlers.handle_export(socket, format)
-  end
+  def handle_event("export", %{"format" => format}, socket),
+    do: ContentHandlers.handle_export(socket, format)
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Render
+  # ═══════════════════════════════════════════════════════════════════════════
 
   @impl true
   def render(assigns) do

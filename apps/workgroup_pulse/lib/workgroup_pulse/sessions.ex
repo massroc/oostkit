@@ -69,7 +69,6 @@ defmodule WorkgroupPulse.Sessions do
   ## Options
 
   - `:planned_duration_minutes` - Optional planned duration
-  - `:settings` - Optional map of session settings
   """
   def create_session(%Template{} = template, attrs \\ %{}) do
     code = generate_unique_code()
@@ -244,33 +243,26 @@ defmodule WorkgroupPulse.Sessions do
   end
 
   def go_back_question(%Session{state: "scoring"} = session) do
-    # When going back, set turn index to participant count to indicate all turns complete
-    # (since we're returning to a question that was already fully discussed)
-    participant_count = length(get_participants_in_turn_order(session))
-
-    result =
-      session
-      |> Session.transition_changeset("scoring", %{
-        current_question_index: session.current_question_index - 1,
-        current_turn_index: participant_count
-      })
-      |> Repo.update()
-
-    broadcast_session_update(result)
+    go_back_to_question(session, session.current_question_index - 1)
   end
 
   @doc """
   Goes back from summary to the last scoring question.
   """
   def go_back_to_scoring(%Session{state: "summary"} = session, last_question_index) do
-    # When going back from summary, set turn index to participant count to indicate all turns complete
-    # (since we're returning to a question that was already fully discussed)
+    go_back_to_question(session, last_question_index)
+  end
+
+  # Shared helper for backward navigation to a specific question.
+  # Sets turn index to participant count to mark all turns complete
+  # (since we're returning to a question that was already fully discussed).
+  defp go_back_to_question(session, question_index) do
     participant_count = length(get_participants_in_turn_order(session))
 
     result =
       session
       |> Session.transition_changeset("scoring", %{
-        current_question_index: last_question_index,
+        current_question_index: question_index,
         current_turn_index: participant_count
       })
       |> Repo.update()
@@ -304,15 +296,6 @@ defmodule WorkgroupPulse.Sessions do
   end
 
   defp with_broadcast(error, _broadcast_fn), do: error
-
-  @doc """
-  Updates the last_activity_at timestamp for the session.
-  """
-  def touch_session(%Session{} = session) do
-    session
-    |> Ecto.Changeset.change(last_activity_at: Timestamps.now())
-    |> Repo.update()
-  end
 
   ## Participants
 
@@ -385,15 +368,6 @@ defmodule WorkgroupPulse.Sessions do
   end
 
   @doc """
-  Gets the facilitator of a session.
-  """
-  def get_facilitator(%Session{} = session) do
-    Participant
-    |> where([p], p.session_id == ^session.id and p.is_facilitator == true)
-    |> Repo.one()
-  end
-
-  @doc """
   Gets a participant by their browser token.
   """
   def get_participant(%Session{} = session, browser_token) do
@@ -408,25 +382,6 @@ defmodule WorkgroupPulse.Sessions do
     |> where([p], p.session_id == ^session.id)
     |> order_by([p], [p.joined_at, p.id])
     |> Repo.all()
-  end
-
-  @doc """
-  Lists only active participants in a session.
-  """
-  def list_active_participants(%Session{} = session) do
-    Participant
-    |> where([p], p.session_id == ^session.id and p.status == "active")
-    |> order_by([p], [p.joined_at, p.id])
-    |> Repo.all()
-  end
-
-  @doc """
-  Counts participants in a session.
-  """
-  def count_participants(%Session{} = session) do
-    Participant
-    |> where([p], p.session_id == ^session.id)
-    |> Repo.aggregate(:count)
   end
 
   @doc """
@@ -484,23 +439,6 @@ defmodule WorkgroupPulse.Sessions do
     |> Repo.update_all(set: [is_ready: false])
 
     :ok
-  end
-
-  @doc """
-  Checks if all active participants are ready.
-  """
-  def all_participants_ready?(%Session{} = session) do
-    active_count =
-      Participant
-      |> where([p], p.session_id == ^session.id and p.status == "active")
-      |> Repo.aggregate(:count)
-
-    ready_count =
-      Participant
-      |> where([p], p.session_id == ^session.id and p.status == "active" and p.is_ready == true)
-      |> Repo.aggregate(:count)
-
-    active_count > 0 and active_count == ready_count
   end
 
   ## Turn-Based Scoring

@@ -35,7 +35,6 @@ defmodule WorkgroupPulse.Sessions.Session do
     field :current_question_index, :integer, default: 0
     field :current_turn_index, :integer, default: 0
     field :planned_duration_minutes, :integer
-    field :settings, :map, default: %{}
     field :started_at, :utc_datetime
     field :completed_at, :utc_datetime
     field :last_activity_at, :utc_datetime
@@ -60,7 +59,6 @@ defmodule WorkgroupPulse.Sessions.Session do
       :current_question_index,
       :current_turn_index,
       :planned_duration_minutes,
-      :settings,
       :started_at,
       :completed_at,
       :last_activity_at
@@ -69,6 +67,7 @@ defmodule WorkgroupPulse.Sessions.Session do
     |> validate_inclusion(:state, @states)
     |> validate_number(:current_question_index, greater_than_or_equal_to: 0)
     |> validate_number(:current_turn_index, greater_than_or_equal_to: 0)
+    |> validate_number(:planned_duration_minutes, greater_than: 0, less_than_or_equal_to: 1440)
     |> unique_constraint(:code)
     |> normalize_code()
   end

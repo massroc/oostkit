@@ -334,8 +334,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
     Calendar.strftime(dt, "%Y-%m-%d %H:%M")
   end
 
-  defp format_score_value("balance", value) when value > 0, do: "+#{value}"
-  defp format_score_value(_, value), do: "#{value}"
+  defdelegate format_score_value(scale_type, value),
+    to: WorkgroupPulseWeb.SessionLive.GridHelpers
 
   defp get_question_title(question_index, scores_summary) do
     case Enum.find(scores_summary, &(&1.question_index == question_index)) do

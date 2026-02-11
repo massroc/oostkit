@@ -13,27 +13,58 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
   alias WorkgroupPulse.Workshops
 
   @doc """
-  Loads scoring data for the current question when in scoring state.
+  Loads scoring data for the current question.
+  Handles scoring, summary, and completed states.
   """
-  def load_scoring_data(socket, %{state: "scoring"} = session, participant) do
-    # Reuse cached template to avoid repeated database queries
+  def load_scoring_data(socket, %{state: state} = session, participant)
+      when state in ["scoring", "summary", "completed"] do
     template = get_or_load_template(socket, session.template_id)
     question_index = session.current_question_index
     question = Enum.find(template.questions, &(&1.index == question_index))
-
     my_score = Scoring.get_score(session, participant, question_index)
-    current_turn_participant = Sessions.get_current_turn_participant(session)
 
-    # Calculate turn-based state
     turn_state =
-      calculate_turn_state(
-        session,
-        participant,
-        my_score,
-        current_turn_participant,
-        question_index
-      )
+      if state == "scoring" do
+        current_turn_participant = Sessions.get_current_turn_participant(session)
 
+        calculate_turn_state(
+          session,
+          participant,
+          my_score,
+          current_turn_participant,
+          question_index
+        )
+      else
+        %{
+          my_turn_locked: true,
+          is_my_turn: false,
+          current_turn_participant_id: nil,
+          current_turn_has_score: false,
+          participant_was_skipped: false
+        }
+      end
+
+    socket
+    |> assign_common_scoring(template, question, my_score, turn_state)
+    |> then(fn socket ->
+      if state == "scoring" and turn_state.is_my_turn and my_score == nil and
+           socket.assigns.carousel_index >= 4 do
+        assign(socket, :carousel_index, 4)
+      else
+        socket
+      end
+    end)
+    |> load_scores(session, question_index)
+    |> load_notes(session, question_index)
+    |> load_all_questions_scores(session, template)
+    |> load_actions_data(session)
+  end
+
+  def load_scoring_data(socket, _session, _participant) do
+    reset_scoring_assigns(socket)
+  end
+
+  defp assign_common_scoring(socket, template, question, my_score, turn_state) do
     socket
     |> assign(template: template)
     |> assign(total_questions: length(template.questions))
@@ -50,50 +81,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Helpers.DataLoaders do
     |> assign(show_score_overlay: false)
     |> assign(show_discuss_prompt: false)
     |> assign(show_team_discuss_prompt: false)
-    |> then(fn socket ->
-      if turn_state.is_my_turn and my_score == nil and socket.assigns.carousel_index >= 4 do
-        assign(socket, :carousel_index, 4)
-      else
-        socket
-      end
-    end)
-    |> load_scores(session, question_index)
-    |> load_notes(session, question_index)
-    |> load_all_questions_scores(session, template)
-    |> load_actions_data(session)
-  end
-
-  def load_scoring_data(socket, %{state: state} = session, participant)
-      when state in ["summary", "completed"] do
-    template = get_or_load_template(socket, session.template_id)
-    question_index = session.current_question_index
-    question = Enum.find(template.questions, &(&1.index == question_index))
-    my_score = Scoring.get_score(session, participant, question_index)
-
-    socket
-    |> assign(template: template)
-    |> assign(total_questions: length(template.questions))
-    |> assign(current_question: question)
-    |> assign(selected_value: if(my_score, do: my_score.value, else: nil))
-    |> assign(my_score: if(my_score, do: my_score.value, else: nil))
-    |> assign(has_submitted: my_score != nil)
-    |> assign(my_turn_locked: true)
-    |> assign(is_my_turn: false)
-    |> assign(current_turn_participant_id: nil)
-    |> assign(current_turn_has_score: false)
-    |> assign(participant_was_skipped: false)
-    |> assign(show_criterion_popup: nil)
-    |> assign(show_score_overlay: false)
-    |> assign(show_discuss_prompt: false)
-    |> assign(show_team_discuss_prompt: false)
-    |> load_scores(session, question_index)
-    |> load_notes(session, question_index)
-    |> load_all_questions_scores(session, template)
-    |> load_actions_data(session)
-  end
-
-  def load_scoring_data(socket, _session, _participant) do
-    reset_scoring_assigns(socket)
   end
 
   defp calculate_turn_state(

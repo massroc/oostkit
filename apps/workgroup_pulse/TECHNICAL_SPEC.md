@@ -26,11 +26,14 @@ For **frontend/UX implementation** (CSS, JS hooks, carousel, sheet dimensions), 
 ```
 SessionLive.Show (root LiveView)
 ├── Handlers/
-│   ├── EventHandlers         # All handle_event callbacks
+│   ├── NavigationHandlers    # Workshop flow: start, intro, carousel, phase transitions, go back
+│   ├── ScoringHandlers       # Score submission, turn completion, skipping, readiness
+│   ├── ContentHandlers       # Notes, actions, export, UI toggles
 │   └── MessageHandlers       # All handle_info callbacks (PubSub)
 │
 ├── Helpers/
 │   ├── DataLoaders           # Data loading & state hydration
+│   ├── GridHelpers           # Shared scoring grid helpers (used by Scoring/Summary/Export components)
 │   ├── StateHelpers          # State transition helpers
 │   ├── OperationHelpers      # Standardised error handling
 │   └── ScoreHelpers          # Score color/formatting utilities
@@ -48,9 +51,6 @@ SessionLive.Show (root LiveView)
 │   ├── CompletedComponent          # Wrap-up: results, action count, export
 │   ├── ExportModalComponent        # Export report type (full/team) + format (CSV/PDF) selection
 │   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
-│
-├── LiveComponents/
-│   └── ActionFormComponent   # Local form state for action creation
 │
 ├── Shared (in CoreComponents)
 │   ├── .app_header           # App header with gradient accent
@@ -139,43 +139,56 @@ All follow the same pure functional pattern:
 - **LobbyComponent** — Waiting room with participant list and start button
 - **IntroComponent** — 4-screen introduction with navigation
 
-### ActionFormComponent (LiveComponent)
-
-**File:** `lib/workgroup_pulse_web/live/session_live/action_form_component.ex`
-
-**Purpose:** Manages action creation form with local state. Form input changes don't trigger parent re-renders.
-
-**Local State:**
-- `action_description` - Action description input
-- `action_owner` - Action owner input
-- `action_question` - Selected related question
-
-**Communication:** Notifies parent via `send(self(), :reload_actions)` after successful action creation.
-
 ---
 
 ## 3. Extracted Handler Modules
 
 The following handler modules have been extracted from SessionLive.Show to improve maintainability and separation of concerns.
 
-### EventHandlers
+### NavigationHandlers
 
-**File:** `lib/workgroup_pulse_web/live/session_live/handlers/event_handlers.ex`
+**File:** `lib/workgroup_pulse_web/live/session_live/handlers/navigation_handlers.ex`
 
-**Purpose:** All `handle_event` callbacks extracted from the root LiveView. Each function receives the socket and returns `{:noreply, socket}`.
+**Purpose:** Workshop flow and navigation events. Each function receives the socket and returns `{:noreply, socket}`.
+
+**Key Functions:**
+- `handle_start_workshop/1` — Starts the session (facilitator only)
+- `handle_intro_next/1` / `handle_intro_prev/1` — Navigate intro slides locally
+- `handle_skip_intro/1` — Navigates to scoring sheet (local); starts timer for facilitator on first arrival
+- `handle_carousel_navigate/3` — Updates carousel index for sheet stack navigation
+- `handle_next_question/1` — Advances to next question (facilitator only)
+- `handle_go_back/1` — Navigate back (facilitator only, context-aware by session state)
+- `handle_continue_to_wrapup/1` — Advances from summary to completed state
+- `handle_finish_workshop/1` — Redirects facilitator to homepage
+
+### ScoringHandlers
+
+**File:** `lib/workgroup_pulse_web/live/session_live/handlers/scoring_handlers.ex`
+
+**Purpose:** Scoring and turn-based events. Handles score submission, turn lifecycle, and readiness.
 
 **Key Functions:**
 - `handle_select_score/2` — Parses score value and auto-submits immediately (no separate submit step)
 - `handle_edit_my_score/1` — Reopens the score overlay for click-to-edit
+- `handle_close_score_overlay/1` — Dismisses the score overlay
 - `handle_complete_turn/1` — Locks turn and advances to next participant
 - `handle_skip_turn/1` — Facilitator skips current participant
 - `handle_mark_ready/1` — Marks participant as ready to continue
+
+### ContentHandlers
+
+**File:** `lib/workgroup_pulse_web/live/session_live/handlers/content_handlers.ex`
+
+**Purpose:** Content events covering notes, actions, export, and UI toggles.
+
+**Key Functions:**
 - `handle_focus_sheet/2` — Brings specified sheet panel to front (`:main` → carousel index 4; `:notes` → sets `notes_revealed: true`)
-- `handle_next_question/1` — Advances to next question (facilitator only)
-- `handle_go_back/1` — Navigate back (facilitator only, context-aware)
-- `reveal_notes` / `hide_notes` — Toggle the fixed-position notes panel (`notes_revealed` assign)
-- `handle_skip_intro/1` — Navigates to scoring sheet (local); starts timer for facilitator on first arrival
-- Note, action, transition, and export handlers
+- `handle_reveal_notes/1` / `handle_hide_notes/1` — Toggle the fixed-position notes panel
+- `handle_dismiss_prompt/2` — Dismisses any prompt type (discuss, team_discuss)
+- `handle_add_note/1` / `handle_delete_note/2` — Note CRUD
+- `handle_add_action/1` / `handle_delete_action/2` — Action CRUD
+- `handle_export/2` — Generates CSV or triggers PDF export via JS hook
+- `handle_show_criterion_info/2` / `handle_close_criterion_info/1` — Criterion popup toggle
 
 ### MessageHandlers
 
@@ -198,7 +211,7 @@ The following handler modules have been extracted from SessionLive.Show to impro
 **Purpose:** Centralised data loading functions that hydrate the socket with data for each phase. Uses smart caching to avoid redundant DB queries.
 
 **Key Functions:**
-- `load_scoring_data/3` — Loads all scoring state: template, current question, scores, turn state, score overlay visibility, all-questions grid data, notes
+- `load_scoring_data/3` — Loads all scoring state for scoring/summary/completed states. Uses a single clause with guard for active states, falling back to `reset_scoring_assigns/1` for others. Delegates common assigns to `assign_common_scoring/5`.
 - `load_scores/3` — Loads scores for a specific question, builds participant score grid, calculates readiness
 - `load_all_questions_scores/3` — Loads scores for all 8 questions (for the full grid display)
 - `load_notes/3` — Loads notes for a specific question
@@ -217,6 +230,19 @@ show_score_overlay: turn_state.is_my_turn and my_score == nil
 - Skipped participants (no score when all turns done) auto-counted as ready
 - Row-locked questions (revisiting completed): all participants auto-ready
 - Otherwise: explicit "I'm Ready" click required from non-facilitator, non-observer participants
+
+### GridHelpers
+
+**File:** `lib/workgroup_pulse_web/live/session_live/helpers/grid_helpers.ex`
+
+**Purpose:** Shared helpers for scoring grid rendering, used by `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent`. Eliminates duplicated grid logic across these three components.
+
+**Key Functions:**
+- `prepare_grid_assigns/1` — Prepares common grid assigns: filters active participants, splits questions by scale type (balance/maximal), calculates empty column slots and total columns. Fixed at 7 participant column slots for consistent grid width.
+- `sub_label/1` — Returns "a" or "b" suffix for paired criteria questions, nil otherwise
+- `first_of_pair?/1` — Returns true if a question starts a paired criterion group (e.g., "2a", "5a")
+- `format_score_value/2` — Formats score for display; balance values > 0 get a "+" prefix
+- `format_criterion_title/1` — Wraps long criterion titles (e.g., "Mutual Support and Respect" gets a line break)
 
 ### TimerHandler
 
@@ -315,9 +341,13 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     }
   end
 
-  # Events delegate to EventHandlers
+  # Events delegate to focused handler modules
   def handle_event("select_score", params, socket),
-    do: EventHandlers.handle_select_score(socket, params)
+    do: ScoringHandlers.handle_select_score(socket, params)
+  def handle_event("go_back", _params, socket),
+    do: NavigationHandlers.handle_go_back(socket)
+  def handle_event("add_note", _params, socket),
+    do: ContentHandlers.handle_add_note(socket)
 
   # PubSub messages delegate to MessageHandlers
   def handle_info({:score_submitted, pid, qi}, socket),
@@ -334,8 +364,10 @@ end
 
 **Key Design Decisions:**
 - `show.ex` is a thin dispatcher — all logic lives in handler/helper modules
+- Event handlers are split by domain: `NavigationHandlers` (flow/navigation), `ScoringHandlers` (scores/turns/readiness), `ContentHandlers` (notes/actions/export/UI toggles). Events in `show.ex` delegate to the appropriate module via one-liner clauses grouped by section.
 - DataLoaders hydrate socket assigns in bulk, avoiding piecemeal loading
 - Template caching (`get_or_load_template/2`) avoids repeated DB queries
+- Shared grid rendering logic (column slots, question grouping, score formatting) is centralised in `GridHelpers`, consumed by `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent`
 - Floating action buttons, notes panel, and score overlays are separate extracted components called from `show.ex`'s `render/1`
 
 ---
@@ -507,16 +539,11 @@ This reduces WebSocket messages by ~80-90% during typing.
 
 The `load_scores/3` function uses participant data from socket assigns rather than querying the database on every score submission. Participant lists are kept in sync via PubSub handlers, eliminating redundant database queries.
 
-### LiveComponent Extraction
-
-Frequently updated sections have been extracted into LiveComponents to isolate re-renders:
-- **ActionFormComponent** — Manages local form state for action creation (typing doesn't trigger parent re-renders)
-
 ### Template Caching
 
 `get_or_load_template/2` reuses the template from socket assigns if already loaded, avoiding repeated DB queries during phase transitions and score submissions.
 
 ---
 
-*Document Version: 1.1 — Removed intro state; timer starts on facilitator reaching scoring sheet*
-*Last Updated: 2026-02-08*
+*Document Version: 1.2 — Split EventHandlers into NavigationHandlers/ScoringHandlers/ContentHandlers; added GridHelpers module; removed ActionFormComponent*
+*Last Updated: 2026-02-11*

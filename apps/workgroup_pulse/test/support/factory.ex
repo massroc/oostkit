@@ -90,7 +90,6 @@ defmodule WorkgroupPulse.Factory do
       code: unique_session_code(),
       state: "lobby",
       current_question_index: 0,
-      settings: %{},
       last_activity_at: DateTime.utc_now() |> DateTime.truncate(:second),
       template: build(:template)
     }

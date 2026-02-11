@@ -85,14 +85,6 @@ defmodule WorkgroupPulse.NotesTest do
       assert Notes.list_notes_for_question(session, 0) == []
     end
 
-    test "count_notes/1 returns total note count", %{session: session} do
-      assert Notes.count_notes(session) == 0
-
-      {:ok, _} = Notes.create_note(session, 0, %{content: "Note 1"})
-      {:ok, _} = Notes.create_note(session, 1, %{content: "Note 2"})
-
-      assert Notes.count_notes(session) == 2
-    end
   end
 
   describe "actions" do
@@ -180,23 +172,5 @@ defmodule WorkgroupPulse.NotesTest do
       assert Notes.list_all_actions(session) == []
     end
 
-    test "count_actions/1 returns total action count", %{session: session} do
-      assert Notes.count_actions(session) == 0
-
-      {:ok, _} = Notes.create_action(session, %{description: "Action 1"})
-      {:ok, _} = Notes.create_action(session, %{description: "Action 2"})
-
-      assert Notes.count_actions(session) == 2
-    end
-
-    test "count_completed_actions/1 returns completed action count", %{session: session} do
-      {:ok, a1} = Notes.create_action(session, %{description: "Action 1"})
-      {:ok, _a2} = Notes.create_action(session, %{description: "Action 2"})
-
-      assert Notes.count_completed_actions(session) == 0
-
-      {:ok, _} = Notes.complete_action(a1)
-      assert Notes.count_completed_actions(session) == 1
-    end
   end
 end

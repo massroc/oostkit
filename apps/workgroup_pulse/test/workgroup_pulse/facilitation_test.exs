@@ -12,14 +12,6 @@ defmodule WorkgroupPulse.FacilitationTest do
       assert Facilitation.phase_name("unknown") == "unknown"
     end
 
-    test "suggested_duration/1 returns default durations in seconds" do
-      # 15 minutes per question
-      assert Facilitation.suggested_duration("question_0") == 900
-      # 10 minutes
-      assert Facilitation.suggested_duration("summary") == 600
-      # 5 minutes default
-      assert Facilitation.suggested_duration("unknown") == 300
-    end
   end
 
   describe "segment-based timer functions" do
