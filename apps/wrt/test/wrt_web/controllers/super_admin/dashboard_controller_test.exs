@@ -13,7 +13,7 @@ defmodule WrtWeb.SuperAdmin.DashboardControllerTest do
         |> log_in_super_admin(admin)
         |> get("/admin/dashboard")
 
-      assert html_response(conn, 200) =~ "dashboard"
+      assert html_response(conn, 200) =~ "Dashboard"
     end
 
     test "redirects to login when not authenticated", %{conn: conn} do

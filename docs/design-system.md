@@ -93,11 +93,22 @@ All sheets derive from this single ratio:
 
 Sheets lift on hover with transition to `shadow-sheet-lifted`.
 
+### OOSTKit Header
+
+All apps share a consistent header pattern:
+
+- **Background**: Dark purple (`bg-ok-purple-900`)
+- **Left**: "OOSTKit" brand link (white, links to `https://oostkit.com`)
+- **Right**: App-specific content (e.g., session name, admin email, logout link)
+- **Below**: Magenta-to-purple gradient brand stripe (`.brand-stripe`, 3px)
+
+This header is implemented in each app's layout files (`app.html.heex`, `admin.html.heex`) or via a shared component (e.g., Pulse's `<.app_header>`).
+
 ### Layout Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  Header (52px, z-index: 10)                                         │
+│  Header (52px, dark purple + brand stripe, z-index: 10)             │
 ├─────────────────────────────────────────────────────────────────────┤
 │  VIRTUAL WALL (bg: #E8E4DF)                                         │
 │                                                                     │
@@ -145,7 +156,8 @@ Tertiary colors (purple, magenta, gold) appear **only in UI chrome**, never as s
 
 | Location | Color | Implementation |
 |----------|-------|----------------|
-| Header bottom-left | Magenta → Purple | 200px gradient stripe, 3px tall |
+| Header background | Dark purple | `bg-ok-purple-900` across all apps |
+| Brand stripe (below header) | Magenta → Purple | Full-width gradient stripe, 3px tall |
 | Submit button | Purple → Magenta | Background gradient |
 | App icon | Purple | With purple shadow glow |
 
@@ -554,6 +566,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-12 | Consistent OOSTKit header across all apps (Portal, Pulse, WRT): dark purple bg, "OOSTKit" brand link, brand stripe below |
 | 2026-02-10 | Design system applied to Portal (semantic tokens, DM Sans, brand stripe, surface/text classes, branded nav header) |
 | 2026-02-10 | Design system applied to WRT (semantic tokens, DM Sans, brand stripe, surface/text classes) |
 | 2026-02-06 | Added sheet dimensions, paper texture, shadows from mockup |

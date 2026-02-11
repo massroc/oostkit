@@ -1,4 +1,15 @@
-<div class="h-screen flex flex-col bg-surface-wall">
-  <.flash_group flash={@flash} />
-  {@inner_content}
+<div class="flex flex-col h-screen bg-surface-wall">
+  <header class="bg-ok-purple-900">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+      <a href="https://oostkit.com" class="text-lg font-semibold text-white">
+        OOSTKit
+      </a>
+      <span class="text-sm text-ok-purple-300">Workgroup Pulse</span>
+    </nav>
+  </header>
+  <div class="brand-stripe"></div>
+  <div class="flex-1 flex flex-col min-h-0">
+    <.flash_group flash={@flash} />
+    {@inner_content}
+  </div>
 </div>

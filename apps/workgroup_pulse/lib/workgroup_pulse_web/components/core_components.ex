@@ -218,76 +218,30 @@ defmodule WorkgroupPulseWeb.CoreComponents do
   # ═══════════════════════════════════════════════════════════════════════════
 
   @doc """
-  Renders the app header bar (52px) with logo, session name, and actions.
+  Renders the OOSTKit app header with brand link and session name.
 
   ## Examples
 
       <.app_header session_name="Team Alpha — Six Criteria" />
   """
   attr :session_name, :string, default: nil
-  attr :show_settings, :boolean, default: false
-  attr :show_signin, :boolean, default: false
 
   def app_header(assigns) do
     ~H"""
-    <header class="flex items-center justify-between px-6 h-header bg-ui-header-bg border-b border-ui-border flex-shrink-0 z-10 relative gradient-stripe-header">
-      <div class="flex items-center gap-2.5">
-        <div class="w-[30px] h-[30px] bg-accent-purple rounded-icon flex items-center justify-center shadow-md">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            class="w-4 h-4"
-          >
-            <path d="M3 6h18M3 12h18M3 18h18" />
-            <circle cx="7" cy="6" r="1.5" fill="white" stroke="none" />
-            <circle cx="12" cy="12" r="1.5" fill="white" stroke="none" />
-            <circle cx="16" cy="18" r="1.5" fill="white" stroke="none" />
-          </svg>
+    <header class="bg-ok-purple-900 flex-shrink-0 z-10">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+        <a href="https://oostkit.com" class="text-lg font-semibold text-white">
+          OOSTKit
+        </a>
+        <div class="flex items-center gap-4">
+          <span :if={@session_name} class="text-sm text-ok-purple-200">
+            {@session_name}
+          </span>
+          <span class="text-sm text-ok-purple-300">Workgroup Pulse</span>
         </div>
-        <span class="font-bold text-lg text-ui-text tracking-tight font-brand">
-          Workgroup Pulse
-        </span>
-      </div>
-
-      <span
-        :if={@session_name}
-        class="font-medium text-sm text-ui-text-muted absolute left-1/2 -translate-x-1/2"
-      >
-        {@session_name}
-      </span>
-
-      <div class="flex items-center gap-3.5">
-        <button
-          :if={@show_settings}
-          type="button"
-          class="p-1.5 rounded-md text-ui-text-muted hover:bg-black/5 transition-colors"
-          title="Settings"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
-          </svg>
-        </button>
-        <button
-          :if={@show_signin}
-          type="button"
-          class="font-brand text-xs font-semibold px-3.5 py-1.5 rounded-md border border-ui-border bg-white text-ui-text hover:border-accent-purple hover:text-accent-purple transition-colors"
-        >
-          Sign In
-        </button>
-      </div>
+      </nav>
     </header>
+    <div class="brand-stripe"></div>
     """
   end
 

@@ -3,6 +3,12 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* Brand stripe */
+.brand-stripe {
+  height: 3px;
+  background: linear-gradient(to right, #BC45F4, #7245F4, transparent);
+}
+
 /* Custom styles for Productive Work Groups */
 
 /* Traffic light colors for score visualization */
@@ -301,7 +307,7 @@ th.active-col-header {
   display: none;
   min-width: 0;
   width: 100%;
-  height: calc(100vh - 52px - 2rem);
+  height: 100%;
   align-items: flex-start;
   justify-content: center;
 }
