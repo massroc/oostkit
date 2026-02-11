@@ -84,7 +84,6 @@ defmodule WorkgroupPulse.NotesTest do
       assert {:ok, _} = Notes.delete_note(note)
       assert Notes.list_notes_for_question(session, 0) == []
     end
-
   end
 
   describe "actions" do
@@ -171,6 +170,5 @@ defmodule WorkgroupPulse.NotesTest do
       assert {:ok, _} = Notes.delete_action(action)
       assert Notes.list_all_actions(session) == []
     end
-
   end
 end

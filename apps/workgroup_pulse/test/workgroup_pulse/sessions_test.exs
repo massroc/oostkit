@@ -256,7 +256,6 @@ defmodule WorkgroupPulse.SessionsTest do
       participants = Sessions.list_participants(session)
       assert Enum.all?(participants, fn p -> p.is_ready == false end)
     end
-
   end
 
   describe "session code generation" do

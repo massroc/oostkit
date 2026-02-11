@@ -90,5 +90,4 @@ defmodule WorkgroupPulse.Scoring.Score do
     score
     |> change(%{turn_locked: true})
   end
-
 end

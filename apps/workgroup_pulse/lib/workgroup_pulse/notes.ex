@@ -117,5 +117,4 @@ defmodule WorkgroupPulse.Notes do
     |> order_by([a], a.inserted_at)
     |> Repo.all()
   end
-
 end

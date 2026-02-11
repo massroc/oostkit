@@ -11,7 +11,6 @@ defmodule WorkgroupPulse.FacilitationTest do
       assert Facilitation.phase_name("summary_actions") == "Summary + Actions"
       assert Facilitation.phase_name("unknown") == "unknown"
     end
-
   end
 
   describe "segment-based timer functions" do

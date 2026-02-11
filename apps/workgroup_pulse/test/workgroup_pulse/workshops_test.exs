@@ -100,7 +100,6 @@ defmodule WorkgroupPulse.WorkshopsTest do
     test "get_question/2 returns nil for non-existent index", %{template: template} do
       assert Workshops.get_question(template, 99) == nil
     end
-
   end
 
   describe "get_template_with_questions/1" do

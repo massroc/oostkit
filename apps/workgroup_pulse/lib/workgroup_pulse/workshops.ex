@@ -110,5 +110,4 @@ defmodule WorkgroupPulse.Workshops do
   def get_question(%Template{} = template, index) do
     Repo.get_by(Question, template_id: template.id, index: index)
   end
-
 end

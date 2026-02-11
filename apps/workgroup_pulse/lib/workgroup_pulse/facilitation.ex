@@ -86,5 +86,4 @@ defmodule WorkgroupPulse.Facilitation do
       duration -> div(duration, 10)
     end
   end
-
 end
