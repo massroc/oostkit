@@ -33,7 +33,7 @@ config :wrt, WrtWeb.Plugs.RateLimiter, enabled: false
 # Portal cross-app auth
 config :wrt, :portal_api_url, "http://localhost:4002"
 config :wrt, :portal_api_key, "test_internal_api_key"
-config :wrt, :portal_login_url, "/admin/login"
+config :wrt, :portal_login_url, "http://localhost:4002/users/log-in"
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime

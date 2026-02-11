@@ -47,7 +47,7 @@ Technical architecture and implementation design for the OST Referral Tool.
 │  │             │     │             │      │             │      │
 │  │ - orgs      │     │ - org_admins│      │ - org_admins│      │
 │  │ - super_    │     │ - campaigns │      │ - campaigns │      │
-│  │   admins    │     │ - rounds    │      │ - rounds    │      │
+│  │   admins*   │     │ - rounds    │      │ - rounds    │      │
 │  │             │     │ - people    │      │ - people    │      │
 │  │             │     │ - etc.      │      │ - etc.      │      │
 │  └─────────────┘     └─────────────┘      └─────────────┘      │
@@ -77,7 +77,7 @@ lib/
 │   │
 │   ├── tenant_manager.ex           # Multi-tenancy orchestration ✓
 │   │
-│   ├── auth/                       # Shared authentication helpers
+│   ├── auth/                       # Legacy authentication helpers (retained for data compat)
 │   │   └── password.ex             # Shared hash_password/1 and valid_password?/2
 │   │
 │   ├── platform/                   # Public schema (cross-tenant) ✓
@@ -122,7 +122,6 @@ lib/
 │   │                               # - Rate limit events only
 │   │
 │   ├── telemetry.ex                # Business telemetry ✓
-│   │                               # - Login attempts
 │   │                               # - Magic links
 │   │                               # - Nominations
 │   │                               # - Rate limiting
@@ -153,25 +152,28 @@ lib/
 │   │   │                            # - Validates via PortalAuthClient
 │   │   │                            # - Sets :portal_user assign on conn
 │   │   │
-│   │   ├── require_portal_or_wrt_super_admin.ex  # Transitional auth plug ✓
-│   │   │                            # - Accepts Portal super_admin OR WRT session auth
-│   │   │                            # - Used during migration period
+│   │   ├── require_portal_super_admin.ex  # Portal super admin auth plug ✓
+│   │   │                            # - Requires portal_user with super_admin role
+│   │   │                            # - Redirects to Portal login if not authenticated
+│   │   │
+│   │   ├── require_portal_user.ex   # Portal user auth plug ✓
+│   │   │                            # - Requires any valid Portal user (enabled)
+│   │   │                            # - Redirects to Portal login if not authenticated
 │   │   │
 │   │   └── rate_limiter.ex         # PlugAttack rate limiting ✓
-│   │                               # - Login: 5/min
 │   │                               # - Magic links: 3/min
 │   │                               # - Nominations: 10/min
 │   │                               # - Webhooks: 100/min
 │   │                               # - General: 120/min
 │   │
 │   ├── controllers/
+│   │   ├── page_controller.ex      # Root redirect (/ → /admin/dashboard) ✓
+│   │   │
 │   │   ├── super_admin/            # ✓
-│   │   │   ├── session_controller.ex
 │   │   │   ├── org_controller.ex
 │   │   │   └── dashboard_controller.ex
 │   │   │
 │   │   ├── org/                    # ✓
-│   │   │   ├── session_controller.ex
 │   │   │   ├── dashboard_controller.ex
 │   │   │   ├── campaign_controller.ex
 │   │   │   ├── round_controller.ex
@@ -188,8 +190,6 @@ lib/
 │   │   ├── health_controller.ex    # Health check endpoints ✓
 │   │   │                           # - /health (liveness)
 │   │   │                           # - /health/ready (readiness)
-│   │   │
-│   │   ├── registration_controller.ex  # ✓
 │   │   │
 │   │   └── webhook_controller.ex       # ✓ Postmark/SendGrid webhooks
 │   │
@@ -330,32 +330,25 @@ end
 ## URL Structure
 
 ```
-# Public routes
-GET  /                                    # Landing page
-GET  /register                            # Org registration form
-POST /register                            # Submit registration
+# Root redirect (users arrive via Portal, already authenticated)
+GET  /                                    # Redirects to /admin/dashboard
 
-# Super admin auth routes (no portal auth required)
-GET  /admin/login                         # Super admin login
-POST /admin/login
-DELETE /admin/logout                      # Super admin logout
-
-# Super admin protected routes (portal auth OR WRT session)
+# Super admin routes (Portal super_admin auth required)
 GET  /admin/dashboard                     # Platform overview
 GET  /admin/orgs                          # Pending/approved orgs
+GET  /admin/orgs/:id                      # Org detail
 POST /admin/orgs/:id/approve
 POST /admin/orgs/:id/reject
 POST /admin/orgs/:id/suspend
 
-# Org-scoped routes (tenant context)
-GET  /org/:slug/login                     # Org admin login
-POST /org/:slug/login
+# Org-scoped routes (Portal user auth required)
 GET  /org/:slug/dashboard                 # Campaign overview
 GET  /org/:slug/campaigns/new             # Create campaign
 POST /org/:slug/campaigns
 GET  /org/:slug/campaigns/:id             # Campaign detail
 GET  /org/:slug/campaigns/:id/seed        # Manage seed group
 POST /org/:slug/campaigns/:id/seed/upload # CSV upload
+POST /org/:slug/campaigns/:id/seed/add    # Manual add
 GET  /org/:slug/campaigns/:id/rounds      # Round management
 POST /org/:slug/campaigns/:id/rounds      # Start new round
 GET  /org/:slug/campaigns/:id/rounds/:num # Round detail
@@ -365,71 +358,60 @@ GET  /org/:slug/campaigns/:id/results     # Convergence view
 GET  /org/:slug/campaigns/:id/export/csv  # Download CSV
 GET  /org/:slug/campaigns/:id/export/pdf  # Download PDF
 
-# Nominator routes (public, token-authenticated)
+# Nominator routes (public, token-authenticated via magic link)
+GET  /org/:slug/nominate/invalid          # Invalid link page
 GET  /org/:slug/nominate/:token           # Landing with magic link
 POST /org/:slug/nominate/request-link     # Request magic link email
-GET  /org/:slug/nominate/verify/:code     # Verify magic link code
+POST /org/:slug/nominate/verify/code      # Verify magic link code
 GET  /org/:slug/nominate/form             # Nomination form (authenticated)
 POST /org/:slug/nominate/submit           # Submit nominations
 
 # Webhook routes
 POST /webhooks/email/:provider            # Email tracking callbacks
+
+# Health checks (no auth)
+GET  /health                              # Liveness check
+GET  /health/ready                        # Readiness check
 ```
 
 ## Authentication Flows
 
-### Super Admin Authentication
+### Admin Authentication (Portal-Delegated)
 
-Two authentication paths (transitional during Portal migration):
+All admin authentication is delegated to Portal. WRT has no login pages, registration
+forms, or password-based auth. Users access WRT through the Portal dashboard, arriving
+already authenticated via Portal's `_oostkit_token` cookie.
 
-**Path 1: WRT-native** — Standard email/password with session cookie (retained during transition).
+The authentication pipeline consists of two plugs applied at the router level:
+
+1. **`PortalAuth`** — Reads the `_oostkit_token` cookie and validates it against Portal's
+   internal API via `PortalAuthClient`. Sets `:portal_user` assign on conn with the user's
+   `id`, `email`, `role`, and `enabled` status. Results are cached in ETS with 5-minute TTL.
+
+2. **`RequirePortalSuperAdmin`** — For `/admin/*` routes. Checks that `portal_user` has
+   `role: "super_admin"` and `enabled: true`. Redirects to Portal login if not.
+
+3. **`RequirePortalUser`** — For `/org/:slug/*` routes. Checks that any valid `portal_user`
+   exists and is enabled. Redirects to Portal login if not.
 
 ```elixir
-defmodule Wrt.Auth do
-  def authenticate_super_admin(email, password) do
-    case Platform.get_super_admin_by_email(email) do
-      nil -> {:error, :not_found}
-      admin ->
-        if Wrt.Auth.Password.valid_password?(admin, password) do
-          {:ok, admin}
-        else
-          {:error, :invalid_password}
-        end
-    end
-  end
+# Router pipelines
+pipeline :require_portal_super_admin do
+  plug WrtWeb.Plugs.PortalAuth
+  plug WrtWeb.Plugs.RequirePortalSuperAdmin
+end
+
+pipeline :require_portal_user do
+  plug WrtWeb.Plugs.PortalAuth
+  plug WrtWeb.Plugs.RequirePortalUser
 end
 ```
 
-Password hashing and verification are centralized in `Wrt.Auth.Password`, which is shared
-by `SuperAdmin`, `OrgAdmin`, and `CampaignAdmin` schemas via `defdelegate`.
+Unauthenticated users are redirected to `portal_login_url` (configured per environment).
 
-**Path 2: Portal cross-app auth** — Reads `_oostkit_token` cookie, validates against Portal API.
+### Root Redirect
 
-```elixir
-# PortalAuthClient validates tokens via Portal's internal API with ETS caching.
-# PortalAuth plug reads the cookie and sets :portal_user assign.
-# RequirePortalOrWrtSuperAdmin accepts either auth method.
-```
-
-Admin routes are split: auth routes (login/logout) are separate from protected routes (dashboard/orgs). The `RequirePortalOrWrtSuperAdmin` plug is applied at the router pipeline level, replacing controller-level `RequireSuperAdmin` plugs.
-
-### Org/Campaign Admin Authentication
-
-Email/password, scoped to tenant.
-
-```elixir
-def authenticate_org_admin(tenant, email, password) do
-  case Orgs.get_admin_by_email(tenant, email) do
-    nil -> {:error, :not_found}
-    admin ->
-      if Wrt.Auth.Password.valid_password?(admin, password) do
-        {:ok, admin}
-      else
-        {:error, :invalid_password}
-      end
-  end
-end
-```
+`/` redirects to `/admin/dashboard`. Users always arrive via Portal, already authenticated.
 
 ### Nominator Magic Link Flow
 
@@ -847,12 +829,12 @@ primary_region = "lhr"
 
 ```
 DATABASE_URL=postgres://...
-SECRET_KEY_BASE=...                # Must match Portal's SECRET_KEY_BASE for cookie sharing
+SECRET_KEY_BASE=...                       # Must match Portal's SECRET_KEY_BASE for cookie sharing
 PHX_HOST=wrt.example.com
 POSTMARK_API_KEY=...
-PORTAL_API_URL=https://oostkit.com # Portal base URL for auth validation
-PORTAL_API_KEY=...                 # Same value as Portal's INTERNAL_API_KEY
-PORTAL_LOGIN_URL=https://oostkit.com/login  # Redirect URL for unauthenticated users
+PORTAL_API_URL=https://oostkit.com        # Portal base URL for auth validation
+PORTAL_API_KEY=...                        # Same value as Portal's INTERNAL_API_KEY
+PORTAL_LOGIN_URL=https://oostkit.com/users/log-in  # Redirect URL for unauthenticated users
 ```
 
 ### Release Configuration
@@ -913,13 +895,12 @@ end
 ### Phase 1: Foundation ✓
 - [x] Phoenix app scaffolding
 - [x] Multi-tenancy setup with Triplex
-- [x] Public schema migrations (orgs, super_admins)
+- [x] Public schema migrations (orgs)
 - [x] Tenant schema migrations
-- [x] Super admin authentication
-- [x] Org registration flow
+- [x] Portal-delegated authentication (RequirePortalSuperAdmin, RequirePortalUser)
+- [x] Organisation management
 
 ### Phase 2: Core Campaign Flow ✓
-- [x] Org admin authentication
 - [x] Campaign CRUD
 - [x] Seed group upload (CSV + manual)
 - [x] Round management (start, close, extend)

@@ -28,7 +28,8 @@ This mailbox shows all emails "sent" by the app, including:
    ```
 
 2. Create test data through the admin UI:
-   - Log in as super admin
+   - Log in via Portal (super admin role required) — Portal must be running on port 4002
+   - Navigate to WRT at `http://localhost:4001` (redirects to admin dashboard)
    - Create an organisation
    - Create a campaign and round
    - Add contacts to the round
@@ -86,13 +87,16 @@ Emails will be sent but you can monitor them in the Postmark dashboard.
 
 ## Production Environment
 
-Production uses Postmark for real email delivery and Portal for cross-app auth.
+Production uses Postmark for real email delivery. All admin authentication is handled
+by Portal — WRT has no login pages or password-based auth of its own.
 
 **Required secrets:**
 ```bash
 fly secrets set POSTMARK_API_KEY=your-production-token -a wrt-tool
 fly secrets set SECRET_KEY_BASE=<same-as-portal> -a wrt-tool
 fly secrets set PORTAL_API_KEY=<same-as-portal-internal-api-key> -a wrt-tool
+fly secrets set PORTAL_API_URL=https://oostkit.com -a wrt-tool
+fly secrets set PORTAL_LOGIN_URL=https://oostkit.com/users/log-in -a wrt-tool
 ```
 
 ## Environment Variable Reference
@@ -110,8 +114,9 @@ fly secrets set PORTAL_API_KEY=<same-as-portal-internal-api-key> -a wrt-tool
 - If `MAIL_ADAPTER=logger` → logs emails (staging mode)
 - If `POSTMARK_API_KEY` set → sends via Postmark
 - If neither set → emails will fail (intentional, to catch misconfig)
-- Portal auth variables are required in production for cross-app authentication
+- Portal auth variables are required in all environments (WRT has no native login)
 - In dev/test, Portal auth defaults are configured in `config/dev.exs` and `config/test.exs`
+- Portal must be running for WRT admin access (dev: `http://localhost:4002`)
 
 ## Rate Limiting
 

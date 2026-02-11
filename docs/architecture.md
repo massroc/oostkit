@@ -104,7 +104,7 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 
 - **Portal login** sets a subdomain-scoped `_oostkit_token` cookie (domain configurable via `COOKIE_DOMAIN` env var, e.g., `.oostkit.com`)
 - **Internal validation API** at `POST /api/internal/auth/validate` allows other apps to verify tokens. Protected by `INTERNAL_API_KEY` (shared secret via `ApiAuth` plug).
-- **Consumer apps** (e.g., WRT) read the `_oostkit_token` cookie and call the Portal API to resolve the user. Results are cached in ETS with a 5-minute TTL.
+- **Consumer apps** (e.g., WRT) read the `_oostkit_token` cookie and call the Portal API to resolve the user. Results are cached in ETS with a 5-minute TTL. WRT delegates all authentication to Portal — it has no login pages or password-based auth of its own.
 - **Shared `SECRET_KEY_BASE`** across Portal and all consuming apps ensures cookie signing compatibility.
 - **Mail delivery** uses a configurable `mail_from` address (supports Postmark sender signatures in production).
 

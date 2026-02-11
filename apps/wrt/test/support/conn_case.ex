@@ -39,21 +39,33 @@ defmodule WrtWeb.ConnCase do
   end
 
   @doc """
-  Logs in a super admin by setting the session.
+  Simulates a Portal-authenticated super admin by setting portal_user in assigns.
   """
-  def log_in_super_admin(conn, super_admin) do
+  def log_in_portal_super_admin(conn, admin) do
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:super_admin_id, super_admin.id)
+    |> Plug.Conn.assign(:portal_user, %{
+      "id" => admin.id,
+      "email" => admin.email,
+      "name" => admin.name || admin.email,
+      "role" => "super_admin",
+      "enabled" => true
+    })
   end
 
   @doc """
-  Logs in an org admin by setting the session.
+  Simulates a Portal-authenticated user (any role) by setting portal_user in assigns.
   """
-  def log_in_org_admin(conn, org_admin) do
+  def log_in_portal_user(conn, user) do
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:org_admin_id, org_admin.id)
+    |> Plug.Conn.assign(:portal_user, %{
+      "id" => user.id,
+      "email" => user.email,
+      "name" => Map.get(user, :name, user.email),
+      "role" => "user",
+      "enabled" => true
+    })
   end
 
   @doc """

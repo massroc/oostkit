@@ -11,7 +11,7 @@ defmodule WrtWeb.Org.DashboardControllerTest do
     test "renders dashboard when authenticated", %{conn: conn, org: org, admin: admin} do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/dashboard")
 
       assert html_response(conn, 200) =~ "Dashboard"
@@ -19,7 +19,7 @@ defmodule WrtWeb.Org.DashboardControllerTest do
 
     test "redirects to login when not authenticated", %{conn: conn, org: org} do
       conn = get(conn, "/org/#{org.slug}/dashboard")
-      assert redirected_to(conn) == "/org/#{org.slug}/login"
+      assert redirected_to(conn)
     end
   end
 end

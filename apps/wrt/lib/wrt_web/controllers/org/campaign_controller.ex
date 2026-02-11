@@ -7,7 +7,6 @@ defmodule WrtWeb.Org.CampaignController do
   alias Wrt.Rounds
 
   plug WrtWeb.Plugs.TenantPlug
-  plug WrtWeb.Plugs.RequireOrgAdmin
 
   def new(conn, _params) do
     tenant = conn.assigns.tenant

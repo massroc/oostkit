@@ -6,7 +6,6 @@ defmodule WrtWeb.Org.DashboardController do
   alias Wrt.Rounds
 
   plug WrtWeb.Plugs.TenantPlug
-  plug WrtWeb.Plugs.RequireOrgAdmin
 
   def index(conn, _params) do
     tenant = conn.assigns.tenant

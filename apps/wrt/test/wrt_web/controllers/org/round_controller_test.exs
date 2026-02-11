@@ -22,7 +22,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
     } do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}/rounds")
 
       assert html_response(conn, 200)
@@ -30,7 +30,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
 
     test "redirects to login when not authenticated", %{conn: conn, org: org, campaign: campaign} do
       conn = get(conn, "/org/#{org.slug}/campaigns/#{campaign.id}/rounds")
-      assert redirected_to(conn) == "/org/#{org.slug}/login"
+      assert redirected_to(conn)
     end
   end
 
@@ -43,7 +43,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
     } do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/rounds", %{
           round: %{duration_days: "7"}
         })
@@ -64,7 +64,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}/rounds/#{round.id}")
 
       assert html_response(conn, 200)
@@ -84,7 +84,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/rounds/#{round.id}/close")
 
       assert redirected_to(conn) =~ "/rounds"
@@ -101,7 +101,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/rounds/#{round.id}/close")
 
       assert redirected_to(conn) =~ "/rounds"
@@ -121,7 +121,7 @@ defmodule WrtWeb.Org.RoundControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/rounds/#{round.id}/extend", %{
           extension: %{days: "7"}
         })

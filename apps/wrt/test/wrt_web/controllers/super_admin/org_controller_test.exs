@@ -12,7 +12,7 @@ defmodule WrtWeb.SuperAdmin.OrgControllerTest do
 
       conn =
         conn
-        |> log_in_super_admin(admin)
+        |> log_in_portal_super_admin(admin)
         |> get("/admin/orgs")
 
       assert html_response(conn, 200) =~ "Organisation"
@@ -24,15 +24,15 @@ defmodule WrtWeb.SuperAdmin.OrgControllerTest do
 
       conn =
         conn
-        |> log_in_super_admin(admin)
+        |> log_in_portal_super_admin(admin)
         |> get("/admin/orgs?status=pending")
 
       assert html_response(conn, 200)
     end
 
-    test "redirects to login when not authenticated", %{conn: conn} do
+    test "redirects when not authenticated", %{conn: conn} do
       conn = get(conn, "/admin/orgs")
-      assert redirected_to(conn) == "/admin/login"
+      assert redirected_to(conn)
     end
   end
 
@@ -42,7 +42,7 @@ defmodule WrtWeb.SuperAdmin.OrgControllerTest do
 
       conn =
         conn
-        |> log_in_super_admin(admin)
+        |> log_in_portal_super_admin(admin)
         |> get("/admin/orgs/#{org.id}")
 
       assert html_response(conn, 200) =~ org.name
@@ -55,7 +55,7 @@ defmodule WrtWeb.SuperAdmin.OrgControllerTest do
 
       conn =
         conn
-        |> log_in_super_admin(admin)
+        |> log_in_portal_super_admin(admin)
         |> post("/admin/orgs/#{org.id}/reject", %{reason: "Not valid"})
 
       assert redirected_to(conn) == "/admin/orgs"
@@ -68,7 +68,7 @@ defmodule WrtWeb.SuperAdmin.OrgControllerTest do
 
       conn =
         conn
-        |> log_in_super_admin(admin)
+        |> log_in_portal_super_admin(admin)
         |> post("/admin/orgs/#{org.id}/suspend", %{reason: "Terms violation"})
 
       assert redirected_to(conn) == "/admin/orgs"

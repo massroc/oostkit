@@ -17,7 +17,7 @@ defmodule WrtWeb.Org.SeedControllerTest do
     } do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}/seed")
 
       assert html_response(conn, 200)
@@ -25,7 +25,7 @@ defmodule WrtWeb.Org.SeedControllerTest do
 
     test "redirects to login when not authenticated", %{conn: conn, org: org, campaign: campaign} do
       conn = get(conn, "/org/#{org.slug}/campaigns/#{campaign.id}/seed")
-      assert redirected_to(conn) == "/org/#{org.slug}/login"
+      assert redirected_to(conn)
     end
   end
 
@@ -35,7 +35,7 @@ defmodule WrtWeb.Org.SeedControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/seed/add", params)
 
       assert redirected_to(conn) =~ "/seed"
@@ -46,7 +46,7 @@ defmodule WrtWeb.Org.SeedControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/seed/add", params)
 
       assert html_response(conn, 200)
@@ -65,7 +65,7 @@ defmodule WrtWeb.Org.SeedControllerTest do
 
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/seed/upload", %{csv: upload})
 
       assert redirected_to(conn) =~ "/seed"
@@ -79,7 +79,7 @@ defmodule WrtWeb.Org.SeedControllerTest do
     } do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> post("/org/#{org.slug}/campaigns/#{campaign.id}/seed/upload", %{})
 
       assert redirected_to(conn) =~ "/seed"

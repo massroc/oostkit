@@ -6,7 +6,7 @@ A web-based tool for managing participative referral processes based on Open Sys
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| Phase 1: Foundation | ✅ Complete | Multi-tenancy, auth, org registration |
+| Phase 1: Foundation | ✅ Complete | Multi-tenancy, org management |
 | Phase 2: Campaign Flow | ✅ Complete | Campaigns, rounds, seed groups |
 | Phase 3: Nomination | ✅ Complete | Magic links, nomination form |
 | Phase 4: Email System | ✅ Complete | Invitations, webhooks, reminders |
@@ -97,11 +97,10 @@ A record of one person nominating another:
 ### F1: Organisation Management
 
 #### F1.1: Organisation Registration
-- Prospective org admins submit registration request
-- Request includes: org name, admin name, admin email, brief description
-- Super admin receives notification of pending requests
-- Super admin approves or rejects with optional message
-- On approval: org schema created, admin account activated, welcome email sent
+- Organisation registration is managed via the super admin UI
+- Super admin creates organisations and approves/manages them
+- On approval: org schema created, org ready for campaign management
+- Note: Self-service registration was removed; Portal owns all user identity/auth
 
 #### F1.2: Organisation Settings
 - Org admins can update organisation name and details
@@ -230,25 +229,27 @@ A record of one person nominating another:
 - ✅ Webhook handlers for Postmark and SendGrid
 - ✅ Aggregate stats per round (Reports context)
 
-### F8: Admin Authentication
+### F8: Admin Authentication (Portal-Delegated)
 
-#### F8.1: Super Admin
-- Standard email/password login (WRT-native, retained during transition)
-- Portal cross-app authentication: reads `_oostkit_token` cookie, validates against Portal's internal API
-- Transitional: either WRT-native super admin session OR Portal super_admin role grants access
-- Protected routes for platform management
+All authentication is delegated to Portal. WRT has no login pages, registration forms,
+or password-based auth of its own. Users access WRT through the Portal dashboard,
+arriving already authenticated via Portal's `_oostkit_token` cookie.
 
-#### F8.2: Portal Integration
+#### F8.1: Portal Integration
 - `PortalAuthClient` calls Portal's `POST /api/internal/auth/validate` endpoint
 - Results cached in ETS with 5-minute TTL (avoids per-request HTTP calls)
 - `PortalAuth` plug reads `_oostkit_token` cookie and sets `:portal_user` assign on conn
-- `RequirePortalOrWrtSuperAdmin` plug accepts either auth method during migration
 - Config: `portal_api_url`, `portal_api_key`, `portal_login_url`
 
-#### F8.3: Org and Campaign Admins
-- Email/password login
-- Scoped to their organisation's schema
-- Role-based access (org admin vs. campaign admin)
+#### F8.2: Super Admin Access
+- `RequirePortalSuperAdmin` plug checks Portal user has `super_admin` role and is enabled
+- Unauthenticated users are redirected to Portal login page
+- Protected routes: `/admin/*` (dashboard, org management)
+
+#### F8.3: Org Admin Access
+- `RequirePortalUser` plug checks any valid Portal user is authenticated and enabled
+- All org-scoped routes (`/org/:slug/*`) require Portal authentication
+- Organisation/campaign admin role enforcement is handled within the tenant context
 
 ## Data Model
 
@@ -263,13 +264,10 @@ organisations
 - created_at
 - approved_at
 - approved_by (super_admin_id)
-
-super_admins
-- id
-- email
-- password_hash
-- name
 ```
+
+Note: The `super_admins` table is retained for legacy data but no longer used for
+authentication. All admin auth is now handled by Portal.
 
 ### Per-Organisation Schema
 
@@ -364,8 +362,8 @@ magic_links
 - Environment-based configuration for email service credentials
 
 ### T5: Security
+- All admin authentication delegated to Portal (no WRT-native passwords)
 - Magic links expire after use and after time limit
-- Admin passwords hashed with bcrypt/argon2
 - HTTPS only
 - CSRF protection on all forms
 

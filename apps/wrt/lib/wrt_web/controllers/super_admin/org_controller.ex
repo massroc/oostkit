@@ -33,8 +33,9 @@ defmodule WrtWeb.SuperAdmin.OrgController do
 
   def approve(conn, %{"id" => id}) do
     org = Platform.get_organisation!(id)
+    super_admin = Platform.get_super_admin_by_email(conn.assigns.portal_user["email"])
 
-    case Platform.approve_organisation(org, conn.assigns.current_super_admin) do
+    case Platform.approve_organisation(org, super_admin) do
       {:ok, _org} ->
         conn
         |> put_flash(:info, "Organisation approved and tenant created.")
@@ -68,7 +69,9 @@ defmodule WrtWeb.SuperAdmin.OrgController do
     org = Platform.get_organisation!(id)
     reason = params["reason"]
 
-    case Platform.suspend_organisation(org, conn.assigns.current_super_admin, reason) do
+    super_admin = Platform.get_super_admin_by_email(conn.assigns.portal_user["email"])
+
+    case Platform.suspend_organisation(org, super_admin, reason) do
       {:ok, _org} ->
         conn
         |> put_flash(:info, "Organisation suspended.")

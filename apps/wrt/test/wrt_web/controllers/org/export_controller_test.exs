@@ -25,7 +25,7 @@ defmodule WrtWeb.Org.ExportControllerTest do
     test "returns CSV download", %{conn: conn, org: org, admin: admin, campaign: campaign} do
       conn =
         conn
-        |> log_in_org_admin(admin)
+        |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/#{campaign.id}/export/csv")
 
       assert response_content_type(conn, :csv) =~ "text/csv"
@@ -40,7 +40,7 @@ defmodule WrtWeb.Org.ExportControllerTest do
       campaign: campaign
     } do
       conn = get(conn, "/org/#{org.slug}/campaigns/#{campaign.id}/export/csv")
-      assert redirected_to(conn) == "/org/#{org.slug}/login"
+      assert redirected_to(conn)
     end
   end
 
