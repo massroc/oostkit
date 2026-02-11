@@ -109,19 +109,23 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 
 ### Portal
 
-Implemented in `apps/portal/` (Phases 1-2 complete, Phase A next). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
+Implemented in `apps/portal/` (Phases 1-2 and Phase A complete, Phase B next). See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
 
-**Current state:**
+**Current state (through Phase A):**
 - User authentication (password + magic link)
-- Landing page with app cards
 - Role system (Super Admin, Session Manager)
 - Admin user management (`/admin/users` LiveView)
 - Cross-app auth: subdomain cookie + internal validation API
 - Mail delivery: Swoosh configured to use Finch API client (not hackney) in production
+- Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
+- Dashboard (`/home`) with DB-backed tool cards (11 tools, three states: live, coming soon, maintenance)
+- `tools` table in DB replacing hardcoded app config, seeded with 11 tools
+- `interest_signups` table for email capture from coming-soon pages
+- Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
+- Three-zone header redesign with Sign Up / Log In buttons pointing to `/coming-soon`
+- Route restructure: `/` redirects logged-in users to `/home`
 
-**Phase A (next):** Two-experience model with marketing page (`/`) and dashboard (`/home`), `tools` table in DB replacing hardcoded app config, coming-soon page with email capture, three-zone header redesign, 11 tool cards on dashboard.
-
-**Phase B:** Admin hub with stats dashboard, email signup management, tool kill switch toggle.
+**Phase B (next):** Admin hub with stats dashboard, email signup management, tool kill switch toggle.
 
 **Phase C:** Self-service registration, facilitator onboarding flow, profile fields.
 

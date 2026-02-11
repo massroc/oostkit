@@ -778,19 +778,19 @@ Resolved during design discussions (February 2026):
 
 Four phases, each independently deployable. Phase A is the priority.
 
-### Phase A: Foundation + Public Face
+### Phase A: Foundation + Public Face (Complete)
 
 Gets the new public experience live. Replaces the current landing page.
 
-| Step | What | Notes |
-|------|------|-------|
-| A1 | **Tools table + seed data** | DB migration. Seed all 11 tools with name, tagline, status, URL, audience, sort order. Foundation for everything. |
-| A2 | **Interest signups table** | DB migration for email capture. Needed by coming-soon page. |
-| A3 | **Route restructure** | Current landing → `/home`. New marketing page → `/`. `/coming-soon` route. Logged-in redirect from `/` to `/home`. |
-| A4 | **Coming-soon page** | Email capture form, context-aware messaging. Sign Up / Log In buttons can now point here. |
-| A5 | **Header redesign** | Three-zone layout. Breadcrumb app name. Sign Up + Log In buttons → `/coming-soon`. |
-| A6 | **Dashboard (`/home`)** | Tool cards reading from DB. Three states. Vertical stack. 11 cards. |
-| A7 | **Marketing landing page (`/`)** | Hero, tool highlights, OST context, footer CTA. Bold tone. |
+| Step | What | Status | Notes |
+|------|------|--------|-------|
+| A1 | **Tools table + seed data** | Done | DB migration. 11 tools seeded with name, tagline, description, status, URL, audience, sort order. `Portal.Tools` context + `Tool` schema. |
+| A2 | **Interest signups table** | Done | DB migration for email capture. `Portal.Marketing` context + `InterestSignup` schema. |
+| A3 | **Route restructure** | Done | `/` is marketing landing (redirects logged-in users to `/home`). `/home` is dashboard. `/coming-soon` route added. `signed_in_path` updated to `/home`. |
+| A4 | **Coming-soon page** | Done | `ComingSoonLive` LiveView with context-aware messaging via query params and email capture form. |
+| A5 | **Header redesign** | Done | Three-zone layout in `root.html.heex`. Sign Up + Log In buttons point to `/coming-soon`. |
+| A6 | **Dashboard (`/home`)** | Done | Tool cards reading from DB via `tool_card` component. Three states (live, coming soon, maintenance). |
+| A7 | **Marketing landing page (`/`)** | Done | Hero, tool highlights, OST context, footer CTA. Bold aspirational tone. |
 
 **Result:** The public sees a proper marketing page, can explore the dashboard with all
 11 tools (1 live, 10 coming soon), can sign up for email notifications, and the header

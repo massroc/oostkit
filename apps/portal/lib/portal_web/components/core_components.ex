@@ -15,6 +15,7 @@ defmodule PortalWeb.CoreComponents do
 
   alias Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
+  alias Portal.Tools.Tool
 
   @doc """
   Renders flash notices.
@@ -72,31 +73,64 @@ defmodule PortalWeb.CoreComponents do
   end
 
   @doc """
-  Renders an app card for the landing page.
-  """
-  attr :app, :map, required: true
+  Renders a tool card for the dashboard.
 
-  def app_card(assigns) do
+  Supports three states:
+  - Live & open: full colour, Launch button
+  - Coming soon: muted, "Coming soon" badge, no action
+  - Live & locked: full colour, "Log in to access" or "Launch" depending on auth
+  """
+  attr :tool, :map, required: true
+  attr :current_scope, :any, default: nil
+
+  def tool_card(assigns) do
+    assigns = assign(assigns, :status, Tool.effective_status(assigns.tool))
+
     ~H"""
-    <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet transition hover:shadow-sheet-lifted">
+    <div class={[
+      "rounded-xl border p-6 transition",
+      @status == :live && "border-zinc-200 bg-surface-sheet shadow-sheet hover:shadow-sheet-lifted",
+      @status == :coming_soon && "border-zinc-200 bg-surface-sheet-secondary opacity-75",
+      @status == :maintenance && "border-zinc-200 bg-surface-sheet-secondary opacity-60"
+    ]}>
       <div class="flex items-start justify-between">
         <div class="flex-1">
-          <h3 class="text-lg font-semibold text-text-dark">{@app.name}</h3>
-          <p class="mt-1 text-sm text-zinc-600">{@app.tagline}</p>
+          <div class="flex items-center gap-3">
+            <h3 class="text-lg font-semibold text-text-dark">{@tool.name}</h3>
+            <%= if @status == :live do %>
+              <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2.5 py-0.5 text-xs font-medium text-ok-green-800">
+                Live
+              </span>
+            <% else %>
+              <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                Coming soon
+              </span>
+            <% end %>
+          </div>
+          <p class="mt-1 text-sm text-zinc-600">{@tool.tagline}</p>
         </div>
-        <span :if={@app.requires_auth} title="Requires login">
-          <.icon name="hero-lock-closed" class="h-4 w-4 text-zinc-400" />
+        <span class={[
+          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+          @tool.audience == "facilitator" && "bg-ok-purple-50 text-ok-purple-700",
+          @tool.audience == "team" && "bg-ok-blue-50 text-ok-blue-700"
+        ]}>
+          {if @tool.audience == "facilitator", do: "For facilitators", else: "For teams"}
         </span>
       </div>
+      <p :if={@tool.description} class="mt-3 text-sm text-zinc-600 line-clamp-2">
+        {@tool.description}
+      </p>
       <div class="mt-4 flex items-center gap-3">
-        <a
-          href={@app.url}
-          class="inline-flex items-center rounded-md bg-ok-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
-        >
-          Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
-        </a>
+        <%= if @status == :live and @tool.url do %>
+          <a
+            href={@tool.url}
+            class="inline-flex items-center rounded-md bg-ok-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
+          >
+            Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
+          </a>
+        <% end %>
         <.link
-          navigate={~p"/apps/#{@app.id}"}
+          navigate={~p"/apps/#{@tool.id}"}
           class="text-sm font-medium text-ok-purple-600 hover:text-ok-purple-800"
         >
           Learn more

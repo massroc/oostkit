@@ -3,7 +3,7 @@
     <!-- Back link -->
     <div class="mb-8">
       <.link
-        navigate={~p"/"}
+        navigate={~p"/home"}
         class="inline-flex items-center gap-1 text-sm text-ok-purple-600 hover:text-ok-purple-800"
       >
         <.icon name="hero-arrow-left" class="h-4 w-4" /> Back to all tools
@@ -15,46 +15,61 @@
       <div class="flex items-start justify-between">
         <div>
           <h1 class="text-3xl font-bold tracking-tight text-text-dark">
-            {@app.name}
+            {@tool.name}
           </h1>
           <p class="mt-2 text-lg text-zinc-600">
-            {@app.tagline}
+            {@tool.tagline}
           </p>
         </div>
-        <span class={[
-          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-          @app.audience == :facilitator && "bg-ok-purple-100 text-ok-purple-800",
-          @app.audience == :team && "bg-ok-blue-100 text-ok-blue-800"
-        ]}>
-          {if @app.audience == :facilitator, do: "For Facilitators", else: "For Teams"}
-        </span>
+        <div class="flex items-center gap-2">
+          <span class={[
+            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+            @tool.audience == "facilitator" && "bg-ok-purple-100 text-ok-purple-800",
+            @tool.audience == "team" && "bg-ok-blue-100 text-ok-blue-800"
+          ]}>
+            {if @tool.audience == "facilitator", do: "For Facilitators", else: "For Teams"}
+          </span>
+          <%= if Portal.Tools.Tool.effective_status(@tool) == :live do %>
+            <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2.5 py-0.5 text-xs font-medium text-ok-green-800">
+              Live
+            </span>
+          <% else %>
+            <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+              Coming soon
+            </span>
+          <% end %>
+        </div>
       </div>
     </div>
     
 <!-- Description -->
-    <div class="prose prose-zinc mb-8">
-      <p class="text-zinc-700 whitespace-pre-line">{@app.description}</p>
+    <div :if={@tool.description} class="prose prose-zinc mb-8">
+      <p class="text-zinc-700 whitespace-pre-line">{@tool.description}</p>
     </div>
     
-<!-- Auth notice -->
-    <div :if={@app.requires_auth} class="mb-8 rounded-lg bg-ok-gold-50 p-4">
-      <div class="flex">
-        <.icon name="hero-lock-closed" class="h-5 w-5 text-ok-gold-500" />
-        <p class="ml-3 text-sm text-ok-gold-700">
-          This tool requires login. You'll need an account to access it.
+<!-- Action area -->
+    <%= if Portal.Tools.Tool.effective_status(@tool) == :live and @tool.url do %>
+      <div class="flex gap-4">
+        <a
+          href={@tool.url}
+          class="inline-flex items-center justify-center rounded-lg bg-ok-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ok-purple-600"
+        >
+          Launch {@tool.name}
+          <.icon name="hero-arrow-top-right-on-square" class="ml-2 h-4 w-4" />
+        </a>
+      </div>
+    <% else %>
+      <div class="rounded-lg border border-zinc-200 bg-surface-sheet-secondary p-6">
+        <p class="text-sm text-zinc-600">
+          This tool is coming soon.
+          <.link
+            navigate={~p"/coming-soon?context=tool&name=#{@tool.name}"}
+            class="font-medium text-ok-purple-600 hover:text-ok-purple-800"
+          >
+            Get notified when it's ready.
+          </.link>
         </p>
       </div>
-    </div>
-    
-<!-- Launch button -->
-    <div class="flex gap-4">
-      <a
-        href={@app.url}
-        class="inline-flex items-center justify-center rounded-lg bg-ok-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ok-purple-600"
-      >
-        Launch {@app.name}
-        <.icon name="hero-arrow-top-right-on-square" class="ml-2 h-4 w-4" />
-      </a>
-    </div>
+    <% end %>
   </div>
 </div>

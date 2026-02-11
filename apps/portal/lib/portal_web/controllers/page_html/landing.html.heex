@@ -1,0 +1,129 @@
+<div class="min-h-screen">
+  <!-- Hero Section -->
+  <div class="bg-ok-purple-900 px-6 py-20 sm:px-8 lg:px-12">
+    <div class="mx-auto max-w-4xl text-center">
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+        Tools for building democratic workplaces
+      </h1>
+      <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-ok-purple-200">
+        Practical online tools built on Open Systems Theory — design organisations
+        where people manage their own work.
+      </p>
+      <div class="mt-10 flex items-center justify-center gap-x-6">
+        <a
+          href="https://pulse.oostkit.com"
+          class="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-ok-purple-900 shadow-sm hover:bg-ok-purple-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Try Workgroup Pulse
+        </a>
+        <a
+          href={~p"/home"}
+          class="text-sm font-semibold leading-6 text-white hover:text-ok-purple-200"
+        >
+          Explore all tools <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  
+<!-- What's in the Kit -->
+  <div class="px-6 py-20 sm:px-8 lg:px-12">
+    <div class="mx-auto max-w-4xl">
+      <h2 class="text-center text-3xl font-bold tracking-tight text-text-dark">
+        What's in the kit
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-center text-lg text-zinc-600">
+        A growing collection of tools for facilitators and teams doing the work
+        of participative design.
+      </p>
+
+      <div class="mt-12 space-y-8">
+        <!-- Workgroup Pulse (live) -->
+        <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-8 shadow-sheet">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-3">
+                <h3 class="text-xl font-semibold text-text-dark">Workgroup Pulse</h3>
+                <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2.5 py-0.5 text-xs font-medium text-ok-green-800">
+                  Live
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-zinc-500">For teams</p>
+            </div>
+          </div>
+          <p class="mt-4 text-zinc-700">
+            Find out how your team is really doing. The 6 Criteria reveal whether people
+            have what they need to do productive, self-managing work.
+          </p>
+          <div class="mt-6">
+            <a
+              href="https://pulse.oostkit.com"
+              class="inline-flex items-center rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
+            >
+              Try it now <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
+            </a>
+          </div>
+        </div>
+        
+<!-- Coming soon tools (compact) -->
+        <div
+          :for={tool <- Enum.reject(@tools, &(&1.default_status == "live"))}
+          class="rounded-xl border border-zinc-200 bg-surface-sheet-secondary p-6 opacity-75"
+        >
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-3">
+                <h3 class="text-lg font-semibold text-text-dark">{tool.name}</h3>
+                <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                  Coming soon
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-zinc-500">{tool.tagline}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- OST Context -->
+  <div class="border-t border-zinc-200 bg-surface-sheet-secondary px-6 py-20 sm:px-8 lg:px-12">
+    <div class="mx-auto max-w-3xl text-center">
+      <h2 class="text-2xl font-bold tracking-tight text-text-dark">
+        Built on Open Systems Theory
+      </h2>
+      <p class="mt-6 text-lg leading-8 text-zinc-600">
+        Open Systems Theory provides a practical framework for designing productive
+        organisations. OOSTKit brings key OST methods online — making them accessible
+        whether you're a seasoned practitioner or exploring the approach for the first time.
+      </p>
+    </div>
+  </div>
+  
+<!-- Footer CTA -->
+  <div class="px-6 py-20 sm:px-8 lg:px-12">
+    <div class="mx-auto max-w-xl text-center">
+      <h2 class="text-2xl font-bold tracking-tight text-text-dark">
+        More tools coming soon
+      </h2>
+      <p class="mt-4 text-zinc-600">
+        Leave your email and we'll let you know when new tools are ready.
+      </p>
+      <div class="mt-8">
+        <a
+          href={~p"/coming-soon"}
+          class="inline-flex items-center rounded-lg bg-ok-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
+        >
+          Keep me posted
+        </a>
+      </div>
+    </div>
+  </div>
+  
+<!-- Footer -->
+  <footer class="border-t border-zinc-200 bg-surface-sheet-secondary py-8">
+    <div class="mx-auto max-w-6xl px-6 text-center text-sm text-zinc-500">
+      <p>OOSTKit — Open Systems Thinking Toolkit</p>
+    </div>
+  </footer>
+</div>
