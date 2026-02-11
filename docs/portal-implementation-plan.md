@@ -24,6 +24,8 @@ The portal is a Phoenix application that serves as:
 
 **Task 1.1.2: Docker configuration**
 - Create `Dockerfile` and `Dockerfile.dev`
+  - Production `Dockerfile` uses **monorepo root as build context** (paths like `COPY apps/portal/mix.exs`)
+  - Includes `COPY shared /shared` to access design system Tailwind preset during asset compilation
 - Create `docker-compose.yml` with services:
   - `portal_app` (port 4002)
   - `portal_db` (port 5436)
@@ -300,6 +302,9 @@ POSTMARK_API_KEY          Postmark API key for email delivery
 MAIL_FROM                 Configurable email from-address (e.g., noreply@oostkit.com)
 ```
 
+**Production Configuration:**
+- `config/prod.exs` configures Swoosh to use `Swoosh.ApiClient.Finch` (instead of hackney) for email delivery via Postmark
+
 ---
 
 ## Deployment
@@ -313,6 +318,7 @@ primary_region = "syd"
 
 [build]
   dockerfile = "Dockerfile"
+  # Build context is monorepo root, not apps/portal/
 
 [env]
   PHX_HOST = "oostkit.com"
@@ -326,6 +332,8 @@ primary_region = "syd"
   port = 443
   handlers = ["tls", "http"]
 ```
+
+**Important:** The `Dockerfile` expects the **monorepo root** as the build context (not `apps/portal/`). This allows access to the `shared/` directory for the Tailwind design system preset during asset compilation.
 
 ### DNS
 

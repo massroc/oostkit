@@ -110,6 +110,7 @@ Implemented in `apps/portal/` (Phase 1 complete, Phase 2 in progress):
 - Role system (Super Admin, Session Manager)
 - Admin user management (`/admin/users` LiveView)
 - Cross-app auth: subdomain cookie + internal validation API (Phase 2)
+- Mail delivery: Swoosh configured to use Finch API client (not hackney) in production
 
 ## Deployment
 
@@ -127,6 +128,9 @@ GitHub Actions with path filtering:
 - Each app has own workflow file
 - Deploys to Fly.io on merge to main
 - Portal: CI/CD enabled with `.dockerignore` to optimize build context
+  - Portal's `Dockerfile` uses monorepo root as build context (not app directory)
+  - Allows access to `shared/tailwind.preset.js` during asset compilation
+  - Deploy command: `fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile`
 
 ### Environment Configuration
 

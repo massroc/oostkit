@@ -214,6 +214,8 @@ Portal is a Phoenix app deployed on Fly.io as `oostkit-portal`. It serves as the
 
 **CI/CD:** Portal has automated deployment enabled via GitHub Actions. Merges to main automatically deploy to Fly.io.
 
+**Build Context:** Portal's `Dockerfile` uses the **monorepo root** as the build context (not `apps/portal/`). This allows the build to access `shared/tailwind.preset.js` during asset compilation. The CI workflow deploys from the root directory with `fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile`.
+
 ```bash
 cd apps/portal
 
@@ -230,9 +232,14 @@ fly secrets set INTERNAL_API_KEY=<generated-key> -a oostkit-portal
 fly secrets set COOKIE_DOMAIN=.oostkit.com -a oostkit-portal
 fly secrets set POSTMARK_API_KEY=<postmark-token> -a oostkit-portal
 
-# Deploy (manual - or let CI handle it)
-fly deploy
+# Deploy manually (or let CI handle it)
+# NOTE: Must deploy from monorepo root
+cd ../..
+fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile
 ```
+
+**Production Configuration:**
+- `config/prod.exs` configures Swoosh to use `Swoosh.ApiClient.Finch` instead of hackney for Postmark email delivery
 
 - [ ] Portal app created on Fly.io
 - [ ] Portal database created and attached
@@ -241,6 +248,7 @@ fly deploy
 - [ ] Root domain (`oostkit.com`) configured and SSL certificate issued
 - [x] CI/CD enabled (auto-deploys on merge to main)
 - [x] `.dockerignore` configured to exclude other apps from build context
+- [x] Dockerfile uses monorepo root build context for shared design system access
 
 ## Monitoring & Maintenance
 
