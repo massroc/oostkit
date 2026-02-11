@@ -41,13 +41,13 @@ Slides are progressively appended as the workshop advances. Indices are stable �
 
 | Index | Slide | Width | Rendered When |
 |-------|-------|-------|--------------|
-| 0 | Welcome | 720px | always |
-| 1 | How It Works | 720px | always |
-| 2 | Balance Scale | 720px | always |
-| 3 | Maximal Scale | 720px | always |
-| 4 | Scoring Grid | 720px | state in scoring/summary/completed |
-| 5 | Summary | 720px | state in summary/completed |
-| 6 | Wrap-up | 720px | state == completed |
+| 0 | Welcome | 960px | always |
+| 1 | How It Works | 960px | always |
+| 2 | Balance Scale | 960px | always |
+| 3 | Maximal Scale | 960px | always |
+| 4 | Scoring Grid | 960px | state in scoring/summary/completed |
+| 5 | Summary | 960px | state in summary/completed |
+| 6 | Wrap-up | 960px | state == completed |
 
 - `data-index` is driven by `@carousel_index` (set by event handlers and state transitions)
 - The `focus_sheet` event updates `@carousel_index` (`:main` → 4) or sets `notes_revealed: true` (`:notes`)
@@ -63,7 +63,7 @@ Slides are progressively appended as the workshop advances. Indices are stable �
 - `IntroComponent.slide_balance_scale/1`
 - `IntroComponent.slide_maximal_scale/1`
 
-Each accepts an optional `class` attr (defaults to `"shadow-sheet p-6 w-[720px] h-full"`). All slides render at full 720px in the unified carousel.
+Each accepts an optional `class` attr (defaults to `"shadow-sheet p-6 w-[960px] h-full"`). All slides render at full 960px landscape in the unified carousel.
 
 ### Server-Side Dispatch
 
@@ -93,9 +93,9 @@ During scoring and later phases, the intro slides are hidden (not visible as sta
 
 ### Standard Dimensions
 
-- **Width**: 720px (all primary sheets), 480px (notes side panel and intro context slides in scoring)
+- **Width**: 960px (all primary sheets, landscape orientation), 480px (notes side panel)
 - **Height**: `calc(100vh - 52px - 3rem)` — fills available viewport minus header (52px) and carousel padding (1.5rem x 2)
-- **Min-height**: 879px — flipchart ratio floor based on Post-it Easel Pad (635mm x 775mm = 0.819 W:H; 720/0.819 = 879)
+- **Min-height**: 786px — landscape ratio floor (960/1.221 = 786)
 
 ### CSS Overflow Rules
 
@@ -123,7 +123,7 @@ This is CSS-driven — no JS intervention needed. The sheet is the scroll contai
 
 ### Positioning
 
-Viewport-fixed bar (`fixed bottom-10 z-50`) that is 720px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
+Viewport-fixed bar (`fixed bottom-10 z-50`) that is 960px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
 
 The container uses `pointer-events-none` with `pointer-events-auto` on the inner button wrapper, so clicks pass through to the sheet except where buttons are.
 

@@ -60,13 +60,13 @@ All workshop phases (except lobby) share a single unified carousel. Slides are p
 
 | Index | Content | Width | Available When |
 |-------|---------|-------|---------------|
-| 0 | Welcome | 720px | always (carousel shown when state != "lobby") |
-| 1 | How It Works | 720px | always |
-| 2 | Balance Scale | 720px | always |
-| 3 | Maximal Scale | 720px | always |
-| 4 | Scoring Grid | 720px | state in scoring/summary/completed |
-| 5 | Summary | 720px | state in summary/completed |
-| 6 | Wrap-up | 720px | state == completed |
+| 0 | Welcome | 960px | always (carousel shown when state != "lobby") |
+| 1 | How It Works | 960px | always |
+| 2 | Balance Scale | 960px | always |
+| 3 | Maximal Scale | 960px | always |
+| 4 | Scoring Grid | 960px | state in scoring/summary/completed |
+| 5 | Summary | 960px | state in summary/completed |
+| 6 | Wrap-up | 960px | state == completed |
 
 Lobby renders as a standalone single slide (no hook, no carousel navigation).
 
@@ -74,7 +74,7 @@ Lobby renders as a standalone single slide (no hook, no carousel navigation).
 
 ### Floating Action Buttons
 
-Viewport-fixed bar aligned to the 720px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline). FABs are hidden when browsing slides outside the current phase (e.g., reviewing intro slides during scoring).
+Viewport-fixed bar aligned to the 960px sheet width. Always visible at the bottom of the sheet area — no scrolling required to reach action buttons. Each phase renders its own set of buttons; lobby has no floating buttons (Start Workshop is inline). FABs are hidden when browsing slides outside the current phase (e.g., reviewing intro slides during scoring).
 
 | Button | Phase | Shown When | Style |
 |--------|-------|-----------|-------|
