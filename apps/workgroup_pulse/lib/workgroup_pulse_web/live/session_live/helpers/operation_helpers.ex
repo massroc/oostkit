@@ -28,7 +28,7 @@ defmodule WorkgroupPulseWeb.SessionLive.OperationHelpers do
         socket,
         Notes.delete_note(note),
         "Failed to delete note",
-        fn socket -> load_notes(socket, session, question_index) end
+        fn socket -> load_notes(socket, session) end
       )
   """
   def handle_operation(socket, {:ok, result}, _error_msg, success_fn) do

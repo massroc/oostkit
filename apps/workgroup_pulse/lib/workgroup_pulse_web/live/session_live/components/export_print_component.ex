@@ -13,7 +13,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
   attr :strengths, :list, required: true
   attr :concerns, :list, required: true
   attr :all_notes, :list, required: true
-  attr :notes_by_question, :map, required: true
   attr :all_actions, :list, required: true
   attr :summary_template, :map, required: true
 
@@ -245,32 +244,16 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
           <thead>
             <tr>
               <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
-                Question
-              </th>
-              <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
                 Note
               </th>
-              <%= if @report_type == :full do %>
-                <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
-                  Author
-                </th>
-              <% end %>
             </tr>
           </thead>
           <tbody>
             <%= for note <- @all_notes do %>
               <tr style="page-break-inside:avoid;">
-                <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;vertical-align:top;">
-                  {get_question_title(note.question_index, @scores_summary)}
-                </td>
                 <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
                   {note.content}
                 </td>
-                <%= if @report_type == :full do %>
-                  <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;color:#64748b;vertical-align:top;">
-                    {note.author_name}
-                  </td>
-                <% end %>
               </tr>
             <% end %>
           </tbody>
@@ -295,11 +278,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
               <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
                 Action
               </th>
-              <%= if @report_type == :full do %>
-                <th style="text-align:left;padding:4px 10px;border-bottom:2px solid #e2e8f0;font-size:11px;color:#64748b;">
-                  Owner
-                </th>
-              <% end %>
             </tr>
           </thead>
           <tbody>
@@ -308,11 +286,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
                 <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;">
                   {action.description}
                 </td>
-                <%= if @report_type == :full do %>
-                  <td style="padding:3px 10px;border-bottom:1px solid #f1f5f9;word-wrap:break-word;color:#64748b;vertical-align:top;">
-                    {action.owner_name || ""}
-                  </td>
-                <% end %>
               </tr>
             <% end %>
           </tbody>
@@ -336,13 +309,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportPrintComponent do
 
   defdelegate format_score_value(scale_type, value),
     to: WorkgroupPulseWeb.SessionLive.GridHelpers
-
-  defp get_question_title(question_index, scores_summary) do
-    case Enum.find(scores_summary, &(&1.question_index == question_index)) do
-      nil -> "Q#{(question_index || 0) + 1}"
-      q -> q.title
-    end
-  end
 
   defp cell_bg_style(:green), do: "background:#dcfce7;"
   defp cell_bg_style(:amber), do: "background:#fef9c3;"

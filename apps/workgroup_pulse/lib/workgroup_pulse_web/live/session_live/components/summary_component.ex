@@ -18,7 +18,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.SummaryComponent do
   attr :participants, :list, required: true
   attr :scores_summary, :list, required: true
   attr :individual_scores, :map, required: true
-  attr :notes_by_question, :map, required: true
   attr :all_questions, :list, required: true
 
   def render(assigns) do

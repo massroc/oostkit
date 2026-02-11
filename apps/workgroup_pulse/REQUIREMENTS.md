@@ -109,7 +109,7 @@ All phases (except lobby) share a single **unified carousel** — a click-only h
 The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
 
 **Unified Slide Map (up to 7 slides, progressively appended):**
-- **Slides 0-3: Intro slides** — Welcome, how-it-works, balance scale, safe space (always rendered, full 720px)
+- **Slides 0-3: Intro slides** — Welcome, how-it-works, balance scale, maximal scale (always rendered, full 720px)
 - **Slide 4: Scoring Grid** — The full 8-question scoring grid (rendered in scoring/summary/completed)
 - **Slide 5: Summary** — Overview of all scores and notes (rendered in summary/completed)
 - **Slide 6: Wrap-up** — Action planning and export (rendered in completed)
@@ -157,14 +157,13 @@ For each of the 8 questions (one row at a time):
 - Score grid showing all question averages at a glance
 - **Action items** - prompt team to identify concrete actions/next steps:
   - Add discrete action items
-  - Optional owner assignment per action
   - No limit on number of actions, but quality over quantity
 - Suggestions on what to focus on available via **Facilitator Assistance** (not shown by default)
 - Discussion notes summary
 - Participants list
 - Export with two report types:
-  - **Full Workshop Report** — all data including individual scores, participant names, note authors, action owners
-  - **Team Report** — anonymized team-level view: team scores, strengths/concerns, notes without authors, actions without owners
+  - **Full Workshop Report** — all data including individual scores, participant names, notes, and actions
+  - **Team Report** — anonymized team-level view with "TEAM REPORT / No individual scores, names or notes" header: team scores, strengths/concerns, and actions (no individual scores, names, or notes)
 - Export formats: CSV and PDF (client-side rendering via html2pdf.js)
 - "Finish Workshop" to return to home
 
@@ -346,7 +345,7 @@ Each team has a "team room" - a persistent space containing:
 
 - **No in-app chat** - teams discuss via their own channels (in-person, MS Teams, Zoom, etc.)
 - The app facilitates scoring and visualization, not the conversation itself
-- **Notes feature**: Ability to capture key outcomes/discussion points per criterion
+- **Notes feature**: Ability to capture key discussion points at the session level
   - Any participant can add notes
   - Notes saved with the session results
 
@@ -466,10 +465,10 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 - [x] Row locking when group advances
 - [x] Skipped participants auto-marked as ready
 - [x] Discussion prompts per criterion (expandable tips)
-- [x] Notes capture per criterion (side-sheet panel)
+- [x] Notes capture (session-level, side-sheet panel)
 - [x] "Ready" confirmation from all to advance rows
 - [x] Summary view with individual scores and traffic lights
-- [x] Action planning with owner assignment
+- [x] Action planning
 - [x] Real-time sync via Phoenix LiveView + PubSub
 - [x] Sheet carousel layout with full 8-question grid
 - [x] PostHog analytics integration
@@ -529,22 +528,14 @@ The introduction is presented before scoring begins. **Skippable** for experienc
 >
 > Don't overthink - go with your gut feeling about your current experience.
 
-### Screen 4: Before You Begin
+### Screen 4: Understanding the Maximal Scale
 
-> **Creating a Safe Space**
+> **Understanding the Maximal Scale**
 >
-> This workshop operates under the Prime Directive:
->
-> *"Regardless of what we discover, we understand and truly believe that everyone did the best job they could, given what they knew at the time, their skills and abilities, the resources available, and the situation at hand."*
->
-> Your scores reflect the system and environment - not individual failings. Low scores aren't accusations; they're opportunities to improve how work is structured.
->
-> - Be honest - this only works if people share their real experience
-> - There are no right or wrong scores
-> - Differences are expected - they reveal different experiences
-> - Your individual scores are visible only to this team, no one else
->
-> **Ready?** When everyone clicks "Ready to Begin", you'll start with the first question.
+> The last four questions use a **maximal scale** from 0 to 10:
+> - For these criteria, **more is always better**
+> - **10 is optimal** — the ideal to strive for
+> - Lower scores highlight areas where the team needs more
 
 ---
 
@@ -764,5 +755,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 4.2 — Export revamp: Full/Team report types with CSV/PDF formats*
-*Last Updated: 2026-02-09*
+*Document Version: 4.3 — Simplified notes (session-level, no author/question), simplified actions (no owner), replaced Safe Space intro with Maximal Scale, home page simplified (no join-by-code), team report header*
+*Last Updated: 2026-02-12*

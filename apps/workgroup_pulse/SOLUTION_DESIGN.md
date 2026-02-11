@@ -100,8 +100,8 @@ This tool may serve as a foundation for other facilitated team events (e.g., tea
 | Timed sections with countdown | Any structured workshop |
 | Turn-based sequential input | Round-robin exercises, facilitated discussions |
 | Discussion prompts (contextual) | Any facilitated discussion |
-| Notes capture per section | Any workshop |
-| Action planning with owners | Any team session |
+| Notes capture (session-level) | Any workshop |
+| Action planning | Any team session |
 | Facilitator Assistance (on-demand help) | Any guided experience |
 | Traffic light visualization | Any scored/rated content |
 | Feedback button | Any product |
@@ -386,10 +386,9 @@ end
 ```elixir
 defmodule WorkgroupPulse.Notes do
   # Notes
-  def create_note(session, question_index, attrs)
+  def create_note(session, attrs)
   def update_note(note, attrs)
   def delete_note(note)
-  def list_notes_for_question(session, question_index)
   def list_all_notes(session)
 
   # Actions
@@ -403,8 +402,8 @@ end
 ```
 
 **Entities:**
-- `Note` - Discussion note linked to a question
-- `Action` - Action item with optional owner and question link
+- `Note` - Session-level discussion note (content only, no question or author association)
+- `Action` - Session-level action item (description and completed status, no owner)
 
 ---
 
@@ -438,14 +437,12 @@ end
 │ optimal      │              │               │ locked       │  │
 └──────────────┘              │               └──────────────┘  │
                               │                                  │
-                              │               ┌──────────────┐  │
-                              │               │     Note     │  │
-                              │               ├──────────────┤  │
-                              │               │ id           │  │
-                              │               │ session_id   │  │
-                              │               │ question_id  │──┘
+                              │               ┌──────────────┐
+                              │               │     Note     │
+                              │               ├──────────────┤
+                              │               │ id           │
+                              │               │ session_id   │
                               │               │ content      │
-                              │               │ author_id    │
                               │               │ created_at   │
                               │               └──────────────┘
                                              ┌──────────────┐
@@ -453,9 +450,8 @@ end
                                              ├──────────────┤
                                              │ id           │
                                              │ session_id   │
-                                             │ content      │
-                                             │ owner        │
-                                             │ question_id  │
+                                             │ description  │
+                                             │ completed    │
                                              │ created_at   │
                                              └──────────────┘
 ```
@@ -680,23 +676,18 @@ defmodule WorkgroupPulse.Repo.Migrations.CreateNotesAndActions do
     create table(:notes, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :session_id, references(:sessions, type: :binary_id, on_delete: :delete_all), null: false
-      add :question_id, references(:questions, type: :binary_id), null: true  # Can be general note
-      add :author_id, references(:participants, type: :binary_id, on_delete: :nilify_all)
       add :content, :text, null: false
 
       timestamps()
     end
 
     create index(:notes, [:session_id])
-    create index(:notes, [:session_id, :question_id])
 
     create table(:actions, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :session_id, references(:sessions, type: :binary_id, on_delete: :delete_all), null: false
-      add :question_id, references(:questions, type: :binary_id), null: true  # Optional link
-      add :content, :text, null: false
-      add :owner, :string  # Just a name, not a participant reference
-      add :position, :integer  # For ordering
+      add :description, :text, null: false
+      add :completed, :boolean, default: false
 
       timestamps()
     end
@@ -1417,6 +1408,6 @@ end
 
 ---
 
-*Document Version: 4.2 — Updated context APIs to match actual implementation; removed unused settings embed from Session schema; added planned_duration_minutes validation*
-*Previous versions: v4.1 removed intro state from state machine; v3.x covered LiveView component structure, socket state, and timer implementation inline*
-*Last Updated: 2026-02-11*
+*Document Version: 4.3 — Simplified Notes/Actions: notes are session-level (no question_index, author_name); actions have description+completed (no owner_name); updated ERD, context APIs, and migration*
+*Previous versions: v4.2 updated context APIs, removed settings embed; v4.1 removed intro state from state machine; v3.x covered LiveView component structure, socket state, and timer implementation inline*
+*Last Updated: 2026-02-12*

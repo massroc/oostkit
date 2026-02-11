@@ -16,13 +16,10 @@ defmodule WorkgroupPulse.Notes do
 
   @doc """
   Creates a note for a session.
-
-  Pass `question_index: nil` for general session notes,
-  or a specific index for question-related notes.
   """
-  def create_note(%Session{} = session, question_index, attrs) do
+  def create_note(%Session{} = session, attrs) do
     %Note{}
-    |> Note.create_changeset(session, question_index, attrs)
+    |> Note.create_changeset(session, attrs)
     |> Repo.insert()
   end
 
@@ -43,22 +40,12 @@ defmodule WorkgroupPulse.Notes do
   end
 
   @doc """
-  Lists notes for a specific question.
-  """
-  def list_notes_for_question(%Session{} = session, question_index) do
-    Note
-    |> where([n], n.session_id == ^session.id and n.question_index == ^question_index)
-    |> order_by([n], n.inserted_at)
-    |> Repo.all()
-  end
-
-  @doc """
   Lists all notes for a session.
   """
   def list_all_notes(%Session{} = session) do
     Note
     |> where([n], n.session_id == ^session.id)
-    |> order_by([n], [n.question_index, n.inserted_at])
+    |> order_by([n], n.inserted_at)
     |> Repo.all()
   end
 

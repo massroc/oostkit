@@ -50,26 +50,22 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.ContentHandlers do
     {:noreply, assign(socket, note_input: value)}
   end
 
-  def handle_add_note(socket) do
-    content = String.trim(socket.assigns.note_input)
+  def handle_add_note(socket, content) do
+    content = String.trim(content)
 
     if content == "" do
       {:noreply, socket}
     else
       session = socket.assigns.session
-      participant = socket.assigns.participant
-      question_index = session.current_question_index
 
-      attrs = %{content: content, author_name: participant.name}
-
-      case Notes.create_note(session, question_index, attrs) do
+      case Notes.create_note(session, %{content: content}) do
         {:ok, _note} ->
-          broadcast(session, {:note_updated, question_index})
+          broadcast(session, :note_updated)
 
           {:noreply,
            socket
            |> assign(note_input: "")
-           |> DataLoaders.load_notes(session, question_index)}
+           |> DataLoaders.load_notes(session)}
 
         {:error, _} ->
           {:noreply, put_flash(socket, :error, "Failed to add note")}
@@ -79,7 +75,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.ContentHandlers do
 
   def handle_delete_note(socket, note_id) do
     session = socket.assigns.session
-    question_index = session.current_question_index
     note_id_int = String.to_integer(note_id)
 
     note = Enum.find(socket.assigns.question_notes, &(&1.id == note_id_int))
@@ -87,8 +82,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.ContentHandlers do
     if note do
       case Notes.delete_note(note) do
         {:ok, _} ->
-          broadcast(session, {:note_updated, question_index})
-          {:noreply, DataLoaders.load_notes(socket, session, question_index)}
+          broadcast(session, :note_updated)
+          {:noreply, DataLoaders.load_notes(socket, session)}
 
         {:error, _} ->
           {:noreply, put_flash(socket, :error, "Failed to delete note")}
@@ -104,17 +99,15 @@ defmodule WorkgroupPulseWeb.SessionLive.Handlers.ContentHandlers do
     {:noreply, assign(socket, action_input: value)}
   end
 
-  def handle_add_action(socket) do
-    description = String.trim(socket.assigns.action_input)
+  def handle_add_action(socket, description) do
+    description = String.trim(description)
 
     if description == "" do
       {:noreply, socket}
     else
       session = socket.assigns.session
 
-      attrs = %{description: description, owner_name: ""}
-
-      case Notes.create_action(session, attrs) do
+      case Notes.create_action(session, %{description: description}) do
         {:ok, action} ->
           broadcast(session, {:action_updated, action.id})
 

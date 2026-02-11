@@ -59,17 +59,11 @@ defmodule WorkgroupPulse.ExportTest do
 
       # Add a note
       {:ok, _note} =
-        Notes.create_note(session, 0, %{
-          content: "This is a test note",
-          author_name: "Alice"
-        })
+        Notes.create_note(session, %{content: "This is a test note"})
 
       # Add an action
       {:ok, _action} =
-        Notes.create_action(session, %{
-          description: "Follow up on feedback",
-          owner_name: "Alice"
-        })
+        Notes.create_action(session, %{description: "Follow up on feedback"})
 
       %{session: session, template: template}
     end
@@ -93,9 +87,8 @@ defmodule WorkgroupPulse.ExportTest do
       assert data =~ "This is a test note"
       assert data =~ "ACTION ITEMS"
       assert data =~ "Follow up on feedback"
-      # Full report includes author and owner columns
-      assert data =~ "Question,Note,Author"
-      assert data =~ "Action,Owner,Created"
+      assert data =~ "NOTES\nNote"
+      assert data =~ "ACTION ITEMS\nAction"
     end
 
     test "exports team report as CSV", %{session: session} do
@@ -107,13 +100,13 @@ defmodule WorkgroupPulse.ExportTest do
       assert data =~ "SESSION INFORMATION"
       assert data =~ session.code
       assert data =~ "TEAM SCORES"
-      # Team report should NOT include participants or individual scores
+      # Team report header with disclaimer
+      assert data =~ "TEAM REPORT\nNo individual scores, names or notes"
+      # Team report should NOT include participants, individual scores, or notes
       refute data =~ "PARTICIPANTS"
       refute data =~ "INDIVIDUAL SCORES"
-      # Team report notes have no Author column
-      assert data =~ "Question,Note\n"
-      # Team report actions have no Owner column
-      assert data =~ "Action,Created\n"
+      refute data =~ "NOTES"
+      assert data =~ "ACTION ITEMS\nAction"
       # Team report includes strengths/concerns
       assert data =~ "STRENGTHS"
       assert data =~ "AREAS OF CONCERN"
@@ -123,25 +116,9 @@ defmodule WorkgroupPulse.ExportTest do
       {:ok, {_filename, _content_type, data}} =
         Export.export(session, content: :team)
 
-      # Split into sections to check notes and actions sections specifically
-      # The note content should appear but not the author name in that context
-      lines = String.split(data, "\n")
-
-      # Find the NOTES section lines
-      notes_start = Enum.find_index(lines, &(&1 == "NOTES"))
-      actions_start = Enum.find_index(lines, &(&1 == "ACTION ITEMS"))
-
-      # Notes section header should not have Author column
-      notes_header = Enum.at(lines, notes_start + 1)
-      assert notes_header == "Question,Note"
-
-      # Actions section header should not have Owner column
-      actions_header = Enum.at(lines, actions_start + 1)
-      assert actions_header == "Action,Created"
-
-      # Participant names should not appear anywhere in team report
-      # (except in the note content itself if a name happens to be in the text)
+      # No participants, individual scores, or notes in team report
       refute data =~ "PARTICIPANTS"
+      refute data =~ "NOTES"
     end
 
     test "defaults to full report", %{session: session} do
@@ -176,16 +153,14 @@ defmodule WorkgroupPulse.ExportTest do
       {:ok, _participant} = Sessions.join_session(session, "Test, User", Ecto.UUID.generate())
 
       {:ok, _note} =
-        Notes.create_note(session, 0, %{
-          content: "Note with \"quotes\" and, commas",
-          author_name: "Test, User"
+        Notes.create_note(session, %{
+          content: "Note with \"quotes\" and, commas"
         })
 
       {:ok, {_filename, _content_type, data}} =
         Export.export(session, content: :full)
 
       # CSV escaping should wrap in quotes and escape internal quotes
-      assert data =~ "\"Test, User\""
       assert data =~ "\"Note with \"\"quotes\"\" and, commas\""
     end
 
