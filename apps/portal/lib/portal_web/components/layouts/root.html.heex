@@ -24,26 +24,32 @@
         <a href="/" class="text-lg font-semibold text-white">
           OOSTKit
         </a>
-
-        <!-- Centre: Nav -->
+        
+<!-- Centre: Nav -->
         <div class="hidden sm:flex sm:items-center sm:gap-6">
           <a href="/home" class="text-sm font-medium text-ok-purple-200 hover:text-white">
             Home
           </a>
         </div>
-
-        <!-- Right: Auth -->
+        
+<!-- Right: Auth -->
         <div class="flex items-center gap-4">
           <%= if @current_scope && @current_scope.user do %>
             <span class="hidden text-sm text-ok-purple-300 sm:inline">
               {@current_scope.user.email}
             </span>
             <%= if @current_scope.user.role == "super_admin" do %>
-              <a href="/admin/users" class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200">
+              <a
+                href="/admin/users"
+                class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200"
+              >
                 Admin
               </a>
             <% end %>
-            <a href="/users/settings" class="text-sm font-semibold text-ok-purple-200 hover:text-white">
+            <a
+              href="/users/settings"
+              class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+            >
               Settings
             </a>
             <.link

@@ -9,8 +9,8 @@
         <.icon name="hero-arrow-left" class="h-4 w-4" /> Back to all tools
       </.link>
     </div>
-
-    <!-- App Header -->
+    
+<!-- App Header -->
     <div class="mb-8">
       <div class="flex items-start justify-between">
         <div>
@@ -41,13 +41,13 @@
         </div>
       </div>
     </div>
-
-    <!-- Description -->
+    
+<!-- Description -->
     <div :if={@tool.description} class="prose prose-zinc mb-8">
       <p class="text-zinc-700 whitespace-pre-line">{@tool.description}</p>
     </div>
-
-    <!-- Action area -->
+    
+<!-- Action area -->
     <%= if Portal.Tools.Tool.effective_status(@tool) == :live and @tool.url do %>
       <div class="flex gap-4">
         <a
@@ -62,7 +62,10 @@
       <div class="rounded-lg border border-zinc-200 bg-surface-sheet-secondary p-6">
         <p class="text-sm text-zinc-600">
           This tool is coming soon.
-          <.link navigate={~p"/coming-soon?context=tool&name=#{@tool.name}"} class="font-medium text-ok-purple-600 hover:text-ok-purple-800">
+          <.link
+            navigate={~p"/coming-soon?context=tool&name=#{@tool.name}"}
+            class="font-medium text-ok-purple-600 hover:text-ok-purple-800"
+          >
             Get notified when it's ready.
           </.link>
         </p>

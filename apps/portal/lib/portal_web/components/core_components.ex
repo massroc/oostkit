@@ -116,7 +116,9 @@ defmodule PortalWeb.CoreComponents do
           {if @tool.audience == "facilitator", do: "For facilitators", else: "For teams"}
         </span>
       </div>
-      <p :if={@tool.description} class="mt-3 text-sm text-zinc-600 line-clamp-2">{@tool.description}</p>
+      <p :if={@tool.description} class="mt-3 text-sm text-zinc-600 line-clamp-2">
+        {@tool.description}
+      </p>
       <div class="mt-4 flex items-center gap-3">
         <%= if @status == :live and @tool.url do %>
           <a
