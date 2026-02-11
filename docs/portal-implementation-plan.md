@@ -183,44 +183,44 @@ See also: [Portal UX Design](../apps/portal/docs/ux-design.md) for detailed desi
 
 ---
 
-## New Rollout: Phase A -- Foundation + Public Face
+## New Rollout: Phase A -- Foundation + Public Face (Complete)
 
-Gets the new public experience live. Replaces the current landing page. This is the priority.
+Gets the new public experience live. Replaces the current landing page.
 
-**Task A1: Tools table + seed data**
-- DB migration creating `tools` table: id (text), name, tagline, description, url, audience, default_status, admin_enabled (boolean), sort_order (integer)
+**Task A1: Tools table + seed data** (Done)
+- DB migration `20260211000001_create_tools` creating `tools` table: id (text), name, tagline, description, url, audience, default_status, admin_enabled (boolean), sort_order (integer)
+- `Portal.Tools` context and `Portal.Tools.Tool` schema
 - Seed all 11 tools: Workgroup Pulse (live), WRT, Search Conference, Team Kick-off, Team Design, Org Design, Skill Matrix, DP1 Briefing, DP2 Briefing, Collaboration Designer, Org Cadence (all coming_soon)
 - Replaces hardcoded app config
 
-**Task A2: Interest signups table**
-- DB migration for `interest_signups` table: id (uuid), name, email (unique), context (text), inserted_at
+**Task A2: Interest signups table** (Done)
+- DB migration `20260211000002_create_interest_signups` for `interest_signups` table: id (uuid), name, email (unique), context (text), inserted_at
+- `Portal.Marketing` context and `Portal.Marketing.InterestSignup` schema
 - Stores email captures from coming-soon page
 
-**Task A3: Route restructure**
-- Current landing page moves to `/home` (dashboard)
-- New marketing page at `/`
+**Task A3: Route restructure** (Done)
+- `/` is now marketing landing page (redirects logged-in users to `/home`)
+- `/home` is the dashboard
 - `/coming-soon` route added
-- Logged-in users visiting `/` auto-redirect to `/home`
+- `signed_in_path` in `UserAuth` updated to `/home`
 
-**Task A4: Coming-soon page**
+**Task A4: Coming-soon page** (Done)
+- `PortalWeb.ComingSoonLive` LiveView
 - Context-aware messaging via query params (`?context=signup`, `?context=login`, `?context=tool&name=WRT`)
-- Email capture form (name + email)
-- Success state replaces form
-- Sign Up / Log In buttons in header now point here
+- Email capture form (name + email) with success state
+- Sign Up / Log In buttons in header point here
 
-**Task A5: Header redesign**
-- Three-zone layout: [Brand + Context] [Centre Nav] [User/Auth]
+**Task A5: Header redesign** (Done)
+- Three-zone layout in `root.html.heex`: [Brand + Context] [Centre Nav] [User/Auth]
 - Left: OOSTKit wordmark, breadcrumb app name when inside an app
-- Centre: "Home" link to `/home`
-- Right: Sign Up + Log In (anonymous) / User menu (authenticated) / Admin link (super admin)
+- Right: Sign Up + Log In buttons → `/coming-soon` (anonymous) / User menu (authenticated)
 
-**Task A6: Dashboard (`/home`)**
-- Tool cards reading from `tools` DB table
-- Three card states (live & open, coming soon, live & locked)
-- Vertical stack, 11 cards
-- Warm, collegial tone
+**Task A6: Dashboard (`/home`)** (Done)
+- Tool cards reading from `tools` DB table via `tool_card` component in `CoreComponents`
+- Three card states (live & open, coming soon, maintenance)
+- 11 cards displayed from DB
 
-**Task A7: Marketing landing page (`/`)**
+**Task A7: Marketing landing page (`/`)** (Done)
 - Hero section with bold headline, CTAs
 - "What's in the Kit" tool showcase
 - OST context paragraph
@@ -468,14 +468,8 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 
 ## Estimated Effort
 
-### Phase A: Foundation + Public Face (Priority)
-- Tools table + seed data: Small
-- Interest signups table: Small
-- Route restructure: Small-Medium
-- Coming-soon page: Small
-- Header redesign: Medium
-- Dashboard: Medium
-- Marketing landing page: Medium-Large
+### Phase A: Foundation + Public Face (Complete)
+- All tasks (A1-A7) delivered
 
 ### Phase B: Admin Hub
 - Admin dashboard: Small-Medium
@@ -500,12 +494,9 @@ wrt.oostkit.com    → wrt.oostkit.com (custom domain)
 
 ## Next Steps
 
-Phase A is the priority. Begin with:
+Phase A is complete. Next priority is Phase B (Admin Hub):
 
-1. A1: Create `tools` table migration and seed all 11 tools
-2. A2: Create `interest_signups` table migration
-3. A3: Restructure routes (`/` → marketing, `/home` → dashboard, `/coming-soon`)
-4. A4: Build coming-soon page with email capture
-5. A5: Redesign header (three-zone layout)
-6. A6: Build dashboard reading from tools DB
-7. A7: Build marketing landing page
+1. B1: Build admin dashboard (`/admin`) with stats cards
+2. B2: Build email signups admin (`/admin/signups`) with list, search, CSV export
+3. B3: Build tool management admin (`/admin/tools`) with kill switch toggle
+4. B4: Enhanced user management (onboarding data columns, last login)

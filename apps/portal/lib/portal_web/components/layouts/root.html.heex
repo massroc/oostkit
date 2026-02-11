@@ -20,42 +20,54 @@
   <body class="bg-surface-wall font-brand antialiased">
     <header class="bg-ok-purple-900">
       <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+        <!-- Left: Brand -->
         <a href="/" class="text-lg font-semibold text-white">
           OOSTKit
         </a>
-        <ul class="flex items-center gap-4">
+
+        <!-- Centre: Nav -->
+        <div class="hidden sm:flex sm:items-center sm:gap-6">
+          <a href="/home" class="text-sm font-medium text-ok-purple-200 hover:text-white">
+            Home
+          </a>
+        </div>
+
+        <!-- Right: Auth -->
+        <div class="flex items-center gap-4">
           <%= if @current_scope && @current_scope.user do %>
-            <li class="text-sm text-ok-purple-300">
+            <span class="hidden text-sm text-ok-purple-300 sm:inline">
               {@current_scope.user.email}
-            </li>
-            <li>
-              <.link
-                href={~p"/users/settings"}
-                class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-              >
-                Settings
-              </.link>
-            </li>
-            <li>
-              <.link
-                href={~p"/users/log-out"}
-                method="delete"
-                class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-              >
-                Log out
-              </.link>
-            </li>
+            </span>
+            <%= if @current_scope.user.role == "super_admin" do %>
+              <a href="/admin/users" class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200">
+                Admin
+              </a>
+            <% end %>
+            <a href="/users/settings" class="text-sm font-semibold text-ok-purple-200 hover:text-white">
+              Settings
+            </a>
+            <.link
+              href={~p"/users/log-out"}
+              method="delete"
+              class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+            >
+              Log out
+            </.link>
           <% else %>
-            <li>
-              <.link
-                href={~p"/users/log-in"}
-                class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-              >
-                Log in
-              </.link>
-            </li>
+            <a
+              href="/coming-soon?context=signup"
+              class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"
+            >
+              Sign Up
+            </a>
+            <a
+              href="/coming-soon?context=login"
+              class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+            >
+              Log In
+            </a>
           <% end %>
-        </ul>
+        </div>
       </nav>
     </header>
     <div class="brand-stripe"></div>

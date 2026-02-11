@@ -33,8 +33,14 @@ defmodule PortalWeb.Router do
   scope "/", PortalWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/", PageController, :landing
+    get "/home", PageController, :home
     get "/apps/:app_id", PageController, :app_detail
+
+    live_session :public,
+      on_mount: [{PortalWeb.UserAuth, :mount_current_scope}] do
+      live "/coming-soon", ComingSoonLive, :index
+    end
   end
 
   # Development routes

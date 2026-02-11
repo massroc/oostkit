@@ -350,15 +350,15 @@ Key requirements (all met):
 
 Four phases, each independently deployable. See [Portal UX Design](../apps/portal/docs/ux-design.md) for full detail.
 
-#### Phase A: Foundation + Public Face
-Gets the new public experience live. Replaces the current landing page.
-- A1: Tools table + seed data (DB migration, 11 tools)
-- A2: Interest signups table (DB migration for email capture)
-- A3: Route restructure (current landing → `/home`, new marketing page → `/`, `/coming-soon` route)
-- A4: Coming-soon page (email capture, context-aware messaging)
-- A5: Header redesign (three-zone layout, breadcrumb app name)
-- A6: Dashboard (`/home`) (tool cards from DB, three states, 11 cards)
-- A7: Marketing landing page (`/`) (hero, tool highlights, OST context, footer CTA)
+#### Phase A: Foundation + Public Face (Complete)
+New public experience live. Replaced the current landing page.
+- A1: Tools table + seed data -- `tools` table with 11 seeded tools, `Portal.Tools` context + `Tool` schema
+- A2: Interest signups table -- `interest_signups` table, `Portal.Marketing` context + `InterestSignup` schema
+- A3: Route restructure -- `/` is marketing landing (redirects logged-in to `/home`), `/home` is dashboard, `/coming-soon` added
+- A4: Coming-soon page -- `ComingSoonLive` LiveView with context-aware messaging and email capture
+- A5: Header redesign -- three-zone layout, Sign Up / Log In buttons to `/coming-soon`
+- A6: Dashboard (`/home`) -- DB-backed tool cards with three states (live, coming soon, maintenance)
+- A7: Marketing landing page (`/`) -- hero, tool highlights, OST context, footer CTA
 
 #### Phase B: Admin Hub
 Operational control panel for platform management.
