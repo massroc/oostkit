@@ -63,4 +63,59 @@ defmodule Portal.MarketingTest do
       assert Marketing.count_interest_signups() == 2
     end
   end
+
+  describe "get_interest_signup!/1" do
+    test "returns signup by id" do
+      {:ok, signup} = Marketing.create_interest_signup(%{email: "get@example.com"})
+      assert Marketing.get_interest_signup!(signup.id).email == "get@example.com"
+    end
+
+    test "raises for non-existent id" do
+      assert_raise Ecto.NoResultsError, fn ->
+        Marketing.get_interest_signup!(0)
+      end
+    end
+  end
+
+  describe "delete_interest_signup/1" do
+    test "deletes a signup" do
+      {:ok, signup} = Marketing.create_interest_signup(%{email: "delete@example.com"})
+      assert {:ok, _} = Marketing.delete_interest_signup(signup)
+      assert Marketing.count_interest_signups() == 0
+    end
+  end
+
+  describe "search_interest_signups/1" do
+    test "searches by email" do
+      Marketing.create_interest_signup(%{email: "alice@example.com", name: "Alice"})
+      Marketing.create_interest_signup(%{email: "bob@example.com", name: "Bob"})
+
+      results = Marketing.search_interest_signups("alice")
+      assert length(results) == 1
+      assert hd(results).email == "alice@example.com"
+    end
+
+    test "searches by name" do
+      Marketing.create_interest_signup(%{email: "a@example.com", name: "Alice"})
+      Marketing.create_interest_signup(%{email: "b@example.com", name: "Bob"})
+
+      results = Marketing.search_interest_signups("Bob")
+      assert length(results) == 1
+      assert hd(results).name == "Bob"
+    end
+
+    test "searches by context" do
+      Marketing.create_interest_signup(%{email: "a@example.com", context: "signup"})
+      Marketing.create_interest_signup(%{email: "b@example.com", context: "tool:wrt"})
+
+      results = Marketing.search_interest_signups("tool:wrt")
+      assert length(results) == 1
+      assert hd(results).context == "tool:wrt"
+    end
+
+    test "returns empty list for no matches" do
+      Marketing.create_interest_signup(%{email: "a@example.com"})
+      assert Marketing.search_interest_signups("zzz") == []
+    end
+  end
 end

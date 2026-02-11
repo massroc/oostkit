@@ -9,7 +9,16 @@ defmodule PortalWeb.Admin.UsersLive do
   @impl true
   def mount(_params, _session, socket) do
     users = Accounts.list_users()
-    {:ok, assign(socket, users: users, show_form: false, editing_user: nil, form: nil)}
+    last_logins = Accounts.last_login_map()
+
+    {:ok,
+     assign(socket,
+       users: users,
+       last_logins: last_logins,
+       show_form: false,
+       editing_user: nil,
+       form: nil
+     )}
   end
 
   @impl true
@@ -120,6 +129,12 @@ defmodule PortalWeb.Admin.UsersLive do
               <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                 Status
               </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                Registered
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                Last Login
+              </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -150,6 +165,12 @@ defmodule PortalWeb.Admin.UsersLive do
                 ]}>
                   {if user.enabled, do: "Enabled", else: "Disabled"}
                 </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
+                {Calendar.strftime(user.inserted_at, "%d %b %Y")}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
+                {format_last_login(@last_logins[user.id])}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                 <.link
@@ -203,7 +224,8 @@ defmodule PortalWeb.Admin.UsersLive do
         {:noreply,
          socket
          |> put_flash(:info, "User updated successfully.")
-         |> assign(:users, Accounts.list_users())}
+         |> assign(:users, Accounts.list_users())
+         |> assign(:last_logins, Accounts.last_login_map())}
 
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Failed to update user.")}
@@ -217,6 +239,7 @@ defmodule PortalWeb.Admin.UsersLive do
          socket
          |> put_flash(:info, "User created successfully. They can log in with the magic link.")
          |> assign(:users, Accounts.list_users())
+         |> assign(:last_logins, Accounts.last_login_map())
          |> push_patch(to: ~p"/admin/users")}
 
       {:error, changeset} ->
@@ -237,6 +260,7 @@ defmodule PortalWeb.Admin.UsersLive do
          socket
          |> put_flash(:info, "User updated successfully.")
          |> assign(:users, Accounts.list_users())
+         |> assign(:last_logins, Accounts.last_login_map())
          |> push_patch(to: ~p"/admin/users")}
 
       {:error, changeset} ->
@@ -250,6 +274,12 @@ defmodule PortalWeb.Admin.UsersLive do
   defp format_role("super_admin"), do: "Super Admin"
   defp format_role("session_manager"), do: "Session Manager"
   defp format_role(role), do: role
+
+  defp format_last_login(nil), do: "Never"
+
+  defp format_last_login(datetime) do
+    Calendar.strftime(datetime, "%d %b %Y %H:%M")
+  end
 
   defp format_errors(changeset) do
     Ecto.Changeset.traverse_errors(changeset, &interpolate_error/1)

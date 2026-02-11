@@ -78,6 +78,24 @@ defmodule Portal.ToolsTest do
     end
   end
 
+  describe "toggle_admin_enabled/1" do
+    test "disables an enabled tool" do
+      {:ok, tool} = Tools.create_tool(@valid_attrs)
+      assert tool.admin_enabled == true
+
+      {:ok, toggled} = Tools.toggle_admin_enabled(tool)
+      assert toggled.admin_enabled == false
+    end
+
+    test "enables a disabled tool" do
+      {:ok, tool} = Tools.create_tool(Map.put(@valid_attrs, :admin_enabled, false))
+      assert tool.admin_enabled == false
+
+      {:ok, toggled} = Tools.toggle_admin_enabled(tool)
+      assert toggled.admin_enabled == true
+    end
+  end
+
   describe "Tool.effective_status/1" do
     test "returns :live for live and enabled tools" do
       tool = %Tool{default_status: "live", admin_enabled: true}

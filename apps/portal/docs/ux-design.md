@@ -248,7 +248,7 @@ or "Get started as a facilitator" — not generic "create an account" language.
 - **Sign Up button**: Visible in UI, leads to "coming soon" holding page with email capture
 - **Log In button**: Visible in UI, leads to "coming soon" holding page with email capture
 - **Super admin**: Can still access login directly at `/users/log-in` (not linked from public nav)
-- **Admin panel**: Super admin manages the platform at `/admin/users`
+- **Admin panel**: Super admin manages the platform at `/admin` (dashboard with links to users, signups, tools)
 
 ### Soft Launch (First Users)
 
@@ -796,16 +796,16 @@ Gets the new public experience live. Replaces the current landing page.
 11 tools (1 live, 10 coming soon), can sign up for email notifications, and the header
 is consistent and clean. Super admin still logs in via direct URL.
 
-### Phase B: Admin Hub
+### Phase B: Admin Hub (Complete)
 
 Operational control panel for managing the platform.
 
-| Step | What | Notes |
-|------|------|-------|
-| B1 | **Admin dashboard (`/admin`)** | Stats cards: signup count, user count, tool interest. Quick links to sub-pages. |
-| B2 | **Email signups admin (`/admin/signups`)** | List, search, CSV export. |
-| B3 | **Tool management admin (`/admin/tools`)** | View status, kill switch toggle per tool. |
-| B4 | **Enhanced user management** | Onboarding data columns, last login, organisation. |
+| Step | What | Status | Notes |
+|------|------|--------|-------|
+| B1 | **Admin dashboard (`/admin`)** | Done | `DashboardLive` with stats cards (email signups, registered users, active users 30d, tool status breakdown) and quick links to sub-pages. |
+| B2 | **Email signups admin (`/admin/signups`)** | Done | `SignupsLive` with table listing, live search, delete, CSV export via `/admin/signups/export`. |
+| B3 | **Tool management admin (`/admin/tools`)** | Done | `ToolsLive` with status display and admin_enabled kill switch toggle per tool. |
+| B4 | **Enhanced user management** | Done | Added Registered date and Last Login columns to `/admin/users`. Organisation column deferred to Phase C. |
 
 **Result:** Super admin has full visibility and operational control. Can toggle tools
 off in an emergency, export the email list, and see platform health at a glance.
