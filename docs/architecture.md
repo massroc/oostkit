@@ -107,6 +107,7 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 - **Consumer apps** (e.g., WRT) read the `_oostkit_token` cookie and call the Portal API to resolve the user. Results are cached in ETS with a 5-minute TTL. WRT delegates all authentication to Portal — it has no login pages or password-based auth of its own.
 - **Shared `SECRET_KEY_BASE`** across Portal and all consuming apps ensures cookie signing compatibility.
 - **Mail delivery** uses a configurable `mail_from` address (supports Postmark sender signatures in production).
+- **Dev auto-login**: In development, Portal's `DevAutoLogin` plug auto-logs in as a dev super admin (`admin@oostkit.local`) on first visit and sets the `_oostkit_token` cookie, making all cross-app routes (WRT, Pulse) accessible without manual login. WRT's `PortalAuth` plug has a complementary dev bypass: when no cross-app cookie is present in dev mode, it assigns a fake dev admin user so WRT routes work even without Portal running.
 
 ### Portal
 
@@ -121,7 +122,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
 - Dashboard (`/home`) with DB-backed tool cards (11 tools, three states: live, coming soon, maintenance)
 - First-visit onboarding card on dashboard (org, referral source, tool interest checkboxes)
-- `tools` table in DB replacing hardcoded app config, seeded with 11 tools
+- `tools` table in DB replacing hardcoded app config, seeded with 11 tools via data migration (ensures tools are available in all environments including production)
 - `interest_signups` table for email capture from coming-soon pages and app detail pages
 - `user_tool_interests` table for onboarding tool interest data
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
@@ -135,6 +136,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Enhanced user management (`/admin/users`) with Registered date, Last Login, and Organisation columns
 - App detail pages (`/apps/:id`) with richer layout, inline email capture for coming-soon tools (`POST /apps/:app_id/notify`)
 - SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
+- Dev auto-login flow: auto-logs in as dev super admin on first visit, sets cross-app cookie, dev-only "Admin" button in header for manual re-login (`POST /dev/admin-login`)
 
 **Deferred:** Header breadcrumbs in Pulse/WRT, admin dashboard trends/charts.
 
@@ -212,6 +214,8 @@ WRT (or other app)                        Portal
 - Portal: `INTERNAL_API_KEY`, `COOKIE_DOMAIN` (e.g., `.oostkit.com`)
 - WRT: `PORTAL_API_KEY` (same value as Portal's `INTERNAL_API_KEY`), `PORTAL_API_URL`
 - Both: must share the same `SECRET_KEY_BASE`
+
+**Dev mode bypass:** In development, Portal auto-sets the `_oostkit_token` cookie via `DevAutoLogin`. If WRT is running without Portal (or the cookie is absent), WRT's `PortalAuth` plug assigns a fake dev super admin so all routes work without requiring Portal to be running.
 
 ### Future Options
 

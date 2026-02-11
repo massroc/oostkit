@@ -80,6 +80,15 @@
               Log out
             </.link>
           <% else %>
+            <%= if @dev_mode do %>
+              <.link
+                href="/dev/admin-login"
+                method="post"
+                class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200"
+              >
+                Admin
+              </.link>
+            <% end %>
             <a
               href="/users/register"
               class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"

@@ -170,6 +170,7 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 - Workgroup Pulse remains free and open (no login required) -- the top-of-funnel discovery tool
 - Participants access sessions via links (no account, no friction)
 - Sign Up and Log In buttons link to real auth pages (`/users/register` and `/users/log-in`)
+- Dev auto-login: in development, Portal auto-logs in as a dev super admin (`admin@oostkit.local`) on first visit and sets the `_oostkit_token` cookie, so WRT and Pulse are accessible without manual login
 
 ### Account Management
 
@@ -225,7 +226,7 @@ Three-zone layout across the entire platform (marketing page, dashboard, inside 
 
 - **Left:** OOSTKit wordmark (links to `/`). Inside apps: breadcrumb `OOSTKit > App Name`
 - **Centre:** "Home" link to `/home` (shown when inside an app)
-- **Right:** Sign Up + Log In (anonymous) / User name + Settings + Log Out (authenticated) / + Admin link (super admin)
+- **Right:** Sign Up + Log In (anonymous) / User name + Settings + Log Out (authenticated) / + Admin link (super admin). In dev mode, an "Admin" button (gold text, POST to `/dev/admin-login`) appears for anonymous users to quickly log in as the dev super admin.
 
 ---
 
@@ -302,6 +303,7 @@ Uses Phoenix built-in auth (`phx.gen.auth`) with cross-app extensions:
 - **Cross-app token cookie** (`_oostkit_token`): Written on login, deleted on logout. Scoped to the shared domain via `COOKIE_DOMAIN` env var (e.g., `.oostkit.com`).
 - **Internal validation API**: `POST /api/internal/auth/validate` -- accepts the token in the request body, returns user `{id, email, role}`. Protected by `ApiAuth` plug requiring `Authorization: Bearer <INTERNAL_API_KEY>` header.
 - **Configurable email from-address**: `mail_from` config supports Postmark sender signatures in production (env: `MAIL_FROM`).
+- **Dev auto-login**: In development, `DevAutoLogin` plug auto-logs in as `admin@oostkit.local` on first visit and sets the `_oostkit_token` cookie. A `_portal_dev_visited` cookie prevents re-login after deliberate logout. A dev-only `POST /dev/admin-login` route allows manual re-login via a gold "Admin" button in the header.
 
 Key requirements (all met):
 - Secure password hashing (bcrypt via phx.gen.auth)
@@ -328,7 +330,7 @@ The landing page uses a `pulse_url/1` helper (in `PageHTML`) that reads the URL 
 1. **Domain:** oostkit.com (registered)
 2. **Branding:** Simple icon + wordmark for now, proper logo in progress
 3. **WRT integration:** Replace WRT's auth entirely when portal auth is ready
-4. **App metadata:** Tools table in database (replaces hardcoded app config), seeded with 11 tools
+4. **App metadata:** Tools table in database (replaces hardcoded app config), seeded with 11 tools via data migration (available in all environments including production)
 5. **Analytics:** Nice to have, implement later (not in initial phases)
 6. **Pricing model:** Platform subscription -- one price unlocks all paid tools
 7. **Org/team accounts:** Solo facilitators only for now; org accounts if demand emerges
