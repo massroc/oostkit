@@ -22,7 +22,9 @@
   />
   <.stat_card
     label="Total People"
-    value={to_string(Map.get(@people_counts, "seed", 0) + Map.get(@people_counts, "nominated", 0))}
+    value={
+      to_string(Map.get(@people_counts, "seed", 0) + Map.get(@people_counts, "nominated", 0))
+    }
     detail={"#{Map.get(@people_counts, "nominated", 0)} nominated"}
   />
   <.stat_card

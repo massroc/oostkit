@@ -19,9 +19,12 @@
   <.stat_card
     label="Responded"
     value={to_string(@contact_stats.responded)}
-    detail={if @contact_stats.total > 0,
-      do: "#{Float.round(@contact_stats.responded / @contact_stats.total * 100, 1)}% response rate",
-      else: "-"}
+    detail={
+      if @contact_stats.total > 0,
+        do:
+          "#{Float.round(@contact_stats.responded / @contact_stats.total * 100, 1)}% response rate",
+        else: "-"
+    }
     value_color="text-ok-green-600"
   />
   <.stat_card
