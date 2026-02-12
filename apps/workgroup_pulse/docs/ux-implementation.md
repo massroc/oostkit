@@ -180,11 +180,13 @@ The overlay no longer auto-opens on turn start. Users click their cell in the sc
 
 ## 5. Design System Components
 
-Shared components in `lib/workgroup_pulse_web/components/core_components.ex`:
+Shared components from `OostkitShared.Components` (`apps/oostkit_shared/`) and app-specific components in `core_components.ex`:
 
-### `<.header_bar>` (shared) and `<.app_header>` (app-specific)
+### `<.header_bar>` (shared), `<.header>` (shared), and `<.app_header>` (app-specific)
 
-The header uses the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This component provides the consistent OOSTKit header across all apps: dark purple background (`bg-ok-purple-900`), three-zone `justify-between` layout with brand link, absolutely centered title, actions slot, and brand stripe.
+The header uses the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This component provides the consistent OOSTKit header across all apps: dark purple background (`bg-ok-purple-900`), three-zone `justify-between` layout with brand link, absolutely centered title (`text-2xl font-semibold`), actions slot, and brand stripe.
+
+The shared `<.header>` component provides page-level section headers (`text-2xl font-bold`) with `:subtitle` and `:actions` slots. Used by Portal and WRT for page titles (settings sections, admin pages).
 
 The app-specific `<.app_header>` in `core_components.ex` wraps `<.header_bar>` and adds session-specific content (session name in the actions slot). Used in session views. The OOSTKit brand link URL is read from `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")`, matching the pattern used by the `:app` layout.
 
@@ -324,6 +326,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.11 — Standardized page title (H1) sizing to `text-2xl font-bold` across create, join, lobby, and intro components*
+*Document Version: 1.12 — `header/1` consolidated into shared lib; header_bar title bumped to `text-2xl font-semibold`*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

@@ -101,7 +101,7 @@ while true; do
       exit 1
     else
       echo "CI PASSED — merging..."
-      gh pr merge "$PR" --squash --delete-branch && git checkout main && git pull
+      gh pr merge "$PR" --squash --delete-branch && git checkout main && git pull && git remote prune origin
       exit 0
     fi
   fi

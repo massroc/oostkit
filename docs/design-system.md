@@ -105,7 +105,7 @@ All apps share a consistent header via the `<.header_bar>` component from `Oostk
 **Rendered output:**
 - **Background**: Dark purple (`bg-ok-purple-900`)
 - **Left**: "OOSTKit" brand link (white, links to Portal via `:brand_url`)
-- **Centre**: Absolutely centered title text (`pointer-events-none absolute inset-x-0 text-center font-brand text-sm font-medium text-ok-purple-200`). In Portal, shows the current page title (e.g., "Dashboard"). In Pulse/WRT, shows the app name.
+- **Centre**: Absolutely centered title text (`pointer-events-none absolute inset-x-0 text-center font-brand text-2xl font-semibold text-ok-purple-200`). In Portal, shows the current page title (e.g., "Dashboard"). In Pulse/WRT, shows the app name.
 - **Right**: `:actions` slot for app-specific content (e.g., Sign Up + Log In buttons, user email, Settings link)
 - **Below**: Magenta-to-purple gradient brand stripe (`.brand-stripe`, 3px), rendered by the component
 
@@ -406,7 +406,7 @@ The design system is implemented as a shared Tailwind preset that all apps impor
 
 /apps/oostkit_shared/
   lib/oostkit_shared/
-    components.ex        ← Shared Phoenix components (header_bar/1)
+    components.ex        ← Shared Phoenix components (header_bar/1, header/1)
 
 /apps/workgroup_pulse/assets/
   tailwind.config.js     ← imports preset + app-specific overrides
@@ -590,6 +590,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-12 | Consolidated `header/1` component into shared library (`OostkitShared.Components`). Header bar centre title bumped from `text-sm font-medium` to `text-2xl font-semibold` for better visual hierarchy. |
 | 2026-02-12 | Sticky footer layout pattern applied to Portal and WRT root layouts (`flex min-h-screen flex-col` on body, `flex-1` on main). Portal auth pages use flex centering; settings and admin pages use consistent `px-6 sm:px-8` padding. |
 | 2026-02-12 | Header extracted to shared Elixir component library (`apps/oostkit_shared/`). All apps now use `<.header_bar>` from `OostkitShared.Components` instead of inline header markup. Portal adds footer bar. |
 | 2026-02-12 | Header consistency update: three-zone layout (OOSTKit link / centered app name / right content), configurable `:portal_url` in Pulse and WRT, Portal centre zone shows page title |

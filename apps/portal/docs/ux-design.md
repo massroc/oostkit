@@ -349,7 +349,7 @@ is applied to the title text.
 ### Centre Zone — Page Title (Absolutely Centered)
 
 Absolutely positioned (`pointer-events-none absolute inset-x-0`) to achieve true centering
-independent of left/right zone content. Displays `font-brand text-sm font-medium text-ok-purple-200`.
+independent of left/right zone content. Displays `font-brand text-2xl font-semibold text-ok-purple-200`.
 Hidden on small screens (`sm:block`).
 
 When `title_url` is set, the title renders as a clickable `<a>` link with `pointer-events-auto`
@@ -486,7 +486,7 @@ sudo mode, the user is redirected to the login page with a message to re-authent
 and a centred "Account Settings" title at the top. The main content uses a responsive two-column grid
 (`grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10`) that stacks to single column
 on mobile. Text input fields are constrained to `max-w-xs` for comfortable reading
-width. Each section uses the `<.header>` component with a bold `text-2xl font-bold`
+width. Each section uses the shared `<.header>` component (from `OostkitShared.Components`) with a bold `text-2xl font-bold`
 heading. Section subtitle descriptions have been removed for a cleaner, more compact
 layout.
 
@@ -900,7 +900,7 @@ Resolved during design discussions (February 2026):
 | Question | Decision | Notes |
 |----------|----------|-------|
 | Landing page redirect | Removed | Logged-in users no longer auto-redirect to `/home`. The header "Dashboard" link provides navigation instead. Lets logged-in users share the marketing URL without being redirected away. |
-| Page title consistency | `<.header>` component | All page titles (admin pages, settings sections) use the shared `<.header>` component at `text-2xl font-bold` instead of inline `<h1>` elements. |
+| Page title consistency | `<.header>` component | All page titles (admin pages, settings sections) use the `<.header>` component from `OostkitShared.Components` at `text-2xl font-bold` instead of inline `<h1>` elements. |
 | "Coming soon" page | Email capture | Collects emails for launch notification. Simple form. |
 | App detail pages | Keep | Useful as shareable links and for SEO. Already built. |
 | Mobile vs desktop | Desktop-first | Responsive but not mobile-obsessed. Marketing page should look decent on mobile for sharing. |
