@@ -91,7 +91,7 @@ All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
 - **Semantic color tokens**: `ok-purple`, `ok-green`, `ok-red`, `ok-gold`, `ok-blue` (branded), plus surface and text tokens (`bg-surface-wall`, `bg-surface-sheet`, `text-text-dark`)
 - **Typography**: DM Sans (UI chrome) loaded via Google Fonts, with `font-brand` utility
 - **Shadows**: `shadow-sheet` for card-like surfaces
-- **OOSTKit header**: Consistent dark purple header across all apps — three-zone `justify-between` layout: "OOSTKit" brand link on the left (links to Portal via configurable `:portal_url`), centered app name (e.g., "Workgroup Pulse", "Workshop Referral Tool") or page title (Portal), and app-specific content on the right
+- **OOSTKit header**: Consistent dark purple header across all apps — three-zone layout with `relative` nav: "OOSTKit" brand link on the left (links to Portal via configurable `:portal_url`), absolutely centered app name or page title (`pointer-events-none absolute inset-x-0 text-center font-brand`), and auth/user content on the right (Sign Up + Log In for anonymous, user email + Settings for authenticated). All apps use identical button styling for Sign Up (`bg-white/10` frosted) and Log In (text link).
 - **Brand stripe**: Magenta-to-purple gradient bar below the header
 
 Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
@@ -126,11 +126,11 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - `interest_signups` table for email capture from coming-soon pages and app detail pages
 - `user_tool_interests` table for tool interest data collected at registration
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
-- Three-zone header: OOSTKit brand link (left), current page title (centre), Sign Up / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
+- Three-zone header: OOSTKit brand link (left), absolutely centered page title (`pointer-events-none absolute inset-x-0 font-brand`), Sign Up (`bg-white/10` frosted) / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
 - Route restructure: `/` redirects logged-in users to `/home`
 - Login page with "Welcome back" heading, magic link primary, password secondary, "Forgot your password?" link
 - Password reset flow: forgot password page (`/users/forgot-password`) sends email with time-limited reset token, reset password page (`/users/reset-password/:token`) allows setting a new password
-- Settings page with profile editing (name, org), email change, password (add/change), and account deletion ("Danger zone" section). Loads without requiring sudo mode; sudo checks in handlers for sensitive actions (email change, password change, account deletion) with graceful redirect to login if not in sudo mode. Referral source removed from settings (collected at registration only).
+- Settings page restructured with section headers (Profile, Email, Password, Danger zone) separated by `border-t` dividers, using `space-y-10` for generous vertical rhythm. Profile editing (name, org), email change, password (add/change), and account deletion. Loads without requiring sudo mode; sudo checks in handlers for sensitive actions with graceful redirect to login if not in sudo mode. Referral source removed from settings (collected at registration only).
 - Account deletion: users can delete their own account from settings, which deletes the user record and logs them out
 - Admin dashboard (`/admin`) with stats cards and quick links
 - Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export
@@ -187,14 +187,17 @@ GitHub Actions with path filtering:
 - Production: Fly.io with secrets management
 - Database URLs, secrets injected via environment
 
-### Tool URL Resolution
+### Tool URL and Status Resolution
 
-Portal's tool catalogue stores production URLs in the database (e.g., `https://pulse.oostkit.com`). The `config :portal, :tool_urls` setting allows per-environment overrides so that links point to the correct host in dev, test, and production:
+Portal's tool catalogue stores production URLs and statuses in the database. Two config keys allow per-environment overrides so that links and statuses resolve correctly in dev, test, and production:
 
-- **Dev/test:** `tool_urls` maps tool IDs to `localhost` ports (Pulse → `http://localhost:4000`, WRT → `http://localhost:4001`)
-- **Production:** `tool_urls` defaults to production subdomain URLs, overridable via `PULSE_URL` and `WRT_URL` env vars
+- **`config :portal, :tool_urls`** — Maps tool IDs to environment-specific URLs:
+  - **Dev/test:** `localhost` ports (Pulse → `http://localhost:4000`, WRT → `http://localhost:4001`)
+  - **Production:** Defaults to production subdomain URLs, overridable via `PULSE_URL` and `WRT_URL` env vars
 
-The `Portal.Tools` context applies these overrides transparently via `apply_config_url/1`, which is piped through all query functions (`list_tools`, `get_tool`, `get_tool!`). Any `@tool.url` reference in templates automatically resolves to the correct environment-specific URL.
+- **`config :portal, :tool_status_overrides`** — Maps tool IDs to status strings (e.g., `"live"`). Allows a tool to appear as "live" in development even if its database status is "coming_soon". Used in `dev.exs` to mark WRT as live locally (since WRT is live for local development but not yet in production).
+
+The `Portal.Tools` context applies both overrides transparently via `apply_config_overrides/1`, which is piped through all query functions (`list_tools`, `get_tool`, `get_tool!`). The `list_tools_grouped/0` function additionally sorts live tools to the top within each category. Any `@tool.url` or `@tool.default_status` reference in templates automatically resolves to the correct environment-specific value.
 
 ## Inter-App Communication
 

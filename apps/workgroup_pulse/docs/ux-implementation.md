@@ -196,10 +196,12 @@ Two Phoenix layouts control header presence:
 
 | Layout | Used By | Header |
 |--------|---------|--------|
-| `:app` | Create (home page) and Join pages | Three-zone header in layout: OOSTKit link (left, via `:portal_url`), "Workgroup Pulse" (centre), placeholder div (right) + brand stripe |
+| `:app` | Create (home page) and Join pages | Three-zone header in layout: OOSTKit link (left, via `:portal_url`), "Workgroup Pulse" absolutely centered (`pointer-events-none absolute inset-x-0 text-center font-brand`), Sign Up + Log In buttons (right, linking to Portal) + brand stripe |
 | `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders `.app_header` inline |
 
-The `:app` layout uses `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit link, configured in `config/dev.exs` and `config/runtime.exs` (from `PORTAL_URL` env var).
+The `:app` layout uses `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit link and for Sign Up/Log In button URLs, configured in `config/dev.exs` and `config/runtime.exs` (from `PORTAL_URL` env var).
+
+The right zone always shows Sign Up (`rounded-md bg-white/10` frosted button linking to Portal `/users/register`) and Log In (text link to Portal `/users/log-in`), matching the Portal header styling. Pulse has no user authentication context, so the right zone does not adapt based on auth state.
 
 The `:session` layout prevents duplicate headers when the session LiveView renders its own `app_header` component (which includes the session name).
 
@@ -307,6 +309,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.7 — Reduced scoring sheet vertical spacing: sheet-stack padding 1rem→0.5rem, inner scroll padding-bottom 5rem→0, sheet padding p-3→p-2, floating buttons bottom-10→bottom-6*
+*Document Version: 1.8 — App layout header standardized: absolutely centered title, Sign Up + Log In buttons in right zone linking to Portal, matching Portal header styling*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

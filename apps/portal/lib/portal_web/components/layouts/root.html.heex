@@ -39,18 +39,16 @@
   </head>
   <body class="bg-surface-wall font-brand antialiased">
     <header class="bg-ok-purple-900">
-      <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+      <nav class="relative mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
         <!-- Left: Brand -->
         <a href="/" class="text-lg font-semibold text-white">
           OOSTKit
         </a>
-        
-<!-- Centre: Page title -->
-        <span class="hidden text-sm font-medium text-ok-purple-200 sm:inline">
+        <!-- Centre: Page title (absolutely centered) -->
+        <span class="pointer-events-none absolute inset-x-0 hidden text-center font-brand text-sm font-medium text-ok-purple-200 sm:block">
           {assigns[:page_title] || "Dashboard"}
         </span>
-        
-<!-- Right: Auth -->
+        <!-- Right: Auth -->
         <div class="flex items-center gap-4">
           <%= if @current_scope && @current_scope.user do %>
             <span class="hidden text-sm text-ok-purple-300 sm:inline">
