@@ -26,8 +26,7 @@ defmodule PortalWeb.ComingSoonLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen">
-      <div class="mx-auto max-w-lg px-6 py-20 sm:px-8">
+    <div class="mx-auto max-w-lg px-6 py-20 sm:px-8">
         <div class="text-center">
           <h1 class="text-3xl font-bold tracking-tight text-text-dark">
             {heading(@context, @tool_name)}
@@ -70,7 +69,6 @@ defmodule PortalWeb.ComingSoonLive do
           </.link>
         </div>
       </div>
-    </div>
     """
   end
 

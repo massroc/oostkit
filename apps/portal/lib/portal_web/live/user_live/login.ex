@@ -6,6 +6,7 @@ defmodule PortalWeb.UserLive.Login do
   @impl true
   def render(assigns) do
     ~H"""
+    <div class="flex flex-1 items-center justify-center py-12">
     <div class="mx-auto max-w-sm space-y-4">
       <div class="text-center">
         <.header>
@@ -90,6 +91,7 @@ defmodule PortalWeb.UserLive.Login do
           Forgot your password?
         </.link>
       </p>
+    </div>
     </div>
     """
   end

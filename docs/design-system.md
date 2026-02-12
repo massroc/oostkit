@@ -115,12 +115,19 @@ Each app's Tailwind config includes the shared library path in its content list 
 
 ### Layout Hierarchy
 
+All apps use a **sticky footer layout pattern** on the root layout. The `<body>` element
+uses `flex min-h-screen flex-col` and the main content area uses `flex-1` (or
+`flex flex-1 flex-col` in Portal) to fill available vertical space. This pushes any
+footer to the bottom of the viewport on short-content pages and ensures consistent
+full-height layouts without per-page `min-h-screen` wrappers.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  Header (52px, dark purple + brand stripe, z-index: 10)             │
 ├─────────────────────────────────────────────────────────────────────┤
-│  VIRTUAL WALL (bg: #E8E4DF)                                         │
+│  MAIN CONTENT AREA (flex-1, fills remaining viewport height)         │
 │                                                                     │
+│  Pulse: VIRTUAL WALL (bg: #E8E4DF)                                  │
 │   ┌─────────────────────────────────┐  ┌───────────────────┐        │
 │   │                                 │  │                   │        │
 │   │      Current Sheet (z: 2)       │  │  Side-sheet (z:1) │        │
@@ -129,6 +136,8 @@ Each app's Tailwind config includes the shared library path in its content list 
 │   └─────────────────────────────────┘  └───────────────────┘        │
 │                                                                     │
 │                                        [Floating buttons, z: 20]    │
+├─────────────────────────────────────────────────────────────────────┤
+│  Footer (Portal only: footer_bar with About, Privacy, Contact)       │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -581,6 +590,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-12 | Sticky footer layout pattern applied to Portal and WRT root layouts (`flex min-h-screen flex-col` on body, `flex-1` on main). Portal auth pages use flex centering; settings and admin pages use consistent `px-6 sm:px-8` padding. |
 | 2026-02-12 | Header extracted to shared Elixir component library (`apps/oostkit_shared/`). All apps now use `<.header_bar>` from `OostkitShared.Components` instead of inline header markup. Portal adds footer bar. |
 | 2026-02-12 | Header consistency update: three-zone layout (OOSTKit link / centered app name / right content), configurable `:portal_url` in Pulse and WRT, Portal centre zone shows page title |
 | 2026-02-12 | Consistent OOSTKit header across all apps (Portal, Pulse, WRT): dark purple bg, "OOSTKit" brand link, brand stripe below |

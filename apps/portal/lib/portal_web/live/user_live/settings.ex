@@ -6,6 +6,7 @@ defmodule PortalWeb.UserLive.Settings do
   @impl true
   def render(assigns) do
     ~H"""
+    <div class="mx-auto max-w-4xl px-6 py-8 sm:px-8">
     <div class="space-y-10">
       <div class="text-center">
         <.header>
@@ -151,6 +152,7 @@ defmodule PortalWeb.UserLive.Settings do
           </div>
         </.form>
       </section>
+    </div>
     </div>
     """
   end

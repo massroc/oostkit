@@ -8,6 +8,7 @@ defmodule PortalWeb.UserLive.Registration do
   @impl true
   def render(assigns) do
     ~H"""
+    <div class="flex flex-1 items-center justify-center py-12">
     <div class="mx-auto max-w-sm">
       <div class="text-center">
         <.header>
@@ -75,6 +76,7 @@ defmodule PortalWeb.UserLive.Registration do
           Get started
         </.button>
       </.form>
+    </div>
     </div>
     """
   end

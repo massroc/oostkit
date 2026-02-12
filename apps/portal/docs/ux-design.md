@@ -396,6 +396,7 @@ visual identity element. Kept for now — may evolve as the overall design matur
 - All apps: Sign Up button uses `rounded-md bg-white/10` frosted style, Log In uses text link style
 - Design system tokens: `bg-ok-purple-900` header, `font-brand` (DM Sans), brand stripe gradient
 - Portal additionally renders a `footer_bar` component in the root layout with links to About, Privacy, and Contact pages
+- **Root layout uses a sticky footer pattern**: `<body class="flex min-h-screen flex-col">` with `<main class="flex flex-1 flex-col">` wrapping `@inner_content`. This ensures the footer bar is pushed to the bottom of the viewport on short-content pages. Individual pages no longer need their own `min-h-screen` wrappers.
 
 ---
 
@@ -404,6 +405,12 @@ visual identity element. Kept for now — may evolve as the overall design matur
 Auth pages are for facilitators (and super admin) only. Participants never see them.
 Tone is collegial — clean, simple, no selling. The facilitator is already interested
 enough to sign up; make it easy and welcoming.
+
+**Layout:** All auth pages (login, registration, forgot password, reset password,
+confirmation) use a flex centering container (`flex flex-1 items-center justify-center`)
+that vertically and horizontally centres the form content within the available viewport
+space. Combined with the root layout's sticky footer pattern, this keeps auth forms
+visually centred between the header and footer regardless of viewport height.
 
 ### Registration (`/users/register`)
 
@@ -475,8 +482,8 @@ without requiring sudo mode — sudo checks are performed in event handlers for
 sensitive actions (email change, password change, account deletion). If not in
 sudo mode, the user is redirected to the login page with a message to re-authenticate.
 
-**Layout:** Uses a `space-y-10` outer wrapper with a centred "Account Settings" title
-at the top. The main content uses a responsive two-column grid
+**Layout:** Uses a `space-y-10` outer wrapper with `px-6 sm:px-8` horizontal padding
+and a centred "Account Settings" title at the top. The main content uses a responsive two-column grid
 (`grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10`) that stacks to single column
 on mobile. Text input fields are constrained to `max-w-xs` for comfortable reading
 width. Each section uses the `<.header>` component with a bold `text-2xl font-bold`
@@ -584,6 +591,9 @@ onboarding step — users are fully onboarded from the moment they create their 
 
 Super admin only. A full admin hub for platform management. Accessed via "Admin"
 link in the header (visible only to super admins).
+
+**Layout:** All admin pages use consistent `px-6 sm:px-8` horizontal padding with
+`max-w-4xl mx-auto` centering, matching the settings page pattern.
 
 ### Admin Dashboard (`/admin`)
 

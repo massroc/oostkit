@@ -6,6 +6,7 @@ defmodule PortalWeb.UserLive.Confirmation do
   @impl true
   def render(assigns) do
     ~H"""
+    <div class="flex flex-1 items-center justify-center py-12">
     <div class="mx-auto max-w-sm">
       <div class="text-center">
         <.header>Welcome {@user.email}</.header>
@@ -66,6 +67,7 @@ defmodule PortalWeb.UserLive.Confirmation do
       <p :if={!@user.confirmed_at} class="alert alert-outline mt-8">
         Tip: If you prefer passwords, you can enable them in the user settings.
       </p>
+    </div>
     </div>
     """
   end

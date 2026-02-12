@@ -37,7 +37,7 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
-  <body class="bg-surface-wall font-brand antialiased">
+  <body class="flex min-h-screen flex-col bg-surface-wall font-brand antialiased">
     <.header_bar
       title={
         if @current_scope && @current_scope.user && !assigns[:hide_header_title], do: "Dashboard"
@@ -94,7 +94,9 @@
         <% end %>
       </:actions>
     </.header_bar>
-    {@inner_content}
+    <main class="flex flex-1 flex-col">
+      {@inner_content}
+    </main>
     <.footer_bar />
   </body>
 </html>
