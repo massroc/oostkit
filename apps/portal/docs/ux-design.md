@@ -412,6 +412,13 @@ that vertically and horizontally centres the form content within the available v
 space. Combined with the root layout's sticky footer pattern, this keeps auth forms
 visually centred between the header and footer regardless of viewport height.
 
+**Card containment:** Form content on all auth pages is wrapped in a card container
+(`bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6`) matching the
+card treatment used on the settings and admin pages. The header text (page title and
+subtitle) sits above the card, while form fields, buttons, and dividers sit inside it.
+This gives each auth form a clear visual boundary and consistent surface treatment
+across the platform.
+
 ### Registration (`/users/register`)
 
 **Status:** Live. Linked from header Sign Up button.
@@ -595,7 +602,8 @@ Super admin only. A full admin hub for platform management. Accessed via "Admin"
 link in the header (visible only to super admins).
 
 **Layout:** All admin pages use consistent `px-6 sm:px-8` horizontal padding with
-`max-w-4xl mx-auto` centering, matching the settings page pattern.
+`max-w-4xl mx-auto` centering, matching the settings page pattern. Section-level card
+containers use `rounded-xl` for design system consistency with settings and auth pages.
 
 ### Admin Dashboard (`/admin`)
 
@@ -758,7 +766,7 @@ demand. The last polled timestamp is displayed at the bottom of the page.
 #### Design
 
 - Uses the standard admin layout (`max-w-4xl mx-auto px-6 sm:px-8`)
-- Cards use `bg-surface-sheet shadow-sheet` with `border-zinc-200`
+- Section cards use `bg-surface-sheet shadow-sheet rounded-xl border border-zinc-200`
 - Section headings at `text-lg font-semibold text-text-dark`
 - Waiting state: "Waiting for first health check..." / "Waiting for first CI status check..."
   displayed in muted text when no data has been polled yet

@@ -12,8 +12,9 @@ defmodule PortalWeb.UserLive.Confirmation do
           <.header>Welcome {@user.email}</.header>
         </div>
 
-        <.form
-          :if={!@user.confirmed_at}
+        <div class="mt-6 bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
+          <.form
+            :if={!@user.confirmed_at}
           for={@form}
           id="confirmation_form"
           phx-mounted={JS.focus_first()}
@@ -63,6 +64,7 @@ defmodule PortalWeb.UserLive.Confirmation do
             </.button>
           <% end %>
         </.form>
+        </div>
 
         <p :if={!@user.confirmed_at} class="alert alert-outline mt-8">
           Tip: If you prefer passwords, you can enable them in the user settings.

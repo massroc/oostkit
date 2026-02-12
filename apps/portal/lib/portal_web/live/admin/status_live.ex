@@ -56,7 +56,7 @@ defmodule PortalWeb.Admin.StatusLive do
         </button>
       </div>
 
-      <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
+      <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
         <h2 class="text-lg font-semibold text-text-dark mb-4">App Health</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <.health_card :for={{name, data} <- @health} name={name} data={data} />
@@ -69,7 +69,7 @@ defmodule PortalWeb.Admin.StatusLive do
         </div>
       </div>
 
-      <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
+      <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
         <h2 class="text-lg font-semibold text-text-dark mb-4">CI Status</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <.ci_card :for={{name, runs} <- @ci} name={name} runs={runs} />
