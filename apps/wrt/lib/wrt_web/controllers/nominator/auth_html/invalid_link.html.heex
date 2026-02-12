@@ -3,22 +3,10 @@
     Unable to Continue
   </.header>
 
-  <div class="mt-8 bg-ok-red-50 border border-ok-red-200 rounded-lg p-6">
+  <.callout kind={:danger} class="mt-8">
     <div class="flex">
       <div class="flex-shrink-0">
-        <svg
-          class="h-6 w-6 text-ok-red-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-          />
-        </svg>
+        <.icon name="hero-exclamation-triangle" class="h-6 w-6 text-ok-red-400" />
       </div>
       <div class="ml-3">
         <h3 class="text-sm font-medium text-ok-red-800">
@@ -26,7 +14,7 @@
         </h3>
       </div>
     </div>
-  </div>
+  </.callout>
 
   <p class="mt-6 text-center text-gray-600">
     If you believe this is an error, please contact the campaign administrator.
