@@ -1,6 +1,6 @@
-Review a LiveView page's layout and suggest UX improvements.
+Review a page's layout, components, and accessibility against the OOSTKit design system.
 
-Usage: `/ux-review <file_path>` — pass the path to a LiveView module (e.g., `apps/portal/lib/portal_web/live/user_live/settings.ex`)
+Usage: `/ux-review <file_path>` — pass the path to a LiveView module, controller template, or component (e.g., `apps/portal/lib/portal_web/live/user_live/settings.ex`)
 
 If no argument is given, ask the user which file to review.
 
@@ -8,12 +8,25 @@ If no argument is given, ask the user which file to review.
 
 Read the target file: `$ARGUMENTS`
 
-If the file references components, layouts, or helpers that are relevant to the layout,
-read those too (but skip compiled assets like `priv/static/assets/*`).
+Determine which app it belongs to:
+- `apps/portal/` → Portal (admin pages, auth, landing, dashboard)
+- `apps/workgroup_pulse/` → Pulse (workshop, scoring, carousel, sheets)
+- `apps/wrt/` → WRT (campaigns, nominations, multi-tenant admin)
+- `apps/oostkit_shared/` → Shared component (used by all apps)
+
+If the file references components, layouts, or helpers that are relevant to the review,
+read those too. In particular:
+- The app's `core_components.ex` if custom components are used
+- The app's layout files (`layouts.ex`, `root.html.heex`, `app.html.heex`)
+- `apps/oostkit_shared/lib/oostkit_shared/components.ex` if shared components are used
+
+Skip compiled assets (`priv/static/assets/*`).
 
 ## Step 2: Identify the page type
 
-Classify the page into one of these common types:
+Classify the page into one of these types:
+
+### Portal / WRT page types
 
 | Type | Typical use |
 |------|-------------|
@@ -24,14 +37,62 @@ Classify the page into one of these common types:
 | **Form** | Single-purpose form (create/edit a resource) |
 | **Empty state** | Zero-data placeholder page |
 | **Auth** | Login, register, forgot password, etc. |
+| **Landing/Marketing** | Public-facing landing page with hero, sections, CTAs |
 | **Mixed** | Combination (e.g., dashboard with a table below) |
+
+### Pulse page types
+
+| Type | Typical use |
+|------|-------------|
+| **Lobby** | Session creation or join — standalone, no carousel |
+| **Intro slide** | Welcome, How It Works, scale explanations — in carousel |
+| **Scoring** | The main scoring grid sheet — turn-based, real-time |
+| **Summary** | Traffic-light results, team overview |
+| **Wrap-up** | Action planning, notes, export |
+| **Side panel** | Notes/actions panel (not a carousel slide — fixed position) |
+| **Component** | Reusable component (`<.sheet>`, `<.facilitator_timer>`, etc.) |
 
 ## Step 3: Audit against known good patterns
 
-For each page type, check against the reference pattern below. Flag anything that
+For each page type, check against the reference patterns below. Flag anything that
 deviates without good reason.
 
-### Reference patterns (OOSTKit design system)
+---
+
+### Shared patterns (all apps)
+
+**OOSTKit header bar** (from `OostkitShared.Components`):
+```heex
+<.header_bar brand_url={...} title="App Name">
+  <:actions>
+    <!-- auth links, user info -->
+  </:actions>
+</.header_bar>
+```
+- Background: `bg-ok-purple-900`
+- Brand stripe rendered automatically below
+- Title is absolutely centred, hidden on mobile (`hidden sm:block`)
+- `:brand_url` — Portal uses `"/"`, Pulse/WRT use configurable `:portal_url`
+
+**Page-level header** (from `OostkitShared.Components`):
+```heex
+<.header>
+  Page Title
+  <:subtitle>Description text</:subtitle>
+  <:actions><.button>Action</.button></:actions>
+</.header>
+```
+- `text-2xl font-bold text-text-dark`
+- Subtitle: `text-sm text-zinc-600`
+
+**Sticky footer layout** (root layout):
+- `<body>` uses `flex min-h-screen flex-col` + `font-brand`
+- Main content area uses `flex-1` (or `flex flex-1 flex-col`)
+- Footer (Portal only) stays at viewport bottom on short pages
+
+---
+
+### Portal / WRT reference patterns
 
 **Card (the universal container):**
 ```html
@@ -156,38 +217,211 @@ Variant — danger card: use `ring-ok-red-200` instead of `ring-zinc-950/5`.
 </div>
 ```
 
-### Common issues to check for
+---
+
+### Pulse reference patterns
+
+**Sheet component** (`<.sheet>` from `WorkgroupPulseWeb.CoreComponents`):
+```heex
+<.sheet>
+  <!-- content sits above paper texture pseudo-elements -->
+</.sheet>
+```
+- Inner wrapper has `relative z-[1]` to sit above paper texture
+- Default rotation: `-0.2deg` (override via `style` attr)
+- `variant={:secondary}` uses `paper-texture-secondary` (notes/side-sheets)
+- Shadow is NOT baked in — apply dynamically via `class` attr when needed (e.g., scoring sheet)
+- All phase components import it: `import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]`
+
+**Sheet stack / carousel:**
+```html
+<!-- Virtual Wall container -->
+<div class="bg-surface-wall min-h-screen">
+  <!-- Sheet stack with JS hook -->
+  <div id="workshop-carousel" phx-hook="SheetStack" data-index={@carousel_index}>
+    <!-- Each slide -->
+    <div class="sheet-stack-slide">
+      <.sheet class="shadow-sheet p-6 w-[960px] h-full">
+        <!-- slide content -->
+      </.sheet>
+    </div>
+  </div>
+</div>
+```
+- `SheetStack` hook toggles `stack-active` / `stack-inactive` classes
+- Server controls position via `data-index` — hook reads on `updated()`
+- Active slide: `display: flex`. All others: `display: none`
+- Standard slide width: `960px`
+- Lobby is a standalone single slide (no hook, no carousel)
+
+**Scoring grid (on-sheet content):**
+- Participant names: `font-workshop text-participant` (Caveat 18px, weight 600)
+- Criterion labels: `font-workshop text-criterion uppercase` (17px, weight 600)
+- Parent criterion labels: `font-workshop text-criterion-parent uppercase opacity-50` (11px)
+- Scores: `font-workshop text-score-md` (24px) or `text-score-lg` (48px for focused)
+- Empty scores: `font-workshop text-score-sm opacity-[0.12]` (20px)
+- Ink colour for all on-sheet text: `text-ink-blue` (`#1a3a6b`)
+
+**Score colour coding** (applied after submission, not during input):
+- 0-3: `text-traffic-red` or `text-accent-red`
+- 4-6: default (no special colour)
+- 7-10: `text-traffic-green` or `text-accent-gold`
+
+**Notes/Actions side panel:**
+- Fixed position, right edge of viewport, z-20
+- Peek tab: 70px wide, read-only preview (slides 4-6)
+- Revealed: 480px wide, editable
+- Uses `<.sheet variant={:secondary}>` for paper texture
+
+**Floating action buttons:**
+- Viewport-fixed, aligned to the 960px sheet width
+- Always visible at bottom of sheet area — no scrolling needed
+- Hidden when browsing slides outside current phase
+- Primary button: purple-to-magenta gradient, white text
+- Secondary button: white bg, light border, dark text
+
+---
+
+## Step 4: Check against issue checklists
+
+Work through the relevant checklist. Only flag genuine issues.
+
+### Layout & structure issues
 
 1. **No card containment** — forms/tables/content floating without a card wrapper
 2. **Redundant container** — page adds `max-w-4xl` when the app layout already provides it
 3. **Missing section descriptions** — headings without explanatory subtitle text
 4. **Unbalanced grid** — 2-column grid where one column has much less content
-5. **Inconsistent spacing** — mixing arbitrary margin/padding instead of using `space-y-*` or `gap-*`
+5. **Inconsistent spacing** — mixing arbitrary margin/padding instead of `space-y-*` or `gap-*`
 6. **Tables outside cards** — tables should be inside a card with `overflow-hidden`
 7. **Buttons not in card footer** — form submit buttons should be in a `border-t` footer strip
 8. **Missing empty state** — list pages with no handling for zero items
 9. **Wrong container width** — form pages that are too wide (should be `max-w-2xl` or `max-w-sm`)
-10. **Centered headers on non-auth pages** — `text-center` on headers is typically only for auth pages
+10. **Centered headers on non-auth pages** — `text-center` on headers is only for auth pages
 
-### Design system tokens to prefer
+### Design system token issues
 
-- Surfaces: `bg-surface-sheet`, `bg-surface-sheet-secondary`, `bg-surface-wall`
-- Shadows: `shadow-sheet`, `shadow-sheet-lifted`
-- Card border: `ring-1 ring-zinc-950/5`
-- Danger border: `ring-1 ring-ok-red-200`
-- Text: `text-text-dark` (headings), `text-zinc-500` or `text-zinc-600` (secondary)
-- Section heading: `text-base font-semibold text-text-dark`
-- Rounding: `rounded-xl` for cards, `rounded-lg` for smaller elements
+11. **Raw colour values** — using `#7245F4` or `bg-purple-600` instead of semantic tokens (`bg-accent-purple`, `bg-ok-purple-600`)
+12. **Wrong surface token** — using `bg-white` instead of `bg-surface-sheet`, or `bg-gray-50` instead of `bg-surface-sheet-secondary`
+13. **Wrong text token** — using `text-gray-900` instead of `text-text-dark`, or `text-gray-400` instead of `text-zinc-500`
+14. **Wrong shadow** — using generic `shadow-lg` instead of `shadow-sheet` or `shadow-sheet-lifted`
+15. **Wrong rounding** — using `rounded-md` on cards (should be `rounded-xl`), or `rounded-xl` on sheet content (sheets use `rounded-sheet` = 2px)
+16. **Missing font family** — UI text without `font-brand`, or workshop content without `font-workshop`
+17. **Wrong score sizing** — scores not using `text-score-lg`/`text-score-md`/`text-score-sm`
+18. **Wrong z-index** — ad-hoc `z-10` instead of semantic `z-sheet-current`, `z-floating`, `z-modal`
 
-## Step 4: Present findings
+### Shared component issues
+
+19. **Inline header instead of `<.header>`** — custom `<h1>` markup where `<.header>` from shared lib should be used
+20. **Inline header bar** — app-specific header markup instead of `<.header_bar>` from `OostkitShared.Components`
+21. **Inline icons** — SVG icons instead of `<.icon name="hero-...">` from shared lib
+22. **Missing flash group** — page without `<.flash_group flash={@flash} />`
+23. **Duplicate shared component** — app defines a component that already exists in `OostkitShared.Components`
+
+### Pulse-specific issues
+
+24. **Sheet without `<.sheet>`** — paper-textured surface built with manual classes instead of the component
+25. **Wrong font on sheet content** — UI font (`font-brand` / DM Sans) used for on-sheet text (should be `font-workshop` / Caveat)
+26. **Score input with colour hints** — score buttons should be neutral during input; colour only after submission
+27. **Carousel logic in JS** — `SheetStack` hook should only show/hide; server must be sole authority on `data-index`
+28. **Side panel as carousel slide** — notes/actions panel should be fixed-position, not a carousel slide
+29. **Missing sheet rotation** — sheets should have slight rotation (default `-0.2deg`)
+
+### Accessibility issues
+
+30. **Colour contrast** — text on background fails WCAG AA (4.5:1 normal text, 3:1 large text). Watch especially: gold (`#F4B945`) on white, `text-zinc-500` on light backgrounds
+31. **Small touch targets** — interactive elements below 44x44px on touch devices
+32. **Missing ARIA labels** — icon-only buttons without `aria-label`
+33. **No visible focus state** — interactive elements without a visible focus ring (should be purple outline)
+34. **Heading hierarchy** — skipped heading levels (e.g., `<h1>` to `<h3>` with no `<h2>`)
+35. **Colour-only meaning** — relying solely on colour to convey information (e.g., score quality) without text or icon backup
+
+### Responsive design issues
+
+36. **Fixed width without responsive fallback** — `w-[960px]` without a mobile alternative
+37. **Missing mobile adaptation** — Pulse sheet carousel should show single-sheet view on mobile (no Previous Sheet)
+38. **Side panel on mobile** — should be full-screen overlay, not inline drawer
+39. **Grid collapse** — multi-column grid without `grid-cols-1` base for mobile
+
+---
+
+## Design system token reference
+
+Use these tokens. Flag any raw values that should use a token instead.
+
+### Surfaces
+- `bg-surface-wall` — `#E8E4DF` (warm taupe, virtual wall background)
+- `bg-surface-sheet` — `#FEFDFB` (cream paper, primary sheets and cards)
+- `bg-surface-sheet-secondary` — `#F5F3F0` (receded sheets, table headers, empty states)
+
+### Text
+- `text-text-dark` — `#151515` (headings, primary text)
+- `text-zinc-500` / `text-zinc-600` — secondary/muted text
+- `text-ink-blue` — `#1a3a6b` (on-sheet handwritten content, Pulse only)
+
+### Brand colour scales (Petal Components mapped)
+- `ok-purple` → `primary` (buttons, links, interactive elements)
+- `ok-magenta` → `secondary` (highlights, gradients)
+- `ok-gold` → `warning` (high scores, attention)
+- `ok-red` → `danger` (low scores, alerts, danger zones)
+- `ok-blue` → `info`
+- `ok-green` → `success`
+
+### Shadows
+- `shadow-sheet` — subtle multi-layer (cards, current sheets)
+- `shadow-sheet-lifted` — enhanced on hover
+- `shadow-sheet-receded` — deeper (previous sheets)
+- `shadow-side-sheet` — left-edge (drawer panels)
+
+### Rounding
+- `rounded-xl` — cards (Portal/WRT)
+- `rounded-sheet` — 2px (paper-like, Pulse sheets)
+- `rounded-button` — 8px (buttons)
+
+### Typography
+- `font-brand` — DM Sans (all UI chrome: headers, buttons, labels)
+- `font-workshop` — Caveat (on-sheet content: scores, criteria, participant names)
+- `text-score-lg` — 48px (large focused scores)
+- `text-score-md` — 24px (grid scores)
+- `text-score-sm` — 20px (small/empty scores)
+- `text-participant` — 18px (participant names)
+- `text-criterion` — 17px (criterion labels)
+
+### Z-index scale
+- `z-wall` — 0
+- `z-sheet-previous` — 1
+- `z-sheet-side` — 2
+- `z-sheet-current` — 5
+- `z-floating` — 20 (FABs)
+- `z-modal` — 50
+
+### Spacing
+- `p-sheet-padding` — 24px (inside sheets)
+- `p-sheet-padding-sm` — 20px (compact sheets)
+- `gap-section-gap` — 32px (between major sections)
+
+### Interactive states
+- Hover: slight background tint, cursor change; sheets lift with `shadow-sheet-lifted`
+- Focus: purple outline for keyboard navigation
+- Active: slight scale or shadow reduction
+- Disabled: 50% opacity, no pointer events
+
+---
+
+## Step 5: Present findings
 
 Output a structured review:
 
-1. **Page type**: What kind of page this is
+1. **App & page type**: Which app, what kind of page
 2. **Current layout**: Brief description of what's there now
-3. **Issues found**: Numbered list of specific problems (reference the checklist above)
-4. **Suggested layout**: Show the concrete HEEx markup for the improved version
-5. **What changed**: Bullet list of structural changes (no logic changes)
+3. **Issues found**: Numbered list referencing the checklists above. For each:
+   - Issue number and title
+   - File and line
+   - What's wrong
+   - Concrete fix (show the actual class names or markup)
+4. **Accessibility notes**: Any a11y issues from the checklist, with specific fixes
+5. **Suggested layout**: Show the concrete HEEx markup for the improved version (only if structural changes are needed — skip for minor token swaps)
+6. **What changed**: Bullet list of changes (structural and token-level, no logic changes)
 
 Be specific — show actual class names and markup, not vague suggestions. The user
 should be able to look at the diff and decide whether to apply it.
