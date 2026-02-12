@@ -17,7 +17,7 @@
         <h2 class="mb-4 text-lg font-semibold text-text-dark">
           {Portal.Tools.category_label(category)}
         </h2>
-        <div class="space-y-4">
+        <div class="grid gap-4">
           <.tool_card
             :for={tool <- Map.get(@grouped_tools, category, [])}
             tool={tool}

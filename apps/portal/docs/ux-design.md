@@ -115,15 +115,21 @@ columns on desktop (stacked on mobile):
 | 3 | `team_workshops` | Team Workshops |
 
 Each column has a category heading and a vertical stack of compact tool cards beneath it.
-The layout uses `md:grid-cols-3` with `gap-8` between columns. This replaced the
+The layout uses `md:grid-cols-3` with `gap-8` between columns. Within each category,
+cards are arranged using `grid gap-4` to ensure equal spacing. This replaced the
 earlier flat full-width card list — the categorized grid better organises the growing
 tool catalogue (12 tools) and gives each category its own visual lane.
 
+**Sorting:** Within each category, live tools are sorted to the top. This ensures
+active tools are immediately visible without scrolling past coming-soon placeholders.
+The sorting is applied in the `list_tools_grouped/0` function.
+
 #### Tool Cards
 
-Cards are compact to fit narrower columns. Each card contains:
+Cards use `flex flex-col` layout with a `flex-1` tagline to ensure equal height across
+all cards within a column. Each card contains:
 - **Name** — tool name (smaller text than previous full-width cards)
-- **Tagline** — one-line summary
+- **Tagline** — one-line summary (uses `flex-1` to push action buttons to the bottom)
 - **Status badge** — "Live" / "Coming soon"
 - **Action button** — depends on card state (see below)
 
@@ -315,43 +321,52 @@ inside each app. Same component, same style, adapts content based on context.
 
 ### Header Layout
 
-Three-zone layout following standard SaaS patterns:
+Three-zone layout with an absolutely centered title, consistent across Portal, Pulse, and WRT:
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  [Left: Brand + Context]    [Centre: Nav]    [Right: User/Auth] │
+│  [Left: Brand]    [Centre: Title (absolute)]    [Right: Auth]    │
 └──────────────────────────────────────────────────────────────────┘
 │  Brand stripe (magenta-to-purple gradient)                       │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### Left Zone — Brand + App Context
+The centre title uses `pointer-events-none absolute inset-x-0 text-center` to achieve
+true visual centering regardless of left/right zone widths. The `font-brand` (DM Sans) class
+is applied to the title text.
+
+### Left Zone — Brand
 
 - **OOSTKit** wordmark/logo (always links to `/`, which redirects to `/home` if logged in)
-- When inside an app: **breadcrumb separator + app name** appears
-  - e.g. `OOSTKit › Workgroup Pulse`
-  - App name is a label (or links to the app's own root)
-- When on portal pages (marketing, dashboard, coming-soon): just the OOSTKit wordmark
+- When inside an app (Pulse/WRT): links to Portal via configurable `:portal_url`
+- No breadcrumb separator — the centre zone identifies the current app/page
 
-### Centre Zone — Page Title
+### Centre Zone — Page Title (Absolutely Centered)
 
-Displays the current page title as static text (e.g., "Dashboard", "Settings", "Admin").
-Hidden on small screens (`sm:inline`). This replaced the earlier "Home" nav link design --
-users navigate home via the OOSTKit brand link (left zone) instead.
+Absolutely positioned (`pointer-events-none absolute inset-x-0`) to achieve true centering
+independent of left/right zone content. Displays `font-brand text-sm font-medium text-ok-purple-200`.
+Hidden on small screens (`sm:block`).
 
-In Pulse and WRT, the centre zone shows the app name ("Workgroup Pulse", "Workshop Referral Tool")
-rather than a page title, providing consistent app identification across the platform.
+- **Portal:** Displays the current page title (e.g., "Dashboard", "Settings", "Admin")
+- **Pulse/WRT:** Displays the app name ("Workgroup Pulse", "Workshop Referral Tool") as static text
 
 ### Right Zone — User & Auth
 
-Adapts based on authentication state:
+Adapts based on authentication state. All three apps use consistent button styling:
+- "Sign Up" uses `rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20`
+- "Log In" uses `text-sm font-semibold text-ok-purple-200 hover:text-white`
 
 | State | Right Zone Content |
 |-------|-------------------|
-| **Anonymous** | "Sign Up" (primary button → `/users/register`) + "Log In" (secondary/text → `/users/log-in`) |
+| **Anonymous** | "Sign Up" (frosted button → `/users/register`) + "Log In" (text link → `/users/log-in`) |
 | **Anonymous (dev mode)** | "Admin" button (gold text, `POST /dev/admin-login`) + Sign Up + Log In. The Admin button logs in as the dev super admin for quick access. |
-| **Logged in** | User name/email + Settings link + "Log Out" |
+| **Logged in** | User email + Settings link + "Log Out" |
 | **Super admin** | Same as logged in + "Admin" link |
+
+**Per-app right zone behaviour:**
+- **Portal:** Full auth state (anonymous/logged-in/super-admin as above)
+- **Pulse:** Always shows Sign Up + Log In (no user context — Pulse has no authentication)
+- **WRT:** Shows Sign Up + Log In when no `portal_user`, or user email + Settings link when authenticated via Portal cookie
 
 ### Brand Stripe
 
@@ -360,9 +375,12 @@ visual identity element. Kept for now — may evolve as the overall design matur
 
 ### Implementation Notes
 
-- Each app renders its own header using the shared Tailwind preset and a consistent three-zone `justify-between` layout
+- Each app renders its own header using the shared Tailwind preset and a consistent `relative` nav with `justify-between` layout
+- The centre title is absolutely positioned within the `relative` nav container using `pointer-events-none absolute inset-x-0 text-center`, ensuring true visual centering regardless of left/right content width
 - Portal: centre zone shows `@page_title`, OOSTKit link goes to `/`
-- Pulse/WRT: centre zone shows app name as static text, OOSTKit link goes to Portal via configurable `:portal_url` (from `PORTAL_URL` env var, defaults to `https://oostkit.com`)
+- Pulse: centre zone shows "Workgroup Pulse", right zone always shows Sign Up + Log In linking to Portal
+- WRT: centre zone shows "Workshop Referral Tool", right zone shows Sign Up + Log In (anonymous) or email + Settings (authenticated)
+- All apps: Sign Up button uses `rounded-md bg-white/10` frosted style, Log In uses text link style
 - Design system tokens: `bg-ok-purple-900` header, `font-brand` (DM Sans), brand stripe gradient
 
 ---
@@ -443,17 +461,29 @@ without requiring sudo mode — sudo checks are performed in event handlers for
 sensitive actions (email change, password change, account deletion). If not in
 sudo mode, the user is redirected to the login page with a message to re-authenticate.
 
+**Layout:** Uses a `space-y-10` wrapper for generous vertical rhythm. Each section has
+a bold `text-base font-semibold` heading and a `text-sm text-zinc-500` description,
+separated by `border-t border-zinc-200` dividers. The "Account Settings" title is
+centred at the top of the page.
+
 **Sections (top to bottom):**
 
-- **Profile** — name and organisation (optional). Referral source is collected at
-  registration only and is not shown on the settings page.
-- **Change email** — sends confirmation to new address (requires sudo mode)
-- **Set/change password** — optional, for facilitators who prefer password login
-  over magic links. If no password is set yet, framed as "Add a password" rather
-  than "Change password" (requires sudo mode)
-- **Danger zone** — delete account section with a red "Delete Account" button and
-  confirmation prompt. Permanently deletes the user account and logs them out
-  (requires sudo mode)
+- **Profile** — heading "Profile", description "Your name and organisation." Name
+  and organisation fields (optional). Referral source is collected at registration
+  only and is not shown on the settings page.
+- *(divider)*
+- **Email** — heading "Email", description "Update your email address." Sends
+  confirmation to new address (requires sudo mode).
+- *(divider)*
+- **Password** — heading "Password", description adapts based on whether a password
+  exists ("Set a password for your account." / "Update your account password.").
+  Optional, for facilitators who prefer password login over magic links. If no
+  password is set yet, the button label reads "Add a password" rather than "Change
+  password" (requires sudo mode).
+- *(divider)*
+- **Danger zone** — heading "Danger zone" in `text-ok-red-600`, description warns
+  that deletion is irreversible. Red "Delete Account" button with confirmation
+  prompt. Permanently deletes the user account and logs them out (requires sudo mode).
 
 ### Forgot Password (`/users/forgot-password`)
 

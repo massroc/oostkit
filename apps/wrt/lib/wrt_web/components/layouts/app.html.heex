@@ -1,17 +1,38 @@
+<% portal_url = Application.get_env(:wrt, :portal_url, "https://oostkit.com") %>
 <header class="bg-ok-purple-900">
-  <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-    <a
-      href={Application.get_env(:wrt, :portal_url, "https://oostkit.com")}
-      class="text-lg font-semibold text-white"
-    >
+  <nav class="relative mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+    <a href={portal_url} class="text-lg font-semibold text-white">
       OOSTKit
     </a>
-    <span class="text-sm font-medium text-ok-purple-200">Workshop Referral Tool</span>
+    <!-- Centre: App name (absolutely centered) -->
+    <span class="pointer-events-none absolute inset-x-0 text-center font-brand text-sm font-medium text-ok-purple-200">
+      Workshop Referral Tool
+    </span>
+    <!-- Right: Auth -->
     <div class="flex items-center gap-4">
       <%= if assigns[:portal_user] do %>
-        <span class="text-sm text-ok-purple-300">{@portal_user["email"]}</span>
+        <span class="hidden text-sm text-ok-purple-300 sm:inline">
+          {@portal_user["email"]}
+        </span>
+        <a
+          href={portal_url <> "/users/settings"}
+          class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+        >
+          Settings
+        </a>
       <% else %>
-        <div class="w-0"></div>
+        <a
+          href={portal_url <> "/users/register"}
+          class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"
+        >
+          Sign Up
+        </a>
+        <a
+          href={portal_url <> "/users/log-in"}
+          class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+        >
+          Log In
+        </a>
       <% end %>
     </div>
   </nav>

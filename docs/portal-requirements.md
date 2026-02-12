@@ -52,7 +52,9 @@ A bold, aspirational page for new visitors. Redirects logged-in users to `/home`
 
 The functional tool hub. Accessible to everyone (anonymous and logged-in). Page title: "Dashboard".
 
-**Layout:** Three-column categorized grid (12 tools). Tools grouped by `category` field into three columns: Learning, Workshop Management, Team Workshops. Each column has a heading and a vertical stack of compact tool cards beneath it. Stacks to single column on mobile.
+**Layout:** Three-column categorized grid (12 tools). Tools grouped by `category` field into three columns: Learning, Workshop Management, Team Workshops. Each column has a heading and a vertical stack of compact tool cards beneath it. Stacks to single column on mobile. Within each category, live tools are sorted to the top so active tools are immediately visible.
+
+**Card layout:** Cards use `flex flex-col` with `flex-1` on the tagline to ensure equal height across all cards within a category column. Action buttons are pushed to the bottom of each card.
 
 **Card states:**
 | State | When | Button | Visual |
@@ -181,7 +183,7 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 ### Account Management
 
 **Self-service (facilitators):**
-- **Settings** (`/users/settings`) -- profile editing (name, organisation), email change, password (add/change), account deletion. Referral source is collected at registration only and not editable in settings. The settings page loads without requiring sudo mode; sudo checks are performed in handlers for sensitive actions (email change, password change, account deletion) with a graceful redirect to login if not in sudo mode.
+- **Settings** (`/users/settings`) -- structured layout with `space-y-10` vertical rhythm and `border-t` dividers between sections. Four sections with bold headings and descriptive subtitles: Profile (name, org), Email (change address), Password (add/change), and Danger zone (delete account, heading in `text-ok-red-600`). Referral source is collected at registration only and not editable in settings. The settings page loads without requiring sudo mode; sudo checks are performed in handlers for sensitive actions (email change, password change, account deletion) with a graceful redirect to login if not in sudo mode.
 - **Password reset** -- "Forgot your password?" link on login page sends a reset email with a time-limited token. User sets a new password via `/users/reset-password/:token`.
 - **Account deletion** -- "Danger zone" section on settings page with confirmation prompt. Deletes the user account and logs them out.
 
@@ -231,15 +233,20 @@ When a user clicks on an app that requires authentication:
 
 ### Consistent Header
 
-Three-zone `justify-between` layout across the entire platform (marketing page, dashboard, inside apps):
+Three-zone layout with absolutely centered title, consistent across the entire platform (Portal, Pulse, WRT):
 
 ```
-[Left: OOSTKit link]    [Centre: App name / Page title]    [Right: User/Auth]
+[Left: OOSTKit link]    [Centre: Title (absolute)]    [Right: Auth]
 ```
+
+The centre title uses `pointer-events-none absolute inset-x-0 text-center font-brand` for true visual centering regardless of left/right zone widths.
 
 - **Left:** "OOSTKit" brand link. In Portal, links to `/`. In Pulse/WRT, links to Portal via configurable `:portal_url` (defaults to `https://oostkit.com`).
 - **Centre:** In Portal, displays the current page title (e.g., "Dashboard"). In Pulse/WRT, displays the app name ("Workgroup Pulse" / "Workshop Referral Tool") as static text.
-- **Right:** Sign Up + Log In (anonymous) / User email + Settings + Log Out (authenticated) / + Admin link (super admin). In dev mode, an "Admin" button (gold text, POST to `/dev/admin-login`) appears for anonymous users to quickly log in as the dev super admin. In apps without user context (e.g., Pulse), a placeholder div maintains spacing.
+- **Right:** All apps use consistent button styling — Sign Up (`rounded-md bg-white/10` frosted button) + Log In (text link). Auth state varies by app:
+  - **Portal:** Sign Up + Log In (anonymous) / User email + Settings + Log Out (authenticated) / + Admin link (super admin). Dev mode adds an "Admin" button (gold text, POST to `/dev/admin-login`).
+  - **Pulse:** Always shows Sign Up + Log In (no user context — Pulse has no authentication).
+  - **WRT:** Shows Sign Up + Log In when no `portal_user`, or user email + Settings link when authenticated via Portal cookie.
 
 ---
 
@@ -325,15 +332,23 @@ Key requirements (all met):
 - Cross-subdomain cookie support via configurable `COOKIE_DOMAIN`
 - Internal API for token validation by other apps
 
-### Tool URL Resolution
+### Tool URL and Status Resolution
 
-Tool URLs are stored in the database (production subdomain URLs), but Portal overrides them per environment via `config :portal, :tool_urls`. The `Portal.Tools` context applies overrides transparently through `apply_config_url/1` on all query functions, so templates always get the correct URL from `@tool.url`.
+Tool URLs and statuses are stored in the database (production values), but Portal overrides them per environment via two config keys. The `Portal.Tools` context applies overrides transparently through `apply_config_overrides/1` on all query functions, so templates always get the correct values from `@tool.url` and `@tool.default_status`.
+
+**URL overrides (`config :portal, :tool_urls`):**
 
 | Environment | Pulse URL | WRT URL | Source |
 |-------------|-----------|---------|--------|
 | Dev | `http://localhost:4000` | `http://localhost:4001` | `config/dev.exs` |
 | Test | `http://localhost:4000` | `http://localhost:4001` | `config/test.exs` |
 | Prod | `https://pulse.oostkit.com` | `https://wrt.oostkit.com` | `config/runtime.exs` (overridable via `PULSE_URL`, `WRT_URL` env vars) |
+
+**Status overrides (`config :portal, :tool_status_overrides`):**
+
+Maps tool IDs to status strings. Used in `dev.exs` to mark WRT as `"live"` locally, since WRT is functional in development but still "coming soon" in production. This lets developers see and test the live tool card experience for WRT without changing the production database status.
+
+**Dashboard sorting:** The `list_tools_grouped/0` function sorts live tools to the top within each category, ensuring active tools appear first.
 
 The landing page uses a `pulse_url/1` helper (in `PageHTML`) that reads the URL from the live tool list, replacing previously hardcoded production URLs.
 

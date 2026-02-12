@@ -59,7 +59,7 @@ SessionLive.Show (root LiveView)
 │   └── .score_indicator      # Traffic light score display
 │
 ├── Layouts
-│   ├── app.html.heex         # Standard layout with 3-zone header (OOSTKit link via :portal_url, centered app name, placeholder) + brand stripe
+│   ├── app.html.heex         # Standard layout with 3-zone header (OOSTKit link via :portal_url, absolutely centered "Workgroup Pulse" title, Sign Up + Log In buttons linking to Portal) + brand stripe
 │   └── session.html.heex     # Bare layout for session pages (no header — session uses .app_header inline)
 │
 └── Other LiveViews
@@ -548,5 +548,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.5 — Merged HomeLive into SessionLive.New (home page is now create session at `/`)*
+*Document Version: 1.6 — App layout header standardized: absolutely centered title, Sign Up + Log In buttons linking to Portal*
 *Last Updated: 2026-02-12*

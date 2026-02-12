@@ -88,7 +88,7 @@ defmodule PortalWeb.CoreComponents do
 
     ~H"""
     <div class={[
-      "rounded-xl border p-4 transition",
+      "flex flex-col rounded-xl border p-4 transition",
       @status == :live && "border-zinc-200 bg-surface-sheet shadow-sheet hover:shadow-sheet-lifted",
       @status == :coming_soon && "border-zinc-200 bg-surface-sheet-secondary opacity-75",
       @status == :maintenance && "border-zinc-200 bg-surface-sheet-secondary opacity-60"
@@ -105,7 +105,7 @@ defmodule PortalWeb.CoreComponents do
           </span>
         <% end %>
       </div>
-      <p class="mt-1 text-xs text-zinc-600">{@tool.tagline}</p>
+      <p class="mt-1 flex-1 text-xs text-zinc-600">{@tool.tagline}</p>
       <div class="mt-3 flex items-center gap-3">
         <%= if @status == :live and @tool.url do %>
           <a

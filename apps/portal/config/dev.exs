@@ -53,5 +53,10 @@ config :portal, :tool_urls, %{
   "wrt" => "http://localhost:4001"
 }
 
+# Tool status overrides for dev (WRT is live locally but not yet in prod)
+config :portal, :tool_status_overrides, %{
+  "wrt" => "live"
+}
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
