@@ -20,7 +20,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.LobbyComponent do
     ~H"""
     <.sheet class="shadow-sheet p-6 w-[960px] h-full">
       <div class="text-center max-w-lg mx-auto">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-2">
+        <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-2">
           Waiting Room
         </h1>
 
