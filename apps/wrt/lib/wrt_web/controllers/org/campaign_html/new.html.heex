@@ -4,18 +4,24 @@
 </.header>
 
 <div class="mt-8 max-w-xl">
-  <.simple_form :let={f} for={@changeset} action={~p"/org/#{@org.slug}/campaigns"}>
-    <.input field={f[:name]} type="text" label="Campaign Name" required />
-    <.input field={f[:description]} type="textarea" label="Description" />
+  <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl">
+    <.simple_form :let={f} for={@changeset} action={~p"/org/#{@org.slug}/campaigns"}>
+      <div class="p-6 space-y-4">
+        <.input field={f[:name]} type="text" label="Campaign Name" required />
+        <.input field={f[:description]} type="textarea" label="Description" />
+      </div>
 
-    <:actions>
-      <.link
-        href={~p"/org/#{@org.slug}/manage"}
-        class="text-ok-purple-600 hover:text-ok-purple-800 mr-4"
-      >
-        Cancel
-      </.link>
-      <.button phx-disable-with="Creating...">Create Campaign</.button>
-    </:actions>
-  </.simple_form>
+      <:actions>
+        <div class="flex justify-end border-t border-zinc-200 px-6 py-4 w-full">
+          <.link
+            href={~p"/org/#{@org.slug}/manage"}
+            class="text-ok-purple-600 hover:text-ok-purple-800 mr-4 self-center"
+          >
+            Cancel
+          </.link>
+          <.button phx-disable-with="Creating...">Create Campaign</.button>
+        </div>
+      </:actions>
+    </.simple_form>
+  </div>
 </div>

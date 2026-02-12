@@ -84,23 +84,25 @@
 
 <%= if length(@rounds) > 0 do %>
   <div class="mt-8">
-    <h2 class="text-lg font-semibold text-text-dark">Rounds History</h2>
-    <.table id="rounds" rows={@rounds}>
-      <:col :let={round} label="Round">{round.round_number}</:col>
-      <:col :let={round} label="Status">
-        <.status_badge kind={:round} status={round.status} />
-      </:col>
-      <:col :let={round} label="Deadline">
-        {if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-"}
-      </:col>
-      <:action :let={round}>
-        <.link
-          href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"}
-          class="text-ok-purple-600 hover:text-ok-purple-800"
-        >
-          View
-        </.link>
-      </:action>
-    </.table>
+    <h2 class="text-lg font-semibold text-text-dark mb-4">Rounds History</h2>
+    <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl overflow-hidden">
+      <.table id="rounds" rows={@rounds}>
+        <:col :let={round} label="Round">{round.round_number}</:col>
+        <:col :let={round} label="Status">
+          <.status_badge kind={:round} status={round.status} />
+        </:col>
+        <:col :let={round} label="Deadline">
+          {if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-"}
+        </:col>
+        <:action :let={round}>
+          <.link
+            href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"}
+            class="text-ok-purple-600 hover:text-ok-purple-800"
+          >
+            View
+          </.link>
+        </:action>
+      </.table>
+    </div>
   </div>
 <% end %>

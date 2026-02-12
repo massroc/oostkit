@@ -181,7 +181,7 @@ defmodule WrtWeb.CoreComponents do
 
   def stat_card(assigns) do
     ~H"""
-    <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
+    <div class="bg-surface-sheet shadow-sheet rounded-xl p-6">
       <h3 class="text-sm font-medium text-gray-500">{@label}</h3>
       <p class={["mt-2 text-3xl font-semibold", @value_color]}>{@value}</p>
       <p :if={@detail} class="mt-1 text-sm text-gray-500">{@detail}</p>
@@ -299,7 +299,7 @@ defmodule WrtWeb.CoreComponents do
 
   def callout(assigns) do
     ~H"""
-    <div class={["border rounded-lg p-6", callout_bg(@kind), @class]}>
+    <div class={["border rounded-xl p-6", callout_bg(@kind), @class]}>
       <h2 :if={@heading} class={["text-lg font-semibold", callout_heading(@kind)]}>
         {@heading}
       </h2>

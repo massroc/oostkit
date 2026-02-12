@@ -59,7 +59,7 @@
       </div>
 
       <%= if length(@top_nominees) > 0 do %>
-        <div class="bg-surface-sheet shadow-sheet rounded-lg p-6 mb-8">
+        <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6 mb-8">
           <h3 class="text-lg font-semibold text-text-dark mb-4">Top Nominees</h3>
           <div class="space-y-3">
             <%= for {nominee, index} <- Enum.with_index(@top_nominees) do %>
@@ -95,22 +95,24 @@
   <%= if Enum.empty?(@campaigns) do %>
     <.empty_state message="No campaigns yet. Create your first campaign to get started." />
   <% else %>
-    <.table id="campaigns" rows={@campaigns}>
-      <:col :let={campaign} label="Name">{campaign.name}</:col>
-      <:col :let={campaign} label="Status">
-        <.status_badge kind={:campaign} status={campaign.status} />
-      </:col>
-      <:col :let={campaign} label="Created">
-        {Calendar.strftime(campaign.inserted_at, "%B %d, %Y")}
-      </:col>
-      <:action :let={campaign}>
-        <.link
-          href={~p"/org/#{@org.slug}/campaigns/#{campaign}"}
-          class="text-ok-purple-600 hover:text-ok-purple-800"
-        >
-          View
-        </.link>
-      </:action>
-    </.table>
+    <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl overflow-hidden">
+      <.table id="campaigns" rows={@campaigns}>
+        <:col :let={campaign} label="Name">{campaign.name}</:col>
+        <:col :let={campaign} label="Status">
+          <.status_badge kind={:campaign} status={campaign.status} />
+        </:col>
+        <:col :let={campaign} label="Created">
+          {Calendar.strftime(campaign.inserted_at, "%B %d, %Y")}
+        </:col>
+        <:action :let={campaign}>
+          <.link
+            href={~p"/org/#{@org.slug}/campaigns/#{campaign}"}
+            class="text-ok-purple-600 hover:text-ok-purple-800"
+          >
+            View
+          </.link>
+        </:action>
+      </.table>
+    </div>
   <% end %>
 </div>
