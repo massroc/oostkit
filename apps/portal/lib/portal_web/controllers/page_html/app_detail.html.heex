@@ -1,120 +1,120 @@
 <div class="mx-auto max-w-3xl px-6 py-16 sm:px-8">
-    <!-- Back link -->
-    <div class="mb-8">
-      <.link
-        navigate={~p"/home"}
-        class="inline-flex items-center gap-1 text-sm text-ok-purple-600 hover:text-ok-purple-800"
-      >
-        <.icon name="hero-arrow-left" class="h-4 w-4" /> Back to all tools
-      </.link>
-    </div>
-    <!-- App Header -->
-    <div class="mb-10">
-      <div class="flex items-start justify-between">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight text-text-dark">
-            {@tool.name}
-          </h1>
-          <p class="mt-2 text-lg text-zinc-600">
-            {@tool.tagline}
-          </p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class={[
-            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-            @tool.audience == "facilitator" && "bg-ok-purple-100 text-ok-purple-800",
-            @tool.audience == "team" && "bg-ok-blue-100 text-ok-blue-800"
-          ]}>
-            {if @tool.audience == "facilitator", do: "For Facilitators", else: "For Teams"}
+  <!-- Back link -->
+  <div class="mb-8">
+    <.link
+      navigate={~p"/home"}
+      class="inline-flex items-center gap-1 text-sm text-ok-purple-600 hover:text-ok-purple-800"
+    >
+      <.icon name="hero-arrow-left" class="h-4 w-4" /> Back to all tools
+    </.link>
+  </div>
+  <!-- App Header -->
+  <div class="mb-10">
+    <div class="flex items-start justify-between">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-text-dark">
+          {@tool.name}
+        </h1>
+        <p class="mt-2 text-lg text-zinc-600">
+          {@tool.tagline}
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class={[
+          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+          @tool.audience == "facilitator" && "bg-ok-purple-100 text-ok-purple-800",
+          @tool.audience == "team" && "bg-ok-blue-100 text-ok-blue-800"
+        ]}>
+          {if @tool.audience == "facilitator", do: "For Facilitators", else: "For Teams"}
+        </span>
+        <%= if Portal.Tools.Tool.effective_status(@tool) == :live do %>
+          <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2.5 py-0.5 text-xs font-medium text-ok-green-800">
+            Live
           </span>
-          <%= if Portal.Tools.Tool.effective_status(@tool) == :live do %>
-            <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2.5 py-0.5 text-xs font-medium text-ok-green-800">
-              Live
-            </span>
-          <% else %>
-            <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2.5 py-0.5 text-xs font-medium text-ok-gold-800">
-              Coming soon
-            </span>
-          <% end %>
-        </div>
-      </div>
-    </div>
-    <!-- Description -->
-    <div :if={@tool.description} class="mb-10">
-      <p class="text-lg leading-relaxed text-zinc-700">{@tool.description}</p>
-    </div>
-    <!-- Action area (live tools) -->
-    <%= if Portal.Tools.Tool.effective_status(@tool) == :live and @tool.url do %>
-      <div class="mb-10">
-        <a
-          href={@tool.url}
-          class="inline-flex items-center justify-center rounded-lg bg-ok-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ok-purple-600"
-        >
-          Launch {@tool.name}
-          <.icon name="hero-arrow-top-right-on-square" class="ml-2 h-4 w-4" />
-        </a>
-      </div>
-    <% end %>
-    <!-- Inline email capture (coming-soon tools) -->
-    <%= if Portal.Tools.Tool.effective_status(@tool) != :live do %>
-      <div class="mb-10 rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
-        <%= if @subscribed do %>
-          <div class="flex items-center gap-3 text-ok-green-800">
-            <.icon name="hero-check-circle" class="h-6 w-6 text-ok-green-600" />
-            <p class="text-sm font-medium">
-              Thanks! We'll let you know when {@tool.name} is ready.
-            </p>
-          </div>
         <% else %>
-          <h3 class="text-sm font-semibold text-text-dark mb-1">
-            Get notified when {@tool.name} is ready
-          </h3>
-          <p class="text-sm text-zinc-500 mb-4">
-            Leave your details and we'll email you when this tool launches.
-          </p>
-          <form action={~p"/apps/#{@tool.id}/notify"} method="post">
-            <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <div class="flex-1">
-                <label for="notify_name" class="block text-sm font-medium text-zinc-700">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="signup[name]"
-                  id="notify_name"
-                  class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-ok-purple-400 focus:ring-ok-purple-400 sm:text-sm"
-                  placeholder="Your name"
-                />
-              </div>
-              <div class="flex-1">
-                <label for="notify_email" class="block text-sm font-medium text-zinc-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="signup[email]"
-                  id="notify_email"
-                  required
-                  class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-ok-purple-400 focus:ring-ok-purple-400 sm:text-sm"
-                  placeholder="you@example.com"
-                />
-              </div>
-              <button
-                type="submit"
-                class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700 whitespace-nowrap"
-              >
-                Notify me
-              </button>
-            </div>
-          </form>
+          <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2.5 py-0.5 text-xs font-medium text-ok-gold-800">
+            Coming soon
+          </span>
         <% end %>
       </div>
-    <% end %>
-    <!-- Learn more link for detail pages -->
-    <div class="border-t border-zinc-200 pt-8">
-      <.link navigate={~p"/home"} class="text-sm text-ok-purple-600 hover:text-ok-purple-800">
-        &larr; See all tools
-      </.link>
     </div>
   </div>
+  <!-- Description -->
+  <div :if={@tool.description} class="mb-10">
+    <p class="text-lg leading-relaxed text-zinc-700">{@tool.description}</p>
+  </div>
+  <!-- Action area (live tools) -->
+  <%= if Portal.Tools.Tool.effective_status(@tool) == :live and @tool.url do %>
+    <div class="mb-10">
+      <a
+        href={@tool.url}
+        class="inline-flex items-center justify-center rounded-lg bg-ok-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ok-purple-600"
+      >
+        Launch {@tool.name}
+        <.icon name="hero-arrow-top-right-on-square" class="ml-2 h-4 w-4" />
+      </a>
+    </div>
+  <% end %>
+  <!-- Inline email capture (coming-soon tools) -->
+  <%= if Portal.Tools.Tool.effective_status(@tool) != :live do %>
+    <div class="mb-10 rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
+      <%= if @subscribed do %>
+        <div class="flex items-center gap-3 text-ok-green-800">
+          <.icon name="hero-check-circle" class="h-6 w-6 text-ok-green-600" />
+          <p class="text-sm font-medium">
+            Thanks! We'll let you know when {@tool.name} is ready.
+          </p>
+        </div>
+      <% else %>
+        <h3 class="text-sm font-semibold text-text-dark mb-1">
+          Get notified when {@tool.name} is ready
+        </h3>
+        <p class="text-sm text-zinc-500 mb-4">
+          Leave your details and we'll email you when this tool launches.
+        </p>
+        <form action={~p"/apps/#{@tool.id}/notify"} method="post">
+          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div class="flex-1">
+              <label for="notify_name" class="block text-sm font-medium text-zinc-700">
+                Name
+              </label>
+              <input
+                type="text"
+                name="signup[name]"
+                id="notify_name"
+                class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-ok-purple-400 focus:ring-ok-purple-400 sm:text-sm"
+                placeholder="Your name"
+              />
+            </div>
+            <div class="flex-1">
+              <label for="notify_email" class="block text-sm font-medium text-zinc-700">
+                Email
+              </label>
+              <input
+                type="email"
+                name="signup[email]"
+                id="notify_email"
+                required
+                class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-ok-purple-400 focus:ring-ok-purple-400 sm:text-sm"
+                placeholder="you@example.com"
+              />
+            </div>
+            <button
+              type="submit"
+              class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700 whitespace-nowrap"
+            >
+              Notify me
+            </button>
+          </div>
+        </form>
+      <% end %>
+    </div>
+  <% end %>
+  <!-- Learn more link for detail pages -->
+  <div class="border-t border-zinc-200 pt-8">
+    <.link navigate={~p"/home"} class="text-sm text-ok-purple-600 hover:text-ok-purple-800">
+      &larr; See all tools
+    </.link>
+  </div>
+</div>

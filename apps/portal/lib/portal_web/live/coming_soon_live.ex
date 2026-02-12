@@ -27,48 +27,48 @@ defmodule PortalWeb.ComingSoonLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-lg px-6 py-20 sm:px-8">
-        <div class="text-center">
-          <h1 class="text-3xl font-bold tracking-tight text-text-dark">
-            {heading(@context, @tool_name)}
-          </h1>
-          <p class="mt-4 text-lg text-zinc-600">
-            {subtext(@context)}
+      <div class="text-center">
+        <h1 class="text-3xl font-bold tracking-tight text-text-dark">
+          {heading(@context, @tool_name)}
+        </h1>
+        <p class="mt-4 text-lg text-zinc-600">
+          {subtext(@context)}
+        </p>
+      </div>
+
+      <%= if @submitted do %>
+        <div class="mt-10 rounded-xl border border-ok-green-200 bg-ok-green-50 p-8 text-center">
+          <.icon name="hero-check-circle" class="mx-auto h-10 w-10 text-ok-green-600" />
+          <p class="mt-4 text-lg font-medium text-ok-green-800">
+            Thanks! We'll be in touch.
           </p>
         </div>
-
-        <%= if @submitted do %>
-          <div class="mt-10 rounded-xl border border-ok-green-200 bg-ok-green-50 p-8 text-center">
-            <.icon name="hero-check-circle" class="mx-auto h-10 w-10 text-ok-green-600" />
-            <p class="mt-4 text-lg font-medium text-ok-green-800">
-              Thanks! We'll be in touch.
-            </p>
-          </div>
-        <% else %>
-          <div class="mt-10 rounded-xl border border-zinc-200 bg-surface-sheet p-8 shadow-sheet">
-            <.simple_form for={@form} phx-submit="submit" phx-change="validate">
-              <.input field={@form[:name]} label="Name" placeholder="Your name" />
-              <.input
-                field={@form[:email]}
-                type="email"
-                label="Email"
-                placeholder="you@example.com"
-                required
-              />
-              <:actions>
-                <.button type="submit" class="w-full">
-                  Keep me posted
-                </.button>
-              </:actions>
-            </.simple_form>
-          </div>
-        <% end %>
-
-        <div class="mt-8 text-center">
-          <.link navigate={~p"/home"} class="text-sm text-ok-purple-600 hover:text-ok-purple-800">
-            &larr; Back to tools
-          </.link>
+      <% else %>
+        <div class="mt-10 rounded-xl border border-zinc-200 bg-surface-sheet p-8 shadow-sheet">
+          <.simple_form for={@form} phx-submit="submit" phx-change="validate">
+            <.input field={@form[:name]} label="Name" placeholder="Your name" />
+            <.input
+              field={@form[:email]}
+              type="email"
+              label="Email"
+              placeholder="you@example.com"
+              required
+            />
+            <:actions>
+              <.button type="submit" class="w-full">
+                Keep me posted
+              </.button>
+            </:actions>
+          </.simple_form>
         </div>
+      <% end %>
+
+      <div class="mt-8 text-center">
+        <.link navigate={~p"/home"} class="text-sm text-ok-purple-600 hover:text-ok-purple-800">
+          &larr; Back to tools
+        </.link>
       </div>
+    </div>
     """
   end
 
