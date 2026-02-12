@@ -74,6 +74,7 @@ if config_env() == :prod do
 
   # Portal cross-app auth
   config :wrt,
+    portal_url: System.get_env("PORTAL_URL", "https://oostkit.com"),
     portal_api_url: System.get_env("PORTAL_API_URL", "http://oostkit-portal.flycast"),
     portal_api_key: System.get_env("PORTAL_API_KEY"),
     portal_login_url: System.get_env("PORTAL_LOGIN_URL", "https://oostkit.com/users/log-in")

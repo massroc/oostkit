@@ -115,10 +115,10 @@ Rather than embedding apps in iframes, we use a hybrid model:
    - Logo and branding assets
 
 3. **Each app renders its own header** using shared styles:
-   - Consistent logo and navigation
-   - "Home" link returns to portal
-   - Login state displayed in header
-   - App-specific navigation below shared header
+   - Consistent three-zone layout: OOSTKit brand link (left), app name (centre), user/auth content (right)
+   - OOSTKit link returns to Portal (configurable `:portal_url` per app)
+   - Login state displayed in header (where applicable)
+   - App name centered in header identifies which tool the user is in
 
 4. **Subdomain structure:**
    - `oostkit.com` (or chosen domain) - Portal
@@ -222,15 +222,15 @@ When a user clicks on an app that requires authentication:
 
 ### Consistent Header
 
-Three-zone layout across the entire platform (marketing page, dashboard, inside apps):
+Three-zone `justify-between` layout across the entire platform (marketing page, dashboard, inside apps):
 
 ```
-[Left: Brand + Context]    [Centre: Nav]    [Right: User/Auth]
+[Left: OOSTKit link]    [Centre: App name / Page title]    [Right: User/Auth]
 ```
 
-- **Left:** OOSTKit wordmark (links to `/`). Inside apps: breadcrumb `OOSTKit > App Name`
-- **Centre:** "Home" link to `/home` (shown when inside an app)
-- **Right:** Sign Up + Log In (anonymous) / User name + Settings + Log Out (authenticated) / + Admin link (super admin). In dev mode, an "Admin" button (gold text, POST to `/dev/admin-login`) appears for anonymous users to quickly log in as the dev super admin.
+- **Left:** "OOSTKit" brand link. In Portal, links to `/`. In Pulse/WRT, links to Portal via configurable `:portal_url` (defaults to `https://oostkit.com`).
+- **Centre:** In Portal, displays the current page title (e.g., "Dashboard"). In Pulse/WRT, displays the app name ("Workgroup Pulse" / "Workshop Referral Tool") as static text.
+- **Right:** Sign Up + Log In (anonymous) / User email + Settings + Log Out (authenticated) / + Admin link (super admin). In dev mode, an "Admin" button (gold text, POST to `/dev/admin-login`) appears for anonymous users to quickly log in as the dev super admin. In apps without user context (e.g., Pulse), a placeholder div maintains spacing.
 
 ---
 
@@ -346,7 +346,6 @@ The landing page uses a `pulse_url/1` helper (in `PageHTML`) that reads the URL 
 
 ## Deferred Items
 
-- Header breadcrumb integration in Pulse/WRT (app name in shared header across apps)
 - Admin dashboard trends (charts/time-series once there's enough data)
 
 ---

@@ -45,12 +45,10 @@
           OOSTKit
         </a>
         
-<!-- Centre: Nav -->
-        <div class="hidden sm:flex sm:items-center sm:gap-6">
-          <a href="/home" class="text-sm font-medium text-ok-purple-200 hover:text-white">
-            Home
-          </a>
-        </div>
+<!-- Centre: Page title -->
+        <span class="hidden text-sm font-medium text-ok-purple-200 sm:inline">
+          {assigns[:page_title] || "Dashboard"}
+        </span>
         
 <!-- Right: Auth -->
         <div class="flex items-center gap-4">

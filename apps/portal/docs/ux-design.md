@@ -333,13 +333,14 @@ Three-zone layout following standard SaaS patterns:
   - App name is a label (or links to the app's own root)
 - When on portal pages (marketing, dashboard, coming-soon): just the OOSTKit wordmark
 
-### Centre Zone — Navigation
+### Centre Zone — Page Title
 
-Minimal:
-- **"Home"** link to `/home` (dashboard) — shown when inside an app, so users can
-  get back to the tool hub
-- On portal pages: may not be needed (logo already links home)
-- Can grow later if more top-level nav is added
+Displays the current page title as static text (e.g., "Dashboard", "Settings", "Admin").
+Hidden on small screens (`sm:inline`). This replaced the earlier "Home" nav link design --
+users navigate home via the OOSTKit brand link (left zone) instead.
+
+In Pulse and WRT, the centre zone shows the app name ("Workgroup Pulse", "Workshop Referral Tool")
+rather than a page title, providing consistent app identification across the platform.
 
 ### Right Zone — User & Auth
 
@@ -359,9 +360,9 @@ visual identity element. Kept for now — may evolve as the overall design matur
 
 ### Implementation Notes
 
-- The header is a shared component used across Portal, Pulse, and WRT
-- Each app already renders its own header using the shared Tailwind preset
-- The app name in the breadcrumb is the only thing that changes per-app
+- Each app renders its own header using the shared Tailwind preset and a consistent three-zone `justify-between` layout
+- Portal: centre zone shows `@page_title`, OOSTKit link goes to `/`
+- Pulse/WRT: centre zone shows app name as static text, OOSTKit link goes to Portal via configurable `:portal_url` (from `PORTAL_URL` env var, defaults to `https://oostkit.com`)
 - Design system tokens: `bg-ok-purple-900` header, `font-brand` (DM Sans), brand stripe gradient
 
 ---
@@ -801,7 +802,6 @@ Resolved during design discussions (February 2026):
 
 ## Deferred Items
 
-- Header breadcrumb integration in Pulse/WRT (app name in shared header across apps)
 - Admin dashboard trends (charts/time-series once there's enough data)
 
 ---

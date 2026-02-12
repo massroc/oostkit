@@ -1,10 +1,14 @@
 <div class="flex flex-col h-screen bg-surface-wall">
   <header class="bg-ok-purple-900">
     <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-      <a href="https://oostkit.com" class="text-lg font-semibold text-white">
+      <a
+        href={Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")}
+        class="text-lg font-semibold text-white"
+      >
         OOSTKit
       </a>
-      <span class="text-sm text-ok-purple-300">Workgroup Pulse</span>
+      <span class="text-sm font-medium text-ok-purple-200">Workgroup Pulse</span>
+      <div class="w-[72px]"></div>
     </nav>
   </header>
   <div class="brand-stripe"></div>

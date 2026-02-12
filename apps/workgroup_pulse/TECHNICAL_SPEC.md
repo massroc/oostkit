@@ -53,13 +53,13 @@ SessionLive.Show (root LiveView)
 │   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
 │
 ├── Shared (in CoreComponents)
-│   ├── .app_header           # OOSTKit brand header (dark purple, brand link + app name)
+│   ├── .app_header           # OOSTKit brand header (dark purple, 3-zone: brand link + app name + session info)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
 │   └── .score_indicator      # Traffic light score display
 │
 ├── Layouts
-│   ├── app.html.heex         # Standard layout with OOSTKit header + brand stripe (Create, Join)
+│   ├── app.html.heex         # Standard layout with 3-zone header (OOSTKit link via :portal_url, centered app name, placeholder) + brand stripe
 │   └── session.html.heex     # Bare layout for session pages (no header — session uses .app_header inline)
 │
 └── Other LiveViews

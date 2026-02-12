@@ -184,7 +184,7 @@ Shared components in `lib/workgroup_pulse_web/components/core_components.ex`:
 
 ### `<.app_header>`
 
-OOSTKit brand header shared across all apps. Dark purple background (`bg-ok-purple-900`) with "OOSTKit" brand link on the left (links to `https://oostkit.com`) and optional session name on the right. A magenta-to-purple gradient brand stripe (`.brand-stripe`) renders below the header.
+OOSTKit brand header used in session views. Dark purple background (`bg-ok-purple-900`) with three-zone `justify-between` layout: "OOSTKit" brand link on the left (links to `https://oostkit.com`, not configurable in the component), optional session name and "Workgroup Pulse" label on the right. A magenta-to-purple gradient brand stripe (`.brand-stripe`) renders below the header.
 
 ```elixir
 <.app_header session_name="Six Criteria Assessment" />
@@ -196,8 +196,10 @@ Two Phoenix layouts control header presence:
 
 | Layout | Used By | Header |
 |--------|---------|--------|
-| `:app` | Create (home page) and Join pages | OOSTKit header + brand stripe in layout (no inline `.app_header`) |
+| `:app` | Create (home page) and Join pages | Three-zone header in layout: OOSTKit link (left, via `:portal_url`), "Workgroup Pulse" (centre), placeholder div (right) + brand stripe |
 | `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders `.app_header` inline |
+
+The `:app` layout uses `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit link, configured in `config/dev.exs` and `config/runtime.exs` (from `PORTAL_URL` env var).
 
 The `:session` layout prevents duplicate headers when the session LiveView renders its own `app_header` component (which includes the session name).
 
