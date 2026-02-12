@@ -85,4 +85,11 @@ if config_env() == :prod do
   config :portal, :mail_from,
     name: System.get_env("MAIL_FROM_NAME", "OOSTKit"),
     address: System.get_env("MAIL_FROM_ADDRESS", "noreply@oostkit.com")
+
+  # Optional: GitHub token for CI status (higher rate limits / private repos)
+  github_token = System.get_env("GITHUB_TOKEN")
+  if github_token, do: config(:portal, :github_token, github_token)
+
+  # GitHub repo for CI status (owner/repo format)
+  config :portal, :github_repo, System.get_env("GITHUB_REPO", "rossm/oostkit")
 end

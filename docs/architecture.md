@@ -159,6 +159,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - App detail pages (`/apps/:id`) with richer layout, inline email capture for coming-soon tools (`POST /apps/:app_id/notify`)
 - SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
 - Dev auto-login flow: auto-logs in as dev super admin on first visit, sets cross-app cookie, dev-only "Admin" button in header for manual re-login (`POST /dev/admin-login`)
+- System status page (`/admin/status`) with a `Portal.StatusPoller` GenServer that polls app health endpoints (`/health`) and GitHub Actions CI status every 5 minutes. Results are broadcast via PubSub to a LiveView (`PortalWeb.Admin.StatusLive`) that updates connected admin sessions in real time. Shows health status (response time, up/down) and recent CI workflow runs for Portal, Pulse, and WRT. Uses the Req HTTP client. The poller is conditionally started in the supervision tree (disabled in test via `:start_status_poller` config).
 
 **Deferred:** Admin dashboard trends/charts.
 
@@ -180,6 +181,8 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - `MAIL_FROM` -- Configurable email from-address (e.g., `noreply@oostkit.com`)
 - `PULSE_URL` -- Override Pulse URL in production (default: `https://pulse.oostkit.com`)
 - `WRT_URL` -- Override WRT URL in production (default: `https://wrt.oostkit.com`)
+- `GITHUB_TOKEN` -- (optional) GitHub personal access token for CI status polling; enables higher API rate limits and access to private repos
+- `GITHUB_REPO` -- GitHub repository in `owner/repo` format for CI status polling (default: `rossm/oostkit`)
 
 ## Deployment
 
@@ -195,7 +198,8 @@ Each app deploys independently:
 GitHub Actions with path filtering:
 - Changes to `apps/workgroup_pulse/**` trigger only that app's CI
 - Each app has own workflow file
-- Deploys to Fly.io on merge to main
+- Deploys to Fly.io on merge to main (with retry: up to 3 attempts with exponential backoff)
+- Creates/updates a GitHub issue labelled `deploy-failure` on genuine deploy failure (after all retries exhausted), with error log details and a link to the workflow run
 - Post-deploy smoke test curls the app's `/health` endpoint with retries to verify successful deployment
 - Portal: CI/CD enabled with `.dockerignore` to optimize build context
   - Portal's `Dockerfile` uses monorepo root as build context (not app directory)
