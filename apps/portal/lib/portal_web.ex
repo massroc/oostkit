@@ -79,8 +79,40 @@ defmodule PortalWeb do
   defp html_helpers do
     quote do
       import Phoenix.HTML
-      use PetalComponents
-      import PortalWeb.CoreComponents, except: [button: 1, icon: 1, input: 1]
+
+      import PetalComponents.{
+        Accordion,
+        Alert,
+        Avatar,
+        Badge,
+        Breadcrumbs,
+        Button,
+        ButtonGroup,
+        Card,
+        Container,
+        Dropdown,
+        Field,
+        Form,
+        Input,
+        Link,
+        Loading,
+        Marquee,
+        Modal,
+        Pagination,
+        Progress,
+        Rating,
+        Skeleton,
+        SlideOver,
+        Stepper,
+        Table,
+        Tabs,
+        Typography,
+        UserDropdownMenu,
+        Menu
+      }
+
+      alias PetalComponents.HeroiconsV1
+      import PortalWeb.CoreComponents
       import OostkitShared.Components
       use Gettext, backend: PortalWeb.Gettext
 

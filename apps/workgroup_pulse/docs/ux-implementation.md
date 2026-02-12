@@ -180,13 +180,20 @@ The overlay no longer auto-opens on turn start. Users click their cell in the sc
 
 ## 5. Design System Components
 
-Shared components from `OostkitShared.Components` (`apps/oostkit_shared/`) and app-specific components in `core_components.ex`:
+Components are split between `OostkitShared.Components` (`apps/oostkit_shared/`) for cross-app shared components and `core_components.ex` for app-specific components:
 
-### `<.header_bar>` (shared), `<.header>` (shared), and `<.app_header>` (app-specific)
+### Shared Components (from `OostkitShared.Components`)
 
-The header uses the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This component provides the consistent OOSTKit header across all apps: dark purple background (`bg-ok-purple-900`), three-zone `justify-between` layout with brand link, absolutely centered title (`text-2xl font-semibold`), actions slot, and brand stripe.
+| Component | Purpose |
+|-----------|---------|
+| `<.header_bar>` | OOSTKit brand header: dark purple (`bg-ok-purple-900`), three-zone layout (brand link, centered title `text-2xl font-semibold`, actions slot), brand stripe |
+| `<.header>` | Page-level section header (`text-2xl font-bold`) with `:subtitle` and `:actions` slots |
+| `<.icon>` | Heroicon renderer (`<span class={[@name, @class]} />`) |
+| `<.flash>` | Flash notice with `:info` / `:error` variants, dismiss-on-click |
+| `<.flash_group>` | Standard flash group with client/server reconnection flashes |
+| `show/2`, `hide/2` | JS command helpers for animated show/hide transitions |
 
-The shared `<.header>` component provides page-level section headers (`text-2xl font-bold`) with `:subtitle` and `:actions` slots. Used by Portal and WRT for page titles (settings sections, admin pages).
+### `<.app_header>` (app-specific)
 
 The app-specific `<.app_header>` in `core_components.ex` wraps `<.header_bar>` and adds session-specific content (session name in the actions slot). Used in session views. The OOSTKit brand link URL is read from `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")`, matching the pattern used by the `:app` layout.
 
@@ -326,6 +333,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.12 — `header/1` consolidated into shared lib; header_bar title bumped to `text-2xl font-semibold`*
+*Document Version: 1.13 — Shared UI components (icon, flash, flash_group, show, hide) consolidated into `OostkitShared.Components`; CoreComponents now contains only app-specific components*
 *Created: 2026-02-07*
-*Updated: 2026-02-12*
+*Updated: 2026-02-13*

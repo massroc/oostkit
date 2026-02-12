@@ -241,9 +241,12 @@ test/
 
 ## Reusable UI Components
 
-`WrtWeb.CoreComponents` provides a set of reusable Phoenix function components for building
-consistent UI across the application. In addition to the standard Phoenix scaffolding components
-(flash, form, input, table, icon, etc.), the module includes these domain-specific components.
+`WrtWeb.CoreComponents` provides app-specific Phoenix function components for building
+consistent UI. Standard Phoenix scaffolding components (icon, flash, flash_group, show/hide) are
+provided by `OostkitShared.Components` (shared across all apps), while form-related components
+(button, input, field, form) come from Petal Components. WRT's CoreComponents contains only
+app-specific components: `simple_form`, `back`, `table`, `stat_card`, `empty_state`,
+`status_badge`, `callout`, badge/status helpers, and `translate_error`.
 
 All admin templates use these components exclusively — there is no inline/copy-pasted HTML for
 stat cards, badges, callouts, or empty states. The templates that consume them are:
@@ -374,7 +377,9 @@ nomination entries keyed by index.
 |------|------|
 | `assets/js/app.js` | JS module for dynamic add/remove of nomination entries |
 | `controllers/nominator/nomination_html/edit.html.heex` | Nomination form template with `<template>` element |
-| `components/core_components.ex` | Provides `simple_form/1`, `callout/1`, `button/1`, `icon/1` |
+| `components/core_components.ex` | Provides `simple_form/1`, `callout/1` |
+| `OostkitShared.Components` | Provides `icon/1` (shared across all apps) |
+| `PetalComponents.Button` | Provides `button/1` (from Petal component library) |
 
 ## Multi-Tenancy Implementation
 
@@ -1058,7 +1063,7 @@ defp deps do
 end
 ```
 
-The `oostkit_shared` path dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header used in the app layout) and `header/1` (page-level section header with title, subtitle, and actions slots).
+The `oostkit_shared` path dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), and `show/2`/`hide/2` (JS transition helpers).
 
 ## Implementation Phases
 

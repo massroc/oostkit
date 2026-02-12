@@ -1426,6 +1426,6 @@ end
 
 ---
 
-*Document Version: 4.5 — `header/1` consolidated into shared `OostkitShared.Components`; header_bar title bumped to `text-2xl font-semibold`*
-*Previous versions: v4.3 simplified Notes/Actions; v4.2 updated context APIs, removed settings embed; v4.1 removed intro state from state machine; v3.x covered LiveView component structure, socket state, and timer implementation inline*
-*Last Updated: 2026-02-12*
+*Document Version: 4.6 — Shared UI components (icon, flash, flash_group, show, hide) consolidated into `OostkitShared.Components`; app CoreComponents now contains only app-specific components (sheet, facilitator_timer, app_header, translate_error/translate_errors)*
+*Previous versions: v4.5 header/1 consolidated into shared lib; v4.3 simplified Notes/Actions; v4.2 updated context APIs, removed settings embed; v4.1 removed intro state from state machine; v3.x covered LiveView component structure, socket state, and timer implementation inline*
+*Last Updated: 2026-02-13*
