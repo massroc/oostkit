@@ -39,8 +39,12 @@
   </head>
   <body class="bg-surface-wall font-brand antialiased">
     <.header_bar
-      title={if @current_scope && @current_scope.user && !assigns[:hide_header_title], do: "Dashboard"}
-      title_url={if @current_scope && @current_scope.user && !assigns[:hide_header_title], do: "/home"}
+      title={
+        if @current_scope && @current_scope.user && !assigns[:hide_header_title], do: "Dashboard"
+      }
+      title_url={
+        if @current_scope && @current_scope.user && !assigns[:hide_header_title], do: "/home"
+      }
     >
       <:actions>
         <%= if @current_scope && @current_scope.user do %>
