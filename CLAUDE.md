@@ -236,6 +236,30 @@ Each app workflow has path filtering so changes to one app don't trigger CI for 
 2. Add app-specific `docker-compose.yml` with prefixed service names (e.g., `ya_app`, `ya_db`)
 3. Create CI workflow: `.github/workflows/your_app_name.yml` that calls `_elixir-ci.yml`:
    ```yaml
+   name: Your App CI
+
+   on:
+     push:
+       branches: [main]
+       paths:
+         - 'apps/your_app_name/**'
+         - 'apps/oostkit_shared/**'
+         - 'shared/**'
+         - '.github/workflows/your_app_name.yml'
+         - '.github/workflows/_elixir-ci.yml'
+     pull_request:
+       branches: [main]
+       paths:
+         - 'apps/your_app_name/**'
+         - 'apps/oostkit_shared/**'
+         - 'shared/**'
+         - '.github/workflows/your_app_name.yml'
+         - '.github/workflows/_elixir-ci.yml'
+
+   concurrency:
+     group: ${{ github.workflow }}-${{ github.ref }}
+     cancel-in-progress: true
+
    jobs:
      ci:
        uses: ./.github/workflows/_elixir-ci.yml
