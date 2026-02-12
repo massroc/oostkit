@@ -101,7 +101,13 @@ All apps share a unified visual identity via two mechanisms:
 - Provides shared Phoenix components consumed by all apps:
   - `header_bar/1` — the consistent OOSTKit header: three-zone layout with `relative` nav — "OOSTKit" brand link on the left (configurable `:brand_url`), absolutely centered title (`pointer-events-none absolute inset-x-0 text-center font-brand text-2xl font-semibold`), and an `:actions` slot on the right for app-specific auth/user content
   - `header/1` — a page-level section header (`text-2xl font-bold`) with `:subtitle` and `:actions` slots, used for page titles across Portal and WRT
-- Each app imports the components (via its `*Web` module) and renders `<.header_bar>` in its root or app layout, passing app-specific title and actions
+  - `icon/1` — Heroicon renderer (`<span class={[@name, @class]} />`)
+  - `flash/1` — flash notice component with `:info` and `:error` variants
+  - `flash_group/1` — standard flash group with client/server reconnection flashes
+  - `show/2` and `hide/2` — JS command helpers for animated show/hide transitions
+- Each app's `CoreComponents` module contains only app-specific components (e.g., Pulse's `sheet`, `facilitator_timer`; WRT's `stat_card`, `callout`; Portal's `tool_card`, `footer_bar`). Common UI primitives that were duplicated across apps have been consolidated into the shared lib.
+- `translate_error/1` remains per-app because each app's Petal Components config references its own `CoreComponents` module for error translation
+- Import chain in each app's `*Web` module: selective Petal Components imports (excluding `PetalComponents.Icon` since shared `icon/1` replaces it) -> app `CoreComponents` -> `OostkitShared.Components`
 - CI path filter: changes to `apps/oostkit_shared/**` trigger all three app workflows
 
 Each app imports the Tailwind preset in its `assets/tailwind.config.js` (with content paths including the shared lib for Tailwind class scanning) and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.

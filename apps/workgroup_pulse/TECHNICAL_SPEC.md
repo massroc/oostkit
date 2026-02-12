@@ -52,13 +52,19 @@ SessionLive.Show (root LiveView)
 │   ├── ExportModalComponent        # Export report type (full/team) + format (CSV/PDF) selection
 │   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
 │
-├── Shared (in CoreComponents + OostkitShared.Components)
-│   ├── .header_bar           # OOSTKit brand header from shared lib (dark purple, 3-zone: brand link + title(text-2xl) + actions slot)
-│   ├── .header               # Page-level section header from shared lib (text-2xl font-bold, subtitle + actions slots)
+├── Shared (from OostkitShared.Components — `apps/oostkit_shared/`)
+│   ├── .header_bar           # OOSTKit brand header (dark purple, 3-zone: brand link + title(text-2xl) + actions slot)
+│   ├── .header               # Page-level section header (text-2xl font-bold, subtitle + actions slots)
+│   ├── .icon                 # Heroicon renderer
+│   ├── .flash / .flash_group # Flash notices with client/server reconnection
+│   ├── show/2, hide/2        # JS command helpers for animated transitions
+│
+├── App-Specific (in CoreComponents)
 │   ├── .app_header           # App-specific header wrapper (delegates to .header_bar, adds session info; OOSTKit brand link via :portal_url config)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
-│   └── .score_indicator      # Traffic light score display
+│   ├── .score_indicator      # Traffic light score display
+│   └── translate_error/1, translate_errors/1  # Error translation (per-app, referenced by Petal config)
 │
 ├── Layouts
 │   ├── app.html.heex         # Standard layout using shared <.header_bar> (OOSTKit link via :portal_url, absolutely centered "Workgroup Pulse" title, Sign Up + Log In buttons linking to Portal) + brand stripe
@@ -550,5 +556,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.9 — `header/1` added to shared lib component hierarchy; header_bar title uses `text-2xl font-semibold`*
-*Last Updated: 2026-02-12*
+*Document Version: 1.10 — Shared UI components (icon, flash, flash_group, show, hide) consolidated into `OostkitShared.Components`; CoreComponents now contains only app-specific components*
+*Last Updated: 2026-02-13*

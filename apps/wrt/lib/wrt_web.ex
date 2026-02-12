@@ -75,7 +75,6 @@ defmodule WrtWeb do
         Dropdown,
         Field,
         Form,
-        Icon,
         Input,
         Link,
         Loading,
@@ -94,7 +93,7 @@ defmodule WrtWeb do
       }
 
       alias PetalComponents.HeroiconsV1
-      import WrtWeb.CoreComponents, except: [button: 1, icon: 1, input: 1]
+      import WrtWeb.CoreComponents
       import OostkitShared.Components
       use Gettext, backend: WrtWeb.Gettext
 
