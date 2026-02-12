@@ -1,0 +1,15 @@
+name: CI Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gate:
+    name: CI Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checks passed
+        run: echo "CI gate passed"

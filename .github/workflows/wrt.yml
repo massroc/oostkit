@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/wrt/**'
       - 'apps/oostkit_shared/**'
+      - 'shared/**'
       - '.github/workflows/wrt.yml'
       - '.github/workflows/_elixir-ci.yml'
   pull_request:
@@ -13,8 +14,13 @@ on:
     paths:
       - 'apps/wrt/**'
       - 'apps/oostkit_shared/**'
+      - 'shared/**'
       - '.github/workflows/wrt.yml'
       - '.github/workflows/_elixir-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -24,5 +30,4 @@ jobs:
       app_path: apps/wrt
       database_name: wrt_test
       deploy_enabled: false  # Enable when Fly.io is configured for WRT
-      app_url: 'https://wrt.oostkit.com'
     secrets: inherit
