@@ -82,7 +82,7 @@ Shared services (e.g., future auth) would have their own database.
 Portal's database is expanding beyond user accounts to include:
 - `tools` -- tool catalogue (12 tools with category grouping, read by dashboard, managed via admin kill switch)
 - `interest_signups` -- email captures from coming-soon pages
-- `user_tool_interests` -- onboarding tool interest data (user_id + tool_id join table)
+- `user_tool_interests` -- registration tool interest data (user_id + tool_id join table)
 
 ## Shared Design System
 
@@ -115,16 +115,16 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 
 **Current state:**
 - User authentication (password + magic link)
-- Self-service registration (name + email, magic link confirmation, facilitator-focused messaging)
+- Self-service registration (name + email + optional org, referral source, tool interests; magic link confirmation; users fully onboarded at registration)
 - Role system (Super Admin, Session Manager)
 - Cross-app auth: subdomain cookie + internal validation API
 - Mail delivery: Swoosh configured to use Finch API client (not hackney) in production
 - Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
 - Dashboard (`/home`) with DB-backed tool cards in a 3-column categorized grid (12 tools across Learning, Workshop Management, Team Workshops categories; three states: live, coming soon, maintenance)
-- First-visit onboarding card on dashboard (org, referral source, tool interest checkboxes)
+- Registration form collects org, referral source, and tool interest checkboxes (no separate onboarding step)
 - `tools` table in DB replacing hardcoded app config, seeded with 12 tools via data migration (ensures tools are available in all environments including production)
 - `interest_signups` table for email capture from coming-soon pages and app detail pages
-- `user_tool_interests` table for onboarding tool interest data
+- `user_tool_interests` table for tool interest data collected at registration
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
 - Three-zone header: OOSTKit brand link (left), current page title (centre), Sign Up / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
 - Route restructure: `/` redirects logged-in users to `/home`
@@ -141,11 +141,11 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 **Deferred:** Admin dashboard trends/charts.
 
 **Data model:**
-- `users` table -- email, name, role, organisation, referral_source, onboarding_completed, enabled
+- `users` table -- email, name, role, organisation, referral_source, onboarding_completed (set true at registration), enabled
 - `users_tokens` table -- session/magic link tokens (from phx.gen.auth)
 - `tools` table -- 12 tools with name, tagline, status, URL, audience, category, sort_order (per category), admin kill switch
 - `interest_signups` table -- email captures from coming-soon and app detail pages
-- `user_tool_interests` table -- onboarding tool interest (user_id + tool_id join table)
+- `user_tool_interests` table -- registration tool interest (user_id + tool_id join table)
 
 **Environment variables:**
 - `DATABASE_URL` -- PostgreSQL connection

@@ -85,6 +85,36 @@ defmodule Portal.AccountsTest do
       assert is_nil(user.hashed_password)
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
+      assert user.onboarding_completed
+    end
+
+    test "saves organisation and referral_source during registration" do
+      email = unique_user_email()
+
+      {:ok, user} =
+        Accounts.register_user(%{
+          email: email,
+          name: "Test",
+          organisation: "Acme Corp",
+          referral_source: "Conference"
+        })
+
+      assert user.organisation == "Acme Corp"
+      assert user.referral_source == "Conference"
+    end
+
+    test "saves tool interests during registration" do
+      email = unique_user_email()
+
+      {:ok, user} =
+        Accounts.register_user(
+          %{email: email, name: "Test"},
+          ["workgroup_pulse", "wrt"]
+        )
+
+      interests = Accounts.list_user_tool_interests(user.id)
+      assert "workgroup_pulse" in interests
+      assert "wrt" in interests
     end
   end
 
@@ -434,9 +464,8 @@ defmodule Portal.AccountsTest do
   end
 
   describe "complete_onboarding/3" do
-    test "marks onboarding complete and saves tool interests" do
+    test "saves profile data and tool interests" do
       user = user_fixture()
-      refute user.onboarding_completed
 
       {:ok, updated} =
         Accounts.complete_onboarding(

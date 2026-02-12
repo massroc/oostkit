@@ -52,6 +52,56 @@ defmodule PortalWeb.UserLive.RegistrationTest do
                ~r/An email was sent to .*, please access it to confirm your account/
     end
 
+    test "creates account with organisation and referral source", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/register")
+
+      email = unique_user_email()
+
+      form =
+        form(lv, "#registration_form",
+          user: %{
+            "email" => email,
+            "name" => "Test Facilitator",
+            "organisation" => "Acme Corp",
+            "referral_source" => "Conference"
+          }
+        )
+
+      {:ok, _lv, _html} =
+        render_submit(form)
+        |> follow_redirect(conn, ~p"/users/log-in")
+
+      user = Portal.Accounts.get_user_by_email(email)
+      assert user.organisation == "Acme Corp"
+      assert user.referral_source == "Conference"
+      assert user.onboarding_completed
+    end
+
+    test "saves tool interests during registration", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/register")
+
+      email = unique_user_email()
+
+      lv
+      |> form("#registration_form",
+        user: %{"email" => email, "name" => "Test"},
+        tool_ids: ["workgroup_pulse", "wrt"]
+      )
+      |> render_submit()
+
+      user = Portal.Accounts.get_user_by_email(email)
+      interests = Portal.Accounts.list_user_tool_interests(user.id)
+      assert "workgroup_pulse" in interests
+      assert "wrt" in interests
+    end
+
+    test "renders tool interest checkboxes", %{conn: conn} do
+      {:ok, _lv, html} = live(conn, ~p"/users/register")
+
+      assert html =~ "Which tools are you interested in?"
+      assert html =~ "Workgroup Pulse"
+    end
+
     test "requires name", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
