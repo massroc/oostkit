@@ -7,7 +7,7 @@ defmodule PortalWeb.UserLive.Login do
   def render(assigns) do
     ~H"""
     <div class="flex flex-1 items-center justify-center py-12">
-      <div class="mx-auto max-w-sm space-y-4">
+      <div class="mx-auto max-w-sm space-y-6">
         <div class="text-center">
           <.header>
             <p>{if @current_scope, do: "Re-authenticate", else: "Welcome back"}</p>
@@ -25,7 +25,8 @@ defmodule PortalWeb.UserLive.Login do
           </.header>
         </div>
 
-        <div :if={local_mail_adapter?()} class="alert alert-info">
+        <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6 space-y-4">
+          <div :if={local_mail_adapter?()} class="alert alert-info">
           <.icon name="hero-information-circle" class="size-6 shrink-0" />
           <div>
             <p>You are running the local mail adapter.</p>
@@ -89,6 +90,7 @@ defmodule PortalWeb.UserLive.Login do
             Log in with password <span aria-hidden="true">&rarr;</span>
           </.button>
         </.form>
+        </div>
 
         <p :if={!@current_scope} class="text-center text-sm text-zinc-500">
           <.link

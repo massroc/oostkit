@@ -37,7 +37,7 @@ defmodule PortalWeb.Admin.DashboardLive do
         </.header>
       </div>
 
-      <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
+      <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
         <h2 class="text-lg font-semibold text-text-dark mb-4">Quick Links</h2>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <.link
@@ -72,7 +72,7 @@ defmodule PortalWeb.Admin.DashboardLive do
       </div>
 
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-        <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
+        <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
           <dt class="text-sm font-medium text-zinc-500">Email Signups</dt>
           <dd class="mt-2 flex items-baseline">
             <span class="text-3xl font-bold text-text-dark">{@signup_count}</span>
@@ -85,7 +85,7 @@ defmodule PortalWeb.Admin.DashboardLive do
           </dd>
         </div>
 
-        <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
+        <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
           <dt class="text-sm font-medium text-zinc-500">Registered Users</dt>
           <dd class="mt-2 flex items-baseline">
             <span class="text-3xl font-bold text-text-dark">{@user_count}</span>
@@ -98,7 +98,7 @@ defmodule PortalWeb.Admin.DashboardLive do
           </dd>
         </div>
 
-        <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
+        <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
           <dt class="text-sm font-medium text-zinc-500">Active Users (30d)</dt>
           <dd class="mt-2">
             <span class="text-3xl font-bold text-text-dark">{@active_user_count}</span>
@@ -106,7 +106,7 @@ defmodule PortalWeb.Admin.DashboardLive do
         </div>
       </div>
 
-      <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
+      <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-text-dark">Tool Status</h2>
           <.link

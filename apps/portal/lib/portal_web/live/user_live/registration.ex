@@ -23,7 +23,8 @@ defmodule PortalWeb.UserLive.Registration do
           </.header>
         </div>
 
-        <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
+        <div class="mt-6 bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
+          <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
           <.field
             field={@form[:name]}
             type="text"
@@ -76,6 +77,7 @@ defmodule PortalWeb.UserLive.Registration do
             Get started
           </.button>
         </.form>
+        </div>
       </div>
     </div>
     """

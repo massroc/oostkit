@@ -7,7 +7,7 @@ defmodule PortalWeb.UserLive.ResetPassword do
   def render(assigns) do
     ~H"""
     <div class="flex flex-1 items-center justify-center py-12">
-      <div class="mx-auto max-w-sm space-y-4">
+      <div class="mx-auto max-w-sm space-y-6">
         <div class="text-center">
           <.header>
             Reset your password
@@ -15,7 +15,8 @@ defmodule PortalWeb.UserLive.ResetPassword do
           </.header>
         </div>
 
-        <.form for={@form} id="reset_password_form" phx-submit="reset_password" phx-change="validate">
+        <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
+          <.form for={@form} id="reset_password_form" phx-submit="reset_password" phx-change="validate">
           <.field
             field={@form[:password]}
             type="password"
@@ -31,6 +32,7 @@ defmodule PortalWeb.UserLive.ResetPassword do
           />
           <.button class="btn btn-primary w-full">Reset password</.button>
         </.form>
+        </div>
 
         <p class="text-center text-sm">
           <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">

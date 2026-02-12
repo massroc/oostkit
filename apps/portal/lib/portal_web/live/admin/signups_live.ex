@@ -48,7 +48,7 @@ defmodule PortalWeb.Admin.SignupsLive do
         </form>
       </div>
 
-      <div class="overflow-hidden rounded-lg border border-zinc-200 bg-surface-sheet shadow-sheet">
+      <div class="overflow-hidden rounded-xl border border-zinc-200 bg-surface-sheet shadow-sheet">
         <table class="min-w-full divide-y divide-zinc-200">
           <thead class="bg-surface-sheet-secondary">
             <tr>

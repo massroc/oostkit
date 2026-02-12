@@ -74,7 +74,7 @@ defmodule PortalWeb.Admin.UsersLive do
 
       <div
         :if={@show_form}
-        class="mb-8 rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet"
+        class="mb-8 rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet"
       >
         <h2 class="text-lg font-semibold mb-4">
           {if @editing_user, do: "Edit User", else: "Create New User"}
@@ -115,7 +115,7 @@ defmodule PortalWeb.Admin.UsersLive do
         </.form>
       </div>
 
-      <div class="overflow-hidden rounded-lg border border-zinc-200 bg-surface-sheet shadow-sheet">
+      <div class="overflow-hidden rounded-xl border border-zinc-200 bg-surface-sheet shadow-sheet">
         <table class="min-w-full divide-y divide-zinc-200">
           <thead class="bg-surface-sheet-secondary">
             <tr>
