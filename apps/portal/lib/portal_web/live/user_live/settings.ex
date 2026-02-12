@@ -14,109 +14,129 @@ defmodule PortalWeb.UserLive.Settings do
         </.header>
       </div>
 
-      <section>
-        <h2 class="text-base font-semibold text-text-dark">Profile</h2>
-        <p class="mt-1 text-sm text-zinc-500">Your name and organisation.</p>
-        <.form
-          for={@profile_form}
-          id="profile_form"
-          phx-submit="update_profile"
-          phx-change="validate_profile"
-        >
-          <div class="mt-4 space-y-4">
-            <.field
-              field={@profile_form[:name]}
-              type="text"
-              label="Name"
-              autocomplete="name"
-              required
-            />
-            <.field
-              field={@profile_form[:organisation]}
-              type="text"
-              label="Organisation (optional)"
-              autocomplete="organization"
-            />
-          </div>
-          <div class="mt-6">
-            <.button phx-disable-with="Saving...">Save Profile</.button>
-          </div>
-        </.form>
-      </section>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+        <section>
+          <h2 class="text-base font-semibold text-text-dark">Profile</h2>
+          <p class="mt-1 text-sm text-zinc-500">Your name and organisation.</p>
+          <.form
+            for={@profile_form}
+            id="profile_form"
+            phx-submit="update_profile"
+            phx-change="validate_profile"
+          >
+            <div class="mt-4 space-y-4 max-w-xs">
+              <.field
+                field={@profile_form[:name]}
+                type="text"
+                label="Name"
+                autocomplete="name"
+                required
+              />
+              <.field
+                field={@profile_form[:organisation]}
+                type="text"
+                label="Organisation (optional)"
+                autocomplete="organization"
+              />
+            </div>
+            <div class="mt-6">
+              <.button phx-disable-with="Saving...">Save Profile</.button>
+            </div>
+          </.form>
+        </section>
 
-      <div class="border-t border-zinc-200" />
+        <section>
+          <h2 class="text-base font-semibold text-text-dark">Contact Preferences</h2>
+          <p class="mt-1 text-sm text-zinc-500">Choose what communications you receive.</p>
+          <.form
+            for={@contact_prefs_form}
+            id="contact_prefs_form"
+            phx-submit="update_contact_prefs"
+            phx-change="validate_contact_prefs"
+          >
+            <div class="mt-4">
+              <.field
+                field={@contact_prefs_form[:product_updates]}
+                type="checkbox"
+                label="Product updates"
+              />
+            </div>
+            <div class="mt-6">
+              <.button phx-disable-with="Saving...">Save Preferences</.button>
+            </div>
+          </.form>
+        </section>
 
-      <section>
-        <h2 class="text-base font-semibold text-text-dark">Email</h2>
-        <p class="mt-1 text-sm text-zinc-500">Update your email address.</p>
-        <.form
-          for={@email_form}
-          id="email_form"
-          phx-submit="update_email"
-          phx-change="validate_email"
-        >
-          <div class="mt-4 space-y-4">
-            <.field
-              field={@email_form[:email]}
-              type="email"
-              label="Email"
+        <section>
+          <h2 class="text-base font-semibold text-text-dark">Email</h2>
+          <p class="mt-1 text-sm text-zinc-500">Update your email address.</p>
+          <.form
+            for={@email_form}
+            id="email_form"
+            phx-submit="update_email"
+            phx-change="validate_email"
+          >
+            <div class="mt-4 space-y-4 max-w-xs">
+              <.field
+                field={@email_form[:email]}
+                type="email"
+                label="Email"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <div class="mt-6">
+              <.button phx-disable-with="Changing...">Change Email</.button>
+            </div>
+          </.form>
+        </section>
+
+        <section>
+          <h2 class="text-base font-semibold text-text-dark">Password</h2>
+          <p class="mt-1 text-sm text-zinc-500">
+            {if @password_label == "Add a password",
+              do: "Set a password for your account.",
+              else: "Update your account password."}
+          </p>
+          <.form
+            for={@password_form}
+            id="password_form"
+            action={~p"/users/update-password"}
+            method="post"
+            phx-change="validate_password"
+            phx-submit="update_password"
+            phx-trigger-action={@trigger_submit}
+          >
+            <input
+              name={@password_form[:email].name}
+              type="hidden"
+              id="hidden_user_email"
               autocomplete="username"
-              required
+              value={@current_email}
             />
-          </div>
-          <div class="mt-6">
-            <.button phx-disable-with="Changing...">Change Email</.button>
-          </div>
-        </.form>
-      </section>
-
-      <div class="border-t border-zinc-200" />
-
-      <section>
-        <h2 class="text-base font-semibold text-text-dark">Password</h2>
-        <p class="mt-1 text-sm text-zinc-500">
-          {if @password_label == "Add a password",
-            do: "Set a password for your account.",
-            else: "Update your account password."}
-        </p>
-        <.form
-          for={@password_form}
-          id="password_form"
-          action={~p"/users/update-password"}
-          method="post"
-          phx-change="validate_password"
-          phx-submit="update_password"
-          phx-trigger-action={@trigger_submit}
-        >
-          <input
-            name={@password_form[:email].name}
-            type="hidden"
-            id="hidden_user_email"
-            autocomplete="username"
-            value={@current_email}
-          />
-          <div class="mt-4 space-y-4">
-            <.field
-              field={@password_form[:password]}
-              type="password"
-              label={@password_label}
-              autocomplete="new-password"
-              required
-            />
-            <.field
-              field={@password_form[:password_confirmation]}
-              type="password"
-              label="Confirm new password"
-              autocomplete="new-password"
-            />
-          </div>
-          <div class="mt-6">
-            <.button phx-disable-with="Saving...">
-              {@password_label}
-            </.button>
-          </div>
-        </.form>
-      </section>
+            <div class="mt-4 space-y-4 max-w-xs">
+              <.field
+                field={@password_form[:password]}
+                type="password"
+                label={@password_label}
+                autocomplete="new-password"
+                required
+              />
+              <.field
+                field={@password_form[:password_confirmation]}
+                type="password"
+                label="Confirm new password"
+                autocomplete="new-password"
+              />
+            </div>
+            <div class="mt-6">
+              <.button phx-disable-with="Saving...">
+                {@password_label}
+              </.button>
+            </div>
+          </.form>
+        </section>
+      </div>
 
       <div class="border-t border-zinc-200" />
 
@@ -160,6 +180,7 @@ defmodule PortalWeb.UserLive.Settings do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_scope.user
     profile_changeset = Accounts.change_user_profile(user, %{})
+    contact_prefs_changeset = Accounts.change_contact_prefs(user, %{})
     email_changeset = Accounts.change_user_email(user, %{}, validate_unique: false)
     password_changeset = Accounts.change_user_password(user, %{}, hash_password: false)
 
@@ -167,6 +188,7 @@ defmodule PortalWeb.UserLive.Settings do
       socket
       |> assign(:current_email, user.email)
       |> assign(:profile_form, to_form(profile_changeset))
+      |> assign(:contact_prefs_form, to_form(contact_prefs_changeset))
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:password_label, password_label(user))
@@ -198,6 +220,28 @@ defmodule PortalWeb.UserLive.Settings do
 
       {:error, changeset} ->
         {:noreply, assign(socket, profile_form: to_form(changeset, action: :insert))}
+    end
+  end
+
+  def handle_event("validate_contact_prefs", %{"user" => user_params}, socket) do
+    contact_prefs_form =
+      socket.assigns.current_scope.user
+      |> Accounts.change_contact_prefs(user_params)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, contact_prefs_form: contact_prefs_form)}
+  end
+
+  def handle_event("update_contact_prefs", %{"user" => user_params}, socket) do
+    user = socket.assigns.current_scope.user
+
+    case Accounts.update_contact_prefs(user, user_params) do
+      {:ok, _user} ->
+        {:noreply, put_flash(socket, :info, "Contact preferences updated successfully.")}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, contact_prefs_form: to_form(changeset, action: :insert))}
     end
   end
 

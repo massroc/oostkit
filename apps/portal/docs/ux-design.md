@@ -272,7 +272,7 @@ or "Get started as a facilitator" — not generic "create an account" language.
 - **Sign Up button**: Links to `/users/register` — self-service registration with name + email, magic link confirmation
 - **Log In button**: Links to `/users/log-in` — "Welcome back" page with magic link (primary) and password (secondary)
 - **Registration collects profile data**: Organisation (optional), referral source (optional), and tool interest checkboxes are part of the registration form. Users are fully onboarded from the moment they register.
-- **Settings**: Facilitators can edit profile (name, org, referral source) and manage password at `/users/settings`
+- **Settings**: Facilitators can edit profile (name, org), manage contact preferences (product updates opt-in), and manage email/password at `/users/settings`
 - **Admin panel**: Super admin manages the platform at `/admin` (dashboard with links to users, signups, tools). Users table includes Organisation column.
 
 ### Next: Subscription
@@ -463,25 +463,34 @@ without requiring sudo mode — sudo checks are performed in event handlers for
 sensitive actions (email change, password change, account deletion). If not in
 sudo mode, the user is redirected to the login page with a message to re-authenticate.
 
-**Layout:** Uses a `space-y-10` wrapper for generous vertical rhythm. Each section has
-a bold `text-base font-semibold` heading and a `text-sm text-zinc-500` description,
-separated by `border-t border-zinc-200` dividers. The "Account Settings" title is
-centred at the top of the page.
+**Layout:** Uses a `space-y-10` outer wrapper with a centred "Account Settings" title
+at the top. The main content uses a responsive two-column grid
+(`grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10`) that stacks to single column
+on mobile. Text input fields are constrained to `max-w-xs` for comfortable reading
+width. Each section has a bold `text-base font-semibold` heading and a
+`text-sm text-zinc-500` description.
 
-**Sections (top to bottom):**
+**Grid sections (2x2 on desktop, stacked on mobile):**
 
-- **Profile** — heading "Profile", description "Your name and organisation." Name
-  and organisation fields (optional). Referral source is collected at registration
-  only and is not shown on the settings page.
-- *(divider)*
-- **Email** — heading "Email", description "Update your email address." Sends
-  confirmation to new address (requires sudo mode).
-- *(divider)*
-- **Password** — heading "Password", description adapts based on whether a password
-  exists ("Set a password for your account." / "Update your account password.").
-  Optional, for facilitators who prefer password login over magic links. If no
-  password is set yet, the button label reads "Add a password" rather than "Change
-  password" (requires sudo mode).
+- **Profile** (top-left) — heading "Profile", description "Your name and organisation."
+  Name and organisation fields (optional) wrapped in `max-w-xs`. Referral source is
+  collected at registration only and is not shown on the settings page.
+- **Contact Preferences** (top-right) — heading "Contact Preferences", description
+  "Choose what communications you receive." A single `product_updates` checkbox
+  labelled "Product updates" controls whether the user receives product update emails.
+  Saved via a dedicated "Save Preferences" button.
+- **Email** (bottom-left) — heading "Email", description "Update your email address."
+  Email field wrapped in `max-w-xs`. Sends confirmation to new address (requires
+  sudo mode).
+- **Password** (bottom-right) — heading "Password", description adapts based on
+  whether a password exists ("Set a password for your account." / "Update your
+  account password."). Password fields wrapped in `max-w-xs`. Optional, for
+  facilitators who prefer password login over magic links. If no password is set
+  yet, the button label reads "Add a password" rather than "Change password"
+  (requires sudo mode).
+
+**Below the grid (full-width):**
+
 - *(divider)*
 - **Danger zone** — heading "Danger zone" in `text-ok-red-600`, description warns
   that deletion is irreversible. Red "Delete Account" button with confirmation
@@ -544,6 +553,7 @@ users (additions)
 - organisation (text, nullable) — collected at registration
 - referral_source (text, nullable) — how they heard about OOSTKit, collected at registration
 - onboarding_completed (boolean, default true) — set to true at registration
+- product_updates (boolean, default false) — opt-in to product update emails, managed via settings
 ```
 
 Tool interest captured separately (many-to-many or simple join table):
@@ -701,7 +711,7 @@ so each category has its own independent ordering.
 | `/users/register` | Registration | No | Name + email + optional org, referral source, tool interests. Magic link confirmation. Facilitator-focused messaging. Users are fully onboarded at registration. |
 | `/users/forgot-password` | Forgot password | No | Email field, sends password reset link. Always shows success message (prevents user enumeration). |
 | `/users/reset-password/:token` | Reset password | No | New password + confirmation. Token validated on mount, redirects to login on success. |
-| `/users/settings` | Account settings | Yes | Profile (name, org), email change, password (add/change), account deletion. Sudo checks in handlers, not on page load. |
+| `/users/settings` | Account settings | Yes | Two-column responsive grid: Profile (name, org), Contact Preferences (product updates opt-in), email change, password (add/change). Danger zone (account deletion) full-width below. Sudo checks in handlers, not on page load. |
 | `DELETE /users/delete-account` | Delete account | Yes | Deletes user account and logs out. Triggered from settings page. |
 | `/admin` | Admin dashboard | Super Admin | Stats overview: signup counts, user counts, tool status. |
 | `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View registration data (org, referral source, tool interests). |

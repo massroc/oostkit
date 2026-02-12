@@ -216,6 +216,22 @@ defmodule Portal.Accounts do
   end
 
   @doc """
+  Returns an `%Ecto.Changeset{}` for changing contact preferences.
+  """
+  def change_contact_prefs(user, attrs \\ %{}) do
+    User.contact_prefs_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user's contact preferences (product_updates).
+  """
+  def update_contact_prefs(%User{} = user, attrs) do
+    user
+    |> User.contact_prefs_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
   Completes user onboarding, saving optional profile data and tool interests.
   """
   def complete_onboarding(%User{} = user, attrs, tool_ids \\ []) do

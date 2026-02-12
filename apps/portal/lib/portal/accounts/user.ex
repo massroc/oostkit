@@ -17,6 +17,7 @@ defmodule Portal.Accounts.User do
     field :organisation, :string
     field :referral_source, :string
     field :onboarding_completed, :boolean, default: false
+    field :product_updates, :boolean, default: false
 
     timestamps(type: :utc_datetime)
   end
@@ -71,6 +72,13 @@ defmodule Portal.Accounts.User do
     |> cast(attrs, [:organisation, :referral_source, :onboarding_completed])
     |> validate_length(:organisation, max: 255)
     |> validate_length(:referral_source, max: 255)
+  end
+
+  @doc """
+  A user changeset for updating contact preferences (product_updates).
+  """
+  def contact_prefs_changeset(user, attrs) do
+    cast(user, attrs, [:product_updates])
   end
 
   @doc """
