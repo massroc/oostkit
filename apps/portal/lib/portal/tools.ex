@@ -19,16 +19,12 @@ defmodule Portal.Tools do
     list_tools()
     |> Enum.group_by(& &1.category)
     |> Map.new(fn {category, tools} ->
-      sorted =
-        Enum.sort_by(tools, fn tool ->
-          case Tool.effective_status(tool) do
-            :live -> 0
-            _ -> 1
-          end
-        end)
-
-      {category, sorted}
+      {category, Enum.sort_by(tools, &status_sort_key/1)}
     end)
+  end
+
+  defp status_sort_key(tool) do
+    if Tool.effective_status(tool) == :live, do: 0, else: 1
   end
 
   def categories_ordered, do: @categories_ordered
