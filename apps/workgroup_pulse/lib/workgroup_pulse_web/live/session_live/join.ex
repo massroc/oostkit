@@ -64,7 +64,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
             Back
           </.link>
 
-          <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-1">
+          <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-1">
             Join Workshop
           </h1>
           <p class="text-ink-blue/60 text-sm font-brand">

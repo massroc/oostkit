@@ -207,6 +207,19 @@ The right zone always shows Sign Up (`rounded-md bg-white/10` frosted button lin
 
 The `:session` layout prevents duplicate headers when the session LiveView renders its own `app_header` component (which includes the session name).
 
+### Page Title (H1) Sizing
+
+All page-level H1 headings use `text-2xl font-bold` to match the Portal standard. This was standardized across all pre-scoring phases:
+
+| Component / Page | H1 Text | Classes |
+|-----------------|---------|---------|
+| `new.ex` (Create Workshop) | "New Workshop" | `text-2xl font-bold text-ink-blue` |
+| `join.ex` (Join Workshop) | "Join Workshop" | `text-2xl font-bold text-ink-blue` |
+| `LobbyComponent` | "Waiting Room" | `font-workshop text-2xl font-bold text-ink-blue` |
+| `IntroComponent` (all 4 slides) | Welcome / How It Works / Balance Scale / Maximal Scale | `font-workshop text-2xl font-bold text-ink-blue` |
+
+Scoring, summary, and wrap-up components were intentionally left at their existing sizes — their content density and layout context require different heading treatment.
+
 ### `<.sheet>`
 
 Core UI primitive — paper-textured surface. The building block for all phase content.
@@ -311,6 +324,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.10 — app_header OOSTKit brand link now uses `:portal_url` config instead of hardcoded URL*
+*Document Version: 1.11 — Standardized page title (H1) sizing to `text-2xl font-bold` across create, join, lobby, and intro components*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

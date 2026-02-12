@@ -145,6 +145,8 @@ See `/docs/brand-colors.md` for the complete palette.
 | UI Chrome | DM Sans | Headers, buttons, labels |
 | Workshop Content | Caveat | Scores, criteria names, notes (handwritten feel) |
 
+**Page title (H1) sizing:** All page-level H1 headings use `text-2xl font-bold` to match the Portal standard. This applies to the create page, join page, lobby, and intro slides. Scoring, summary, and wrap-up phases may use different heading sizes appropriate to their content density.
+
 ### Style Direction
 
 - **Light, warm, physical** — evokes paper and markers on a wall
@@ -229,6 +231,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.7 — Header extracted to shared `OostkitShared.Components.header_bar/1` component from `apps/oostkit_shared/`*
+*Document Version: 1.8 — Standardized page title (H1) sizing to `text-2xl font-bold` across all pre-scoring phases, matching Portal standard*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

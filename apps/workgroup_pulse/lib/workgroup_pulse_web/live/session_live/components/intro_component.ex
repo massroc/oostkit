@@ -16,7 +16,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <.sheet class={@class}>
       <div class="text-center">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
+        <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-6">
           Welcome to the Workshop
         </h1>
 
@@ -45,7 +45,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <.sheet class={@class}>
       <div class="text-center">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
+        <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-6">
           How This Workshop Works
         </h1>
 
@@ -80,7 +80,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <.sheet class={@class}>
       <div class="text-center">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
+        <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-6">
           Understanding the Balance Scale
         </h1>
 
@@ -128,7 +128,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.IntroComponent do
     ~H"""
     <.sheet class={@class}>
       <div class="text-center">
-        <h1 class="font-workshop text-3xl font-bold text-ink-blue mb-6">
+        <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-6">
           Understanding the Maximal Scale
         </h1>
 

@@ -76,7 +76,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
     <div class="flex-1 flex flex-col items-center justify-center px-4 py-4">
       <.sheet class="shadow-sheet p-sheet-padding w-[520px]">
         <div class="text-center mb-3">
-          <h1 class="font-workshop text-4xl font-bold text-ink-blue mb-1">
+          <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-1">
             Workgroup Pulse
           </h1>
           <p class="text-ink-blue/60 text-sm font-brand mb-3">
