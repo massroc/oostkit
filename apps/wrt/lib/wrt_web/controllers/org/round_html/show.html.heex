@@ -81,34 +81,38 @@
   <%= if Enum.empty?(@contacts) do %>
     <.empty_state message="No contacts in this round." />
   <% else %>
-    <.table id="contacts" rows={@contacts}>
-      <:col :let={contact} label="Name">{contact.person.name}</:col>
-      <:col :let={contact} label="Email">{contact.person.email}</:col>
-      <:col :let={contact} label="Status">
-        <%= cond do %>
-          <% contact.responded_at -> %>
-            <.status_badge kind={:contact} status="responded" />
-          <% contact.clicked_at -> %>
-            <.status_badge kind={:contact} status="clicked" />
-          <% contact.opened_at -> %>
-            <.status_badge kind={:contact} status="opened" />
-          <% contact.delivered_at -> %>
-            <.status_badge kind={:contact} status="delivered" />
-          <% true -> %>
-            <.status_badge kind={:contact} status="pending" />
-        <% end %>
-      </:col>
-    </.table>
+    <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl overflow-hidden">
+      <.table id="contacts" rows={@contacts}>
+        <:col :let={contact} label="Name">{contact.person.name}</:col>
+        <:col :let={contact} label="Email">{contact.person.email}</:col>
+        <:col :let={contact} label="Status">
+          <%= cond do %>
+            <% contact.responded_at -> %>
+              <.status_badge kind={:contact} status="responded" />
+            <% contact.clicked_at -> %>
+              <.status_badge kind={:contact} status="clicked" />
+            <% contact.opened_at -> %>
+              <.status_badge kind={:contact} status="opened" />
+            <% contact.delivered_at -> %>
+              <.status_badge kind={:contact} status="delivered" />
+            <% true -> %>
+              <.status_badge kind={:contact} status="pending" />
+          <% end %>
+        </:col>
+      </.table>
+    </div>
   <% end %>
 </div>
 
 <%= if length(@nominations) > 0 do %>
   <div class="mt-8">
-    <h2 class="text-lg font-semibold text-text-dark">Nominations</h2>
-    <.table id="nominations" rows={@nominations}>
-      <:col :let={nom} label="Nominee">{nom.nominee.name}</:col>
-      <:col :let={nom} label="Nominated By">{nom.nominator.name}</:col>
-      <:col :let={nom} label="Reason">{nom.reason || "-"}</:col>
-    </.table>
+    <h2 class="text-lg font-semibold text-text-dark mb-4">Nominations</h2>
+    <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl overflow-hidden">
+      <.table id="nominations" rows={@nominations}>
+        <:col :let={nom} label="Nominee">{nom.nominee.name}</:col>
+        <:col :let={nom} label="Nominated By">{nom.nominator.name}</:col>
+        <:col :let={nom} label="Reason">{nom.reason || "-"}</:col>
+      </.table>
+    </div>
   </div>
 <% end %>

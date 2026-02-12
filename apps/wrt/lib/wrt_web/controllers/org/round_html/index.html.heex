@@ -13,7 +13,7 @@
 </.header>
 
 <%= if @can_start_round do %>
-  <div class="mt-8 bg-surface-sheet shadow-sheet rounded-lg p-6">
+  <div class="mt-8 bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
     <h2 class="text-lg font-semibold text-text-dark mb-4">Start New Round</h2>
     <.simple_form
       for={%{}}
@@ -55,25 +55,27 @@
   <%= if Enum.empty?(@rounds) do %>
     <.empty_state message="No rounds yet. Start your first round above." />
   <% else %>
-    <.table id="rounds" rows={@rounds}>
-      <:col :let={round} label="Round">{round.round_number}</:col>
-      <:col :let={round} label="Status">
-        <.status_badge kind={:round} status={round.status} />
-      </:col>
-      <:col :let={round} label="Started">
-        {if round.started_at, do: Calendar.strftime(round.started_at, "%B %d, %Y"), else: "-"}
-      </:col>
-      <:col :let={round} label="Deadline">
-        {if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-"}
-      </:col>
-      <:action :let={round}>
-        <.link
-          href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"}
-          class="text-ok-purple-600 hover:text-ok-purple-800"
-        >
-          View
-        </.link>
-      </:action>
-    </.table>
+    <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl overflow-hidden">
+      <.table id="rounds" rows={@rounds}>
+        <:col :let={round} label="Round">{round.round_number}</:col>
+        <:col :let={round} label="Status">
+          <.status_badge kind={:round} status={round.status} />
+        </:col>
+        <:col :let={round} label="Started">
+          {if round.started_at, do: Calendar.strftime(round.started_at, "%B %d, %Y"), else: "-"}
+        </:col>
+        <:col :let={round} label="Deadline">
+          {if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-"}
+        </:col>
+        <:action :let={round}>
+          <.link
+            href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{round}"}
+            class="text-ok-purple-600 hover:text-ok-purple-800"
+          >
+            View
+          </.link>
+        </:action>
+      </.table>
+    </div>
   <% end %>
 </div>

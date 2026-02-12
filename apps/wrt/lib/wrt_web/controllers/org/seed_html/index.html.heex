@@ -15,7 +15,7 @@
 </.header>
 
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
+  <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
     <h2 class="text-lg font-semibold text-text-dark mb-4">Upload CSV</h2>
     <p class="text-sm text-gray-600 mb-4">
       Upload a CSV file with columns: <code>name</code>, <code>email</code>
@@ -37,7 +37,7 @@
     </.simple_form>
   </div>
 
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
+  <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
     <h2 class="text-lg font-semibold text-text-dark mb-4">Add Person</h2>
     <.simple_form
       :let={f}
@@ -60,9 +60,11 @@
   <%= if Enum.empty?(@seed_people) do %>
     <.empty_state message="No people in the seed group yet. Upload a CSV or add people manually." />
   <% else %>
-    <.table id="seed-people" rows={@seed_people}>
-      <:col :let={person} label="Name">{person.name}</:col>
-      <:col :let={person} label="Email">{person.email}</:col>
-    </.table>
+    <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl overflow-hidden">
+      <.table id="seed-people" rows={@seed_people}>
+        <:col :let={person} label="Name">{person.name}</:col>
+        <:col :let={person} label="Email">{person.email}</:col>
+      </.table>
+    </div>
   <% end %>
 </div>
