@@ -187,7 +187,8 @@ lib/
 │   │   │   ├── auth_controller.ex    # Magic link flow
 │   │   │   ├── auth_html.ex          # Landing, verify templates
 │   │   │   ├── nomination_controller.ex
-│   │   │   └── nomination_html.ex    # Nomination form
+│   │   │   └── nomination_html.ex    # Nomination form (uses <.simple_form>, <.callout>)
+│   │   │                             # edit.html.heex uses <template> + JS for dynamic entries
 │   │   │
 │   │   ├── health_controller.ex    # Health check endpoints ✓
 │   │   │                           # - /health (liveness)
@@ -253,6 +254,7 @@ stat cards, badges, callouts, or empty states. The templates that consume them a
 - `round_html/show.html.heex` — stat cards, active round callout (with form actions slot), contact status badges
 - `results_html/index.html.heex` — stat cards, source badges, empty state
 - `seed_html/index.html.heex` — empty state
+- `nomination_html/edit.html.heex` — simple_form, callouts (round info, existing nominations), button, icon (remove entry)
 
 ### stat_card/1
 
@@ -334,6 +336,45 @@ cleanup:
 - `campaign_status_class/1` — returns CSS classes for campaign status badges
 - `round_status_class/1` — returns CSS classes for round status badges
 - `source_class/1` — returns CSS classes for person source badges
+
+## Nomination Form (Dynamic Entries)
+
+The nomination form (`edit.html.heex`) uses a `<template>` element with placeholder tokens and a
+vanilla JS module in `app.js` for dynamic add/remove of nomination entries. This replaces an
+earlier inline `<script>` block.
+
+### How It Works
+
+1. **Server-rendered initial entries** — The HEEx template renders entries for each existing
+   nomination plus empty slots (minimum 3 entries), pre-populated with nominee data where
+   applicable. Each entry has a `data-index` attribute and a remove button (X icon).
+
+2. **`<template id="nomination-template">`** — A hidden HTML `<template>` element contains the
+   markup for a new nomination entry with `__INDEX__` and `__DISPLAY__` placeholder tokens. The
+   template uses plain CSS class names (e.g., `hero-x-mark`) instead of HEEx components since
+   it is cloned by JS, not rendered by Phoenix.
+
+3. **JS module (`app.js`)** — A `DOMContentLoaded` handler attaches to the form if present:
+   - **Add**: Clones the template, replaces `__INDEX__`/`__DISPLAY__` tokens with the next
+     available index, appends the entry, renumbers all headings, and focuses the first input.
+   - **Remove**: Delegated click handler on the container removes the closest `.nomination-entry`
+     (minimum 1 entry enforced), then renumbers headings.
+   - **Index calculation**: Scans existing `data-index` attributes for the max value and
+     increments, so indices remain unique even after removals.
+
+### Form Structure
+
+The form uses `<.simple_form>` and `<.callout>` components from `CoreComponents`. Field names
+follow the pattern `nominations[{index}][name|email|reason]` so Phoenix parses them as a map of
+nomination entries keyed by index.
+
+### Key Files
+
+| File | Role |
+|------|------|
+| `assets/js/app.js` | JS module for dynamic add/remove of nomination entries |
+| `controllers/nominator/nomination_html/edit.html.heex` | Nomination form template with `<template>` element |
+| `components/core_components.ex` | Provides `simple_form/1`, `callout/1`, `button/1`, `icon/1` |
 
 ## Multi-Tenancy Implementation
 
