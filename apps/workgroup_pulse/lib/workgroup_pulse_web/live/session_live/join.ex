@@ -53,14 +53,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
             navigate={~p"/"}
             class="text-ink-blue/50 hover:text-ink-blue inline-flex items-center text-sm font-brand mb-4"
           >
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
+            <.icon name="hero-arrow-left" class="w-4 h-4 mr-1" />
             Back
           </.link>
 
