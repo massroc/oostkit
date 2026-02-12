@@ -107,7 +107,7 @@ Content scrolls within the sheet when it exceeds the available height; no scroll
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 5rem;
+  padding-bottom: 0;
   scrollbar-width: thin;                          /* Firefox */
   scrollbar-color: rgba(26, 58, 107, 0.15) transparent;
 }
@@ -115,7 +115,7 @@ Content scrolls within the sheet when it exceeds the available height; no scroll
 
 Cross-browser thin scrollbar styling is applied via `::-webkit-scrollbar` (Chromium/Edge/Safari, 6px width) and `scrollbar-width: thin` (Firefox). `overflow-x: hidden` prevents horizontal scrollbars caused by CSS rotation on sheet containers.
 
-This is CSS-driven — no JS intervention needed. The sheet is the scroll container, not the page. The `padding-bottom: 5rem` ensures content isn't hidden behind the fixed floating action buttons.
+This is CSS-driven — no JS intervention needed. The sheet is the scroll container, not the page. No extra bottom padding is needed because the floating action buttons are positioned close to the sheet edge and the sheet's own padding provides sufficient clearance.
 
 ---
 
@@ -123,7 +123,7 @@ This is CSS-driven — no JS intervention needed. The sheet is the scroll contai
 
 ### Positioning
 
-Viewport-fixed bar (`fixed bottom-10 z-50`) that is 960px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
+Viewport-fixed bar (`fixed bottom-6 z-50`) that is 960px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
 
 The container uses `pointer-events-none` with `pointer-events-auto` on the inner button wrapper, so clicks pass through to the sheet except where buttons are.
 
@@ -307,6 +307,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.6 — Removed HomeLive from accent color table (merged into SessionLive.New); updated layout table*
+*Document Version: 1.7 — Reduced scoring sheet vertical spacing: sheet-stack padding 1rem→0.5rem, inner scroll padding-bottom 5rem→0, sheet padding p-3→p-2, floating buttons bottom-10→bottom-6*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*
