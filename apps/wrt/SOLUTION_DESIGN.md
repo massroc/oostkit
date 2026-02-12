@@ -199,7 +199,7 @@ lib/
 │   │
 │   ├── components/                 # ✓
 │   │   ├── layouts.ex
-│   │   └── core_components.ex      # Includes campaign/round/source status badge helpers
+│   │   └── core_components.ex      # Core UI components (see Reusable UI Components below)
 │   │
 │   └── templates/                  # ✓
 │       └── nominator/
@@ -237,6 +237,92 @@ test/
         │   └── manage_controller_test.exs # Process Manager tests ✓
         └── webhook_controller_test.exs # ✓
 ```
+
+## Reusable UI Components
+
+`WrtWeb.CoreComponents` provides a set of reusable Phoenix function components for building
+consistent UI across the application. In addition to the standard Phoenix scaffolding components
+(flash, form, input, table, icon, etc.), the module includes these domain-specific components:
+
+### stat_card/1
+
+Renders a metric card with label, value, optional detail text, and optional link. Used on
+dashboards and summary views to display KPIs.
+
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `label` | string | yes | — | Card heading (e.g. "Response Rate") |
+| `value` | string | yes | — | Primary metric value (e.g. "85%") |
+| `detail` | string | no | nil | Secondary detail text (e.g. "17 / 20 responded") |
+| `value_color` | string | no | `"text-text-dark"` | Tailwind text color class for the value |
+| `link_text` | string | no | nil | Link label shown below detail |
+| `link_href` | any | no | nil | Link destination |
+
+### empty_state/1
+
+Renders a centered empty state message with optional Heroicon and call-to-action button. Used
+when a list or section has no data to display.
+
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `icon` | string | no | nil | Heroicon name (e.g. `"hero-document-text"`) |
+| `message` | string | yes | — | Explanatory message |
+| `action_text` | string | no | nil | CTA button label |
+| `action_href` | any | no | nil | CTA button destination |
+
+### status_badge/1
+
+Renders a PetalComponents Badge with automatic color mapping based on entity kind and status
+value. Replaces the legacy `*_status_class/1` helper functions which returned raw CSS class
+strings for manual badge markup.
+
+| Attribute | Type | Required | Values | Description |
+|-----------|------|----------|--------|-------------|
+| `kind` | atom | yes | `:campaign`, `:round`, `:source`, `:contact` | Determines color mapping |
+| `status` | string | yes | — | Status value displayed as badge label |
+
+**Color mapping:**
+
+| Kind | Status | Badge Color |
+|------|--------|-------------|
+| `:campaign` | `"active"` | success (green) |
+| `:campaign` | `"completed"` | info (blue) |
+| `:campaign` | other | gray |
+| `:round` | `"active"` | success (green) |
+| `:round` | `"closed"` | info (blue) |
+| `:round` | other | gray |
+| `:source` | `"seed"` | info (blue) |
+| `:source` | `"nominated"` | primary (purple) |
+| `:source` | other | gray |
+| `:contact` | `"responded"` | success (green) |
+| `:contact` | `"clicked"` | info (blue) |
+| `:contact` | `"opened"` | warning (yellow) |
+| `:contact` | other | gray |
+
+### callout/1
+
+Renders a colored alert/callout box with optional heading, body content, and actions slot.
+Supports five variants for different contexts: info, success, warning, danger, and neutral.
+
+| Attribute | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `kind` | atom | yes | — | `:info`, `:success`, `:warning`, `:danger`, or `:neutral` |
+| `heading` | string | no | nil | Bold heading text |
+| `class` | string | no | nil | Additional CSS classes |
+
+| Slot | Description |
+|------|-------------|
+| `inner_block` | Body content |
+| `actions` | Action buttons/links rendered below the body |
+
+### Legacy Status Helpers
+
+The following functions are retained for backward compatibility but should not be used in new
+code. Use `status_badge/1` instead:
+
+- `campaign_status_class/1` — returns CSS classes for campaign status badges
+- `round_status_class/1` — returns CSS classes for round status badges
+- `source_class/1` — returns CSS classes for person source badges
 
 ## Multi-Tenancy Implementation
 
