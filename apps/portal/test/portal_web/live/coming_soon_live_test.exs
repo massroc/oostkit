@@ -1,5 +1,5 @@
 defmodule PortalWeb.ComingSoonLiveTest do
-  use PortalWeb.ConnCase
+  use PortalWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
 

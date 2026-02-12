@@ -1,5 +1,5 @@
 defmodule PortalWeb.PageControllerTest do
-  use PortalWeb.ConnCase
+  use PortalWeb.ConnCase, async: true
 
   describe "GET / (landing page)" do
     test "renders the marketing landing page for anonymous users", %{conn: conn} do

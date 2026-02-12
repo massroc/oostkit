@@ -61,8 +61,9 @@ defmodule PortalWeb.Admin.DashboardLiveTest do
       session_manager_fixture(%{email: "sm@example.com"})
 
       {:ok, _lv, html} = live(conn, ~p"/admin")
-      # At least 2 users: the admin + the session manager
       assert html =~ "Registered Users"
+      # 2 users: the super admin from setup + the session manager
+      assert html =~ ">2</span>"
     end
 
     test "displays tool status summary", %{conn: conn} do

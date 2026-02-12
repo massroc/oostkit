@@ -251,9 +251,8 @@ defmodule PortalWeb.UserLive.Settings do
 
   def handle_event("update_email", params, socket) do
     %{"user" => user_params} = params
-    user = socket.assigns.current_scope.user
 
-    if Accounts.sudo_mode?(user) do
+    require_sudo(socket, "change your email", fn user ->
       case Accounts.change_user_email(user, user_params) do
         %{valid?: true} = changeset ->
           Accounts.deliver_user_update_email_instructions(
@@ -268,12 +267,7 @@ defmodule PortalWeb.UserLive.Settings do
         changeset ->
           {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
       end
-    else
-      {:noreply,
-       socket
-       |> put_flash(:error, "You must re-authenticate to change your email.")
-       |> push_navigate(to: ~p"/users/log-in")}
-    end
+    end)
   end
 
   def handle_event("validate_password", params, socket) do
@@ -290,9 +284,8 @@ defmodule PortalWeb.UserLive.Settings do
 
   def handle_event("update_password", params, socket) do
     %{"user" => user_params} = params
-    user = socket.assigns.current_scope.user
 
-    if Accounts.sudo_mode?(user) do
+    require_sudo(socket, "change your password", fn user ->
       case Accounts.change_user_password(user, user_params) do
         %{valid?: true} = changeset ->
           {:noreply, assign(socket, trigger_submit: true, password_form: to_form(changeset))}
@@ -300,23 +293,24 @@ defmodule PortalWeb.UserLive.Settings do
         changeset ->
           {:noreply, assign(socket, password_form: to_form(changeset, action: :insert))}
       end
-    else
-      {:noreply,
-       socket
-       |> put_flash(:error, "You must re-authenticate to change your password.")
-       |> push_navigate(to: ~p"/users/log-in")}
-    end
+    end)
   end
 
   def handle_event("delete_account", _params, socket) do
+    require_sudo(socket, "delete your account", fn _user ->
+      {:noreply, assign(socket, trigger_delete: true)}
+    end)
+  end
+
+  defp require_sudo(socket, action_name, fun) do
     user = socket.assigns.current_scope.user
 
     if Accounts.sudo_mode?(user) do
-      {:noreply, assign(socket, trigger_delete: true)}
+      fun.(user)
     else
       {:noreply,
        socket
-       |> put_flash(:error, "You must re-authenticate to delete your account.")
+       |> put_flash(:error, "You must re-authenticate to #{action_name}.")
        |> push_navigate(to: ~p"/users/log-in")}
     end
   end

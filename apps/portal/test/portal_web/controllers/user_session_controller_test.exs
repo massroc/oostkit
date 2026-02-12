@@ -145,6 +145,50 @@ defmodule PortalWeb.UserSessionControllerTest do
     end
   end
 
+  describe "POST /users/update-password" do
+    test "redirects to login when sudo mode has expired", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> log_in_user(user,
+          token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -25, :minute)
+        )
+        |> post(~p"/users/update-password", %{
+          "user" => %{
+            "password" => "new_valid_password!",
+            "password_confirmation" => "new_valid_password!"
+          }
+        })
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "re-authenticate"
+    end
+  end
+
+  describe "DELETE /users/delete-account" do
+    test "redirects to login when sudo mode has expired", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> log_in_user(user,
+          token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -25, :minute)
+        )
+        |> delete(~p"/users/delete-account")
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "re-authenticate"
+    end
+
+    test "deletes account when in sudo mode", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> delete(~p"/users/delete-account")
+
+      assert redirected_to(conn) == ~p"/"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "deleted"
+      refute Accounts.get_user_by_email(user.email)
+    end
+  end
+
   describe "DELETE /users/log-out" do
     test "logs the user out", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> delete(~p"/users/log-out")

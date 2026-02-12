@@ -305,6 +305,22 @@ defmodule PortalWeb.UserLive.SettingsTest do
   end
 
   describe "delete account" do
+    test "deletes account when in sudo mode", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      form = form(lv, "#delete_account_form")
+      render_submit(form)
+
+      delete_conn = follow_trigger_action(form, conn)
+
+      assert redirected_to(delete_conn) == ~p"/"
+      assert Phoenix.Flash.get(delete_conn.assigns.flash, :info) =~ "deleted"
+      refute Accounts.get_user_by_email(user.email)
+    end
+
     test "redirects to login when not in sudo mode", %{conn: conn} do
       user = user_fixture()
 

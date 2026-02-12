@@ -110,14 +110,7 @@ defmodule PortalWeb.Admin.SignupsLive do
 
   @impl true
   def handle_event("search", %{"query" => query}, socket) do
-    signups =
-      if String.trim(query) == "" do
-        Marketing.list_interest_signups()
-      else
-        Marketing.search_interest_signups(query)
-      end
-
-    {:noreply, assign(socket, signups: signups, search: query)}
+    {:noreply, assign(socket, signups: reload_signups(query), search: query)}
   end
 
   def handle_event("delete_signup", %{"id" => id}, socket) do

@@ -48,25 +48,37 @@ defmodule PortalWeb.UserSessionController do
 
   def update_password(conn, %{"user" => user_params} = params) do
     user = conn.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
-    {:ok, {_user, expired_tokens}} = Accounts.update_user_password(user, user_params)
 
-    # disconnect all existing LiveViews with old sessions
-    UserAuth.disconnect_sessions(expired_tokens)
+    if Accounts.sudo_mode?(user) do
+      {:ok, {_user, expired_tokens}} = Accounts.update_user_password(user, user_params)
 
-    conn
-    |> put_session(:user_return_to, ~p"/users/settings")
-    |> create(params, "Password updated successfully!")
+      # disconnect all existing LiveViews with old sessions
+      UserAuth.disconnect_sessions(expired_tokens)
+
+      conn
+      |> put_session(:user_return_to, ~p"/users/settings")
+      |> create(params, "Password updated successfully!")
+    else
+      conn
+      |> put_flash(:error, "You must re-authenticate to change your password.")
+      |> redirect(to: ~p"/users/log-in")
+    end
   end
 
   def delete_account(conn, _params) do
     user = conn.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
-    {:ok, _user} = Accounts.delete_user(user)
 
-    conn
-    |> put_flash(:info, "Your account has been deleted.")
-    |> UserAuth.log_out_user()
+    if Accounts.sudo_mode?(user) do
+      {:ok, _user} = Accounts.delete_user(user)
+
+      conn
+      |> put_flash(:info, "Your account has been deleted.")
+      |> UserAuth.log_out_user()
+    else
+      conn
+      |> put_flash(:error, "You must re-authenticate to delete your account.")
+      |> redirect(to: ~p"/users/log-in")
+    end
   end
 
   def delete(conn, _params) do

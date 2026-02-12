@@ -7,24 +7,16 @@ defmodule PortalWeb.Admin.SignupsController do
   alias Portal.Marketing
 
   def export(conn, _params) do
-    scope = conn.assigns[:current_scope]
+    signups = Marketing.list_interest_signups()
+    csv = build_csv(signups)
 
-    if scope && scope.user && scope.user.role == "super_admin" && scope.user.enabled do
-      signups = Marketing.list_interest_signups()
-      csv = build_csv(signups)
-
-      conn
-      |> put_resp_content_type("text/csv")
-      |> put_resp_header(
-        "content-disposition",
-        ~s|attachment; filename="signups-#{Date.utc_today()}.csv"|
-      )
-      |> send_resp(200, csv)
-    else
-      conn
-      |> put_flash(:error, "You must be a super admin to access this page.")
-      |> redirect(to: ~p"/")
-    end
+    conn
+    |> put_resp_content_type("text/csv")
+    |> put_resp_header(
+      "content-disposition",
+      ~s|attachment; filename="signups-#{Date.utc_today()}.csv"|
+    )
+    |> send_resp(200, csv)
   end
 
   defp build_csv(signups) do
