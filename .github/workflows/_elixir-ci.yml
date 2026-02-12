@@ -82,7 +82,7 @@ jobs:
           path: |
             ${{ inputs.app_path }}/deps
             ${{ inputs.app_path }}/_build
-          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path)) }}
+          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
           restore-keys: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-
 
       - name: Install dependencies
@@ -96,18 +96,13 @@ jobs:
         run: mix format --check-formatted
 
       - name: Compile
-        run: mix compile
+        run: mix compile --warnings-as-errors
 
       - name: Run Credo
         run: mix credo --strict
 
       - name: Run Sobelow security scan
         run: mix sobelow --config
-
-      - name: Run tests
-        env:
-          DATABASE_URL: ecto://postgres:postgres@localhost:5432/${{ inputs.database_name }}
-        run: mix test
 
       - name: Run tests with coverage
         env:
@@ -144,7 +139,7 @@ jobs:
           path: |
             ${{ inputs.app_path }}/deps
             ${{ inputs.app_path }}/_build
-          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path)) }}
+          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
           restore-keys: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-
 
       - name: Restore PLT cache

@@ -226,8 +226,9 @@ CI uses a **reusable workflow pattern** for consistency across apps:
 - `.github/workflows/portal.yml` - Thin caller for Portal
 - `.github/workflows/workgroup_pulse.yml` - Thin caller for Workgroup Pulse
 - `.github/workflows/wrt.yml` - Thin caller for WRT
+- `.github/workflows/ci-gate.yml` - Always-run gate (required status check for branch protection)
 
-Each app workflow has path filtering so changes to one app don't trigger CI for others. Updates to `_elixir-ci.yml` trigger CI for all apps.
+Each app workflow has path filtering so changes to one app don't trigger CI for others. Updates to `_elixir-ci.yml` or `shared/**` trigger CI for all apps. The CI Gate workflow runs on every PR to satisfy branch protection's required status check.
 
 ## Adding a New App
 

@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/portal/**'
       - 'apps/oostkit_shared/**'
+      - 'shared/**'
       - '.github/workflows/portal.yml'
       - '.github/workflows/_elixir-ci.yml'
   pull_request:
@@ -13,8 +14,13 @@ on:
     paths:
       - 'apps/portal/**'
       - 'apps/oostkit_shared/**'
+      - 'shared/**'
       - '.github/workflows/portal.yml'
       - '.github/workflows/_elixir-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
