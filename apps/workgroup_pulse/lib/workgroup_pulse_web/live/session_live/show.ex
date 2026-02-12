@@ -315,12 +315,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     ~H"""
     <div id="session-analytics" phx-hook="PostHogTracker" class="flex flex-col h-full">
       {render_facilitator_timer(assigns)}
-      <!-- App Header (no session name during workshop phases) -->
-      <.app_header session_name={
-        if @session.state == "lobby",
-          do: session_display_name(@session),
-          else: nil
-      } />
+      <.app_header />
       <!-- Main Content Area -->
       <div class="flex-1 relative">
         {render_phase_carousel(assigns)}
@@ -482,20 +477,6 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
   # ═══════════════════════════════════════════════════════════════════════════
   # Helper functions
   # ═══════════════════════════════════════════════════════════════════════════
-
-  defp session_display_name(session) do
-    template_name =
-      case session.template do
-        %{name: name} when is_binary(name) and name != "" -> name
-        _ -> nil
-      end
-
-    if template_name do
-      "#{template_name}"
-    else
-      "Six Criteria Assessment"
-    end
-  end
 
   defp initial_carousel_index("scoring"), do: 4
   defp initial_carousel_index("summary"), do: 5

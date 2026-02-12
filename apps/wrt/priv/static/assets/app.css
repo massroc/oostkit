@@ -10932,6 +10932,10 @@ input::-webkit-datetime-edit {
   border-width: 0;
 }
 
+.pointer-events-none {
+  pointer-events: none;
+}
+
 .collapse {
   visibility: collapse;
 }
@@ -11011,16 +11015,6 @@ input::-webkit-datetime-edit {
   z-index: 50;
 }
 
-.-mx-4 {
-  margin-left: -1rem;
-  margin-right: -1rem;
-}
-
-.-my-2 {
-  margin-top: -0.5rem;
-  margin-bottom: -0.5rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -11028,6 +11022,10 @@ input::-webkit-datetime-edit {
 
 .-mr-1 {
   margin-right: -0.25rem;
+}
+
+.mb-1\.5 {
+  margin-bottom: 0.375rem;
 }
 
 .mb-10 {
@@ -11130,10 +11128,6 @@ input::-webkit-datetime-edit {
   display: block;
 }
 
-.inline-block {
-  display: inline-block;
-}
-
 .flex {
   display: flex;
 }
@@ -11144,10 +11138,6 @@ input::-webkit-datetime-edit {
 
 .table {
   display: table;
-}
-
-.flow-root {
-  display: flow-root;
 }
 
 .grid {
@@ -11186,8 +11176,16 @@ input::-webkit-datetime-edit {
   height: 1.5rem;
 }
 
+.h-8 {
+  height: 2rem;
+}
+
 .min-h-\[6rem\] {
   min-height: 6rem;
+}
+
+.min-h-screen {
+  min-height: 100vh;
 }
 
 .\!w-max {
@@ -11219,6 +11217,10 @@ input::-webkit-datetime-edit {
   width: 1.5rem;
 }
 
+.w-8 {
+  width: 2rem;
+}
+
 .w-80 {
   width: 20rem;
 }
@@ -11231,16 +11233,12 @@ input::-webkit-datetime-edit {
   width: 100%;
 }
 
-.min-w-full {
-  min-width: 100%;
-}
-
 .max-w-2xl {
   max-width: 42rem;
 }
 
-.max-w-4xl {
-  max-width: 56rem;
+.max-w-3xl {
+  max-width: 48rem;
 }
 
 .max-w-7xl {
@@ -11249,14 +11247,6 @@ input::-webkit-datetime-edit {
 
 .max-w-lg {
   max-width: 32rem;
-}
-
-.max-w-md {
-  max-width: 28rem;
-}
-
-.max-w-sm {
-  max-width: 24rem;
 }
 
 .max-w-xl {
@@ -11346,6 +11336,10 @@ input::-webkit-datetime-edit {
   animation: spin 1s linear infinite;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .list-inside {
   list-style-position: inside;
 }
@@ -11414,25 +11408,6 @@ input::-webkit-datetime-edit {
   gap: 2rem;
 }
 
-.gap-x-12 {
-  -moz-column-gap: 3rem;
-       column-gap: 3rem;
-}
-
-.gap-x-4 {
-  -moz-column-gap: 1rem;
-       column-gap: 1rem;
-}
-
-.gap-x-6 {
-  -moz-column-gap: 1.5rem;
-       column-gap: 1.5rem;
-}
-
-.gap-y-6 {
-  row-gap: 1.5rem;
-}
-
 .space-y-3 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
@@ -11451,12 +11426,6 @@ input::-webkit-datetime-edit {
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
 }
 
-.space-y-8 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(2rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(2rem * var(--tw-space-y-reverse));
-}
-
 .divide-y > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-y-reverse: 0;
   border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
@@ -11468,16 +11437,6 @@ input::-webkit-datetime-edit {
   border-color: rgb(244 244 245 / var(--tw-divide-opacity, 1));
 }
 
-.divide-zinc-200 > :not([hidden]) ~ :not([hidden]) {
-  --tw-divide-opacity: 1;
-  border-color: rgb(228 228 231 / var(--tw-divide-opacity, 1));
-}
-
-.divide-zinc-300 > :not([hidden]) ~ :not([hidden]) {
-  --tw-divide-opacity: 1;
-  border-color: rgb(212 212 216 / var(--tw-divide-opacity, 1));
-}
-
 .self-start {
   align-self: flex-start;
 }
@@ -11486,18 +11445,8 @@ input::-webkit-datetime-edit {
   overflow: hidden;
 }
 
-.overflow-x-auto {
-  overflow-x: auto;
-}
-
 .overflow-y-auto {
   overflow-y: auto;
-}
-
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .whitespace-nowrap {
@@ -11582,6 +11531,10 @@ input::-webkit-datetime-edit {
   border-color: rgb(251 113 133 / var(--tw-border-opacity, 1));
 }
 
+.border-transparent {
+  border-color: transparent;
+}
+
 .border-zinc-200 {
   --tw-border-opacity: 1;
   border-color: rgb(228 228 231 / var(--tw-border-opacity, 1));
@@ -11632,11 +11585,6 @@ input::-webkit-datetime-edit {
   background-color: rgb(251 249 243 / var(--tw-bg-opacity, 1));
 }
 
-.bg-ok-gold-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(241 167 19 / var(--tw-bg-opacity, 1));
-}
-
 .bg-ok-green-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(234 246 233 / var(--tw-bg-opacity, 1));
@@ -11667,11 +11615,6 @@ input::-webkit-datetime-edit {
   background-color: rgb(36 21 81 / var(--tw-bg-opacity, 1));
 }
 
-.bg-ok-red-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 231 231 / var(--tw-bg-opacity, 1));
-}
-
 .bg-ok-red-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(251 243 243 / var(--tw-bg-opacity, 1));
@@ -11700,6 +11643,10 @@ input::-webkit-datetime-edit {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.bg-white\/10 {
+  background-color: rgb(255 255 255 / 0.1);
 }
 
 .fill-cyan-900 {
@@ -11735,19 +11682,9 @@ input::-webkit-datetime-edit {
   padding-right: 0.5rem;
 }
 
-.px-2\.5 {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-}
-
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
-}
-
-.px-3\.5 {
-  padding-left: 0.875rem;
-  padding-right: 0.875rem;
 }
 
 .px-4 {
@@ -11765,9 +11702,9 @@ input::-webkit-datetime-edit {
   padding-bottom: 0.25rem;
 }
 
-.py-10 {
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
+.py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
 }
 
 .py-2 {
@@ -11775,34 +11712,14 @@ input::-webkit-datetime-edit {
   padding-bottom: 0.5rem;
 }
 
-.py-2\.5 {
-  padding-top: 0.625rem;
-  padding-bottom: 0.625rem;
-}
-
 .py-20 {
   padding-top: 5rem;
   padding-bottom: 5rem;
 }
 
-.py-3 {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-.py-3\.5 {
-  padding-top: 0.875rem;
-  padding-bottom: 0.875rem;
-}
-
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
-}
-
-.py-5 {
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
 }
 
 .py-8 {
@@ -11814,32 +11731,8 @@ input::-webkit-datetime-edit {
   padding-bottom: 1rem;
 }
 
-.pl-3 {
-  padding-left: 0.75rem;
-}
-
-.pl-4 {
-  padding-left: 1rem;
-}
-
-.pr-3 {
-  padding-right: 0.75rem;
-}
-
-.pr-4 {
-  padding-right: 1rem;
-}
-
 .pr-6 {
   padding-right: 1.5rem;
-}
-
-.pt-6 {
-  padding-top: 1.5rem;
-}
-
-.pt-8 {
-  padding-top: 2rem;
 }
 
 .text-left {
@@ -11870,11 +11763,6 @@ input::-webkit-datetime-edit {
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
-}
-
-.text-4xl {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
 }
 
 .text-lg {
@@ -11928,8 +11816,8 @@ input::-webkit-datetime-edit {
   line-height: 2rem;
 }
 
-.tracking-tight {
-  letter-spacing: -0.025em;
+.tracking-wide {
+  letter-spacing: 0.025em;
 }
 
 .tracking-widest {
@@ -12051,11 +11939,6 @@ input::-webkit-datetime-edit {
   color: rgb(46 23 115 / var(--tw-text-opacity, 1));
 }
 
-.text-ok-purple-900 {
-  --tw-text-opacity: 1;
-  color: rgb(36 21 81 / var(--tw-text-opacity, 1));
-}
-
 .text-ok-red-400 {
   --tw-text-opacity: 1;
   color: rgb(239 108 108 / var(--tw-text-opacity, 1));
@@ -12174,10 +12057,6 @@ input::-webkit-datetime-edit {
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
-.ring-inset {
-  --tw-ring-inset: inset;
-}
-
 .ring-emerald-500 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(16 185 129 / var(--tw-ring-opacity, 1));
@@ -12186,11 +12065,6 @@ input::-webkit-datetime-edit {
 .ring-rose-500 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(244 63 94 / var(--tw-ring-opacity, 1));
-}
-
-.ring-zinc-300 {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(212 212 216 / var(--tw-ring-opacity, 1));
 }
 
 .filter {
@@ -12352,16 +12226,6 @@ input::-webkit-datetime-edit {
   background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
 }
 
-.hover\:bg-ok-gold-500:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(244 185 69 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-ok-green-500:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(66 210 53 / var(--tw-bg-opacity, 1));
-}
-
 .hover\:bg-ok-green-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(49 137 41 / var(--tw-bg-opacity, 1));
@@ -12372,11 +12236,6 @@ input::-webkit-datetime-edit {
   background-color: rgb(55 21 157 / var(--tw-bg-opacity, 1));
 }
 
-.hover\:bg-ok-red-500:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(244 69 69 / var(--tw-bg-opacity, 1));
-}
-
 .hover\:bg-ok-red-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(157 21 21 / var(--tw-bg-opacity, 1));
@@ -12385,6 +12244,10 @@ input::-webkit-datetime-edit {
 .hover\:bg-surface-sheet-secondary:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(245 243 240 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-white\/20:hover {
+  background-color: rgb(255 255 255 / 0.2);
 }
 
 .hover\:text-ok-purple-500:hover {
@@ -12400,10 +12263,6 @@ input::-webkit-datetime-edit {
 .hover\:text-white:hover {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
-}
-
-.hover\:underline:hover {
-  text-decoration-line: underline;
 }
 
 .hover\:file\:bg-ok-purple-100::file-selector-button:hover {
@@ -12474,13 +12333,12 @@ input::-webkit-datetime-edit {
 }
 
 @media (min-width: 640px) {
-  .sm\:col-span-2 {
-    grid-column: span 2 / span 2;
+  .sm\:block {
+    display: block;
   }
 
-  .sm\:-mx-6 {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
+  .sm\:inline {
+    display: inline;
   }
 
   .sm\:w-96 {
@@ -12508,10 +12366,6 @@ input::-webkit-datetime-edit {
     transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
   }
 
-  .sm\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .sm\:flex-row {
     flex-direction: row;
   }
@@ -12530,10 +12384,6 @@ input::-webkit-datetime-edit {
     border-bottom-right-radius: 0.75rem;
   }
 
-  .sm\:p-6 {
-    padding: 1.5rem;
-  }
-
   .sm\:px-0 {
     padding-left: 0px;
     padding-right: 0px;
@@ -12542,19 +12392,6 @@ input::-webkit-datetime-edit {
   .sm\:px-6 {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
-  }
-
-  .sm\:pl-0 {
-    padding-left: 0px;
-  }
-
-  .sm\:pr-0 {
-    padding-right: 0px;
-  }
-
-  .sm\:text-6xl {
-    font-size: 3.75rem;
-    line-height: 1;
   }
 
   .sm\:text-sm {
@@ -12582,17 +12419,8 @@ input::-webkit-datetime-edit {
 }
 
 @media (min-width: 1024px) {
-  .lg\:-mx-8 {
-    margin-left: -2rem;
-    margin-right: -2rem;
-  }
-
   .lg\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .lg\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .lg\:px-8 {

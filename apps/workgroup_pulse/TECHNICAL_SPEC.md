@@ -52,14 +52,15 @@ SessionLive.Show (root LiveView)
 │   ├── ExportModalComponent        # Export report type (full/team) + format (CSV/PDF) selection
 │   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
 │
-├── Shared (in CoreComponents)
-│   ├── .app_header           # OOSTKit brand header (dark purple, 3-zone: brand link + app name + session info)
+├── Shared (in CoreComponents + OostkitShared.Components)
+│   ├── .header_bar           # OOSTKit brand header from shared lib (dark purple, 3-zone: brand link + title + actions slot)
+│   ├── .app_header           # App-specific header wrapper (delegates to .header_bar, adds session info)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
 │   └── .score_indicator      # Traffic light score display
 │
 ├── Layouts
-│   ├── app.html.heex         # Standard layout with 3-zone header (OOSTKit link via :portal_url, absolutely centered "Workgroup Pulse" title, Sign Up + Log In buttons linking to Portal) + brand stripe
+│   ├── app.html.heex         # Standard layout using shared <.header_bar> (OOSTKit link via :portal_url, absolutely centered "Workgroup Pulse" title, Sign Up + Log In buttons linking to Portal) + brand stripe
 │   └── session.html.heex     # Bare layout for session pages (no header — session uses .app_header inline)
 │
 └── Other LiveViews
@@ -548,5 +549,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.6 — App layout header standardized: absolutely centered title, Sign Up + Log In buttons linking to Portal*
+*Document Version: 1.7 — Header extracted to shared `OostkitShared.Components.header_bar/1`; app_header simplified to delegate to shared component*
 *Last Updated: 2026-02-12*

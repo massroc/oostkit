@@ -18,10 +18,10 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 
 ### Portal
 
-**Feature-complete** — marketing landing page, dashboard, auth, onboarding, admin hub, app detail pages, SEO.
+**Feature-complete** — marketing landing page, dashboard, auth, onboarding, admin hub, app detail pages, static pages, SEO.
 
 - Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
-- Dashboard (`/home`) with DB-backed tool cards (11 tools, three states)
+- Dashboard (`/home`) with DB-backed tool cards (12 tools, three states)
 - Self-service registration (name + email, magic link confirmation)
 - Login with magic link (primary) and password (secondary)
 - First-visit onboarding card (org, referral source, tool interests)
@@ -34,8 +34,11 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 - SEO/Open Graph meta tags with per-page overrides
 - Cross-app auth via subdomain cookie + internal validation API
 - OOSTKit design system applied (branded semantic tokens, DM Sans, brand stripe)
+- Shared `header_bar` component from `oostkit_shared` library
+- Footer bar with links to About, Privacy, and Contact pages
+- Static pages: About (`/about`), Privacy Policy (`/privacy`), Contact (`/contact`)
 
-**Deferred:** Header breadcrumbs in Pulse/WRT, admin dashboard trends/charts.
+**Deferred:** Admin dashboard trends/charts.
 
 ### Workgroup Pulse
 
@@ -157,6 +160,21 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 
 ## Future Roadmap
 
+### New Apps (from Portal Dashboard)
+
+| App | Category | Status |
+|-----|----------|--------|
+| Introduction to OST | Learning | Planned |
+| DP1 Briefing | Learning | Planned |
+| DP2 Briefing | Learning | Planned |
+| Search Conference | Workshop Management | Planned |
+| Skill Matrix | Workshop Management | Planned |
+| Team Design | Team Workshops | Planned |
+| Team Kick-off | Team Workshops | Planned |
+| Org Design | Workshop Management | Deferred |
+| Collaboration Designer | Workshop Management | Deferred |
+| Org Cadence | Workshop Management | Deferred |
+
 ### Pulse Phase 2: Enhanced Features
 
 - Integration with Portal authentication
@@ -169,7 +187,6 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 
 ### Portal Enhancements
 
-- Header breadcrumb integration in Pulse/WRT
 - Admin dashboard trends/charts (once there's enough data)
 - Content expansion ("Learn about OST" section, richer app pages)
 - Billing integration (platform subscription)
@@ -185,9 +202,10 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 
 ### Shared Infrastructure
 
-- **CI/CD**: Path-filtered GitHub Actions workflows
+- **CI/CD**: Path-filtered GitHub Actions workflows (changes to `apps/oostkit_shared/**` trigger all app workflows)
 - **Deployment**: Fly.io, Sydney region, auto-scaling machines
 - **Design system**: `docs/design-system.md` + `shared/tailwind.preset.js`
+- **Shared component library**: `apps/oostkit_shared/` — Elixir path dependency providing `header_bar/1` component used by all apps
 
 ### Testing Standards
 

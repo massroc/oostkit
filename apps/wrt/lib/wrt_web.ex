@@ -95,6 +95,7 @@ defmodule WrtWeb do
 
       alias PetalComponents.HeroiconsV1
       import WrtWeb.CoreComponents, except: [button: 1, icon: 1, input: 1]
+      import OostkitShared.Components
       use Gettext, backend: WrtWeb.Gettext
 
       alias Phoenix.LiveView.JS

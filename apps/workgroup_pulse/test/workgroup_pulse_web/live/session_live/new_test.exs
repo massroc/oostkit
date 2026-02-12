@@ -8,7 +8,7 @@ defmodule WorkgroupPulseWeb.SessionLive.NewTest do
       {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "Workgroup Pulse"
-      assert html =~ "Intrinsic Motivator Assessment"
+      assert html =~ "Intrinsic Motivation Assessment"
       assert html =~ "Create Workshop"
       assert html =~ "Your Name"
     end

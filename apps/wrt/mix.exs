@@ -103,6 +103,9 @@ defmodule Wrt.MixProject do
       {:excoveralls, "~> 0.18", only: :test},
       {:mox, "~> 1.2", only: :test},
 
+      # Shared components
+      {:oostkit_shared, path: "../oostkit_shared"},
+
       # Development
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},

@@ -8,8 +8,10 @@ if System.get_env("PHX_SERVER") do
   config :workgroup_pulse, WorkgroupPulseWeb.Endpoint, server: true
 end
 
-# Portal URL for OOSTKit header link
-config :workgroup_pulse, :portal_url, System.get_env("PORTAL_URL", "https://oostkit.com")
+# Portal URL for OOSTKit header link (dev.exs sets localhost:4002; only override when env var is present)
+if portal_url = System.get_env("PORTAL_URL") do
+  config :workgroup_pulse, :portal_url, portal_url
+end
 
 # PostHog analytics (optional - set POSTHOG_API_KEY to enable)
 posthog_key = System.get_env("POSTHOG_API_KEY")

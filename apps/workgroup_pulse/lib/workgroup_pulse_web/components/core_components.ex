@@ -218,27 +218,23 @@ defmodule WorkgroupPulseWeb.CoreComponents do
   # ═══════════════════════════════════════════════════════════════════════════
 
   @doc """
-  Renders the OOSTKit app header with brand link and session name.
+  Renders the OOSTKit app header with centered app name.
 
   ## Examples
 
-      <.app_header session_name="Team Alpha — Six Criteria" />
+      <.app_header />
   """
-  attr :session_name, :string, default: nil
 
   def app_header(assigns) do
     ~H"""
     <header class="bg-ok-purple-900 flex-shrink-0 z-10">
-      <nav class="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
+      <nav class="relative mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
         <a href="https://oostkit.com" class="text-lg font-semibold text-white">
           OOSTKit
         </a>
-        <div class="flex items-center gap-4">
-          <span :if={@session_name} class="text-sm text-ok-purple-200">
-            {@session_name}
-          </span>
-          <span class="text-sm text-ok-purple-300">Workgroup Pulse</span>
-        </div>
+        <span class="pointer-events-none absolute inset-x-0 text-center font-brand text-sm font-medium text-ok-purple-200">
+          Workgroup Pulse
+        </span>
       </nav>
     </header>
     <div class="brand-stripe"></div>

@@ -182,9 +182,11 @@ The overlay no longer auto-opens on turn start. Users click their cell in the sc
 
 Shared components in `lib/workgroup_pulse_web/components/core_components.ex`:
 
-### `<.app_header>`
+### `<.header_bar>` (shared) and `<.app_header>` (app-specific)
 
-OOSTKit brand header used in session views. Dark purple background (`bg-ok-purple-900`) with three-zone `justify-between` layout: "OOSTKit" brand link on the left (links to `https://oostkit.com`, not configurable in the component), optional session name and "Workgroup Pulse" label on the right. A magenta-to-purple gradient brand stripe (`.brand-stripe`) renders below the header.
+The header uses the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This component provides the consistent OOSTKit header across all apps: dark purple background (`bg-ok-purple-900`), three-zone `justify-between` layout with brand link, absolutely centered title, actions slot, and brand stripe.
+
+The app-specific `<.app_header>` in `core_components.ex` wraps `<.header_bar>` and adds session-specific content (session name in the actions slot). Used in session views.
 
 ```elixir
 <.app_header session_name="Six Criteria Assessment" />
@@ -196,10 +198,10 @@ Two Phoenix layouts control header presence:
 
 | Layout | Used By | Header |
 |--------|---------|--------|
-| `:app` | Create (home page) and Join pages | Three-zone header in layout: OOSTKit link (left, via `:portal_url`), "Workgroup Pulse" absolutely centered (`pointer-events-none absolute inset-x-0 text-center font-brand`), Sign Up + Log In buttons (right, linking to Portal) + brand stripe |
+| `:app` | Create (home page) and Join pages | Shared `<.header_bar>` in layout: OOSTKit link (left, via `:portal_url`), "Workgroup Pulse" absolutely centered, Sign Up + Log In buttons (right, linking to Portal) + brand stripe |
 | `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders `.app_header` inline |
 
-The `:app` layout uses `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit link and for Sign Up/Log In button URLs, configured in `config/dev.exs` and `config/runtime.exs` (from `PORTAL_URL` env var).
+The `:app` layout uses `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit brand link URL and for Sign Up/Log In button URLs, configured in `config/dev.exs` and `config/runtime.exs` (from `PORTAL_URL` env var).
 
 The right zone always shows Sign Up (`rounded-md bg-white/10` frosted button linking to Portal `/users/register`) and Log In (text link to Portal `/users/log-in`), matching the Portal header styling. Pulse has no user authentication context, so the right zone does not adapt based on auth state.
 
@@ -309,6 +311,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.8 — App layout header standardized: absolutely centered title, Sign Up + Log In buttons in right zone linking to Portal, matching Portal header styling*
+*Document Version: 1.9 — Header extracted to shared `OostkitShared.Components.header_bar/1` from `apps/oostkit_shared/`; app_header simplified to delegate to shared component*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

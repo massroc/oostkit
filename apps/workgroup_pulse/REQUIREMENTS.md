@@ -755,5 +755,5 @@ The following features require further design decisions:
 
 ---
 
-*Document Version: 4.4 — Merged home and create session into single page at `/`; "Intrinsic Motivator Assessment" subtitle; removed standalone entry screen*
+*Document Version: 4.5 — Fixed "Intrinsic Motivator" → "Intrinsic Motivation" subtitle; header now uses shared `OostkitShared.Components.header_bar/1` component*
 *Last Updated: 2026-02-12*

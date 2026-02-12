@@ -1,32 +1,21 @@
 <div class="flex flex-col h-screen bg-surface-wall">
   <% portal_url = Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com") %>
-  <header class="bg-ok-purple-900">
-    <nav class="relative mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-      <a href={portal_url} class="text-lg font-semibold text-white">
-        OOSTKit
+  <.header_bar brand_url={portal_url} title="Workgroup Pulse">
+    <:actions>
+      <a
+        href={portal_url <> "/users/register"}
+        class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"
+      >
+        Sign Up
       </a>
-      <!-- Centre: App name (absolutely centered) -->
-      <span class="pointer-events-none absolute inset-x-0 text-center font-brand text-sm font-medium text-ok-purple-200">
-        Workgroup Pulse
-      </span>
-      <!-- Right: Auth -->
-      <div class="flex items-center gap-4">
-        <a
-          href={portal_url <> "/users/register"}
-          class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"
-        >
-          Sign Up
-        </a>
-        <a
-          href={portal_url <> "/users/log-in"}
-          class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-        >
-          Log In
-        </a>
-      </div>
-    </nav>
-  </header>
-  <div class="brand-stripe"></div>
+      <a
+        href={portal_url <> "/users/log-in"}
+        class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+      >
+        Log In
+      </a>
+    </:actions>
+  </.header_bar>
   <div class="flex-1 flex flex-col min-h-0">
     <.flash_group flash={@flash} />
     {@inner_content}

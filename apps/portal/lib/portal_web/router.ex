@@ -37,6 +37,9 @@ defmodule PortalWeb.Router do
 
     get "/", PageController, :landing
     get "/home", PageController, :home
+    get "/about", PageController, :about
+    get "/privacy", PageController, :privacy
+    get "/contact", PageController, :contact
     get "/apps/:app_id", PageController, :app_detail
     post "/apps/:app_id/notify", PageController, :notify
 
