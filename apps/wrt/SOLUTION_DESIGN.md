@@ -242,7 +242,17 @@ test/
 
 `WrtWeb.CoreComponents` provides a set of reusable Phoenix function components for building
 consistent UI across the application. In addition to the standard Phoenix scaffolding components
-(flash, form, input, table, icon, etc.), the module includes these domain-specific components:
+(flash, form, input, table, icon, etc.), the module includes these domain-specific components.
+
+All admin templates use these components exclusively — there is no inline/copy-pasted HTML for
+stat cards, badges, callouts, or empty states. The templates that consume them are:
+
+- `manage_html/index.html.heex` — stat cards, status badges (campaign, source), callouts (active campaign), empty states
+- `campaign_html/show.html.heex` — stat cards (with links), callouts (active/ready/seed states), round status badges
+- `round_html/index.html.heex` — warning callout (active round), round status badges, empty state
+- `round_html/show.html.heex` — stat cards, active round callout (with form actions slot), contact status badges
+- `results_html/index.html.heex` — stat cards, source badges, empty state
+- `seed_html/index.html.heex` — empty state
 
 ### stat_card/1
 
@@ -273,8 +283,8 @@ when a list or section has no data to display.
 ### status_badge/1
 
 Renders a PetalComponents Badge with automatic color mapping based on entity kind and status
-value. Replaces the legacy `*_status_class/1` helper functions which returned raw CSS class
-strings for manual badge markup.
+value. The label is automatically capitalised via `String.capitalize/1`. Replaces the legacy
+`*_status_class/1` helper functions which returned raw CSS class strings for manual badge markup.
 
 | Attribute | Type | Required | Values | Description |
 |-----------|------|----------|--------|-------------|
@@ -317,8 +327,9 @@ Supports five variants for different contexts: info, success, warning, danger, a
 
 ### Legacy Status Helpers
 
-The following functions are retained for backward compatibility but should not be used in new
-code. Use `status_badge/1` instead:
+The following functions are retained for backward compatibility but are no longer called by any
+template. All admin templates now use `status_badge/1` instead. These can be removed in a future
+cleanup:
 
 - `campaign_status_class/1` — returns CSS classes for campaign status badges
 - `round_status_class/1` — returns CSS classes for round status badges

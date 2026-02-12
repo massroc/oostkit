@@ -1,9 +1,7 @@
 <.header>
   {@campaign.name}
   <:subtitle>
-    <span class={"px-2 py-1 text-xs rounded-full #{campaign_status_class(@campaign.status)}"}>
-      {@campaign.status}
-    </span>
+    <.status_badge kind={:campaign} status={@campaign.status} />
     <%= if @campaign.description do %>
       <span class="ml-4 text-gray-600">{@campaign.description}</span>
     <% end %>
@@ -16,80 +14,63 @@
 </.header>
 
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Seed Group</h3>
-    <p class="mt-2 text-3xl font-semibold text-text-dark">{@seed_count}</p>
-    <.link
-      href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed"}
-      class="mt-2 text-sm text-ok-purple-600 hover:text-ok-purple-800"
-    >
-      Manage Seed Group &rarr;
-    </.link>
-  </div>
-
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Total People</h3>
-    <p class="mt-2 text-3xl font-semibold text-text-dark">
-      {Map.get(@people_counts, "seed", 0) + Map.get(@people_counts, "nominated", 0)}
-    </p>
-    <p class="mt-2 text-sm text-gray-500">
-      {Map.get(@people_counts, "nominated", 0)} nominated
-    </p>
-  </div>
-
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Rounds</h3>
-    <p class="mt-2 text-3xl font-semibold text-text-dark">{length(@rounds)}</p>
-    <.link
-      href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"}
-      class="mt-2 text-sm text-ok-purple-600 hover:text-ok-purple-800"
-    >
-      View Rounds &rarr;
-    </.link>
-  </div>
+  <.stat_card
+    label="Seed Group"
+    value={to_string(@seed_count)}
+    link_text="Manage Seed Group"
+    link_href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed"}
+  />
+  <.stat_card
+    label="Total People"
+    value={
+      to_string(Map.get(@people_counts, "seed", 0) + Map.get(@people_counts, "nominated", 0))
+    }
+    detail={"#{Map.get(@people_counts, "nominated", 0)} nominated"}
+  />
+  <.stat_card
+    label="Rounds"
+    value={to_string(length(@rounds))}
+    link_text="View Rounds"
+    link_href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"}
+  />
 </div>
 
 <%= if @active_round do %>
-  <div class="mt-8 bg-ok-green-50 border border-ok-green-200 rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-ok-green-800">
-      Active Round {@active_round.round_number}
-    </h2>
-    <p class="text-ok-green-700 mt-1">
+  <.callout kind={:success} heading={"Active Round #{@active_round.round_number}"} class="mt-8">
+    <p>
       Deadline: {Calendar.strftime(@active_round.deadline, "%B %d, %Y at %I:%M %p")}
     </p>
-    <div class="mt-4 flex gap-4">
+    <:actions>
       <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@active_round}"}>
         <.button>View Round</.button>
       </.link>
-    </div>
-  </div>
+    </:actions>
+  </.callout>
 <% else %>
   <%= if @campaign.status == "draft" and @seed_count > 0 do %>
-    <div class="mt-8 bg-ok-gold-50 border border-ok-gold-200 rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-ok-gold-800">Ready to Start</h2>
-      <p class="text-ok-gold-700 mt-1">
+    <.callout kind={:warning} heading="Ready to Start" class="mt-8">
+      <p>
         Your seed group has {@seed_count} people. Start the first round to begin collecting nominations.
       </p>
-      <div class="mt-4">
+      <:actions>
         <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"}>
           <.button>Start Round 1</.button>
         </.link>
-      </div>
-    </div>
+      </:actions>
+    </.callout>
   <% end %>
 
   <%= if @campaign.status == "draft" and @seed_count == 0 do %>
-    <div class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-gray-800">Add Seed Group</h2>
-      <p class="text-gray-600 mt-1">
+    <.callout kind={:neutral} heading="Add Seed Group" class="mt-8">
+      <p>
         Upload a CSV or manually add people to your seed group before starting the campaign.
       </p>
-      <div class="mt-4">
+      <:actions>
         <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/seed"}>
           <.button>Manage Seed Group</.button>
         </.link>
-      </div>
-    </div>
+      </:actions>
+    </.callout>
   <% end %>
 <% end %>
 
@@ -99,9 +80,7 @@
     <.table id="rounds" rows={@rounds}>
       <:col :let={round} label="Round">{round.round_number}</:col>
       <:col :let={round} label="Status">
-        <span class={"px-2 py-1 text-xs rounded-full #{round_status_class(round.status)}"}>
-          {round.status}
-        </span>
+        <.status_badge kind={:round} status={round.status} />
       </:col>
       <:col :let={round} label="Deadline">
         {if round.deadline, do: Calendar.strftime(round.deadline, "%B %d, %Y"), else: "-"}

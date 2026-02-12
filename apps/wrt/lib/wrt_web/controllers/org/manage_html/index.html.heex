@@ -10,70 +10,52 @@
 
 <div class="mt-8">
   <%= if @active_campaign do %>
-    <div class="bg-ok-green-50 border border-ok-green-200 rounded-lg p-6 mb-8">
+    <.callout kind={:success} heading="Active Campaign" class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-semibold text-ok-green-800">Active Campaign</h2>
-          <p class="text-ok-green-700 mt-1">{@active_campaign.name}</p>
+          <p>{@active_campaign.name}</p>
+          <%= if @active_round do %>
+            <p class="text-sm mt-2">
+              Round {@active_round.round_number} in progress
+              <span class="ml-2">
+                Deadline: {Calendar.strftime(@active_round.deadline, "%B %d, %Y")}
+              </span>
+            </p>
+          <% else %>
+            <p class="text-sm mt-2">No active round</p>
+          <% end %>
         </div>
         <.link href={~p"/org/#{@org.slug}/campaigns/#{@active_campaign}"}>
           <.button class="bg-ok-green-600 hover:bg-ok-green-700">View Campaign</.button>
         </.link>
       </div>
-
-      <%= if @active_round do %>
-        <p class="text-sm text-ok-green-600 mt-2">
-          Round {@active_round.round_number} in progress
-          <span class="ml-2">
-            Deadline: {Calendar.strftime(@active_round.deadline, "%B %d, %Y")}
-          </span>
-        </p>
-      <% else %>
-        <p class="text-sm text-ok-green-600 mt-2">No active round</p>
-      <% end %>
-    </div>
+    </.callout>
 
     <%= if @campaign_stats do %>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface-sheet shadow-sheet rounded-lg p-4">
-          <h3 class="text-sm font-medium text-gray-500">Response Rate</h3>
-          <p class="mt-1 text-2xl font-semibold text-ok-purple-600">
-            {@campaign_stats.contacts.response_rate}%
-          </p>
-          <p class="text-xs text-gray-400">
-            {@campaign_stats.contacts.responded} / {@campaign_stats.contacts.total} responded
-          </p>
-        </div>
-
-        <div class="bg-surface-sheet shadow-sheet rounded-lg p-4">
-          <h3 class="text-sm font-medium text-gray-500">Total Nominations</h3>
-          <p class="mt-1 text-2xl font-semibold text-ok-green-600">
-            {@campaign_stats.nominations.total}
-          </p>
-          <p class="text-xs text-gray-400">
-            from {@campaign_stats.nominations.unique_nominators} nominators
-          </p>
-        </div>
-
-        <div class="bg-surface-sheet shadow-sheet rounded-lg p-4">
-          <h3 class="text-sm font-medium text-gray-500">Unique Nominees</h3>
-          <p class="mt-1 text-2xl font-semibold text-ok-purple-600">
-            {@campaign_stats.nominations.unique_nominees}
-          </p>
-          <p class="text-xs text-gray-400">
-            avg {@campaign_stats.nominations.avg_per_nominator} nominations each
-          </p>
-        </div>
-
-        <div class="bg-surface-sheet shadow-sheet rounded-lg p-4">
-          <h3 class="text-sm font-medium text-gray-500">Rounds</h3>
-          <p class="mt-1 text-2xl font-semibold text-gray-700">
-            {@campaign_stats.rounds.total}
-          </p>
-          <p class="text-xs text-gray-400">
-            {@campaign_stats.rounds.closed} closed, {@campaign_stats.rounds.active} active
-          </p>
-        </div>
+        <.stat_card
+          label="Response Rate"
+          value={"#{@campaign_stats.contacts.response_rate}%"}
+          detail={"#{@campaign_stats.contacts.responded} / #{@campaign_stats.contacts.total} responded"}
+          value_color="text-ok-purple-600"
+        />
+        <.stat_card
+          label="Total Nominations"
+          value={to_string(@campaign_stats.nominations.total)}
+          detail={"from #{@campaign_stats.nominations.unique_nominators} nominators"}
+          value_color="text-ok-green-600"
+        />
+        <.stat_card
+          label="Unique Nominees"
+          value={to_string(@campaign_stats.nominations.unique_nominees)}
+          detail={"avg #{@campaign_stats.nominations.avg_per_nominator} nominations each"}
+          value_color="text-ok-purple-600"
+        />
+        <.stat_card
+          label="Rounds"
+          value={to_string(@campaign_stats.rounds.total)}
+          detail={"#{@campaign_stats.rounds.closed} closed, #{@campaign_stats.rounds.active} active"}
+        />
       </div>
 
       <%= if length(@top_nominees) > 0 do %>
@@ -85,8 +67,8 @@
                 <div class="flex items-center">
                   <span class="w-6 text-sm font-bold text-ok-purple-600">{index + 1}.</span>
                   <span class="font-medium">{nominee.name}</span>
-                  <span class={"ml-2 px-2 py-0.5 text-xs rounded-full #{if nominee.source == "seed", do: "bg-ok-blue-100 text-ok-blue-700", else: "bg-ok-purple-100 text-ok-purple-700"}"}>
-                    {nominee.source}
+                  <span class="ml-2">
+                    <.status_badge kind={:source} status={nominee.source} />
                   </span>
                 </div>
                 <span class="font-semibold text-ok-green-600">
@@ -111,14 +93,12 @@
   <h2 class="text-lg font-semibold text-text-dark">Campaigns</h2>
 
   <%= if Enum.empty?(@campaigns) do %>
-    <p class="text-gray-500 mt-4">No campaigns yet. Create your first campaign to get started.</p>
+    <.empty_state message="No campaigns yet. Create your first campaign to get started." />
   <% else %>
     <.table id="campaigns" rows={@campaigns}>
       <:col :let={campaign} label="Name">{campaign.name}</:col>
       <:col :let={campaign} label="Status">
-        <span class={"px-2 py-1 text-xs rounded-full #{campaign_status_class(campaign.status)}"}>
-          {campaign.status}
-        </span>
+        <.status_badge kind={:campaign} status={campaign.status} />
       </:col>
       <:col :let={campaign} label="Created">
         {Calendar.strftime(campaign.inserted_at, "%B %d, %Y")}
