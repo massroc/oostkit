@@ -80,7 +80,7 @@ Shared services (e.g., future auth) would have their own database.
 | wrt | `wrt_dev` | `wrt_test` | 5434/5435 |
 
 Portal's database is expanding beyond user accounts to include:
-- `tools` -- tool catalogue (11 tools, read by dashboard, managed via admin kill switch)
+- `tools` -- tool catalogue (12 tools with category grouping, read by dashboard, managed via admin kill switch)
 - `interest_signups` -- email captures from coming-soon pages
 - `user_tool_interests` -- onboarding tool interest data (user_id + tool_id join table)
 
@@ -120,9 +120,9 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Cross-app auth: subdomain cookie + internal validation API
 - Mail delivery: Swoosh configured to use Finch API client (not hackney) in production
 - Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
-- Dashboard (`/home`) with DB-backed tool cards (11 tools, three states: live, coming soon, maintenance)
+- Dashboard (`/home`) with DB-backed tool cards in a 3-column categorized grid (12 tools across Learning, Workshop Management, Team Workshops categories; three states: live, coming soon, maintenance)
 - First-visit onboarding card on dashboard (org, referral source, tool interest checkboxes)
-- `tools` table in DB replacing hardcoded app config, seeded with 11 tools via data migration (ensures tools are available in all environments including production)
+- `tools` table in DB replacing hardcoded app config, seeded with 12 tools via data migration (ensures tools are available in all environments including production)
 - `interest_signups` table for email capture from coming-soon pages and app detail pages
 - `user_tool_interests` table for onboarding tool interest data
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
@@ -143,7 +143,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 **Data model:**
 - `users` table -- email, name, role, organisation, referral_source, onboarding_completed, enabled
 - `users_tokens` table -- session/magic link tokens (from phx.gen.auth)
-- `tools` table -- 11 tools with name, tagline, status, URL, audience, sort_order, admin kill switch
+- `tools` table -- 12 tools with name, tagline, status, URL, audience, category, sort_order (per category), admin kill switch
 - `interest_signups` table -- email captures from coming-soon and app detail pages
 - `user_tool_interests` table -- onboarding tool interest (user_id + tool_id join table)
 

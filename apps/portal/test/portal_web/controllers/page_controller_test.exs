@@ -28,6 +28,15 @@ defmodule PortalWeb.PageControllerTest do
       assert html_response(conn, 200) =~ "Workshop Referral Tool"
     end
 
+    test "renders category headings", %{conn: conn} do
+      conn = get(conn, ~p"/home")
+      html = html_response(conn, 200)
+
+      assert html =~ "Learning"
+      assert html =~ "Workshop Management"
+      assert html =~ "Team Workshops"
+    end
+
     test "shows Launch button for live tools", %{conn: conn} do
       conn = get(conn, ~p"/home")
 

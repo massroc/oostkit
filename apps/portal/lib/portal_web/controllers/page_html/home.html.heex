@@ -1,7 +1,7 @@
 <div class="min-h-screen">
   <!-- Dashboard Header -->
   <div class="px-6 py-12 sm:px-8 lg:px-12">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-6xl">
       <h1 class="text-3xl font-bold tracking-tight text-text-dark">
         Your tools
       </h1>
@@ -11,7 +11,7 @@
     </div>
   </div>
   <!-- Onboarding Card -->
-  <div :if={@show_onboarding} class="mx-auto max-w-4xl px-6 pb-8 sm:px-8 lg:px-12">
+  <div :if={@show_onboarding} class="mx-auto max-w-6xl px-6 pb-8 sm:px-8 lg:px-12">
     <div class="rounded-lg border border-ok-gold-300 bg-surface-sheet p-6 shadow-sheet">
       <h2 class="text-lg font-semibold text-text-dark mb-1">Tell us a bit about yourself</h2>
       <p class="text-sm text-zinc-500 mb-4">
@@ -88,10 +88,21 @@
       </form>
     </div>
   </div>
-  <!-- Tool Cards -->
-  <div class="mx-auto max-w-4xl px-6 pb-16 sm:px-8 lg:px-12">
-    <div class="space-y-6">
-      <.tool_card :for={tool <- @tools} tool={tool} current_scope={@current_scope} />
+  <!-- Tool Categories Grid -->
+  <div class="mx-auto max-w-6xl px-6 pb-16 sm:px-8 lg:px-12">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div :for={category <- @categories}>
+        <h2 class="mb-4 text-lg font-semibold text-text-dark">
+          {Portal.Tools.category_label(category)}
+        </h2>
+        <div class="space-y-4">
+          <.tool_card
+            :for={tool <- Map.get(@grouped_tools, category, [])}
+            tool={tool}
+            current_scope={@current_scope}
+          />
+        </div>
+      </div>
     </div>
   </div>
   <!-- Footer -->

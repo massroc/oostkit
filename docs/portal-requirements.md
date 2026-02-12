@@ -50,9 +50,9 @@ A bold, aspirational page for new visitors. Redirects logged-in users to `/home`
 
 ### Dashboard (`/home`)
 
-The functional tool hub. Accessible to everyone (anonymous and logged-in).
+The functional tool hub. Accessible to everyone (anonymous and logged-in). Page title: "Dashboard".
 
-**Layout:** Vertical stack of rich, full-width tool cards (11 total). No audience grouping -- flat list ordered by sort_order.
+**Layout:** Three-column categorized grid (12 tools). Tools grouped by `category` field into three columns: Learning, Workshop Management, Team Workshops. Each column has a heading and a vertical stack of compact tool cards beneath it. Stacks to single column on mobile.
 
 **Card states:**
 | State | When | Button | Visual |
@@ -61,20 +61,24 @@ The functional tool hub. Accessible to everyone (anonymous and logged-in).
 | Coming soon | Most tools now | "Coming soon" badge | Muted/greyed |
 | Live & locked | WRT later | "Log in to access" (anon) / "Launch" (logged in) | Full colour, lock icon for anon |
 
-**Tool catalogue (11 tools):**
-| Tool | Status |
-|------|--------|
-| Workgroup Pulse | Live & open |
-| Workshop Referral Tool | Coming soon |
-| Search Conference | Coming soon |
-| Team Kick-off | Coming soon |
-| Team Design | Coming soon |
-| Org Design | Coming soon |
-| Skill Matrix | Coming soon |
-| DP1 Briefing | Coming soon |
-| DP2 Briefing | Coming soon |
-| Collaboration Designer | Coming soon |
-| Org Cadence | Coming soon |
+Cards are compact (name, tagline, status badge, action button) -- no description text or audience badges to fit the narrower columns.
+
+**Tool catalogue (12 tools, by category):**
+
+| Category | Tool | Status |
+|----------|------|--------|
+| Learning | Introduction to Open Systems Thinking | Coming soon |
+| Learning | DP1 Briefing | Coming soon |
+| Learning | DP2 Briefing | Coming soon |
+| Workshop Management | Search Conference | Coming soon |
+| Workshop Management | Workshop Referral Tool | Coming soon |
+| Workshop Management | Skill Matrix | Coming soon |
+| Workshop Management | Org Design | Coming soon |
+| Workshop Management | Collaboration Designer | Coming soon |
+| Workshop Management | Org Cadence | Coming soon |
+| Team Workshops | Team Design | Coming soon |
+| Team Workshops | Team Kick-off | Coming soon |
+| Team Workshops | Workgroup Pulse | Live & open |
 
 ### App Detail Pages (`/apps/:id`)
 
@@ -178,7 +182,7 @@ Admin hub for super admins:
 - **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest)
 - **User management** (`/admin/users`) -- create/edit/disable accounts, view onboarding data
 - **Email signups** (`/admin/signups`) -- view/export coming-soon email capture list, CSV export
-- **Tool management** (`/admin/tools`) -- view tool status, kill switch toggle per tool
+- **Tool management** (`/admin/tools`) -- view tool status with category column, kill switch toggle per tool
 
 ### Future Considerations
 
@@ -330,7 +334,7 @@ The landing page uses a `pulse_url/1` helper (in `PageHTML`) that reads the URL 
 1. **Domain:** oostkit.com (registered)
 2. **Branding:** Simple icon + wordmark for now, proper logo in progress
 3. **WRT integration:** Replace WRT's auth entirely when portal auth is ready
-4. **App metadata:** Tools table in database (replaces hardcoded app config), seeded with 11 tools via data migration (available in all environments including production)
+4. **App metadata:** Tools table in database (replaces hardcoded app config), seeded with 12 tools via data migration (available in all environments including production). Tools have a `category` field for dashboard grouping.
 5. **Analytics:** Nice to have, implement later (not in initial phases)
 6. **Pricing model:** Platform subscription -- one price unlocks all paid tools
 7. **Org/team accounts:** Solo facilitators only for now; org accounts if demand emerges

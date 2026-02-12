@@ -88,50 +88,36 @@ defmodule PortalWeb.CoreComponents do
 
     ~H"""
     <div class={[
-      "rounded-xl border p-6 transition",
+      "rounded-xl border p-4 transition",
       @status == :live && "border-zinc-200 bg-surface-sheet shadow-sheet hover:shadow-sheet-lifted",
       @status == :coming_soon && "border-zinc-200 bg-surface-sheet-secondary opacity-75",
       @status == :maintenance && "border-zinc-200 bg-surface-sheet-secondary opacity-60"
     ]}>
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <div class="flex items-center gap-3">
-            <h3 class="text-lg font-semibold text-text-dark">{@tool.name}</h3>
-            <%= if @status == :live do %>
-              <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2.5 py-0.5 text-xs font-medium text-ok-green-800">
-                Live
-              </span>
-            <% else %>
-              <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2.5 py-0.5 text-xs font-medium text-ok-gold-800">
-                Coming soon
-              </span>
-            <% end %>
-          </div>
-          <p class="mt-1 text-sm text-zinc-600">{@tool.tagline}</p>
-        </div>
-        <span class={[
-          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-          @tool.audience == "facilitator" && "bg-ok-purple-50 text-ok-purple-700",
-          @tool.audience == "team" && "bg-ok-blue-50 text-ok-blue-700"
-        ]}>
-          {if @tool.audience == "facilitator", do: "For facilitators", else: "For teams"}
-        </span>
+      <div class="flex items-center gap-2 flex-wrap">
+        <h3 class="text-sm font-semibold text-text-dark">{@tool.name}</h3>
+        <%= if @status == :live do %>
+          <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2 py-0.5 text-xs font-medium text-ok-green-800">
+            Live
+          </span>
+        <% else %>
+          <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2 py-0.5 text-xs font-medium text-ok-gold-800">
+            Coming soon
+          </span>
+        <% end %>
       </div>
-      <p :if={@tool.description} class="mt-3 text-sm text-zinc-600 line-clamp-2">
-        {@tool.description}
-      </p>
-      <div class="mt-4 flex items-center gap-3">
+      <p class="mt-1 text-xs text-zinc-600">{@tool.tagline}</p>
+      <div class="mt-3 flex items-center gap-3">
         <%= if @status == :live and @tool.url do %>
           <a
             href={@tool.url}
-            class="inline-flex items-center rounded-md bg-ok-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-ok-purple-700"
+            class="inline-flex items-center rounded-md bg-ok-purple-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-ok-purple-700"
           >
-            Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1.5 h-4 w-4" />
+            Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1 h-3.5 w-3.5" />
           </a>
         <% end %>
         <.link
           navigate={~p"/apps/#{@tool.id}"}
-          class="text-sm font-medium text-ok-purple-600 hover:text-ok-purple-800"
+          class="text-xs font-medium text-ok-purple-600 hover:text-ok-purple-800"
         >
           Learn more
         </.link>

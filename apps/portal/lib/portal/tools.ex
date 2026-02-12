@@ -6,12 +6,25 @@ defmodule Portal.Tools do
   alias Portal.Repo
   alias Portal.Tools.Tool
 
+  @categories_ordered ~w(learning workshop_management team_workshops)
+
   def list_tools do
     Tool
-    |> order_by(:sort_order)
+    |> order_by([:category, :sort_order])
     |> Repo.all()
     |> Enum.map(&apply_config_url/1)
   end
+
+  def list_tools_grouped do
+    list_tools()
+    |> Enum.group_by(& &1.category)
+  end
+
+  def categories_ordered, do: @categories_ordered
+
+  def category_label("learning"), do: "Learning"
+  def category_label("workshop_management"), do: "Workshop Management"
+  def category_label("team_workshops"), do: "Team Workshops"
 
   def get_tool(id) do
     case Repo.get(Tool, id) do

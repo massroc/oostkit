@@ -31,6 +31,9 @@ defmodule PortalWeb.Admin.ToolsLive do
                 Tool
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                Category
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                 Default Status
               </th>
               <th class="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
@@ -49,6 +52,9 @@ defmodule PortalWeb.Admin.ToolsLive do
               <td class="px-6 py-4">
                 <div class="text-sm font-medium text-text-dark">{tool.name}</div>
                 <div class="text-xs text-zinc-500">{tool.tagline}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
+                {Portal.Tools.category_label(tool.category)}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class={[
