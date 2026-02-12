@@ -174,11 +174,18 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 - Workgroup Pulse remains free and open (no login required) -- the top-of-funnel discovery tool
 - Participants access sessions via links (no account, no friction)
 - Sign Up and Log In buttons link to real auth pages (`/users/register` and `/users/log-in`)
+- Password reset: "Forgot your password?" link on login page, email-based reset flow with time-limited tokens
+- Account deletion: users can delete their own account from the settings page (requires sudo mode)
 - Dev auto-login: in development, Portal auto-logs in as a dev super admin (`admin@oostkit.local`) on first visit and sets the `_oostkit_token` cookie, so WRT and Pulse are accessible without manual login
 
 ### Account Management
 
-Admin hub for super admins:
+**Self-service (facilitators):**
+- **Settings** (`/users/settings`) -- profile editing (name, organisation), email change, password (add/change), account deletion. Referral source is collected at registration only and not editable in settings. The settings page loads without requiring sudo mode; sudo checks are performed in handlers for sensitive actions (email change, password change, account deletion) with a graceful redirect to login if not in sudo mode.
+- **Password reset** -- "Forgot your password?" link on login page sends a reset email with a time-limited token. User sets a new password via `/users/reset-password/:token`.
+- **Account deletion** -- "Danger zone" section on settings page with confirmation prompt. Deletes the user account and logs them out.
+
+**Admin hub (super admins):**
 - **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest)
 - **User management** (`/admin/users`) -- create/edit/disable accounts, view registration data (org, referral source, tool interests)
 - **Email signups** (`/admin/signups`) -- view/export coming-soon email capture list, CSV export
@@ -209,6 +216,8 @@ Admin hub for super admins:
         │
         ├── "Sign Up" → [/users/register]
         └── "Log In" → [/users/log-in]
+                 └── "Forgot your password?" → [/users/forgot-password]
+                          └── Email with reset link → [/users/reset-password/:token]
 
 [Logged-in user hits /] → auto-redirect to [/home]
 ```
@@ -306,6 +315,7 @@ Uses Phoenix built-in auth (`phx.gen.auth`) with cross-app extensions:
 - **Session cookies**: Standard Phoenix session auth for Portal UI
 - **Cross-app token cookie** (`_oostkit_token`): Written on login, deleted on logout. Scoped to the shared domain via `COOKIE_DOMAIN` env var (e.g., `.oostkit.com`).
 - **Internal validation API**: `POST /api/internal/auth/validate` -- accepts the token in the request body, returns user `{id, email, role}`. Protected by `ApiAuth` plug requiring `Authorization: Bearer <INTERNAL_API_KEY>` header.
+- **Password reset tokens**: Hashed tokens stored in `users_tokens` table with a `reset_password` context and configurable expiry. Sent via email when a user requests a password reset from `/users/forgot-password`.
 - **Configurable email from-address**: `mail_from` config supports Postmark sender signatures in production (env: `MAIL_FROM`).
 - **Dev auto-login**: In development, `DevAutoLogin` plug auto-logs in as `admin@oostkit.local` on first visit and sets the `_oostkit_token` cookie. A `_portal_dev_visited` cookie prevents re-login after deliberate logout. A dev-only `POST /dev/admin-login` route allows manual re-login via a gold "Admin" button in the header.
 

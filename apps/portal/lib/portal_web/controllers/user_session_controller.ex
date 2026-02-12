@@ -59,6 +59,16 @@ defmodule PortalWeb.UserSessionController do
     |> create(params, "Password updated successfully!")
   end
 
+  def delete_account(conn, _params) do
+    user = conn.assigns.current_scope.user
+    true = Accounts.sudo_mode?(user)
+    {:ok, _user} = Accounts.delete_user(user)
+
+    conn
+    |> put_flash(:info, "Your account has been deleted.")
+    |> UserAuth.log_out_user()
+  end
+
   def delete(conn, _params) do
     conn
     |> put_flash(:info, "Logged out successfully.")

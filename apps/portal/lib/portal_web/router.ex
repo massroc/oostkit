@@ -98,6 +98,7 @@ defmodule PortalWeb.Router do
     end
 
     post "/users/update-password", UserSessionController, :update_password
+    delete "/users/delete-account", UserSessionController, :delete_account
   end
 
   scope "/", PortalWeb do
@@ -108,6 +109,8 @@ defmodule PortalWeb.Router do
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
+      live "/users/forgot-password", UserLive.ForgotPassword, :new
+      live "/users/reset-password/:token", UserLive.ResetPassword, :new
     end
 
     post "/users/log-in", UserSessionController, :create

@@ -84,6 +84,12 @@ defmodule PortalWeb.UserLive.Login do
           Log in with password <span aria-hidden="true">&rarr;</span>
         </.button>
       </.form>
+
+      <p :if={!@current_scope} class="text-center text-sm text-zinc-500">
+        <.link navigate={~p"/users/forgot-password"} class="font-semibold text-brand hover:underline">
+          Forgot your password?
+        </.link>
+      </p>
     </div>
     """
   end

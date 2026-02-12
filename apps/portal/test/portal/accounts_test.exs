@@ -542,4 +542,87 @@ defmodule Portal.AccountsTest do
       assert Map.has_key?(map, user.id)
     end
   end
+
+  describe "deliver_password_reset_instructions/2" do
+    test "sends token through notification" do
+      user = user_fixture()
+
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_password_reset_instructions(user, url)
+        end)
+
+      {:ok, token} = Base.url_decode64(token, padding: false)
+      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
+      assert user_token.user_id == user.id
+      assert user_token.sent_to == user.email
+      assert user_token.context == "reset_password"
+    end
+  end
+
+  describe "get_user_by_reset_password_token/1" do
+    setup do
+      user = user_fixture()
+
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_password_reset_instructions(user, url)
+        end)
+
+      %{user: user, token: token}
+    end
+
+    test "returns the user with valid token", %{user: %{id: id}, token: token} do
+      assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
+    end
+
+    test "does not return the user with invalid token" do
+      refute Accounts.get_user_by_reset_password_token("oops")
+    end
+
+    test "does not return the user if token expired", %{user: user, token: _token} do
+      {encoded, user_token} = Accounts.UserToken.build_email_token(user, "reset_password")
+      Repo.insert!(user_token)
+
+      # Expire the token
+      offset_user_token(user_token.token, -2, :day)
+
+      refute Accounts.get_user_by_reset_password_token(encoded)
+    end
+  end
+
+  describe "reset_user_password/2" do
+    setup do
+      user = user_fixture() |> set_password()
+      %{user: user}
+    end
+
+    test "validates password", %{user: user} do
+      {:error, changeset} = Accounts.reset_user_password(user, %{password: "short"})
+      assert "should be at least 12 character(s)" in errors_on(changeset).password
+    end
+
+    test "updates the password", %{user: user} do
+      {:ok, _} = Accounts.reset_user_password(user, %{password: "new_valid_password123"})
+      assert Accounts.get_user_by_email_and_password(user.email, "new_valid_password123")
+    end
+
+    test "deletes all tokens for the given user", %{user: user} do
+      _token = Accounts.generate_user_session_token(user)
+      {:ok, _} = Accounts.reset_user_password(user, %{password: "new_valid_password123"})
+      refute Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
+
+  describe "delete_user/1" do
+    test "deletes the user and all associated data" do
+      user = user_fixture()
+      _token = Accounts.generate_user_session_token(user)
+
+      {:ok, _} = Accounts.delete_user(user)
+
+      refute Accounts.get_user_by_email(user.email)
+      refute Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
 end

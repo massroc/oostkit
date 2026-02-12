@@ -15,7 +15,8 @@ defmodule PortalWeb.UserLive.SettingsTest do
       assert html =~ "Save Profile"
       assert html =~ "Change Email"
       assert html =~ "Organisation"
-      assert html =~ "How did you hear about OOSTKit?"
+      assert html =~ "Danger zone"
+      assert html =~ "Delete Account"
     end
 
     test "shows 'Add a password' when user has no password", %{conn: conn} do
@@ -46,16 +47,15 @@ defmodule PortalWeb.UserLive.SettingsTest do
       assert %{"error" => "You must log in to access this page."} = flash
     end
 
-    test "redirects if user is not in sudo mode", %{conn: conn} do
-      {:ok, conn} =
+    test "loads without sudo mode (no redirect)", %{conn: conn} do
+      {:ok, _lv, html} =
         conn
         |> log_in_user(user_fixture(),
           token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -11, :minute)
         )
         |> live(~p"/users/settings")
-        |> follow_redirect(conn, ~p"/users/log-in")
 
-      assert conn.resp_body =~ "You must re-authenticate to access this page."
+      assert html =~ "Account Settings"
     end
   end
 
@@ -65,7 +65,7 @@ defmodule PortalWeb.UserLive.SettingsTest do
       %{conn: log_in_user(conn, user), user: user}
     end
 
-    test "updates name, organisation, and referral source", %{conn: conn} do
+    test "updates name and organisation", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
       result =
@@ -73,8 +73,7 @@ defmodule PortalWeb.UserLive.SettingsTest do
         |> form("#profile_form", %{
           "user" => %{
             "name" => "Updated Name",
-            "organisation" => "Acme Corp",
-            "referral_source" => "Conference"
+            "organisation" => "Acme Corp"
           }
         })
         |> render_submit()
@@ -114,6 +113,26 @@ defmodule PortalWeb.UserLive.SettingsTest do
 
       assert result =~ "A link to confirm your email"
       assert Accounts.get_user_by_email(user.email)
+    end
+
+    test "redirects to login when not in sudo mode", %{conn: conn} do
+      user = user_fixture()
+
+      conn =
+        log_in_user(conn, user,
+          token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -25, :minute)
+        )
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#email_form", %{
+          "user" => %{"email" => unique_user_email()}
+        })
+        |> render_submit()
+
+      assert {:error, {:live_redirect, %{to: "/users/log-in"}}} = result
     end
 
     test "renders errors with invalid data (phx-change)", %{conn: conn} do
@@ -180,6 +199,29 @@ defmodule PortalWeb.UserLive.SettingsTest do
       assert Accounts.get_user_by_email_and_password(user.email, new_password)
     end
 
+    test "redirects to login when not in sudo mode", %{conn: conn} do
+      user = user_fixture()
+
+      conn =
+        log_in_user(conn, user,
+          token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -25, :minute)
+        )
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#password_form", %{
+          "user" => %{
+            "password" => valid_user_password(),
+            "password_confirmation" => valid_user_password()
+          }
+        })
+        |> render_submit()
+
+      assert {:error, {:live_redirect, %{to: "/users/log-in"}}} = result
+    end
+
     test "renders errors with invalid data (phx-change)", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
@@ -212,6 +254,26 @@ defmodule PortalWeb.UserLive.SettingsTest do
 
       assert result =~ "should be at least 12 character(s)"
       assert result =~ "does not match password"
+    end
+  end
+
+  describe "delete account" do
+    test "redirects to login when not in sudo mode", %{conn: conn} do
+      user = user_fixture()
+
+      conn =
+        log_in_user(conn, user,
+          token_authenticated_at: DateTime.add(DateTime.utc_now(:second), -25, :minute)
+        )
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#delete_account_form")
+        |> render_submit()
+
+      assert {:error, {:live_redirect, %{to: "/users/log-in"}}} = result
     end
   end
 

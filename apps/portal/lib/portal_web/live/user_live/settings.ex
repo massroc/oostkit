@@ -1,8 +1,6 @@
 defmodule PortalWeb.UserLive.Settings do
   use PortalWeb, :live_view
 
-  on_mount {PortalWeb.UserAuth, :require_sudo_mode}
-
   alias Portal.Accounts
 
   @impl true
@@ -27,11 +25,6 @@ defmodule PortalWeb.UserLive.Settings do
         type="text"
         label="Organisation (optional)"
         autocomplete="organization"
-      />
-      <.field
-        field={@profile_form[:referral_source]}
-        type="text"
-        label="How did you hear about OOSTKit? (optional)"
       />
       <.button phx-disable-with="Saving...">Save Profile</.button>
     </.form>
@@ -84,6 +77,26 @@ defmodule PortalWeb.UserLive.Settings do
         {@password_label}
       </.button>
     </.form>
+
+    <div class="divider" />
+
+    <div class="space-y-2">
+      <h3 class="text-lg font-semibold text-error">Danger zone</h3>
+      <p class="text-sm text-zinc-500">
+        Once you delete your account, there is no going back. Please be certain.
+      </p>
+      <.form
+        for={%{}}
+        id="delete_account_form"
+        action={~p"/users/delete-account"}
+        method="delete"
+        phx-submit="delete_account"
+        phx-trigger-action={@trigger_delete}
+        data-confirm="Are you sure you want to delete your account? This action cannot be undone."
+      >
+        <.button class="btn btn-error btn-soft">Delete Account</.button>
+      </.form>
+    </div>
     """
   end
 
@@ -115,6 +128,7 @@ defmodule PortalWeb.UserLive.Settings do
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:password_label, password_label(user))
       |> assign(:trigger_submit, false)
+      |> assign(:trigger_delete, false)
 
     {:ok, socket}
   end
@@ -159,21 +173,27 @@ defmodule PortalWeb.UserLive.Settings do
   def handle_event("update_email", params, socket) do
     %{"user" => user_params} = params
     user = socket.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
 
-    case Accounts.change_user_email(user, user_params) do
-      %{valid?: true} = changeset ->
-        Accounts.deliver_user_update_email_instructions(
-          Ecto.Changeset.apply_action!(changeset, :insert),
-          user.email,
-          &url(~p"/users/settings/confirm-email/#{&1}")
-        )
+    if Accounts.sudo_mode?(user) do
+      case Accounts.change_user_email(user, user_params) do
+        %{valid?: true} = changeset ->
+          Accounts.deliver_user_update_email_instructions(
+            Ecto.Changeset.apply_action!(changeset, :insert),
+            user.email,
+            &url(~p"/users/settings/confirm-email/#{&1}")
+          )
 
-        info = "A link to confirm your email change has been sent to the new address."
-        {:noreply, socket |> put_flash(:info, info)}
+          info = "A link to confirm your email change has been sent to the new address."
+          {:noreply, socket |> put_flash(:info, info)}
 
-      changeset ->
-        {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
+        changeset ->
+          {:noreply, assign(socket, :email_form, to_form(changeset, action: :insert))}
+      end
+    else
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must re-authenticate to change your email.")
+       |> push_navigate(to: ~p"/users/log-in")}
     end
   end
 
@@ -192,14 +212,33 @@ defmodule PortalWeb.UserLive.Settings do
   def handle_event("update_password", params, socket) do
     %{"user" => user_params} = params
     user = socket.assigns.current_scope.user
-    true = Accounts.sudo_mode?(user)
 
-    case Accounts.change_user_password(user, user_params) do
-      %{valid?: true} = changeset ->
-        {:noreply, assign(socket, trigger_submit: true, password_form: to_form(changeset))}
+    if Accounts.sudo_mode?(user) do
+      case Accounts.change_user_password(user, user_params) do
+        %{valid?: true} = changeset ->
+          {:noreply, assign(socket, trigger_submit: true, password_form: to_form(changeset))}
 
-      changeset ->
-        {:noreply, assign(socket, password_form: to_form(changeset, action: :insert))}
+        changeset ->
+          {:noreply, assign(socket, password_form: to_form(changeset, action: :insert))}
+      end
+    else
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must re-authenticate to change your password.")
+       |> push_navigate(to: ~p"/users/log-in")}
+    end
+  end
+
+  def handle_event("delete_account", _params, socket) do
+    user = socket.assigns.current_scope.user
+
+    if Accounts.sudo_mode?(user) do
+      {:noreply, assign(socket, trigger_delete: true)}
+    else
+      {:noreply,
+       socket
+       |> put_flash(:error, "You must re-authenticate to delete your account.")
+       |> push_navigate(to: ~p"/users/log-in")}
     end
   end
 
