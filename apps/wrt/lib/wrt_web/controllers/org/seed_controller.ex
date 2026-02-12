@@ -3,6 +3,7 @@ defmodule WrtWeb.Org.SeedController do
 
   alias Wrt.Campaigns
   alias Wrt.People
+  alias Wrt.People.Person
 
   plug WrtWeb.Plugs.TenantPlug
 
@@ -17,7 +18,8 @@ defmodule WrtWeb.Org.SeedController do
       page_title: "Seed Group",
       org: org,
       campaign: campaign,
-      seed_people: seed_people
+      seed_people: seed_people,
+      person_changeset: Person.changeset(%Person{}, %{})
     )
   end
 
@@ -66,7 +68,7 @@ defmodule WrtWeb.Org.SeedController do
           org: org,
           campaign: campaign,
           seed_people: seed_people,
-          changeset: changeset
+          person_changeset: changeset
         )
     end
   end

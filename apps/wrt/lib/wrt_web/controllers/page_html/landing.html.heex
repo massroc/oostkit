@@ -64,14 +64,14 @@
     </div>
   </div>
 
-  <form action={~p"/dismiss-landing"} method="post" class="flex items-center justify-between">
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-    <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-      <input type="checkbox" name="skip" value="true" class="rounded border-gray-300" />
-      Don't show this page again
-    </label>
+  <.simple_form
+    for={%{}}
+    action={~p"/dismiss-landing"}
+    class="flex items-center justify-between"
+  >
+    <.input type="checkbox" name="skip" value="true" label="Don't show this page again" />
     <.button type="submit">
       Get Started
     </.button>
-  </form>
+  </.simple_form>
 </div>

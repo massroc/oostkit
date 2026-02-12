@@ -24,11 +24,8 @@
           Please contact support for more information.
         </p>
     <% end %>
-    <a
-      href={Application.get_env(:wrt, :portal_login_url, "https://oostkit.com")}
-      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-ok-purple-600 hover:bg-ok-purple-700"
-    >
-      Back to Portal
-    </a>
+    <.link href={Application.get_env(:wrt, :portal_login_url, "https://oostkit.com")}>
+      <.button>Back to Portal</.button>
+    </.link>
   </div>
 </div>
