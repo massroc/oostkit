@@ -53,7 +53,8 @@ SessionLive.Show (root LiveView)
 │   └── ExportPrintComponent        # Hidden print-optimized HTML for PDF capture via html2pdf.js
 │
 ├── Shared (in CoreComponents + OostkitShared.Components)
-│   ├── .header_bar           # OOSTKit brand header from shared lib (dark purple, 3-zone: brand link + title + actions slot)
+│   ├── .header_bar           # OOSTKit brand header from shared lib (dark purple, 3-zone: brand link + title(text-2xl) + actions slot)
+│   ├── .header               # Page-level section header from shared lib (text-2xl font-bold, subtitle + actions slots)
 │   ├── .app_header           # App-specific header wrapper (delegates to .header_bar, adds session info; OOSTKit brand link via :portal_url config)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
@@ -549,5 +550,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.8 — app_header OOSTKit brand link now uses `:portal_url` config instead of hardcoded URL*
+*Document Version: 1.9 — `header/1` added to shared lib component hierarchy; header_bar title uses `text-2xl font-semibold`*
 *Last Updated: 2026-02-12*

@@ -920,7 +920,7 @@ defp deps do
 end
 ```
 
-The `oostkit_shared` path dependency provides the shared `header_bar/1` component used in the app layout.
+The `oostkit_shared` path dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header used in the app layout) and `header/1` (page-level section header with title, subtitle, and actions slots).
 
 ## Implementation Phases
 

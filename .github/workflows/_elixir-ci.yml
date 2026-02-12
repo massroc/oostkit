@@ -147,8 +147,7 @@ jobs:
         id: plt-cache
         with:
           path: ${{ inputs.app_path }}/priv/plts
-          key: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path)) }}
-          restore-keys: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-
+          key: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
 
       - name: Install dependencies
         run: mix deps.get
