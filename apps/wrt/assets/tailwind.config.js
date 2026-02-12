@@ -5,9 +5,8 @@ const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
 
-// Import shared design system preset
-// Path is /shared in Docker (mounted volume) or ../../../shared locally
-const designSystemPreset = require("/shared/tailwind.preset.js")
+// Import shared design system preset (relative to umbrella root)
+const designSystemPreset = require("../../../shared/tailwind.preset.js")
 
 module.exports = {
   presets: [designSystemPreset],
@@ -15,8 +14,8 @@ module.exports = {
     "./js/**/*.js",
     "../lib/wrt_web.ex",
     "../lib/wrt_web/**/*.*ex",
-    "../deps/petal_components/**/*.*ex",
-    "/oostkit_shared/lib/**/*.*ex"
+    "../../../deps/petal_components/**/*.*ex",
+    "../../oostkit_shared/lib/**/*.*ex"
   ],
   theme: {
     extend: {
@@ -34,7 +33,7 @@ module.exports = {
     // Embeds Heroicons (https://heroicons.com) into your app.css bundle
     // See your `CoreComponents.icon/1` for more information.
     plugin(function({matchComponents, theme}) {
-      let iconsDir = path.join(__dirname, "../deps/heroicons/optimized")
+      let iconsDir = path.join(__dirname, "../../../deps/heroicons/optimized")
       let values = {}
       let icons = [
         ["", "/24/outline"],

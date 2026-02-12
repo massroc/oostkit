@@ -215,7 +215,7 @@ Portal is a Phoenix app deployed on Fly.io as `oostkit-portal`. It serves as the
 
 **CI/CD:** Portal has automated deployment enabled via GitHub Actions. Merges to main automatically deploy to Fly.io.
 
-**Build Context:** Portal's `Dockerfile` uses the **monorepo root** as the build context (not `apps/portal/`). This allows the build to access `shared/tailwind.preset.js` during asset compilation. The CI workflow deploys from the root directory with `fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile`.
+**Build Context:** All apps use the **monorepo root** as the Docker build context, since this is an Elixir umbrella project with shared `config/`, `deps/`, and `_build/` at the root. Production Dockerfiles compile from the umbrella root and build named releases (e.g., `mix release portal`). The CI workflow deploys from the root directory with `fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile`.
 
 ```bash
 cd apps/portal
@@ -240,7 +240,7 @@ fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile
 ```
 
 **Production Configuration:**
-- `config/prod.exs` configures Swoosh to use `Swoosh.ApiClient.Finch` instead of hackney for Postmark email delivery
+- Root `config/prod.exs` configures Swoosh to use `Swoosh.ApiClient.Finch` instead of hackney for Postmark email delivery (configuration is consolidated in the umbrella root `config/` directory)
 
 - [ ] Portal app created on Fly.io
 - [ ] Portal database created and attached

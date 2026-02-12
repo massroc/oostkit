@@ -1,15 +1,8 @@
 # Production Dockerfile for Fly.io deployment
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu
-# instead of Alpine to avoid DNS issues that often plague production.
+# Build context: monorepo root (umbrella project)
 #
 # https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
 # https://hub.docker.com/_/ubuntu?tab=tags
-#
-# This file is based on these images:
-#
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/ubuntu?tab=tags - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
 
 ARG ELIXIR_VERSION=1.18.3
 ARG OTP_VERSION=27.2
@@ -24,7 +17,6 @@ FROM ${BUILDER_IMAGE} AS builder
 RUN apt-get update -y && apt-get install -y build-essential git curl \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-
 # Prepare build dir
 WORKDIR /app
 
@@ -35,31 +27,32 @@ RUN mix local.hex --force && \
 # Set build ENV
 ENV MIX_ENV="prod"
 
-# Install mix dependencies
-COPY mix.exs mix.lock ./
+# Copy umbrella root and child mix.exs files
+COPY mix.exs ./
+COPY apps/wrt/mix.exs apps/wrt/
+COPY apps/oostkit_shared/mix.exs apps/oostkit_shared/
+
 RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
 
-# Copy shared component library (path dependency)
-COPY apps/oostkit_shared /oostkit_shared
-
-# Copy compile-time config files before we compile dependencies
-# to ensure any relevant config change will trigger the dependencies
-# to be re-compiled.
+# Copy root config (compile-time config)
 COPY config/config.exs config/${MIX_ENV}.exs config/
+
+# Copy shared component library source
+COPY apps/oostkit_shared/lib apps/oostkit_shared/lib
+
 RUN mix deps.compile
 
-COPY priv priv
+COPY apps/wrt/priv apps/wrt/priv
 
-COPY lib lib
+COPY apps/wrt/lib apps/wrt/lib
 
 # Copy shared design system preset (used by tailwind.config.js)
 COPY shared /shared
 
-COPY assets assets
+COPY apps/wrt/assets apps/wrt/assets
 
 # Compile assets
-RUN mix assets.deploy
+RUN cd apps/wrt && mix assets.deploy
 
 # Compile the release
 RUN mix compile
@@ -67,8 +60,8 @@ RUN mix compile
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 
-COPY rel rel
-RUN mix release
+COPY apps/wrt/rel apps/wrt/rel
+RUN mix release wrt
 
 # Start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
@@ -98,11 +91,5 @@ COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/wrt ./
 RUN chmod +x /app/bin/*
 
 USER nobody
-
-# If using an environment that doesn't automatically reap zombie processes, it is
-# advised to add an init process such as tini via `apt-get install tini` inside the
-# temporary builder stage, and adding an entrypoint.
-#
-# ENTRYPOINT ["/tini", "--"]
 
 CMD ["/app/bin/wrt", "start"]

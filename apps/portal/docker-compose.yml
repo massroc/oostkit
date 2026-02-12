@@ -40,20 +40,19 @@ services:
   # Phoenix Application (Development)
   portal_app:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ../..
+      dockerfile: apps/portal/Dockerfile.dev
     environment:
       MIX_ENV: dev
       DB_HOST: portal_db
       PHX_HOST: localhost
       SECRET_KEY_BASE: portal_dev_secret_key_base_that_is_at_least_64_characters_long_for_dev
     volumes:
-      - .:/app
-      - ../../shared:/shared
-      - ../oostkit_shared:/oostkit_shared
+      - ../..:/app
       - portal_deps:/app/deps
       - portal_build:/app/_build
-      - portal_node_modules:/app/assets/node_modules
+      - portal_node_modules:/app/apps/portal/assets/node_modules
+    working_dir: /app/apps/portal
     ports:
       - "4002:4002"
     depends_on:
@@ -62,7 +61,8 @@ services:
     stdin_open: true
     tty: true
     command: >
-      sh -c "mix deps.get &&
+      sh -c "cd /app && mix deps.get &&
+             cd /app/apps/portal &&
              mix ecto.create &&
              mix ecto.migrate &&
              mix run priv/repo/seeds.exs &&
@@ -71,17 +71,16 @@ services:
   # Test Runner (for TDD workflow)
   portal_test:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ../..
+      dockerfile: apps/portal/Dockerfile.dev
     environment:
       MIX_ENV: test
       DB_HOST: portal_db_test
     volumes:
-      - .:/app
-      - ../../shared:/shared
-      - ../oostkit_shared:/oostkit_shared
+      - ../..:/app
       - portal_deps:/app/deps
       - portal_build:/app/_build
+    working_dir: /app/apps/portal
     depends_on:
       portal_db_test:
         condition: service_healthy
@@ -92,17 +91,16 @@ services:
   # Test Watcher (for continuous TDD)
   portal_test_watch:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ../..
+      dockerfile: apps/portal/Dockerfile.dev
     environment:
       MIX_ENV: test
       DB_HOST: portal_db_test
     volumes:
-      - .:/app
-      - ../../shared:/shared
-      - ../oostkit_shared:/oostkit_shared
+      - ../..:/app
       - portal_deps:/app/deps
       - portal_build:/app/_build
+    working_dir: /app/apps/portal
     depends_on:
       portal_db_test:
         condition: service_healthy
@@ -111,7 +109,8 @@ services:
     stdin_open: true
     tty: true
     command: >
-      sh -c "mix deps.get &&
+      sh -c "cd /app && mix deps.get &&
+             cd /app/apps/portal &&
              mix ecto.create --quiet &&
              mix ecto.migrate --quiet &&
              mix test --stale --listen-on-stdin"

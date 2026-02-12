@@ -6,6 +6,7 @@ primary_region = "syd"  # Sydney, AU (matches database region)
 
 [build]
   dockerfile = "Dockerfile"
+  ignorefile = ".dockerignore"
 
 [env]
   PHX_HOST = "wrt.oostkit.com"

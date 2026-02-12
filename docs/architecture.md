@@ -2,17 +2,25 @@
 
 ## Overview
 
-**OOSTKit** (Online Open Systems Theory Kit) - a monorepo containing multiple applications supporting OST methodology. Each app is self-contained with its own tech stack, database, and deployment, while sharing common infrastructure where beneficial.
+**OOSTKit** (Online Open Systems Theory Kit) - an Elixir umbrella project containing multiple applications supporting OST methodology. Each app has its own database and deployment, while sharing dependencies, build artifacts, and configuration through the umbrella structure.
 
 ## Monorepo Structure
 
 ```
 /
-├── apps/                          # Individual applications
-│   ├── oostkit_shared/            # Shared Elixir component library (path dep)
+├── mix.exs                        # Umbrella root (apps_path: "apps", named releases)
+├── config/                        # Consolidated config (all apps)
+│   ├── config.exs                 # Compile-time config (shared + per-app)
+│   ├── dev.exs / test.exs / prod.exs
+│   └── runtime.exs                # Runtime config (guarded per-release)
+├── mix.lock                       # Unified lock file (all dependencies)
+├── apps/                          # Umbrella child applications
+│   ├── oostkit_shared/            # Shared Elixir component library (in_umbrella dep)
 │   ├── portal/                    # OOSTKit Portal (landing page & auth hub)
 │   ├── workgroup_pulse/           # Workgroup Pulse (6 Criteria workshop)
 │   └── wrt/                       # Workshop Referral Tool
+├── deps/                          # Shared dependencies (gitignored)
+├── _build/                        # Shared build artifacts (gitignored)
 ├── shared/                        # Shared frontend assets across apps
 │   └── tailwind.preset.js         # Design system tokens (colors, fonts, shadows)
 ├── docs/                          # Platform-wide documentation
@@ -31,10 +39,20 @@
 | Workgroup Pulse | `apps/workgroup_pulse/` | 6 Criteria for Productive Work |
 | Workshop Referral Tool (WRT) | `apps/wrt/` | PDW participant selection |
 
+### Umbrella Structure
+
+The project uses an Elixir umbrella (`apps_path: "apps"` in root `mix.exs`):
+- **Shared `deps/` and `_build/`** at the root -- all apps share compiled dependencies
+- **Consolidated `config/`** at the root -- one config directory for all apps, with per-app sections guarded by app atom (e.g., `config :portal, ...`)
+- **Unified `mix.lock`** at the root -- single lock file for all dependencies
+- **Named releases** -- each app has its own release definition in root `mix.exs` (e.g., `portal`, `workgroup_pulse`, `wrt`)
+- **In-umbrella dependencies** -- apps reference `oostkit_shared` with `in_umbrella: true` instead of relative path deps
+- Changes to `oostkit_shared` automatically recompile in all apps -- no more stale `_build` issues
+
 ### App Conventions
 
 Each app in `apps/` should have:
-- Self-contained codebase with its own dependencies
+- `mix.exs` declaring it as an umbrella child (no `config/` or `mix.lock` -- those live at root)
 - `docker-compose.yml` with prefixed service names (e.g., `wp_app`, `wp_db`)
 - Own CI workflow in `.github/workflows/<app_name>.yml` with path filtering
 - Own deployment configuration (e.g., `fly.toml`)
@@ -97,7 +115,7 @@ All apps share a unified visual identity via two mechanisms:
 - **Brand stripe**: Magenta-to-purple gradient bar below the header
 
 **Shared Elixir components** — `apps/oostkit_shared/`:
-- A lightweight Elixir library (`OostkitShared.Components`) consumed by all apps as a path dependency (`{:oostkit_shared, path: "../oostkit_shared"}`)
+- A lightweight Elixir library (`OostkitShared.Components`) consumed by all apps as an in-umbrella dependency (`{:oostkit_shared, in_umbrella: true}`)
 - Provides shared Phoenix components consumed by all apps:
   - `header_bar/1` — the consistent OOSTKit header: three-zone layout with `relative` nav — "OOSTKit" brand link on the left (configurable `:brand_url`), absolutely centered title (`pointer-events-none absolute inset-x-0 text-center font-brand text-2xl font-semibold`), and an `:actions` slot on the right for app-specific auth/user content
   - `header/1` — a page-level section header (`text-2xl font-bold`) with `:subtitle` and `:actions` slots, used for page titles across Portal and WRT
@@ -146,7 +164,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Footer bar in root layout with links to About, Privacy, and Contact pages
 - Sticky footer layout: root layout uses `flex min-h-screen flex-col` on body with `flex flex-1 flex-col` on main, ensuring footer stays at viewport bottom on short pages. Auth pages use flex centering; settings and admin pages use consistent `px-6 sm:px-8` horizontal padding.
 - Static pages: About (`/about`), Privacy Policy (`/privacy`), Contact (`/contact`)
-- Route restructure: `/` redirects logged-in users to `/home`
+- Marketing landing page (`/`) with no redirect for logged-in users — header shows "Dashboard" link to `/home`
 - Login page with "Welcome back" heading, magic link primary, password secondary, "Forgot your password?" link
 - Password reset flow: forgot password page (`/users/forgot-password`) sends email with time-limited reset token, reset password page (`/users/reset-password/:token`) allows setting a new password
 - Settings page restructured with section headers (Profile, Email, Password, Danger zone) separated by `border-t` dividers, using `space-y-10` for generous vertical rhythm. Profile editing (name, org), email change, password (add/change), and account deletion. Loads without requiring sudo mode; sudo checks in handlers for sensitive actions with graceful redirect to login if not in sudo mode. Referral source removed from settings (collected at registration only).
@@ -195,16 +213,16 @@ Each app deploys independently:
 
 ### CI/CD
 
-GitHub Actions with path filtering:
+GitHub Actions with path filtering. CI runs from the umbrella root, compiling and testing the target app within the shared `deps/` and `_build/`:
 - Changes to `apps/workgroup_pulse/**` trigger only that app's CI
+- Changes to `config/**` trigger CI for all apps (shared config)
 - Each app has own workflow file
 - Deploys to Fly.io on merge to main (with retry: up to 3 attempts with exponential backoff)
 - Creates/updates a GitHub issue labelled `deploy-failure` on genuine deploy failure (after all retries exhausted), with error log details and a link to the workflow run
 - Post-deploy smoke test curls the app's `/health` endpoint with retries to verify successful deployment
-- Portal: CI/CD enabled with `.dockerignore` to optimize build context
-  - Portal's `Dockerfile` uses monorepo root as build context (not app directory)
-  - Allows access to `shared/tailwind.preset.js` during asset compilation
-  - Deploy command: `fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile`
+- All apps use the monorepo root as Docker build context to access the umbrella's shared `config/`, `deps/`, and `_build/`
+  - Production Dockerfiles compile from the umbrella root and build named releases (e.g., `mix release portal`)
+  - Deploy command: `fly deploy --config apps/<app>/fly.toml --dockerfile apps/<app>/Dockerfile`
 
 ### Health Checks
 
@@ -221,8 +239,9 @@ Used by:
 
 ### Environment Configuration
 
-- Development: Docker Compose (local)
-- Production: Fly.io with secrets management
+- **Configuration**: Consolidated in root `config/` directory (all apps share one config tree). Runtime config (`config/runtime.exs`) uses release-name guards to apply per-app settings in production.
+- **Development**: Docker Compose (local). Each app's `docker-compose.yml` mounts the root project as build context so all apps share `deps/`, `_build/`, and `config/`.
+- **Production**: Fly.io with secrets management. Named releases (e.g., `MIX_ENV=prod mix release portal`) ensure only the target app starts.
 - Database URLs, secrets injected via environment
 
 ### Tool URL and Status Resolution
@@ -305,8 +324,10 @@ docker compose --profile test run --rm <prefix>_test
 
 ### Adding a New App
 
-1. Create `apps/<app_name>/` with app code
-2. Add `docker-compose.yml` with prefixed services
-3. Create `.github/workflows/<app_name>.yml` with path filtering
-4. Update root `docker-compose.yml` to include new app
-5. Add to root README apps table
+1. Create `apps/<app_name>/` as an umbrella child (`mix new apps/<app_name>` or manually with `in_umbrella: true` deps)
+2. Add app-specific config sections to root `config/` files (config.exs, dev.exs, test.exs, prod.exs, runtime.exs)
+3. Add a named release in root `mix.exs` under `releases/0`
+4. Add `docker-compose.yml` with prefixed services
+5. Create `.github/workflows/<app_name>.yml` with path filtering
+6. Update root `docker-compose.yml` to include new app
+7. Add to root README apps table

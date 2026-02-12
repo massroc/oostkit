@@ -62,10 +62,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    defaults:
-      run:
-        working-directory: ${{ inputs.app_path }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -80,9 +76,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            ${{ inputs.app_path }}/deps
-            ${{ inputs.app_path }}/_build
-          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles('mix.lock', format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
           restore-keys: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-
 
       - name: Install dependencies
@@ -90,24 +86,30 @@ jobs:
 
       - name: Compile dependencies
         run: mix deps.compile
+        working-directory: ${{ inputs.app_path }}
 
       - name: Check formatting
         if: github.event_name == 'pull_request'
         run: mix format --check-formatted
+        working-directory: ${{ inputs.app_path }}
 
       - name: Compile
         run: mix compile --warnings-as-errors
+        working-directory: ${{ inputs.app_path }}
 
       - name: Run Credo
         run: mix credo --strict
+        working-directory: ${{ inputs.app_path }}
 
       - name: Run Sobelow security scan
         run: mix sobelow --config
+        working-directory: ${{ inputs.app_path }}
 
       - name: Run tests with coverage
         env:
           DATABASE_URL: ecto://postgres:postgres@localhost:5432/${{ inputs.database_name }}
         run: mix coveralls.json
+        working-directory: ${{ inputs.app_path }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -119,10 +121,6 @@ jobs:
     name: Dialyzer
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ${{ inputs.app_path }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -137,9 +135,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            ${{ inputs.app_path }}/deps
-            ${{ inputs.app_path }}/_build
-          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-${{ hashFiles('mix.lock', format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
           restore-keys: ${{ runner.os }}-mix-${{ inputs.app_name }}-${{ inputs.elixir_version }}-${{ inputs.otp_version }}-
 
       - name: Restore PLT cache
@@ -147,7 +145,7 @@ jobs:
         id: plt-cache
         with:
           path: ${{ inputs.app_path }}/priv/plts
-          key: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-${{ hashFiles(format('{0}/mix.lock', inputs.app_path), format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
+          key: ${{ runner.os }}-plt-${{ inputs.app_name }}-${{ inputs.otp_version }}-${{ inputs.elixir_version }}-${{ hashFiles('mix.lock', format('{0}/mix.exs', inputs.app_path), 'apps/oostkit_shared/mix.exs', 'apps/oostkit_shared/lib/**') }}
 
       - name: Install dependencies
         run: mix deps.get
@@ -157,10 +155,12 @@ jobs:
         run: |
           mkdir -p priv/plts
           mix dialyzer --plt
+        working-directory: ${{ inputs.app_path }}
         timeout-minutes: 20
 
       - name: Run Dialyzer
         run: mix dialyzer --format github
+        working-directory: ${{ inputs.app_path }}
 
   deploy:
     name: Deploy to Fly.io
@@ -171,10 +171,6 @@ jobs:
     permissions:
       contents: read
       issues: write
-
-    defaults:
-      run:
-        working-directory: ${{ inputs.app_path }}
 
     steps:
       - name: Checkout code
@@ -211,7 +207,6 @@ jobs:
 
           echo "Deploy failed after $MAX_ATTEMPTS attempts"
           exit 1
-        working-directory: .
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -280,4 +275,3 @@ jobs:
             echo "Creating new deploy failure issue"
             gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" --label "deploy-failure"
           fi
-        working-directory: .

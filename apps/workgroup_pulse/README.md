@@ -1,4 +1,4 @@
-# Productive Work Groups
+# Workgroup Pulse
 
 A self-guided team collaboration web application that guides teams through the "Six Criteria of Productive Work" workshop without requiring a trained facilitator.
 
@@ -7,7 +7,7 @@ Built with Elixir/Phoenix LiveView and PostgreSQL, deployed on Fly.io.
 ## Tech Stack
 
 - **Backend**: Elixir 1.17 / Phoenix 1.7 with LiveView
-- **Shared Components**: `oostkit_shared` path dependency (shared header bar component)
+- **Shared Components**: `oostkit_shared` in-umbrella dependency (shared header bar component)
 - **Database**: PostgreSQL 16
 - **Frontend**: Phoenix LiveView + Tailwind CSS
 - **Deployment**: Fly.io (Sydney region)
@@ -201,12 +201,13 @@ Set via Fly.io secrets:
 │   ├── repo/migrations/              # Database migrations
 │   └── static/                       # Static assets
 ├── assets/                           # Frontend (JS, CSS)
-├── config/                           # Environment configs
 ├── docker-compose.yml                # Development environment
 ├── Dockerfile                        # Production build
 ├── Dockerfile.dev                    # Development build
 └── fly.toml                          # Fly.io configuration
 ```
+
+**Note:** Configuration lives in the root `config/` directory (umbrella-wide), not in this app directory. Dependencies and build artifacts are shared at `deps/` and `_build/` respectively.
 
 ## Current Build Status
 

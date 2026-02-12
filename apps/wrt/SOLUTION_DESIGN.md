@@ -587,7 +587,7 @@ The "don't show again" action (`POST /dismiss-landing`) sets a `wrt_skip_landing
 ### Swoosh Configuration
 
 ```elixir
-# config/config.exs
+# config/config.exs (root umbrella config — WRT section)
 config :wrt, Wrt.Mailer,
   adapter: Swoosh.Adapters.Postmark,
   api_key: {:system, "POSTMARK_API_KEY"}
@@ -938,7 +938,7 @@ end
 ```toml
 # fly.toml
 app = "wrt"
-primary_region = "lhr"
+primary_region = "syd"
 
 [build]
   dockerfile = "Dockerfile"
@@ -1000,8 +1000,10 @@ PORTAL_LOGIN_URL=https://oostkit.com/users/log-in  # Redirect URL for unauthenti
 
 ### Release Configuration
 
+WRT is part of an Elixir umbrella project. Configuration lives in the root `config/` directory. Runtime config uses release-name guards so each app only reads its own env vars:
+
 ```elixir
-# config/runtime.exs
+# config/runtime.exs (WRT section — guarded by release name)
 import Config
 
 if config_env() == :prod do
@@ -1025,13 +1027,15 @@ if config_env() == :prod do
 end
 ```
 
+Production builds use the umbrella's named release system (`mix release wrt`), defined in the root `mix.exs`.
+
 ## Dependencies
 
 ```elixir
-# mix.exs
+# mix.exs (umbrella child — deps/ and config/ are shared at root)
 defp deps do
   [
-    {:oostkit_shared, path: "../oostkit_shared"},
+    {:oostkit_shared, in_umbrella: true},
     {:phoenix, "~> 1.7"},
     {:phoenix_ecto, "~> 4.4"},
     {:ecto_sql, "~> 3.10"},
@@ -1052,7 +1056,7 @@ defp deps do
 end
 ```
 
-The `oostkit_shared` path dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), and `show/2`/`hide/2` (JS transition helpers).
+The `oostkit_shared` in-umbrella dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), and `show/2`/`hide/2` (JS transition helpers).
 
 ## Implementation Phases
 
