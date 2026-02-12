@@ -54,7 +54,7 @@ SessionLive.Show (root LiveView)
 │
 ├── Shared (in CoreComponents + OostkitShared.Components)
 │   ├── .header_bar           # OOSTKit brand header from shared lib (dark purple, 3-zone: brand link + title + actions slot)
-│   ├── .app_header           # App-specific header wrapper (delegates to .header_bar, adds session info)
+│   ├── .app_header           # App-specific header wrapper (delegates to .header_bar, adds session info; OOSTKit brand link via :portal_url config)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
 │   └── .score_indicator      # Traffic light score display
@@ -549,5 +549,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.7 — Header extracted to shared `OostkitShared.Components.header_bar/1`; app_header simplified to delegate to shared component*
+*Document Version: 1.8 — app_header OOSTKit brand link now uses `:portal_url` config instead of hardcoded URL*
 *Last Updated: 2026-02-12*
