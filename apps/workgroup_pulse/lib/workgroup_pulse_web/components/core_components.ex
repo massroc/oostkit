@@ -226,10 +226,14 @@ defmodule WorkgroupPulseWeb.CoreComponents do
   """
 
   def app_header(assigns) do
+    assigns = assign_new(assigns, :portal_url, fn ->
+      Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")
+    end)
+
     ~H"""
     <header class="bg-ok-purple-900 flex-shrink-0 z-10">
       <nav class="relative mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-        <a href="https://oostkit.com" class="text-lg font-semibold text-white">
+        <a href={@portal_url} class="text-lg font-semibold text-white">
           OOSTKit
         </a>
         <span class="pointer-events-none absolute inset-x-0 text-center font-brand text-sm font-medium text-ok-purple-200">
