@@ -55,18 +55,65 @@ Wait for the subagent to finish before proceeding.
 
 ## Step 4: Watch CI and merge (background task)
 
-Run the CI watch as a **background** Bash task:
-```
-gh pr checks <PR_NUMBER> --watch
+**IMPORTANT:** Do NOT use `gh pr checks --watch`. It shows stale runs from prior
+force-pushes and exits with false failures. Instead, poll check runs for the
+**exact commit SHA** that was pushed.
+
+Run the following as a **single background** Bash task (replace `<SHA>` with the
+actual commit SHA from the push, and `<PR_NUMBER>` with the PR number):
+
+```bash
+SHA="<SHA>"
+PR="<PR_NUMBER>"
+REPO="massroc/oostkit"
+
+echo "Watching CI for commit $SHA (PR #$PR)..."
+while true; do
+  # Get check runs for this specific commit (excludes stale runs from old pushes)
+  # NOTE: use "| not" instead of "!=" to avoid bash escaping issues with !
+  result=$(gh api "repos/$REPO/commits/$SHA/check-runs" \
+    --jq '[.check_runs[] | select(.name | test("Deploy") | not)] |
+      { total: length,
+        done: [.[] | select(.status == "completed")] | length,
+        failed: [.[] | select(.status == "completed" and (.conclusion == "success" or .conclusion == "skipped") | not)] | length,
+        checks: [.[] | "\(.name): \(.status)/\(.conclusion // empty)"] }')
+
+  total=$(echo "$result" | jq -r '.total')
+  done_count=$(echo "$result" | jq -r '.done')
+  failed=$(echo "$result" | jq -r '.failed')
+
+  echo "[$done_count/$total complete, $failed failed]"
+  echo "$result" | jq -r '.checks[]'
+
+  # Wait for checks to appear (GitHub may take a few seconds)
+  if [ "$total" -eq 0 ]; then
+    echo "Waiting for checks to start..."
+    sleep 10
+    continue
+  fi
+
+  # All done?
+  if [ "$done_count" -eq "$total" ]; then
+    if [ "$failed" -gt 0 ]; then
+      echo "CI FAILED"
+      gh api "repos/$REPO/commits/$SHA/check-runs" \
+        --jq '.check_runs[] | select(.status == "completed" and (.conclusion == "success" or .conclusion == "skipped") | not) | "\(.name): \(.conclusion) \(.html_url)"'
+      exit 1
+    else
+      echo "CI PASSED — merging..."
+      gh pr merge "$PR" --squash --delete-branch && git checkout main && git pull
+      exit 0
+    fi
+  fi
+
+  sleep 10
+done
 ```
 
 Then tell me the PR URL and that CI is running in the background.
 
-Once I confirm or you check and CI has passed, merge with:
-```
-gh pr merge <PR_NUMBER> --squash --delete-branch
-```
-Then: `git checkout main && git pull`
+If CI fails, report the failure and do NOT attempt to merge. Show the failed
+check URLs so I can investigate.
 
 ## Error handling
 
