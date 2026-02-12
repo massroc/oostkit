@@ -12,18 +12,20 @@ defmodule WrtWeb.PageController do
         render(conn, :no_org, page_title: "No Organisation Found")
 
       %Organisation{} = org ->
-        if Organisation.active?(org) do
-          if skip_landing?(conn) do
-            redirect(conn, to: ~p"/org/#{org.slug}/manage")
-          else
-            render(conn, :landing, page_title: "Workshop Referral Tool", org: org)
-          end
-        else
-          render(conn, :inactive,
-            page_title: "Organisation Inactive",
-            org: org
-          )
-        end
+        render_for_org(conn, org)
+    end
+  end
+
+  defp render_for_org(conn, org) do
+    cond do
+      !Organisation.active?(org) ->
+        render(conn, :inactive, page_title: "Organisation Inactive", org: org)
+
+      skip_landing?(conn) ->
+        redirect(conn, to: ~p"/org/#{org.slug}/manage")
+
+      true ->
+        render(conn, :landing, page_title: "Workshop Referral Tool", org: org)
     end
   end
 
