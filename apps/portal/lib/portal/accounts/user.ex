@@ -43,9 +43,11 @@ defmodule Portal.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :name])
+    |> cast(attrs, [:email, :name, :organisation, :referral_source])
     |> validate_required([:name])
     |> validate_length(:name, min: 1, max: 255)
+    |> validate_length(:organisation, max: 255)
+    |> validate_length(:referral_source, max: 255)
     |> validate_email(opts)
   end
 

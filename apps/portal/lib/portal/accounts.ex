@@ -109,10 +109,16 @@ defmodule Portal.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+  def register_user(attrs, tool_ids \\ []) do
+    Repo.transact(fn ->
+      with {:ok, user} <-
+             %User{onboarding_completed: true}
+             |> User.registration_changeset(attrs)
+             |> Repo.insert() do
+        save_tool_interests(user, tool_ids)
+        {:ok, user}
+      end
+    end)
   end
 
   @doc """

@@ -265,7 +265,7 @@ or "Get started as a facilitator" — not generic "create an account" language.
 
 - **Sign Up button**: Links to `/users/register` — self-service registration with name + email, magic link confirmation
 - **Log In button**: Links to `/users/log-in` — "Welcome back" page with magic link (primary) and password (secondary)
-- **First-visit onboarding**: Dashboard shows onboarding card for new users (org, referral source, tool interests)
+- **Registration collects profile data**: Organisation (optional), referral source (optional), and tool interest checkboxes are part of the registration form. Users are fully onboarded from the moment they register.
 - **Settings**: Facilitators can edit profile (name, org, referral source) and manage password at `/users/settings`
 - **Admin panel**: Super admin manages the platform at `/admin` (dashboard with links to users, signups, tools). Users table includes Organisation column.
 
@@ -381,6 +381,9 @@ enough to sign up; make it easy and welcoming.
 
 - **Email** (required)
 - **Name** (required) — first and last name, single field
+- **Organisation** (optional, text field) — where the facilitator works
+- **How did you hear about OOSTKit?** (optional, text field) — referral source
+- **Which tools are you interested in?** (optional, checkboxes) — tool interest, shown as checkboxes for all available tools
 - **Submit button**: "Get started" or "Create account"
 - No password at registration — magic link flow instead
 
@@ -388,11 +391,10 @@ enough to sign up; make it easy and welcoming.
 
 ```
 Facilitator clicks "Sign Up"
-  → Registration page: enters name + email
+  → Registration page: enters name + email, plus optional org, referral source, and tool interests
   → Submits → confirmation email sent (magic link)
   → Clicks link in email
-  → Logged in, lands on dashboard
-  → First-visit onboarding prompt appears (see below)
+  → Logged in, lands on dashboard (fully onboarded, no further prompts)
 ```
 
 #### Messaging
@@ -439,29 +441,7 @@ Requires authentication. Where facilitators manage their account:
   than "Change password"
 - **Edit name** — update display name
 - **Profile info** — organisation, how they heard about OOSTKit (same fields as
-  onboarding, editable here)
-
-### First-Visit Onboarding
-
-After a facilitator's first login, the dashboard shows a friendly onboarding card
-(not a blocking modal or multi-step wizard). It appears at the top of the dashboard
-and can be completed or dismissed.
-
-#### Onboarding Card Content
-
-- Heading: "Tell us a bit about yourself"
-- **Organisation** (text field, optional)
-- **How did you hear about OOSTKit?** (text field or dropdown, optional)
-- **Which tools are you interested in?** (checkboxes of available tools, optional)
-- "Save" button + "Skip for now" dismiss link
-- **Visual:** Gold border (`border-ok-gold-300`) to draw attention as an onboarding prompt
-
-#### Behaviour
-
-- Appears on first visit to `/home` after registration
-- Dismissed permanently once completed or skipped
-- Data saved to user profile (visible/editable in Settings)
-- Super admin can see onboarding data in the admin user list
+  registration, editable here)
 
 ### Data Model Implications
 
@@ -470,9 +450,9 @@ The user table needs additional fields beyond the current schema:
 ```
 users (additions)
 - name (text) — already exists
-- organisation (text, nullable) — from onboarding
-- referral_source (text, nullable) — how they heard about OOSTKit
-- onboarding_completed (boolean, default false) — controls onboarding card visibility
+- organisation (text, nullable) — collected at registration
+- referral_source (text, nullable) — how they heard about OOSTKit, collected at registration
+- onboarding_completed (boolean, default true) — set to true at registration
 ```
 
 Tool interest captured separately (many-to-many or simple join table):
@@ -483,6 +463,10 @@ user_tool_interests
 - tool_id (text) — e.g. "workgroup_pulse", "wrt", "search_conference"
 - inserted_at (timestamp)
 ```
+
+Note: Organisation, referral source, and tool interests are all collected during registration.
+The `onboarding_completed` flag is set to `true` at registration time. There is no separate
+onboarding step — users are fully onboarded from the moment they create their account.
 
 ---
 
@@ -501,7 +485,7 @@ when there's enough data.
 - **Email signups** — total coming-soon email captures
 - **Registered users** — total facilitator accounts
 - **Active users** — users who've logged in recently (last 30 days)
-- **Tool interest** — breakdown of which tools people selected during onboarding
+- **Tool interest** — breakdown of which tools people selected during registration
 
 #### Quick Links
 
@@ -511,7 +495,7 @@ when there's enough data.
 
 ### User Management (`/admin/users`)
 
-Already built. Evolve to include onboarding data.
+Already built. Includes registration data (org, referral source, tool interests).
 
 #### User List
 
@@ -519,7 +503,7 @@ Table with columns:
 - Email
 - Name
 - Role (Super Admin / Session Manager) — colour-coded badges
-- Organisation (from onboarding, may be blank)
+- Organisation (from registration, may be blank)
 - Status (Enabled / Disabled) — colour-coded badges
 - Registered date
 - Last login
@@ -534,7 +518,7 @@ Table with columns:
 
 #### Edit User
 
-- View all profile info including onboarding data (org, referral source, tool interests)
+- View all profile info including registration data (org, referral source, tool interests)
 - Edit name, role
 - Enable/disable account
 - Cannot edit email (security — user changes their own email via settings)
@@ -620,10 +604,10 @@ so each category has its own independent ordering.
 | `/apps/:id` | App detail / product page | No | Visual walkthrough, full description, launch or inline email capture. Shareable URL. |
 | `POST /apps/:app_id/notify` | Email capture from detail page | No | Creates interest_signup with context `tool:{tool_id}`. Redirects back with `?subscribed=true`. |
 | `/users/log-in` | Login | No | "Welcome back" heading. Magic link (primary) + password (secondary). |
-| `/users/register` | Registration | No | Name + email form, magic link confirmation. Facilitator-focused messaging. |
+| `/users/register` | Registration | No | Name + email + optional org, referral source, tool interests. Magic link confirmation. Facilitator-focused messaging. Users are fully onboarded at registration. |
 | `/users/settings` | Account settings | Yes | Profile (name, org, referral source), email change, password (add/change). |
 | `/admin` | Admin dashboard | Super Admin | Stats overview: signup counts, user counts, tool status. |
-| `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View onboarding data. |
+| `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View registration data (org, referral source, tool interests). |
 | `/admin/signups` | Email signups | Super Admin | View/export coming-soon email capture list. |
 | `/admin/tools` | Tool management | Super Admin | View tool status, toggle tools on/off (kill switch). |
 | `/coming-soon` | Holding page | No | Context-aware holding page with email capture. |
@@ -778,7 +762,6 @@ Gold (`ok-gold`) is used prominently across the portal for warmth and visual con
 | Element | Classes | Context |
 |---------|---------|---------|
 | "Coming soon" badges | `bg-ok-gold-100 text-ok-gold-800` | Landing page, dashboard tool cards, app detail pages, admin tools page |
-| Onboarding card border | `border-ok-gold-300` | Dashboard first-visit onboarding prompt |
 
 ---
 

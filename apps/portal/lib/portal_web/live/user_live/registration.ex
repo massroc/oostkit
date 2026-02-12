@@ -3,6 +3,7 @@ defmodule PortalWeb.UserLive.Registration do
 
   alias Portal.Accounts
   alias Portal.Accounts.User
+  alias Portal.Tools
 
   @impl true
   def render(assigns) do
@@ -39,7 +40,38 @@ defmodule PortalWeb.UserLive.Registration do
           required
         />
 
-        <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
+        <.field
+          field={@form[:organisation]}
+          type="text"
+          label="Organisation"
+          placeholder="Where do you work? (optional)"
+        />
+
+        <.field
+          field={@form[:referral_source]}
+          type="text"
+          label="How did you hear about OOSTKit?"
+          placeholder="e.g. colleague, conference, search (optional)"
+        />
+
+        <fieldset class="mt-4">
+          <legend class="block text-sm font-medium text-zinc-700 mb-2">
+            Which tools are you interested in?
+          </legend>
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label :for={tool <- @tools} class="flex items-center gap-2 text-sm text-zinc-700">
+              <input
+                type="checkbox"
+                name="tool_ids[]"
+                value={tool.id}
+                class="rounded border-zinc-300 text-ok-purple-600 focus:ring-ok-purple-400"
+              />
+              {tool.name}
+            </label>
+          </div>
+        </fieldset>
+
+        <.button phx-disable-with="Creating account..." class="btn btn-primary w-full mt-6">
           Get started
         </.button>
       </.form>
@@ -56,12 +88,17 @@ defmodule PortalWeb.UserLive.Registration do
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user_registration(%User{}, %{}, validate_unique: false)
 
-    {:ok, assign_form(socket, changeset), temporary_assigns: [form: nil]}
+    {:ok,
+     socket
+     |> assign(:tools, Tools.list_tools())
+     |> assign_form(changeset), temporary_assigns: [form: nil]}
   end
 
   @impl true
-  def handle_event("save", %{"user" => user_params}, socket) do
-    case Accounts.register_user(user_params) do
+  def handle_event("save", %{"user" => user_params} = params, socket) do
+    tool_ids = Map.get(params, "tool_ids", [])
+
+    case Accounts.register_user(user_params, tool_ids) do
       {:ok, user} ->
         {:ok, _} =
           Accounts.deliver_login_instructions(

@@ -168,7 +168,7 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 | Session Manager | Facilitator running workshops | Apps they have access to (e.g., WRT) |
 
 ### Current Scope
-- Self-service registration for facilitators (email + name, magic link confirmation)
+- Self-service registration for facilitators (email + name, plus optional organisation, referral source, and tool interest checkboxes; magic link confirmation; users are fully onboarded at registration)
 - Super Admin can also create Session Manager accounts via admin panel
 - Session Managers log in to access WRT
 - Workgroup Pulse remains free and open (no login required) -- the top-of-funnel discovery tool
@@ -180,7 +180,7 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 
 Admin hub for super admins:
 - **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest)
-- **User management** (`/admin/users`) -- create/edit/disable accounts, view onboarding data
+- **User management** (`/admin/users`) -- create/edit/disable accounts, view registration data (org, referral source, tool interests)
 - **Email signups** (`/admin/signups`) -- view/export coming-soon email capture list, CSV export
 - **Tool management** (`/admin/tools`) -- view tool status with category column, kill switch toggle per tool
 
