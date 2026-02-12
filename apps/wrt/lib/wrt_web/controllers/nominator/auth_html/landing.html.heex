@@ -16,11 +16,12 @@
       ({@person.email}).
     </p>
 
-    <form action={~p"/org/#{@org.slug}/nominate/request-link?token=#{@token}"} method="post">
-      <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-      <.button type="submit" class="w-full">
-        Send Verification Code
-      </.button>
-    </form>
+    <.simple_form for={%{}} action={~p"/org/#{@org.slug}/nominate/request-link?token=#{@token}"}>
+      <:actions>
+        <.button type="submit" class="w-full">
+          Send Verification Code
+        </.button>
+      </:actions>
+    </.simple_form>
   </div>
 </div>
