@@ -25,6 +25,10 @@ defmodule PortalWeb.Router do
     plug PortalWeb.Plugs.ApiAuth
   end
 
+  pipeline :require_super_admin do
+    plug PortalWeb.Plugs.RequireSuperAdmin
+  end
+
   # Health check routes (no auth required)
   scope "/health", PortalWeb do
     pipe_through :api
@@ -79,7 +83,7 @@ defmodule PortalWeb.Router do
   ## Admin routes (super admin only)
 
   scope "/admin", PortalWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_authenticated_user, :require_super_admin]
 
     # Non-LiveView admin routes (CSV export)
     get "/signups/export", Admin.SignupsController, :export

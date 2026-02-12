@@ -194,6 +194,9 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 - **Account deletion** -- "Danger zone" section on settings page with confirmation prompt. Deletes the user account and logs them out.
 
 **Admin hub (super admins):**
+
+All admin routes (`/admin/*`) are protected by a `require_super_admin` router pipeline that enforces super admin authorization at the router level for both LiveView and controller routes (e.g., CSV export). LiveView routes additionally use an `on_mount` hook for the same check.
+
 - **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest)
 - **User management** (`/admin/users`) -- create/edit/disable accounts, view registration data (org, referral source, tool interests)
 - **Email signups** (`/admin/signups`) -- view/export coming-soon email capture list, CSV export

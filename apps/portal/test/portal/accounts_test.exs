@@ -1,5 +1,5 @@
 defmodule Portal.AccountsTest do
-  use Portal.DataCase
+  use Portal.DataCase, async: true
 
   alias Portal.Accounts
 
@@ -611,6 +611,85 @@ defmodule Portal.AccountsTest do
       _token = Accounts.generate_user_session_token(user)
       {:ok, _} = Accounts.reset_user_password(user, %{password: "new_valid_password123"})
       refute Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
+
+  describe "create_session_manager/1" do
+    test "creates an enabled session_manager user" do
+      email = unique_user_email()
+      {:ok, user} = Accounts.create_session_manager(%{email: email, name: "SM User"})
+
+      assert user.email == email
+      assert user.name == "SM User"
+      assert user.role == "session_manager"
+      assert user.enabled
+      assert is_nil(user.confirmed_at)
+      assert is_nil(user.hashed_password)
+    end
+
+    test "creates session manager without name" do
+      email = unique_user_email()
+      {:ok, user} = Accounts.create_session_manager(%{email: email})
+
+      assert user.email == email
+      assert is_nil(user.name)
+    end
+
+    test "fails with duplicate email" do
+      user = user_fixture()
+      {:error, changeset} = Accounts.create_session_manager(%{email: user.email})
+      assert "has already been taken" in errors_on(changeset).email
+    end
+  end
+
+  describe "update_user/2" do
+    test "updates name and role" do
+      user = user_fixture()
+
+      {:ok, updated} = Accounts.update_user(user, %{name: "New Name", role: "super_admin"})
+
+      assert updated.name == "New Name"
+      assert updated.role == "super_admin"
+    end
+
+    test "rejects invalid role" do
+      user = user_fixture()
+      {:error, changeset} = Accounts.update_user(user, %{role: "hacker"})
+      assert errors_on(changeset).role
+    end
+  end
+
+  describe "disable_user/1" do
+    test "disables an enabled user" do
+      user = user_fixture()
+      assert user.enabled
+
+      {:ok, disabled} = Accounts.disable_user(user)
+      refute disabled.enabled
+    end
+  end
+
+  describe "enable_user/1" do
+    test "enables a disabled user" do
+      user = user_fixture()
+      {:ok, disabled} = Accounts.disable_user(user)
+      refute disabled.enabled
+
+      {:ok, enabled} = Accounts.enable_user(disabled)
+      assert enabled.enabled
+    end
+  end
+
+  describe "update_contact_prefs/2" do
+    test "updates product_updates preference" do
+      user = user_fixture()
+      refute user.product_updates
+
+      {:ok, updated} = Accounts.update_contact_prefs(user, %{product_updates: true})
+      assert updated.product_updates
+
+      {:ok, updated} = Accounts.update_contact_prefs(updated, %{product_updates: false})
+      refute updated.product_updates
     end
   end
 

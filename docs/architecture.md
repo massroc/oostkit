@@ -142,6 +142,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Password reset flow: forgot password page (`/users/forgot-password`) sends email with time-limited reset token, reset password page (`/users/reset-password/:token`) allows setting a new password
 - Settings page restructured with section headers (Profile, Email, Password, Danger zone) separated by `border-t` dividers, using `space-y-10` for generous vertical rhythm. Profile editing (name, org), email change, password (add/change), and account deletion. Loads without requiring sudo mode; sudo checks in handlers for sensitive actions with graceful redirect to login if not in sudo mode. Referral source removed from settings (collected at registration only).
 - Account deletion: users can delete their own account from settings, which deletes the user record and logs them out
+- Admin routes (`/admin/*`) protected by a `require_super_admin` router pipeline (covers both LiveView and controller routes), plus LiveView `on_mount` hooks
 - Admin dashboard (`/admin`) with stats cards and quick links
 - Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export
 - Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle

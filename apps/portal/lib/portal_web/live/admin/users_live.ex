@@ -232,8 +232,7 @@ defmodule PortalWeb.Admin.UsersLive do
         {:noreply,
          socket
          |> put_flash(:info, "User updated successfully.")
-         |> assign(:users, Accounts.list_users())
-         |> assign(:last_logins, Accounts.last_login_map())}
+         |> reload_users()}
 
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Failed to update user.")}
@@ -246,8 +245,7 @@ defmodule PortalWeb.Admin.UsersLive do
         {:noreply,
          socket
          |> put_flash(:info, "User created successfully. They can log in with the magic link.")
-         |> assign(:users, Accounts.list_users())
-         |> assign(:last_logins, Accounts.last_login_map())
+         |> reload_users()
          |> push_patch(to: ~p"/admin/users")}
 
       {:error, changeset} ->
@@ -267,8 +265,7 @@ defmodule PortalWeb.Admin.UsersLive do
         {:noreply,
          socket
          |> put_flash(:info, "User updated successfully.")
-         |> assign(:users, Accounts.list_users())
-         |> assign(:last_logins, Accounts.last_login_map())
+         |> reload_users()
          |> push_patch(to: ~p"/admin/users")}
 
       {:error, changeset} ->
@@ -277,6 +274,10 @@ defmodule PortalWeb.Admin.UsersLive do
          |> put_flash(:error, format_errors(changeset))
          |> assign(:form, to_form(params, as: "user"))}
     end
+  end
+
+  defp reload_users(socket) do
+    assign(socket, users: Accounts.list_users(), last_logins: Accounts.last_login_map())
   end
 
   defp format_role("super_admin"), do: "Super Admin"

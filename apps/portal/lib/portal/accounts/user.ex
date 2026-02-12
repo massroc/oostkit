@@ -45,10 +45,7 @@ defmodule Portal.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email, :name, :organisation, :referral_source])
-    |> validate_required([:name])
-    |> validate_length(:name, min: 1, max: 255)
-    |> validate_length(:organisation, max: 255)
-    |> validate_length(:referral_source, max: 255)
+    |> validate_profile_fields()
     |> validate_email(opts)
   end
 
@@ -58,10 +55,7 @@ defmodule Portal.Accounts.User do
   def profile_changeset(user, attrs) do
     user
     |> cast(attrs, [:name, :organisation, :referral_source])
-    |> validate_required([:name])
-    |> validate_length(:name, min: 1, max: 255)
-    |> validate_length(:organisation, max: 255)
-    |> validate_length(:referral_source, max: 255)
+    |> validate_profile_fields()
   end
 
   @doc """
@@ -96,6 +90,14 @@ defmodule Portal.Accounts.User do
     user
     |> cast(attrs, [:email])
     |> validate_email(opts)
+  end
+
+  defp validate_profile_fields(changeset) do
+    changeset
+    |> validate_required([:name])
+    |> validate_length(:name, min: 1, max: 255)
+    |> validate_length(:organisation, max: 255)
+    |> validate_length(:referral_source, max: 255)
   end
 
   defp validate_email(changeset, opts) do
@@ -151,10 +153,6 @@ defmodule Portal.Accounts.User do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 12, max: 72)
-    # Examples of additional password validation:
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
   end
 
