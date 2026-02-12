@@ -81,37 +81,13 @@ defmodule PortalWeb do
       import Phoenix.HTML
 
       import PetalComponents.{
-        Accordion,
-        Alert,
-        Avatar,
-        Badge,
-        Breadcrumbs,
         Button,
-        ButtonGroup,
-        Card,
-        Container,
-        Dropdown,
         Field,
         Form,
         Input,
-        Link,
-        Loading,
-        Marquee,
-        Modal,
-        Pagination,
-        Progress,
-        Rating,
-        Skeleton,
-        SlideOver,
-        Stepper,
-        Table,
-        Tabs,
-        Typography,
-        UserDropdownMenu,
-        Menu
+        Link
       }
 
-      alias PetalComponents.HeroiconsV1
       import PortalWeb.CoreComponents
       import OostkitShared.Components
       use Gettext, backend: PortalWeb.Gettext

@@ -63,36 +63,15 @@ defmodule WrtWeb do
       import Phoenix.HTML
 
       import PetalComponents.{
-        Accordion,
-        Alert,
-        Avatar,
         Badge,
         Breadcrumbs,
         Button,
-        ButtonGroup,
-        Card,
-        Container,
-        Dropdown,
         Field,
         Form,
         Input,
-        Link,
-        Loading,
-        Marquee,
-        Modal,
-        Pagination,
-        Progress,
-        Rating,
-        Skeleton,
-        SlideOver,
-        Stepper,
-        Tabs,
-        Typography,
-        UserDropdownMenu,
-        Menu
+        Link
       }
 
-      alias PetalComponents.HeroiconsV1
       import WrtWeb.CoreComponents
       import OostkitShared.Components
       use Gettext, backend: WrtWeb.Gettext

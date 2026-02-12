@@ -60,7 +60,6 @@ SessionLive.Show (root LiveView)
 │   ├── show/2, hide/2        # JS command helpers for animated transitions
 │
 ├── App-Specific (in CoreComponents)
-│   ├── .app_header           # App-specific header wrapper (delegates to .header_bar, adds session info; OOSTKit brand link via :portal_url config)
 │   ├── .sheet               # Core UI primitive (paper-textured sheet)
 │   ├── .facilitator_timer    # Timer display (facilitator-only)
 │   ├── .score_indicator      # Traffic light score display
@@ -68,7 +67,7 @@ SessionLive.Show (root LiveView)
 │
 ├── Layouts
 │   ├── app.html.heex         # Standard layout using shared <.header_bar> (OOSTKit link via :portal_url, absolutely centered "Workgroup Pulse" title, Sign Up + Log In buttons linking to Portal) + brand stripe
-│   └── session.html.heex     # Bare layout for session pages (no header — session uses .app_header inline)
+│   └── session.html.heex     # Bare layout for session pages (no header — session LiveView renders shared .header_bar inline)
 │
 └── Other LiveViews
     ├── SessionLive.New        # Home page / create new session (mounted at `/`)
@@ -556,5 +555,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.10 — Shared UI components (icon, flash, flash_group, show, hide) consolidated into `OostkitShared.Components`; CoreComponents now contains only app-specific components*
+*Document Version: 1.11 — Removed app_header from CoreComponents (session view now uses shared header_bar directly); trimmed unused Petal imports to Button/Field/Form/Input/Link*
 *Last Updated: 2026-02-13*
