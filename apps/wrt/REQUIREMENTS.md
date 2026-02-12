@@ -34,17 +34,12 @@ The referral method is participative by nature—it lets the system identify its
 
 ## User Roles
 
-### Super Admin
-- You (the platform owner)
-- Approves/rejects organisation registration requests
-- Can suspend organisations
-- Views platform-wide metrics
-
-### Organisation Admin
+### Process Manager (Organisation Admin)
 - Creates and manages campaigns for their organisation
 - Invites campaign admins
 - Manages organisation settings
 - Views all campaigns for their org
+- Organisation auto-resolved by matching Portal login email to org admin_email
 
 ### Campaign Admin
 - Invited collaborator on a specific campaign
@@ -96,11 +91,10 @@ A record of one person nominating another:
 
 ### F1: Organisation Management
 
-#### F1.1: Organisation Registration
-- Organisation registration is managed via the super admin UI
-- Super admin creates organisations and approves/manages them
-- On approval: org schema created, org ready for campaign management
-- Note: Self-service registration was removed; Portal owns all user identity/auth
+#### F1.1: Organisation Provisioning
+- Organisations are provisioned via Portal (admin tools)
+- On creation: org schema created, org ready for campaign management
+- Organisation admin email links a Portal user to their org automatically
 
 #### F1.2: Organisation Settings
 - Org admins can update organisation name and details
@@ -108,7 +102,7 @@ A record of one person nominating another:
 - Org admins can view/manage campaign admins across campaigns
 
 #### F1.3: Organisation Suspension
-- Super admin can suspend an organisation
+- Organisations can be suspended via Portal
 - Suspended orgs cannot run campaigns or send emails
 - Existing data preserved, access restricted
 
@@ -241,14 +235,18 @@ arriving already authenticated via Portal's `_oostkit_token` cookie.
 - `PortalAuth` plug reads `_oostkit_token` cookie and sets `:portal_user` assign on conn
 - Config: `portal_api_url`, `portal_api_key`, `portal_login_url`
 
-#### F8.2: Super Admin Access
-- `RequirePortalSuperAdmin` plug checks Portal user has `super_admin` role and is enabled
-- Unauthenticated users are redirected to Portal login page
-- Protected routes: `/admin/*` (dashboard, org management)
+#### F8.2: Entry Flow (Landing Page)
+- `GET /` resolves the user's organisation by matching Portal email to `admin_email`
+- If no matching org: shows "no organisation" page with contact instructions
+- If org is inactive/suspended: shows "organisation inactive" page
+- If org is active: shows landing page explaining the referral process
+  - "Don't show again" option sets a persistent cookie (`wrt_skip_landing`)
+  - If cookie set, user is auto-redirected to `/org/:slug/manage`
+- `POST /dismiss-landing` handles the "don't show again" action and redirects to manage
 
 #### F8.3: Org Admin Access
 - `RequirePortalUser` plug checks any valid Portal user is authenticated and enabled
-- All org-scoped routes (`/org/:slug/*`) require Portal authentication
+- All routes (root `/` and org-scoped `/org/:slug/*`) require Portal authentication
 - Organisation/campaign admin role enforcement is handled within the tenant context
 
 ## Data Model
@@ -266,8 +264,8 @@ organisations
 - approved_by (super_admin_id)
 ```
 
-Note: The `super_admins` table is retained for legacy data but no longer used for
-authentication. All admin auth is now handled by Portal.
+Note: The `super_admins` table is retained for legacy data compatibility but is not used.
+All admin auth is handled by Portal. Organisation management is handled via Portal admin tools.
 
 ### Per-Organisation Schema
 
@@ -362,7 +360,8 @@ magic_links
 - Environment-based configuration for email service credentials
 
 ### T5: Security
-- All admin authentication delegated to Portal (no WRT-native passwords)
+- All admin authentication delegated to Portal (no WRT-native passwords or admin UI)
+- Organisation resolved by Portal email — no super admin web layer in WRT
 - Magic links expire after use and after time limit
 - HTTPS only
 - CSRF protection on all forms

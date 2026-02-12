@@ -1,4 +1,4 @@
-defmodule WrtWeb.Org.DashboardControllerTest do
+defmodule WrtWeb.Org.ManageControllerTest do
   use WrtWeb.ConnCase, async: true
 
   setup do
@@ -7,18 +7,18 @@ defmodule WrtWeb.Org.DashboardControllerTest do
     %{org: org, tenant: tenant, admin: admin}
   end
 
-  describe "GET /org/:org_slug/dashboard" do
-    test "renders dashboard when authenticated", %{conn: conn, org: org, admin: admin} do
+  describe "GET /org/:org_slug/manage" do
+    test "renders process manager when authenticated", %{conn: conn, org: org, admin: admin} do
       conn =
         conn
         |> log_in_portal_user(admin)
-        |> get("/org/#{org.slug}/dashboard")
+        |> get("/org/#{org.slug}/manage")
 
-      assert html_response(conn, 200) =~ "Dashboard"
+      assert html_response(conn, 200) =~ "Process Manager"
     end
 
     test "redirects to login when not authenticated", %{conn: conn, org: org} do
-      conn = get(conn, "/org/#{org.slug}/dashboard")
+      conn = get(conn, "/org/#{org.slug}/manage")
       assert redirected_to(conn)
     end
   end

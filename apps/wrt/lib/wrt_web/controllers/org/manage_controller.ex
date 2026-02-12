@@ -1,4 +1,4 @@
-defmodule WrtWeb.Org.DashboardController do
+defmodule WrtWeb.Org.ManageController do
   use WrtWeb, :controller
 
   alias Wrt.Campaigns
@@ -25,7 +25,7 @@ defmodule WrtWeb.Org.DashboardController do
       end
 
     render(conn, :index,
-      page_title: "Dashboard",
+      page_title: "Process Manager",
       org: org,
       campaigns: campaigns,
       active_campaign: active_campaign,

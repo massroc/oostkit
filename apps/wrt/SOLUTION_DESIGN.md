@@ -7,12 +7,12 @@ Technical architecture and implementation design for the OST Referral Tool.
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Web Layer                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
-│  │ Super Admin │  │  Org Admin  │  │  Nominator (Public)     │  │
-│  │   Routes    │  │   Routes    │  │       Routes            │  │
-│  └──────┬──────┘  └──────┬──────┘  └───────────┬─────────────┘  │
-│         │                │                     │                 │
-│         ▼                ▼                     ▼                 │
+│  ┌──────────────┐  ┌─────────────┐  ┌───────────────────────┐   │
+│  │ Landing Page │  │  Org Admin  │  │  Nominator (Public)   │   │
+│  │   Routes     │  │   Routes    │  │       Routes          │   │
+│  └──────┬───────┘  └──────┬──────┘  └───────────┬───────────┘   │
+│         │                 │                      │               │
+│         ▼                 ▼                      ▼               │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │                    Phoenix Controllers                      ││
 │  └─────────────────────────────────────────────────────────────┘│
@@ -46,8 +46,8 @@ Technical architecture and implementation design for the OST Referral Tool.
 │  │   schema    │     │   schema    │      │   schema    │      │
 │  │             │     │             │      │             │      │
 │  │ - orgs      │     │ - org_admins│      │ - org_admins│      │
-│  │ - super_    │     │ - campaigns │      │ - campaigns │      │
-│  │   admins*   │     │ - rounds    │      │ - rounds    │      │
+│  │             │     │ - campaigns │      │ - campaigns │      │
+│  │             │     │ - rounds    │      │ - rounds    │      │
 │  │             │     │ - people    │      │ - people    │      │
 │  │             │     │ - etc.      │      │ - etc.      │      │
 │  └─────────────┘     └─────────────┘      └─────────────┘      │
@@ -82,8 +82,8 @@ lib/
 │   │
 │   ├── platform/                   # Public schema (cross-tenant) ✓
 │   │   ├── organisation.ex         # Schema
-│   │   ├── super_admin.ex          # Schema (delegates to Auth.Password)
-│   │   └── platform.ex             # Context
+│   │   ├── super_admin.ex          # Schema (legacy, retained for data compat)
+│   │   └── platform.ex             # Context (includes get_organisation_by_admin_email/1)
 │   │
 │   ├── orgs/                       # Org management (tenant-scoped) ✓
 │   │   ├── org_admin.ex            # Schema (delegates to Auth.Password)
@@ -153,13 +153,13 @@ lib/
 │   │   │                            # - Sets :portal_user assign on conn
 │   │   │                            # - Dev bypass: assigns fake dev admin when no cookie present
 │   │   │
-│   │   ├── require_portal_super_admin.ex  # Portal super admin auth plug ✓
-│   │   │                            # - Requires portal_user with super_admin role
-│   │   │                            # - Redirects to Portal login if not authenticated
-│   │   │
 │   │   ├── require_portal_user.ex   # Portal user auth plug ✓
 │   │   │                            # - Requires any valid Portal user (enabled)
 │   │   │                            # - Redirects to Portal login if not authenticated
+│   │   │
+│   │   ├── tenant_plug.ex           # Tenant resolution from URL ✓
+│   │   │                            # - Extracts org slug from /org/:slug routes
+│   │   │                            # - Sets :current_org and :tenant assigns
 │   │   │
 │   │   └── rate_limiter.ex         # PlugAttack rate limiting ✓
 │   │                               # - Magic links: 3/min
@@ -168,14 +168,13 @@ lib/
 │   │                               # - General: 120/min
 │   │
 │   ├── controllers/
-│   │   ├── page_controller.ex      # Root redirect (/ → /admin/dashboard) ✓
-│   │   │
-│   │   ├── super_admin/            # ✓
-│   │   │   ├── org_controller.ex
-│   │   │   └── dashboard_controller.ex
+│   │   ├── page_controller.ex      # Entry flow (landing, no_org, inactive) ✓
+│   │   │                           # - Resolves org by portal_user email
+│   │   │                           # - Shows landing page or redirects to /org/:slug/manage
+│   │   │                           # - Handles "don't show again" cookie
 │   │   │
 │   │   ├── org/                    # ✓
-│   │   │   ├── dashboard_controller.ex
+│   │   │   ├── manage_controller.ex  # Process Manager dashboard (was dashboard_controller)
 │   │   │   ├── campaign_controller.ex
 │   │   │   ├── round_controller.ex
 │   │   │   ├── seed_controller.ex
@@ -217,6 +216,7 @@ test/
 ├── wrt/
 │   ├── emails_test.exs             # Email composition tests ✓
 │   ├── magic_links_test.exs        # MagicLinks context tests ✓
+│   ├── platform_test.exs           # Platform context tests ✓
 │   ├── reports_test.exs            # Reports context tests ✓
 │   └── workers/
 │       ├── cleanup_expired_magic_links_test.exs ✓
@@ -227,6 +227,9 @@ test/
 │
 └── wrt_web/controllers/
     ├── health_controller_test.exs  # ✓
+    ├── page_controller_test.exs    # Entry flow tests ✓
+    ├── org/
+    │   └── manage_controller_test.exs # Process Manager tests ✓
     └── webhook_controller_test.exs # ✓
 ```
 
@@ -308,7 +311,7 @@ end
 ### Migration Strategy
 
 Two sets of migrations:
-- `priv/repo/migrations/` - Public schema (organisations, super_admins)
+- `priv/repo/migrations/` - Public schema (organisations)
 - `priv/repo/tenant_migrations/` - Tenant schemas (campaigns, rounds, etc.)
 
 ```elixir
@@ -331,19 +334,12 @@ end
 ## URL Structure
 
 ```
-# Root redirect (users arrive via Portal, already authenticated)
-GET  /                                    # Redirects to /admin/dashboard
-
-# Super admin routes (Portal super_admin auth required)
-GET  /admin/dashboard                     # Platform overview
-GET  /admin/orgs                          # Pending/approved orgs
-GET  /admin/orgs/:id                      # Org detail
-POST /admin/orgs/:id/approve
-POST /admin/orgs/:id/reject
-POST /admin/orgs/:id/suspend
+# Landing page (users arrive via Portal, already authenticated)
+GET  /                                    # Entry flow: landing / no_org / inactive
+POST /dismiss-landing                     # "Don't show again" + redirect to manage
 
 # Org-scoped routes (Portal user auth required)
-GET  /org/:slug/dashboard                 # Campaign overview
+GET  /org/:slug/manage                    # Process Manager dashboard
 GET  /org/:slug/campaigns/new             # Create campaign
 POST /org/:slug/campaigns
 GET  /org/:slug/campaigns/:id             # Campaign detail
@@ -380,8 +376,8 @@ GET  /health/ready                        # Readiness check
 ### Admin Authentication (Portal-Delegated)
 
 All admin authentication is delegated to Portal. WRT has no login pages, registration
-forms, or password-based auth. Users access WRT through the Portal dashboard, arriving
-already authenticated via Portal's `_oostkit_token` cookie.
+forms, password-based auth, or super admin web layer. Users access WRT through the Portal
+dashboard, arriving already authenticated via Portal's `_oostkit_token` cookie.
 
 The authentication pipeline consists of two plugs applied at the router level:
 
@@ -391,19 +387,11 @@ The authentication pipeline consists of two plugs applied at the router level:
    In dev mode, if no cookie is present, assigns a fake dev admin user (`dev@oostkit.local`,
    `super_admin` role) so WRT routes work without requiring Portal to be running.
 
-2. **`RequirePortalSuperAdmin`** — For `/admin/*` routes. Checks that `portal_user` has
-   `role: "super_admin"` and `enabled: true`. Redirects to Portal login if not.
-
-3. **`RequirePortalUser`** — For `/org/:slug/*` routes. Checks that any valid `portal_user`
-   exists and is enabled. Redirects to Portal login if not.
+2. **`RequirePortalUser`** — For all authenticated routes (`/` and `/org/:slug/*`). Checks
+   that any valid `portal_user` exists and is enabled. Redirects to Portal login if not.
 
 ```elixir
-# Router pipelines
-pipeline :require_portal_super_admin do
-  plug WrtWeb.Plugs.PortalAuth
-  plug WrtWeb.Plugs.RequirePortalSuperAdmin
-end
-
+# Router pipeline
 pipeline :require_portal_user do
   plug WrtWeb.Plugs.PortalAuth
   plug WrtWeb.Plugs.RequirePortalUser
@@ -412,9 +400,19 @@ end
 
 Unauthenticated users are redirected to `portal_login_url` (configured per environment).
 
-### Root Redirect
+### Entry Flow (Landing Page)
 
-`/` redirects to `/admin/dashboard`. Users always arrive via Portal, already authenticated.
+When a Portal-authenticated user arrives at `GET /`, the `PageController` resolves their
+organisation by matching their Portal email against `Organisation.admin_email`:
+
+- **No matching org** → renders `no_org.html.heex` (explains they need an org set up)
+- **Org inactive/suspended** → renders `inactive.html.heex` (explains org is not active)
+- **Org active + no skip cookie** → renders `landing.html.heex` (explains the referral
+  process, with a "don't show again" checkbox)
+- **Org active + skip cookie set** → redirects directly to `/org/:slug/manage`
+
+The "don't show again" action (`POST /dismiss-landing`) sets a `wrt_skip_landing` cookie
+(1-year expiry) and redirects to the org's manage page.
 
 ### Nominator Magic Link Flow
 
@@ -900,8 +898,9 @@ end
 - [x] Multi-tenancy setup with Triplex
 - [x] Public schema migrations (orgs)
 - [x] Tenant schema migrations
-- [x] Portal-delegated authentication (RequirePortalSuperAdmin, RequirePortalUser)
-- [x] Organisation management
+- [x] Portal-delegated authentication (RequirePortalUser)
+- [x] Organisation management (via Portal, auto-resolved by admin email)
+- [x] Landing page entry flow with "don't show again" option
 
 ### Phase 2: Core Campaign Flow ✓
 - [x] Campaign CRUD

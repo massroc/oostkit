@@ -11,7 +11,8 @@
 # and so on) as they will fail if something goes wrong.
 
 alias Wrt.Repo
-alias Wrt.Platform.SuperAdmin
+alias Wrt.Platform.{Organisation, SuperAdmin}
+alias Wrt.TenantManager
 
 # Create a default super admin for development
 if Mix.env() == :dev do
@@ -29,5 +30,30 @@ if Mix.env() == :dev do
 
     _existing ->
       IO.puts("Super admin already exists")
+  end
+
+  # Create a dev organisation matching the PortalAuth dev bypass email
+  case Repo.get_by(Organisation, admin_email: "dev@oostkit.local") do
+    nil ->
+      org =
+        %Organisation{}
+        |> Organisation.registration_changeset(%{
+          name: "Dev Organisation",
+          admin_name: "Dev Admin",
+          admin_email: "dev@oostkit.local"
+        })
+        |> Ecto.Changeset.put_change(:status, "approved")
+        |> Ecto.Changeset.put_change(
+          :approved_at,
+          DateTime.utc_now() |> DateTime.truncate(:second)
+        )
+        |> Repo.insert!()
+
+      {:ok, _} = TenantManager.create_tenant(org.id)
+
+      IO.puts("Created dev organisation: #{org.name} (#{org.slug}) with tenant schema")
+
+    _existing ->
+      IO.puts("Dev organisation already exists")
   end
 end

@@ -27,10 +27,11 @@ This mailbox shows all emails "sent" by the app, including:
    docker compose up
    ```
 
-2. Create test data through the admin UI:
-   - Log in via Portal (super admin role required) — Portal must be running on port 4002
-   - Navigate to WRT at `http://localhost:4001` (redirects to admin dashboard)
-   - Create an organisation
+2. Create test data through the UI:
+   - Navigate to WRT at `http://localhost:4001`
+   - In dev mode, the PortalAuth dev bypass auto-logs you in as `dev@oostkit.local`
+   - Seeds create a "Dev Organisation" matched to that email, so you land on the landing page
+   - Click through to the Process Manager (`/org/:slug/manage`)
    - Create a campaign and round
    - Add contacts to the round
 

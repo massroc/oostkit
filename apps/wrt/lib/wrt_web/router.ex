@@ -14,11 +14,6 @@ defmodule WrtWeb.Router do
     plug :accepts, ["json"]
   end
 
-  pipeline :require_portal_super_admin do
-    plug WrtWeb.Plugs.PortalAuth
-    plug WrtWeb.Plugs.RequirePortalSuperAdmin
-  end
-
   pipeline :require_portal_user do
     plug WrtWeb.Plugs.PortalAuth
     plug WrtWeb.Plugs.RequirePortalUser
@@ -32,30 +27,19 @@ defmodule WrtWeb.Router do
     get "/ready", HealthController, :ready
   end
 
-  # Root redirect — users arrive via Portal, already authenticated
+  # Landing page — users arrive via Portal, already authenticated
   scope "/", WrtWeb do
-    pipe_through :browser
+    pipe_through [:browser, :require_portal_user]
 
     get "/", PageController, :home
-  end
-
-  # Super admin routes (Portal auth required)
-  scope "/admin", WrtWeb.SuperAdmin, as: :super_admin do
-    pipe_through [:browser, :require_portal_super_admin]
-
-    get "/dashboard", DashboardController, :index
-    get "/orgs", OrgController, :index
-    get "/orgs/:id", OrgController, :show
-    post "/orgs/:id/approve", OrgController, :approve
-    post "/orgs/:id/reject", OrgController, :reject
-    post "/orgs/:id/suspend", OrgController, :suspend
+    post "/dismiss-landing", PageController, :dismiss_landing
   end
 
   # Org-scoped routes (Portal auth required)
   scope "/org/:org_slug", WrtWeb.Org, as: :org do
     pipe_through [:browser, :require_portal_user]
 
-    get "/dashboard", DashboardController, :index
+    get "/manage", ManageController, :index
 
     # Campaign routes
     resources "/campaigns", CampaignController, only: [:new, :create, :show] do

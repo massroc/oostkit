@@ -18,7 +18,7 @@ defmodule WrtWeb.Org.CampaignController do
         :error,
         "You already have an active campaign. Complete or archive it before creating a new one."
       )
-      |> redirect(to: ~p"/org/#{org.slug}/dashboard")
+      |> redirect(to: ~p"/org/#{org.slug}/manage")
     else
       changeset = Campaigns.change_campaign(%Campaign{})
 
@@ -43,7 +43,7 @@ defmodule WrtWeb.Org.CampaignController do
       {:error, :active_campaign_exists} ->
         conn
         |> put_flash(:error, "You already have an active campaign.")
-        |> redirect(to: ~p"/org/#{org.slug}/dashboard")
+        |> redirect(to: ~p"/org/#{org.slug}/manage")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new,
