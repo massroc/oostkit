@@ -193,14 +193,6 @@ Components are split between `OostkitShared.Components` (`apps/oostkit_shared/`)
 | `<.flash_group>` | Standard flash group with client/server reconnection flashes |
 | `show/2`, `hide/2` | JS command helpers for animated show/hide transitions |
 
-### `<.app_header>` (app-specific)
-
-The app-specific `<.app_header>` in `core_components.ex` wraps `<.header_bar>` and adds session-specific content (session name in the actions slot). Used in session views. The OOSTKit brand link URL is read from `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")`, matching the pattern used by the `:app` layout.
-
-```elixir
-<.app_header session_name="Six Criteria Assessment" />
-```
-
 ### Layouts
 
 Two Phoenix layouts control header presence:
@@ -208,13 +200,13 @@ Two Phoenix layouts control header presence:
 | Layout | Used By | Header |
 |--------|---------|--------|
 | `:app` | Create (home page) and Join pages | Shared `<.header_bar>` in layout: OOSTKit link (left, via `:portal_url`), "Workgroup Pulse" absolutely centered, Sign Up + Log In buttons (right, linking to Portal) + brand stripe |
-| `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders `.app_header` inline |
+| `:session` | `SessionLive.Show` | Bare layout (no header) — the session LiveView renders shared `<.header_bar>` inline with brand URL and "Workgroup Pulse" title |
 
-Both the `:app` layout and the `<.app_header>` component use `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit brand link URL. The `:app` layout also uses it for Sign Up/Log In button URLs. This is configured in `config/dev.exs` (defaults to `http://localhost:4002`) and `config/runtime.exs` (from `PORTAL_URL` env var).
+Both the `:app` layout and the session LiveView use `Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")` for the OOSTKit brand link URL. The `:app` layout also uses it for Sign Up/Log In button URLs. This is configured in `config/dev.exs` (defaults to `http://localhost:4002`) and `config/runtime.exs` (from `PORTAL_URL` env var).
 
 The right zone always shows Sign Up (`rounded-md bg-white/10` frosted button linking to Portal `/users/register`) and Log In (text link to Portal `/users/log-in`), matching the Portal header styling. Pulse has no user authentication context, so the right zone does not adapt based on auth state.
 
-The `:session` layout prevents duplicate headers when the session LiveView renders its own `app_header` component (which includes the session name).
+The `:session` layout is bare (flash group only) so the session LiveView can render the shared `<.header_bar>` component inline, avoiding duplicate headers.
 
 ### Page Title (H1) Sizing
 
@@ -333,6 +325,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.13 — Shared UI components (icon, flash, flash_group, show, hide) consolidated into `OostkitShared.Components`; CoreComponents now contains only app-specific components*
+*Document Version: 1.14 — Removed app_header section (session view now uses shared header_bar directly); removed redundant Heroicons CSS (Tailwind plugin handles it)*
 *Created: 2026-02-07*
 *Updated: 2026-02-13*

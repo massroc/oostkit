@@ -331,30 +331,4 @@ defmodule WrtWeb.CoreComponents do
   defp callout_text(:info), do: "text-ok-blue-700"
   defp callout_text(:neutral), do: "text-gray-600"
 
-  # =============================================================================
-  # Status Badge Helpers (legacy — use status_badge/1 for new code)
-  # =============================================================================
-
-  @doc """
-  Returns CSS classes for campaign status badges.
-  """
-  def campaign_status_class("draft"), do: "bg-gray-100 text-gray-800"
-  def campaign_status_class("active"), do: "bg-ok-green-100 text-ok-green-800"
-  def campaign_status_class("completed"), do: "bg-ok-blue-100 text-ok-blue-800"
-  def campaign_status_class(_), do: "bg-gray-100 text-gray-800"
-
-  @doc """
-  Returns CSS classes for round status badges.
-  """
-  def round_status_class("pending"), do: "bg-gray-100 text-gray-800"
-  def round_status_class("active"), do: "bg-ok-green-100 text-ok-green-800"
-  def round_status_class("closed"), do: "bg-ok-blue-100 text-ok-blue-800"
-  def round_status_class(_), do: "bg-gray-100 text-gray-800"
-
-  @doc """
-  Returns CSS classes for person source badges.
-  """
-  def source_class("seed"), do: "bg-ok-blue-100 text-ok-blue-800"
-  def source_class("nominated"), do: "bg-ok-purple-100 text-ok-purple-800"
-  def source_class(_), do: "bg-gray-100 text-gray-800"
 end

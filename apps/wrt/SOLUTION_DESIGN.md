@@ -246,7 +246,7 @@ consistent UI. Standard Phoenix scaffolding components (icon, flash, flash_group
 provided by `OostkitShared.Components` (shared across all apps), while form-related components
 (button, input, field, form) come from Petal Components. WRT's CoreComponents contains only
 app-specific components: `simple_form`, `back`, `table`, `stat_card`, `empty_state`,
-`status_badge`, `callout`, badge/status helpers, and `translate_error`.
+`status_badge`, `callout`, and `translate_error`.
 
 All admin templates use these components exclusively — there is no inline/copy-pasted HTML for
 stat cards, badges, callouts, or empty states. The templates that consume them are:
@@ -288,8 +288,7 @@ when a list or section has no data to display.
 ### status_badge/1
 
 Renders a PetalComponents Badge with automatic color mapping based on entity kind and status
-value. The label is automatically capitalised via `String.capitalize/1`. Replaces the legacy
-`*_status_class/1` helper functions which returned raw CSS class strings for manual badge markup.
+value. The label is automatically capitalised via `String.capitalize/1`.
 
 | Attribute | Type | Required | Values | Description |
 |-----------|------|----------|--------|-------------|
@@ -329,16 +328,6 @@ Supports five variants for different contexts: info, success, warning, danger, a
 |------|-------------|
 | `inner_block` | Body content |
 | `actions` | Action buttons/links rendered below the body |
-
-### Legacy Status Helpers
-
-The following functions are retained for backward compatibility but are no longer called by any
-template. All admin templates now use `status_badge/1` instead. These can be removed in a future
-cleanup:
-
-- `campaign_status_class/1` — returns CSS classes for campaign status badges
-- `round_status_class/1` — returns CSS classes for round status badges
-- `source_class/1` — returns CSS classes for person source badges
 
 ## Nomination Form (Dynamic Entries)
 

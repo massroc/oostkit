@@ -31,12 +31,6 @@
   @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900;
 }
 
-/* Heroicons overrides for dark theme */
-[class*="hero-"] {
-  @apply inline-block;
-  background-size: contain;
-  background-repeat: no-repeat;
-}
 
 /* ─── Sheet Carousel Design System ─── */
 
