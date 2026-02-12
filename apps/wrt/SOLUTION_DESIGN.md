@@ -151,7 +151,8 @@ lib/
 │   │   │                            # - Reads _oostkit_token cookie
 │   │   │                            # - Validates via PortalAuthClient
 │   │   │                            # - Sets :portal_user assign on conn
-│   │   │                            # - Dev bypass: assigns fake dev admin when no cookie present
+│   │   │                            # - Dev bypass: assigns fake dev admin when no cookie
+│   │   │                            #   or when validation fails (e.g., Portal unreachable)
 │   │   │
 │   │   ├── require_portal_user.ex   # Portal user auth plug ✓
 │   │   │                            # - Requires any valid Portal user (enabled)
@@ -226,12 +227,15 @@ test/
 │       ├── send_reminder_email_test.exs ✓
 │       └── send_round_invitations_test.exs ✓
 │
-└── wrt_web/controllers/
-    ├── health_controller_test.exs  # ✓
-    ├── page_controller_test.exs    # Entry flow tests ✓
-    ├── org/
-    │   └── manage_controller_test.exs # Process Manager tests ✓
-    └── webhook_controller_test.exs # ✓
+└── wrt_web/
+    ├── plugs/
+    │   └── portal_auth_test.exs    # PortalAuth plug tests ✓
+    └── controllers/
+        ├── health_controller_test.exs  # ✓
+        ├── page_controller_test.exs    # Entry flow tests ✓
+        ├── org/
+        │   └── manage_controller_test.exs # Process Manager tests ✓
+        └── webhook_controller_test.exs # ✓
 ```
 
 ## Multi-Tenancy Implementation
@@ -385,8 +389,10 @@ The authentication pipeline consists of two plugs applied at the router level:
 1. **`PortalAuth`** — Reads the `_oostkit_token` cookie and validates it against Portal's
    internal API via `PortalAuthClient`. Sets `:portal_user` assign on conn with the user's
    `id`, `email`, `role`, and `enabled` status. Results are cached in ETS with 5-minute TTL.
-   In dev mode, if no cookie is present, assigns a fake dev admin user (`dev@oostkit.local`,
-   `super_admin` role) so WRT routes work without requiring Portal to be running.
+   In dev mode, if no cookie is present **or if validation fails** (e.g., Portal is unreachable
+   from Docker), assigns a fake dev admin user (`dev@oostkit.local`, `super_admin` role) so
+   WRT routes work without requiring Portal to be running. In prod, validation failure sets
+   `:portal_user` to `nil` (same as no cookie).
 
 2. **`RequirePortalUser`** — For all authenticated routes (`/` and `/org/:slug/*`). Checks
    that any valid `portal_user` exists and is enabled. Redirects to Portal login if not.

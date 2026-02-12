@@ -28,7 +28,7 @@ defmodule WrtWeb.Plugs.PortalAuth do
       encoded_token ->
         case WrtWeb.PortalAuthClient.validate_token(encoded_token) do
           {:ok, user} -> assign(conn, :portal_user, user)
-          {:error, _} -> assign(conn, :portal_user, nil)
+          {:error, _} -> maybe_dev_bypass(conn)
         end
     end
   end
