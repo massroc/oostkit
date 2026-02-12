@@ -482,35 +482,37 @@ without requiring sudo mode — sudo checks are performed in event handlers for
 sensitive actions (email change, password change, account deletion). If not in
 sudo mode, the user is redirected to the login page with a message to re-authenticate.
 
-**Layout:** Uses a `space-y-10` outer wrapper with `px-6 sm:px-8` horizontal padding
-and a centred "Account Settings" title at the top. The main content uses a responsive two-column grid
-(`grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10`) that stacks to single column
-on mobile. Text input fields are constrained to `max-w-xs` for comfortable reading
-width. Each section uses the shared `<.header>` component (from `OostkitShared.Components`) with a bold `text-2xl font-bold`
-heading. Section subtitle descriptions have been removed for a cleaner, more compact
-layout.
+**Layout:** Uses the "stacked sections with cards" pattern (Tailwind UI style). An
+"Account Settings" title with subtitle sits at the top via the shared `<.header>` component.
+Below it, sections are separated by `divide-y divide-zinc-200` dividers. Each section
+uses a responsive 1/3 + 2/3 grid (`grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 py-10`):
 
-**Grid sections (2x2 on desktop, stacked on mobile):**
+- **Left column (1/3)** — section heading (`text-base font-semibold text-text-dark`) and
+  a subtitle paragraph (`text-sm text-zinc-500`) describing the section's purpose.
+- **Right column (2/3)** — a card (`bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5
+  rounded-xl md:col-span-2`) containing the form fields in a `p-6` content area, with a
+  card footer (`border-t border-zinc-200 px-6 py-4`) housing a right-aligned save button
+  (`flex justify-end`).
 
-- **Profile** (top-left) — heading "Profile". Name and organisation fields (optional)
-  wrapped in `max-w-xs`. Referral source is collected at registration only and is not
+**Sections (stacked vertically, separated by dividers):**
+
+- **Profile** — heading "Profile", subtitle "Your name and organisation." Name and
+  organisation fields. Referral source is collected at registration only and is not
   shown on the settings page.
-- **Contact Preferences** (top-right) — heading "Contact Preferences". A single
-  `product_updates` checkbox labelled "Product updates" controls whether the user
-  receives product update emails. Saved via a dedicated "Save Preferences" button.
-- **Email** (bottom-left) — heading "Email". Email field wrapped in `max-w-xs`. Sends
-  confirmation to new address (requires sudo mode).
-- **Password** (bottom-right) — heading "Password". Password fields wrapped in
-  `max-w-xs`. Optional, for facilitators who prefer password login over magic links.
-  If no password is set yet, the button label reads "Add a password" rather than
-  "Change password" (requires sudo mode).
-
-**Below the grid (full-width):**
-
-- *(divider)*
-- **Danger zone** — heading "Danger zone" in `text-ok-red-600`, description warns
-  that deletion is irreversible. Red "Delete Account" button with confirmation
-  prompt. Permanently deletes the user account and logs them out (requires sudo mode).
+- **Contact Preferences** — heading "Contact Preferences", subtitle "How we communicate
+  with you." A single `product_updates` checkbox labelled "Product updates" controls
+  whether the user receives product update emails. Saved via a dedicated "Save Preferences"
+  button.
+- **Email** — heading "Email", subtitle "Change the email address associated with your
+  account." Email field. Sends confirmation to new address (requires sudo mode).
+- **Password** — heading "Password", subtitle "Update your password to keep your account
+  secure." Password fields. Optional, for facilitators who prefer password login over
+  magic links. If no password is set yet, the button label reads "Add a password" rather
+  than "Change password" (requires sudo mode).
+- **Danger zone** — heading "Danger zone" in `text-ok-red-600`, subtitle warns that
+  deletion is irreversible. Card uses `ring-ok-red-200` instead of the default ring for
+  visual warning. Red "Delete Account" button with confirmation prompt. Permanently
+  deletes the user account and logs them out (requires sudo mode).
 
 ### Forgot Password (`/users/forgot-password`)
 
@@ -778,7 +780,7 @@ demand. The last polled timestamp is displayed at the bottom of the page.
 | `/users/register` | Registration | No | Name + email + optional org, referral source, tool interests. Magic link confirmation. Facilitator-focused messaging. Users are fully onboarded at registration. |
 | `/users/forgot-password` | Forgot password | No | Email field, sends password reset link. Always shows success message (prevents user enumeration). |
 | `/users/reset-password/:token` | Reset password | No | New password + confirmation. Token validated on mount, redirects to login on success. |
-| `/users/settings` | Account settings | Yes | Two-column responsive grid: Profile (name, org), Contact Preferences (product updates opt-in), email change, password (add/change). Danger zone (account deletion) full-width below. Sudo checks in handlers, not on page load. |
+| `/users/settings` | Account settings | Yes | Stacked sections with cards (Tailwind UI pattern): Profile (name, org), Contact Preferences (product updates opt-in), Email change, Password (add/change), Danger zone (account deletion). Each section has a 1/3 description + 2/3 form card layout. Sudo checks in handlers, not on page load. |
 | `DELETE /users/delete-account` | Delete account | Yes | Deletes user account and logs out. Triggered from settings page. |
 | `/admin` | Admin dashboard | Super Admin | Stats overview: signup counts, user counts, tool status. |
 | `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View registration data (org, referral source, tool interests). |
@@ -947,7 +949,7 @@ Resolved during design discussions (February 2026):
 | Question | Decision | Notes |
 |----------|----------|-------|
 | Landing page redirect | Removed | Logged-in users no longer auto-redirect to `/home`. The header "Dashboard" link provides navigation instead. Lets logged-in users share the marketing URL without being redirected away. |
-| Page title consistency | `<.header>` component | All page titles (admin pages, settings sections) use the `<.header>` component from `OostkitShared.Components` at `text-2xl font-bold` instead of inline `<h1>` elements. |
+| Page title consistency | `<.header>` component | Page titles (admin pages, settings page title) use the `<.header>` component from `OostkitShared.Components` at `text-2xl font-bold`. Settings section headings within the page use plain `<h2>` elements at `text-base font-semibold` as part of the stacked-sections card layout. |
 | "Coming soon" page | Email capture | Collects emails for launch notification. Simple form. |
 | App detail pages | Keep | Useful as shareable links and for SEO. Already built. |
 | Mobile vs desktop | Desktop-first | Responsive but not mobile-obsessed. Marketing page should look decent on mobile for sharing. |
