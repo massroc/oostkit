@@ -34,8 +34,62 @@ defmodule PortalWeb.UserAuth do
 
     conn
     |> create_or_extend_session(user, params)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect_after_login(user_return_to)
   end
+
+  @doc """
+  Plug that reads a `return_to` query param, validates the URL against
+  known tool origins (`:tool_urls` config), and stores it in the session
+  as `:user_return_to` for post-login redirect.
+  """
+  def store_external_return_to(conn, _opts) do
+    conn = fetch_query_params(conn)
+
+    case conn.query_params["return_to"] do
+      url when is_binary(url) and url != "" ->
+        if valid_return_to_url?(url) do
+          put_session(conn, :user_return_to, url)
+        else
+          conn
+        end
+
+      _ ->
+        conn
+    end
+  end
+
+  defp valid_return_to_url?(url) do
+    case URI.parse(url) do
+      %URI{scheme: scheme, host: host, port: port}
+      when scheme in ["http", "https"] and is_binary(host) ->
+        allowed_origins =
+          :portal
+          |> Application.get_env(:tool_urls, %{})
+          |> Map.values()
+          |> Enum.map(fn tool_url ->
+            uri = URI.parse(tool_url)
+            {uri.scheme, uri.host, uri.port}
+          end)
+
+        {scheme, host, port} in allowed_origins
+
+      _ ->
+        false
+    end
+  end
+
+  defp redirect_after_login(conn, nil), do: redirect(conn, to: signed_in_path(conn))
+  defp redirect_after_login(conn, "/" <> _ = path), do: redirect(conn, to: path)
+
+  defp redirect_after_login(conn, "http" <> _ = url) do
+    if valid_return_to_url?(url) do
+      redirect(conn, external: url)
+    else
+      redirect(conn, to: signed_in_path(conn))
+    end
+  end
+
+  defp redirect_after_login(conn, _), do: redirect(conn, to: signed_in_path(conn))
 
   @doc """
   Logs the user out.

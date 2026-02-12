@@ -20,9 +20,14 @@ defmodule WrtWeb.Plugs.RequirePortalUser do
         portal_login_url =
           Application.get_env(:wrt, :portal_login_url, "https://oostkit.com/users/log-in")
 
+        current_url = WrtWeb.Endpoint.url() <> current_path(conn)
+
+        redirect_url =
+          portal_login_url <> "?" <> URI.encode_query(%{"return_to" => current_url})
+
         conn
         |> put_flash(:error, "You must be logged in via OOSTKit Portal to access this page.")
-        |> redirect(external: portal_login_url)
+        |> redirect(external: redirect_url)
         |> halt()
     end
   end

@@ -248,6 +248,7 @@ arriving already authenticated via Portal's `_oostkit_token` cookie.
 - `RequirePortalUser` plug checks any valid Portal user is authenticated and enabled
 - All routes (root `/` and org-scoped `/org/:slug/*`) require Portal authentication
 - Organisation/campaign admin role enforcement is handled within the tenant context
+- When redirecting unauthenticated users to Portal login, the plug appends a `return_to` query param with the user's current WRT URL (e.g., `?return_to=http://localhost:4001/org/acme/manage`), so Portal can redirect back after login
 
 ## Data Model
 

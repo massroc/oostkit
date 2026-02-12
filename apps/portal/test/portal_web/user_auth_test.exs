@@ -64,6 +64,24 @@ defmodule PortalWeb.UserAuthTest do
       assert redirected_to(conn) == "/hello"
     end
 
+    test "redirects to a valid external return URL", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> put_session(:user_return_to, "http://localhost:4001/referrals")
+        |> UserAuth.log_in_user(user)
+
+      assert redirected_to(conn) == "http://localhost:4001/referrals"
+    end
+
+    test "falls back to signed_in_path for invalid external return URL", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> put_session(:user_return_to, "https://evil.com/steal")
+        |> UserAuth.log_in_user(user)
+
+      assert redirected_to(conn) == ~p"/home"
+    end
+
     test "writes a cookie if remember_me is configured", %{conn: conn, user: user} do
       conn = conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
       assert get_session(conn, :user_token) == conn.cookies[@remember_me_cookie]
@@ -363,6 +381,53 @@ defmodule PortalWeb.UserAuthTest do
 
       refute conn.halted
       refute conn.status
+    end
+  end
+
+  describe "store_external_return_to/2" do
+    test "stores a valid WRT URL in session", %{conn: conn} do
+      conn =
+        conn
+        |> Map.put(:query_params, %{"return_to" => "http://localhost:4001/referrals"})
+        |> Map.put(:query_string, "return_to=http%3A%2F%2Flocalhost%3A4001%2Freferrals")
+        |> UserAuth.store_external_return_to([])
+
+      assert get_session(conn, :user_return_to) == "http://localhost:4001/referrals"
+    end
+
+    test "stores a valid Pulse URL in session", %{conn: conn} do
+      conn =
+        conn
+        |> Map.put(:query_params, %{"return_to" => "http://localhost:4000/workshop/123"})
+        |> Map.put(:query_string, "return_to=http%3A%2F%2Flocalhost%3A4000%2Fworkshop%2F123")
+        |> UserAuth.store_external_return_to([])
+
+      assert get_session(conn, :user_return_to) == "http://localhost:4000/workshop/123"
+    end
+
+    test "rejects unknown domain", %{conn: conn} do
+      conn =
+        conn
+        |> Map.put(:query_params, %{"return_to" => "https://evil.com/steal"})
+        |> Map.put(:query_string, "return_to=https%3A%2F%2Fevil.com%2Fsteal")
+        |> UserAuth.store_external_return_to([])
+
+      refute get_session(conn, :user_return_to)
+    end
+
+    test "rejects javascript: URLs", %{conn: conn} do
+      conn =
+        conn
+        |> Map.put(:query_params, %{"return_to" => "javascript:alert(1)"})
+        |> Map.put(:query_string, "return_to=javascript%3Aalert%281%29")
+        |> UserAuth.store_external_return_to([])
+
+      refute get_session(conn, :user_return_to)
+    end
+
+    test "is a no-op when return_to param is missing", %{conn: conn} do
+      conn = UserAuth.store_external_return_to(conn, [])
+      refute get_session(conn, :user_return_to)
     end
   end
 

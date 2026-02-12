@@ -61,6 +61,22 @@ defmodule PortalWeb.UserSessionControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Welcome back!"
     end
 
+    test "redirects to external return_to URL after login", %{conn: conn, user: user} do
+      user = set_password(user)
+
+      conn =
+        conn
+        |> init_test_session(user_return_to: "http://localhost:4001/referrals")
+        |> post(~p"/users/log-in", %{
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password()
+          }
+        })
+
+      assert redirected_to(conn) == "http://localhost:4001/referrals"
+    end
+
     test "redirects to login page with invalid credentials", %{conn: conn, user: user} do
       conn =
         post(conn, ~p"/users/log-in?mode=password", %{
