@@ -15,6 +15,8 @@ defmodule PortalWeb.UserLive.SettingsTest do
       assert html =~ "Save Profile"
       assert html =~ "Change Email"
       assert html =~ "Organisation"
+      assert html =~ "Contact Preferences"
+      assert html =~ "Save Preferences"
       assert html =~ "Danger zone"
       assert html =~ "Delete Account"
     end
@@ -90,6 +92,51 @@ defmodule PortalWeb.UserLive.SettingsTest do
         |> render_change(%{"user" => %{"name" => ""}})
 
       assert result =~ "can&#39;t be blank"
+    end
+  end
+
+  describe "update contact preferences form" do
+    setup %{conn: conn} do
+      user = user_fixture()
+      %{conn: log_in_user(conn, user), user: user}
+    end
+
+    test "renders contact preferences section", %{conn: conn} do
+      {:ok, _lv, html} = live(conn, ~p"/users/settings")
+
+      assert html =~ "Contact Preferences"
+      assert html =~ "Product updates"
+      assert html =~ "Save Preferences"
+    end
+
+    test "toggles product_updates on", %{conn: conn, user: user} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#contact_prefs_form", %{
+          "user" => %{"product_updates" => "true"}
+        })
+        |> render_submit()
+
+      assert result =~ "Contact preferences updated successfully."
+      assert Accounts.get_user!(user.id).product_updates == true
+    end
+
+    test "toggles product_updates off", %{conn: conn, user: user} do
+      Accounts.update_contact_prefs(user, %{product_updates: true})
+
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#contact_prefs_form", %{
+          "user" => %{"product_updates" => "false"}
+        })
+        |> render_submit()
+
+      assert result =~ "Contact preferences updated successfully."
+      assert Accounts.get_user!(user.id).product_updates == false
     end
   end
 
