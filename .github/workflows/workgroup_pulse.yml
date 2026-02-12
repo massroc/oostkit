@@ -26,4 +26,5 @@ jobs:
       app_path: apps/workgroup_pulse
       database_name: workgroup_pulse_test
       deploy_enabled: true
+      app_url: 'https://pulse.oostkit.com'
     secrets: inherit

@@ -98,7 +98,8 @@ fly logs
 ```
 
 - [ ] Initial deployment successful
-- [ ] Health checks passing
+- [ ] Health checks passing (`curl https://<host>/health` returns `{"status": "ok"}`)
+- [ ] Readiness check passing (`curl https://<host>/health/ready` returns `{"status": "ready"}`)
 
 ### Configure Custom Domain
 

@@ -24,6 +24,14 @@ defmodule PortalWeb.Router do
     plug PortalWeb.Plugs.ApiAuth
   end
 
+  # Health check routes (no auth required)
+  scope "/health", PortalWeb do
+    pipe_through :api
+
+    get "/", HealthController, :index
+    get "/ready", HealthController, :ready
+  end
+
   # Internal API (cross-app token validation)
   scope "/api/internal", PortalWeb.Api do
     pipe_through [:internal_api]
