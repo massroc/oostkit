@@ -91,7 +91,7 @@ All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
 - **Semantic color tokens**: `ok-purple`, `ok-green`, `ok-red`, `ok-gold`, `ok-blue` (branded), plus surface and text tokens (`bg-surface-wall`, `bg-surface-sheet`, `text-text-dark`)
 - **Typography**: DM Sans (UI chrome) loaded via Google Fonts, with `font-brand` utility
 - **Shadows**: `shadow-sheet` for card-like surfaces
-- **OOSTKit header**: Consistent dark purple header across all apps — "OOSTKit" brand link on the left (links to `https://oostkit.com`), app-specific content on the right
+- **OOSTKit header**: Consistent dark purple header across all apps — three-zone `justify-between` layout: "OOSTKit" brand link on the left (links to Portal via configurable `:portal_url`), centered app name (e.g., "Workgroup Pulse", "Workshop Referral Tool") or page title (Portal), and app-specific content on the right
 - **Brand stripe**: Magenta-to-purple gradient bar below the header
 
 Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
@@ -126,7 +126,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - `interest_signups` table for email capture from coming-soon pages and app detail pages
 - `user_tool_interests` table for onboarding tool interest data
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
-- Three-zone header with Sign Up / Log In buttons pointing to real auth pages (`/users/register`, `/users/log-in`)
+- Three-zone header: OOSTKit brand link (left), current page title (centre), Sign Up / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
 - Route restructure: `/` redirects logged-in users to `/home`
 - Login page with "Welcome back" heading, magic link primary, password secondary
 - Settings page with profile editing (name, org, referral source) and dynamic password label
@@ -138,7 +138,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
 - Dev auto-login flow: auto-logs in as dev super admin on first visit, sets cross-app cookie, dev-only "Admin" button in header for manual re-login (`POST /dev/admin-login`)
 
-**Deferred:** Header breadcrumbs in Pulse/WRT, admin dashboard trends/charts.
+**Deferred:** Admin dashboard trends/charts.
 
 **Data model:**
 - `users` table -- email, name, role, organisation, referral_source, onboarding_completed, enabled

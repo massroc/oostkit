@@ -50,5 +50,8 @@ config :phoenix_live_view,
   debug_heex_annotations: true,
   enable_expensive_runtime_checks: System.get_env("PHOENIX_EXPENSIVE_CHECKS") == "true"
 
+# Portal URL for OOSTKit header link
+config :workgroup_pulse, :portal_url, "http://localhost:4002"
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false

@@ -95,12 +95,15 @@ Sheets lift on hover with transition to `shadow-sheet-lifted`.
 
 ### OOSTKit Header
 
-All apps share a consistent header pattern:
+All apps share a consistent header pattern with a three-zone `justify-between` layout:
 
 - **Background**: Dark purple (`bg-ok-purple-900`)
-- **Left**: "OOSTKit" brand link (white, links to `https://oostkit.com`)
-- **Right**: App-specific content (e.g., session name, admin email, logout link)
+- **Left**: "OOSTKit" brand link (white, links to Portal via configurable `:portal_url`, defaults to `https://oostkit.com`)
+- **Centre**: App name displayed as static text (e.g., "Workgroup Pulse", "Workshop Referral Tool"). In Portal, the centre shows the current page title (e.g., "Dashboard").
+- **Right**: App-specific content (e.g., user email, auth links). In apps without user context (e.g., Pulse), a placeholder `<div>` maintains the three-zone spacing.
 - **Below**: Magenta-to-purple gradient brand stripe (`.brand-stripe`, 3px)
+
+The `:portal_url` is configured per-app in `config/dev.exs` (hardcoded to `http://localhost:4002`) and `config/runtime.exs` (from `PORTAL_URL` env var), defaulting to `https://oostkit.com` if unset.
 
 This header is implemented in each app's layout files (`app.html.heex`, `admin.html.heex`) or via a shared component (e.g., Pulse's `<.app_header>`).
 
@@ -566,6 +569,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-12 | Header consistency update: three-zone layout (OOSTKit link / centered app name / right content), configurable `:portal_url` in Pulse and WRT, Portal centre zone shows page title |
 | 2026-02-12 | Consistent OOSTKit header across all apps (Portal, Pulse, WRT): dark purple bg, "OOSTKit" brand link, brand stripe below |
 | 2026-02-10 | Design system applied to Portal (semantic tokens, DM Sans, brand stripe, surface/text classes, branded nav header) |
 | 2026-02-10 | Design system applied to WRT (semantic tokens, DM Sans, brand stripe, surface/text classes) |
