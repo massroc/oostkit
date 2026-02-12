@@ -6,151 +6,153 @@ defmodule PortalWeb.UserLive.Settings do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-10">
-      <div class="text-center">
-        <.header>
-          Account Settings
-          <:subtitle>Manage your account details</:subtitle>
-        </.header>
-      </div>
+    <div class="mx-auto max-w-4xl px-6 py-8 sm:px-8">
+      <div class="space-y-10">
+        <div class="text-center">
+          <.header>
+            Account Settings
+            <:subtitle>Manage your account details</:subtitle>
+          </.header>
+        </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-        <section>
-          <h2 class="text-base font-semibold text-text-dark">Profile</h2>
-          <.form
-            for={@profile_form}
-            id="profile_form"
-            phx-submit="update_profile"
-            phx-change="validate_profile"
-          >
-            <div class="mt-4 space-y-4 max-w-xs">
-              <.field
-                field={@profile_form[:name]}
-                type="text"
-                label="Name"
-                autocomplete="name"
-                required
-              />
-              <.field
-                field={@profile_form[:organisation]}
-                type="text"
-                label="Organisation (optional)"
-                autocomplete="organization"
-              />
-            </div>
-            <div class="mt-6">
-              <.button phx-disable-with="Saving...">Save Profile</.button>
-            </div>
-          </.form>
-        </section>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+          <section>
+            <h2 class="text-base font-semibold text-text-dark">Profile</h2>
+            <.form
+              for={@profile_form}
+              id="profile_form"
+              phx-submit="update_profile"
+              phx-change="validate_profile"
+            >
+              <div class="mt-4 space-y-4 max-w-xs">
+                <.field
+                  field={@profile_form[:name]}
+                  type="text"
+                  label="Name"
+                  autocomplete="name"
+                  required
+                />
+                <.field
+                  field={@profile_form[:organisation]}
+                  type="text"
+                  label="Organisation (optional)"
+                  autocomplete="organization"
+                />
+              </div>
+              <div class="mt-6">
+                <.button phx-disable-with="Saving...">Save Profile</.button>
+              </div>
+            </.form>
+          </section>
 
-        <section>
-          <h2 class="text-base font-semibold text-text-dark">Contact Preferences</h2>
-          <.form
-            for={@contact_prefs_form}
-            id="contact_prefs_form"
-            phx-submit="update_contact_prefs"
-            phx-change="validate_contact_prefs"
-          >
-            <div class="mt-4">
-              <.field
-                field={@contact_prefs_form[:product_updates]}
-                type="checkbox"
-                label="Product updates"
-              />
-            </div>
-            <div class="mt-6">
-              <.button phx-disable-with="Saving...">Save Preferences</.button>
-            </div>
-          </.form>
-        </section>
+          <section>
+            <h2 class="text-base font-semibold text-text-dark">Contact Preferences</h2>
+            <.form
+              for={@contact_prefs_form}
+              id="contact_prefs_form"
+              phx-submit="update_contact_prefs"
+              phx-change="validate_contact_prefs"
+            >
+              <div class="mt-4">
+                <.field
+                  field={@contact_prefs_form[:product_updates]}
+                  type="checkbox"
+                  label="Product updates"
+                />
+              </div>
+              <div class="mt-6">
+                <.button phx-disable-with="Saving...">Save Preferences</.button>
+              </div>
+            </.form>
+          </section>
 
-        <section>
-          <h2 class="text-base font-semibold text-text-dark">Email</h2>
-          <.form
-            for={@email_form}
-            id="email_form"
-            phx-submit="update_email"
-            phx-change="validate_email"
-          >
-            <div class="mt-4 space-y-4 max-w-xs">
-              <.field
-                field={@email_form[:email]}
-                type="email"
-                label="Email"
+          <section>
+            <h2 class="text-base font-semibold text-text-dark">Email</h2>
+            <.form
+              for={@email_form}
+              id="email_form"
+              phx-submit="update_email"
+              phx-change="validate_email"
+            >
+              <div class="mt-4 space-y-4 max-w-xs">
+                <.field
+                  field={@email_form[:email]}
+                  type="email"
+                  label="Email"
+                  autocomplete="username"
+                  required
+                />
+              </div>
+              <div class="mt-6">
+                <.button phx-disable-with="Changing...">Change Email</.button>
+              </div>
+            </.form>
+          </section>
+
+          <section>
+            <h2 class="text-base font-semibold text-text-dark">Password</h2>
+            <.form
+              for={@password_form}
+              id="password_form"
+              action={~p"/users/update-password"}
+              method="post"
+              phx-change="validate_password"
+              phx-submit="update_password"
+              phx-trigger-action={@trigger_submit}
+            >
+              <input
+                name={@password_form[:email].name}
+                type="hidden"
+                id="hidden_user_email"
                 autocomplete="username"
-                required
+                value={@current_email}
               />
-            </div>
-            <div class="mt-6">
-              <.button phx-disable-with="Changing...">Change Email</.button>
-            </div>
-          </.form>
-        </section>
+              <div class="mt-4 space-y-4 max-w-xs">
+                <.field
+                  field={@password_form[:password]}
+                  type="password"
+                  label={@password_label}
+                  autocomplete="new-password"
+                  required
+                />
+                <.field
+                  field={@password_form[:password_confirmation]}
+                  type="password"
+                  label="Confirm new password"
+                  autocomplete="new-password"
+                />
+              </div>
+              <div class="mt-6">
+                <.button phx-disable-with="Saving...">
+                  {@password_label}
+                </.button>
+              </div>
+            </.form>
+          </section>
+        </div>
+
+        <div class="border-t border-zinc-200" />
 
         <section>
-          <h2 class="text-base font-semibold text-text-dark">Password</h2>
+          <h2 class="text-base font-semibold text-ok-red-600">Danger zone</h2>
+          <p class="mt-1 text-sm text-zinc-500">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
           <.form
-            for={@password_form}
-            id="password_form"
-            action={~p"/users/update-password"}
-            method="post"
-            phx-change="validate_password"
-            phx-submit="update_password"
-            phx-trigger-action={@trigger_submit}
+            for={%{}}
+            id="delete_account_form"
+            action={~p"/users/delete-account"}
+            method="delete"
+            phx-submit="delete_account"
+            phx-trigger-action={@trigger_delete}
+            data-confirm="Are you sure you want to delete your account? This action cannot be undone."
           >
-            <input
-              name={@password_form[:email].name}
-              type="hidden"
-              id="hidden_user_email"
-              autocomplete="username"
-              value={@current_email}
-            />
-            <div class="mt-4 space-y-4 max-w-xs">
-              <.field
-                field={@password_form[:password]}
-                type="password"
-                label={@password_label}
-                autocomplete="new-password"
-                required
-              />
-              <.field
-                field={@password_form[:password_confirmation]}
-                type="password"
-                label="Confirm new password"
-                autocomplete="new-password"
-              />
-            </div>
             <div class="mt-6">
-              <.button phx-disable-with="Saving...">
-                {@password_label}
-              </.button>
+              <.button class="btn btn-error btn-soft">Delete Account</.button>
             </div>
           </.form>
         </section>
       </div>
-
-      <div class="border-t border-zinc-200" />
-
-      <section>
-        <h2 class="text-base font-semibold text-ok-red-600">Danger zone</h2>
-        <p class="mt-1 text-sm text-zinc-500">
-          Once you delete your account, there is no going back. Please be certain.
-        </p>
-        <.form
-          for={%{}}
-          id="delete_account_form"
-          action={~p"/users/delete-account"}
-          method="delete"
-          phx-submit="delete_account"
-          phx-trigger-action={@trigger_delete}
-          data-confirm="Are you sure you want to delete your account? This action cannot be undone."
-        >
-          <div class="mt-6">
-            <.button class="btn btn-error btn-soft">Delete Account</.button>
-          </div>
-        </.form>
-      </section>
     </div>
     """
   end

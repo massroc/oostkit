@@ -8,73 +8,75 @@ defmodule PortalWeb.UserLive.Registration do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
-      <div class="text-center">
-        <.header>
-          Start running workshops with OOSTKit
-          <:subtitle>
-            Create your facilitator account to access the full toolkit. <br />
-            Already have an account?
-            <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
-              Log in
-            </.link>
-          </:subtitle>
-        </.header>
+    <div class="flex flex-1 items-center justify-center py-12">
+      <div class="mx-auto max-w-sm">
+        <div class="text-center">
+          <.header>
+            Start running workshops with OOSTKit
+            <:subtitle>
+              Create your facilitator account to access the full toolkit. <br />
+              Already have an account?
+              <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
+                Log in
+              </.link>
+            </:subtitle>
+          </.header>
+        </div>
+
+        <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
+          <.field
+            field={@form[:name]}
+            type="text"
+            label="Your name"
+            autocomplete="name"
+            required
+            phx-mounted={JS.focus()}
+          />
+
+          <.field
+            field={@form[:email]}
+            type="email"
+            label="Email"
+            autocomplete="username"
+            required
+          />
+
+          <.field
+            field={@form[:organisation]}
+            type="text"
+            label="Organisation"
+            placeholder="Where do you work? (optional)"
+          />
+
+          <.field
+            field={@form[:referral_source]}
+            type="text"
+            label="How did you hear about OOSTKit?"
+            placeholder="e.g. colleague, conference, search (optional)"
+          />
+
+          <fieldset class="mt-4">
+            <legend class="block text-sm font-medium text-zinc-700 mb-2">
+              Which tools are you interested in?
+            </legend>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <label :for={tool <- @tools} class="flex items-center gap-2 text-sm text-zinc-700">
+                <input
+                  type="checkbox"
+                  name="tool_ids[]"
+                  value={tool.id}
+                  class="rounded border-zinc-300 text-ok-purple-600 focus:ring-ok-purple-400"
+                />
+                {tool.name}
+              </label>
+            </div>
+          </fieldset>
+
+          <.button phx-disable-with="Creating account..." class="btn btn-primary w-full mt-6">
+            Get started
+          </.button>
+        </.form>
       </div>
-
-      <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
-        <.field
-          field={@form[:name]}
-          type="text"
-          label="Your name"
-          autocomplete="name"
-          required
-          phx-mounted={JS.focus()}
-        />
-
-        <.field
-          field={@form[:email]}
-          type="email"
-          label="Email"
-          autocomplete="username"
-          required
-        />
-
-        <.field
-          field={@form[:organisation]}
-          type="text"
-          label="Organisation"
-          placeholder="Where do you work? (optional)"
-        />
-
-        <.field
-          field={@form[:referral_source]}
-          type="text"
-          label="How did you hear about OOSTKit?"
-          placeholder="e.g. colleague, conference, search (optional)"
-        />
-
-        <fieldset class="mt-4">
-          <legend class="block text-sm font-medium text-zinc-700 mb-2">
-            Which tools are you interested in?
-          </legend>
-          <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label :for={tool <- @tools} class="flex items-center gap-2 text-sm text-zinc-700">
-              <input
-                type="checkbox"
-                name="tool_ids[]"
-                value={tool.id}
-                class="rounded border-zinc-300 text-ok-purple-600 focus:ring-ok-purple-400"
-              />
-              {tool.name}
-            </label>
-          </div>
-        </fieldset>
-
-        <.button phx-disable-with="Creating account..." class="btn btn-primary w-full mt-6">
-          Get started
-        </.button>
-      </.form>
     </div>
     """
   end

@@ -15,7 +15,7 @@ defmodule PortalWeb.Admin.ToolsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-4xl py-8">
+    <div class="mx-auto max-w-4xl px-6 py-8 sm:px-8">
       <div class="mb-8">
         <.header>
           Tool Management

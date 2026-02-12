@@ -136,6 +136,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
 - Three-zone header via shared `<.header_bar>` component from `OostkitShared.Components`: OOSTKit brand link (left), absolutely centered page title, Sign Up (`bg-white/10` frosted) / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
 - Footer bar in root layout with links to About, Privacy, and Contact pages
+- Sticky footer layout: root layout uses `flex min-h-screen flex-col` on body with `flex flex-1 flex-col` on main, ensuring footer stays at viewport bottom on short pages. Auth pages use flex centering; settings and admin pages use consistent `px-6 sm:px-8` horizontal padding.
 - Static pages: About (`/about`), Privacy Policy (`/privacy`), Contact (`/contact`)
 - Route restructure: `/` redirects logged-in users to `/home`
 - Login page with "Welcome back" heading, magic link primary, password secondary, "Forgot your password?" link
