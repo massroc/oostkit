@@ -39,7 +39,7 @@ defmodule PortalWeb.Admin.DashboardLive do
 
       <div class="rounded-lg border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
         <h2 class="text-lg font-semibold text-text-dark mb-4">Quick Links</h2>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <.link
             navigate={~p"/admin/users"}
             class="rounded-lg border border-zinc-200 p-4 text-center hover:bg-surface-sheet-secondary"
@@ -60,6 +60,13 @@ defmodule PortalWeb.Admin.DashboardLive do
           >
             <div class="text-sm font-medium text-text-dark">Tool Status</div>
             <div class="text-xs text-zinc-500">Enable/disable tools</div>
+          </.link>
+          <.link
+            navigate={~p"/admin/status"}
+            class="rounded-lg border border-zinc-200 p-4 text-center hover:bg-surface-sheet-secondary"
+          >
+            <div class="text-sm font-medium text-text-dark">System Status</div>
+            <div class="text-xs text-zinc-500">Health & CI status</div>
           </.link>
         </div>
       </div>

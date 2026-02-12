@@ -168,6 +168,10 @@ jobs:
     needs: [test, dialyzer]
     if: inputs.deploy_enabled && github.ref == 'refs/heads/main' && github.event_name == 'push'
 
+    permissions:
+      contents: read
+      issues: write
+
     defaults:
       run:
         working-directory: ${{ inputs.app_path }}
@@ -179,8 +183,34 @@ jobs:
       - name: Setup Fly.io CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only --config ${{ inputs.app_path }}/fly.toml
+      - name: Deploy to Fly.io (with retry)
+        id: deploy
+        run: |
+          set -o pipefail
+          MAX_ATTEMPTS=3
+          ATTEMPT=0
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "::group::Deploy attempt $ATTEMPT of $MAX_ATTEMPTS"
+
+            if flyctl deploy --remote-only --config ${{ inputs.app_path }}/fly.toml 2>&1 | tee /tmp/deploy-output.log; then
+              echo "::endgroup::"
+              echo "Deploy succeeded on attempt $ATTEMPT"
+              exit 0
+            fi
+
+            echo "::endgroup::"
+
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              BACKOFF=$((ATTEMPT * 30))
+              echo "Deploy attempt $ATTEMPT failed, retrying in ${BACKOFF}s..."
+              sleep $BACKOFF
+            fi
+          done
+
+          echo "Deploy failed after $MAX_ATTEMPTS attempts"
+          exit 1
         working-directory: .
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
@@ -203,3 +233,51 @@ jobs:
           done
           echo "FAILED: Health check did not return 200 after 5 attempts"
           exit 1
+
+      - name: Notify deploy failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APP_NAME="${{ inputs.app_name }}"
+          COMMIT_SHA="${{ github.sha }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          TITLE="Deploy failure: ${APP_NAME}"
+
+          # Capture last 50 lines of deploy output (if available)
+          ERROR_LOG=""
+          if [ -f /tmp/deploy-output.log ]; then
+            ERROR_LOG=$(tail -50 /tmp/deploy-output.log)
+          fi
+
+          BODY=$(cat <<EOF
+          ## Deploy failure: ${APP_NAME}
+
+          | Field | Value |
+          |-------|-------|
+          | **App** | \`${APP_NAME}\` |
+          | **Commit** | \`${COMMIT_SHA}\` |
+          | **Workflow run** | [View logs](${RUN_URL}) |
+          | **Time** | $(date -u +"%Y-%m-%d %H:%M:%S UTC") |
+
+          <details>
+          <summary>Error output (last 50 lines)</summary>
+
+          \`\`\`
+          ${ERROR_LOG}
+          \`\`\`
+          </details>
+          EOF
+          )
+
+          # Check for existing open issue with this title
+          EXISTING=$(gh issue list --repo "${{ github.repository }}" --state open --label "deploy-failure" --search "in:title ${TITLE}" --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING" ]; then
+            echo "Adding comment to existing issue #${EXISTING}"
+            gh issue comment "$EXISTING" --repo "${{ github.repository }}" --body "$BODY"
+          else
+            echo "Creating new deploy failure issue"
+            gh issue create --repo "${{ github.repository }}" --title "$TITLE" --body "$BODY" --label "deploy-failure"
+          fi
+        working-directory: .

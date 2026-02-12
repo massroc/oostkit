@@ -607,6 +607,7 @@ Displayed first, at the top of the dashboard for immediate navigation:
 - "Manage users" → `/admin/users`
 - "View signups" → `/admin/signups`
 - "Tool status" → `/admin/tools`
+- "System Status" → `/admin/status`
 
 #### Stats Cards
 
@@ -715,6 +716,51 @@ This replaces the current hardcoded app config and gives the admin full control.
 The `sort_order` is scoped per category (unique constraint on `[category, sort_order]`),
 so each category has its own independent ordering.
 
+### System Status (`/admin/status`)
+
+Live operational dashboard showing app health and CI pipeline status for all deployed
+apps (Portal, Pulse, WRT). Page title: "System Status". Subtitle: "App health and
+CI pipeline status".
+
+#### App Health Section
+
+Card grid (3 columns on desktop, stacked on mobile) with one card per app. Each card shows:
+- **Status dot** — green (`bg-ok-green-500`) for healthy, red (`bg-ok-red-500`) for unhealthy
+- **App name** — Portal, Pulse, WRT
+- **Response time** (when healthy) — e.g., "Response: 142ms"
+- **Error detail** (when unhealthy) — error message or HTTP status code
+- **Last checked** — timestamp of most recent health poll
+
+Health is determined by polling each app's `/health` endpoint. A 200 response = healthy.
+
+#### CI Status Section
+
+Card grid (same layout) with one card per app's GitHub Actions workflow. Each card shows:
+- **Status dot** — green (success), red (failure), yellow (in progress), grey (unknown)
+- **App name**
+- **Latest run result** — "Passed", "Failed", "Running", or the conclusion string
+- **Commit SHA** — short hash of the commit that triggered the run
+- **Run timestamp**
+- **"View run" link** — opens the GitHub Actions workflow run in a new tab
+
+CI status is fetched from the GitHub Actions API (most recent 5 runs on the `main` branch
+per workflow). An optional `GITHUB_TOKEN` env var provides higher rate limits and access
+to private repos.
+
+#### Auto-Refresh and Manual Refresh
+
+The page auto-refreshes every 5 minutes via a background `Portal.StatusPoller` GenServer
+that broadcasts updates through PubSub. A "Refresh now" button allows manual refresh on
+demand. The last polled timestamp is displayed at the bottom of the page.
+
+#### Design
+
+- Uses the standard admin layout (`max-w-4xl mx-auto px-6 sm:px-8`)
+- Cards use `bg-surface-sheet shadow-sheet` with `border-zinc-200`
+- Section headings at `text-lg font-semibold text-text-dark`
+- Waiting state: "Waiting for first health check..." / "Waiting for first CI status check..."
+  displayed in muted text when no data has been polled yet
+
 ---
 
 ## Page Inventory
@@ -738,6 +784,7 @@ so each category has its own independent ordering.
 | `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View registration data (org, referral source, tool interests). |
 | `/admin/signups` | Email signups | Super Admin | View/export coming-soon email capture list. |
 | `/admin/tools` | Tool management | Super Admin | View tool status, toggle tools on/off (kill switch). |
+| `/admin/status` | System status | Super Admin | Live app health checks and CI pipeline status for Portal, Pulse, WRT. Auto-refreshes every 5 minutes. |
 | `/coming-soon` | Holding page | No | Context-aware holding page with email capture. |
 | `POST /dev/admin-login` | Dev admin login | No | Dev-only. Logs in as dev super admin and redirects to `/admin`. |
 

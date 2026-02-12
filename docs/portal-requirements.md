@@ -197,10 +197,11 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 
 All admin routes (`/admin/*`) are protected by a `require_super_admin` router pipeline that enforces super admin authorization at the router level for both LiveView and controller routes (e.g., CSV export). LiveView routes additionally use an `on_mount` hook for the same check.
 
-- **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest)
+- **Admin dashboard** (`/admin`) -- stats cards (signup count, user count, tool interest), quick links to all admin pages
 - **User management** (`/admin/users`) -- create/edit/disable accounts, view registration data (org, referral source, tool interests)
 - **Email signups** (`/admin/signups`) -- view/export coming-soon email capture list, CSV export
 - **Tool management** (`/admin/tools`) -- view tool status with category column, kill switch toggle per tool
+- **System status** (`/admin/status`) -- live health check and CI pipeline status for all deployed apps (Portal, Pulse, WRT). Polls every 5 minutes via a background GenServer and broadcasts updates to connected admin sessions in real time via PubSub. Displays app health (response time, up/down) and recent GitHub Actions workflow runs (pass/fail/running). Manual refresh button available.
 
 ### Future Considerations
 
@@ -324,6 +325,7 @@ The admin toggle is an operational kill switch -- if something goes wrong with a
 - Phoenix LiveView for interactive elements
 - Tailwind CSS for styling
 - PostgreSQL for account data
+- Req HTTP client (used by StatusPoller for health checks and GitHub API calls)
 
 ### Deployment
 

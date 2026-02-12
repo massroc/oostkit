@@ -99,6 +99,7 @@ defmodule PortalWeb.Router do
       live "/users/:id/edit", Admin.UsersLive, :edit
       live "/signups", Admin.SignupsLive, :index
       live "/tools", Admin.ToolsLive, :index
+      live "/status", Admin.StatusLive, :index
     end
   end
 

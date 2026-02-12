@@ -30,6 +30,12 @@ config :portal, :tool_urls, %{
   "wrt" => "http://localhost:4001"
 }
 
+# Disable StatusPoller in tests (started explicitly when needed)
+config :portal, :start_status_poller, false
+
+# GitHub repo for CI status tests
+config :portal, :github_repo, "rossm/oostkit"
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
