@@ -56,18 +56,20 @@ defmodule PortalWeb.Admin.UsersLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-4xl py-8">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-bold text-text-dark">User Management</h1>
-          <p class="mt-1 text-sm text-zinc-600">Manage session manager accounts</p>
-        </div>
-        <.link
-          :if={!@show_form}
-          patch={~p"/admin/users/new"}
-          class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700"
-        >
-          Create User
-        </.link>
+      <div class="mb-8">
+        <.header>
+          User Management
+          <:subtitle>Manage session manager accounts</:subtitle>
+          <:actions>
+            <.link
+              :if={!@show_form}
+              patch={~p"/admin/users/new"}
+              class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700"
+            >
+              Create User
+            </.link>
+          </:actions>
+        </.header>
       </div>
 
       <div

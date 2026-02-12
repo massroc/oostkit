@@ -17,10 +17,10 @@ defmodule PortalWeb.Admin.ToolsLive do
     ~H"""
     <div class="mx-auto max-w-4xl py-8">
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-text-dark">Tool Management</h1>
-        <p class="mt-1 text-sm text-zinc-600">
-          Control tool visibility and status on the dashboard
-        </p>
+        <.header>
+          Tool Management
+          <:subtitle>Control tool visibility and status on the dashboard</:subtitle>
+        </.header>
       </div>
 
       <div class="overflow-hidden rounded-lg border border-zinc-200 bg-surface-sheet shadow-sheet">

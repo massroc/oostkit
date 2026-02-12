@@ -20,17 +20,19 @@ defmodule PortalWeb.Admin.SignupsLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-4xl py-8">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-bold text-text-dark">Email Signups</h1>
-          <p class="mt-1 text-sm text-zinc-600">{length(@signups)} signups captured</p>
-        </div>
-        <a
-          href={~p"/admin/signups/export"}
-          class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700"
-        >
-          Export CSV
-        </a>
+      <div class="mb-8">
+        <.header>
+          Email Signups
+          <:subtitle>{length(@signups)} signups captured</:subtitle>
+          <:actions>
+            <a
+              href={~p"/admin/signups/export"}
+              class="rounded-lg bg-ok-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-ok-purple-700"
+            >
+              Export CSV
+            </a>
+          </:actions>
+        </.header>
       </div>
 
       <div class="mb-6">

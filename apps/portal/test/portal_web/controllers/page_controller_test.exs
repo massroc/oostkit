@@ -11,11 +11,11 @@ defmodule PortalWeb.PageControllerTest do
       assert html_response(conn, 200) =~ "Built on Open Systems Theory"
     end
 
-    test "redirects logged-in users to /home", %{conn: conn} do
+    test "renders landing page for logged-in users", %{conn: conn} do
       %{conn: conn} = register_and_log_in_user(%{conn: conn})
 
       conn = get(conn, ~p"/")
-      assert redirected_to(conn) == ~p"/home"
+      assert html_response(conn, 200) =~ "Explore all tools"
     end
   end
 

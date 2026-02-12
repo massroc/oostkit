@@ -17,7 +17,6 @@ defmodule PortalWeb.UserLive.Settings do
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
         <section>
           <h2 class="text-base font-semibold text-text-dark">Profile</h2>
-          <p class="mt-1 text-sm text-zinc-500">Your name and organisation.</p>
           <.form
             for={@profile_form}
             id="profile_form"
@@ -47,7 +46,6 @@ defmodule PortalWeb.UserLive.Settings do
 
         <section>
           <h2 class="text-base font-semibold text-text-dark">Contact Preferences</h2>
-          <p class="mt-1 text-sm text-zinc-500">Choose what communications you receive.</p>
           <.form
             for={@contact_prefs_form}
             id="contact_prefs_form"
@@ -69,7 +67,6 @@ defmodule PortalWeb.UserLive.Settings do
 
         <section>
           <h2 class="text-base font-semibold text-text-dark">Email</h2>
-          <p class="mt-1 text-sm text-zinc-500">Update your email address.</p>
           <.form
             for={@email_form}
             id="email_form"
@@ -93,11 +90,6 @@ defmodule PortalWeb.UserLive.Settings do
 
         <section>
           <h2 class="text-base font-semibold text-text-dark">Password</h2>
-          <p class="mt-1 text-sm text-zinc-500">
-            {if @password_label == "Add a password",
-              do: "Set a password for your account.",
-              else: "Update your account password."}
-          </p>
           <.form
             for={@password_form}
             id="password_form"
