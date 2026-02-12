@@ -80,7 +80,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
             Workgroup Pulse
           </h1>
           <p class="text-ink-blue/60 text-sm font-brand mb-3">
-            Intrinsic Motivator Assessment
+            Intrinsic Motivation Assessment
           </p>
           <p class="text-ink-blue/70 text-sm font-brand">
             Create a session and share the link with your team.

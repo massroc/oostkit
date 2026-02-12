@@ -9,6 +9,7 @@ This is a monorepo containing multiple applications:
 ```
 /
 ├── apps/
+│   ├── oostkit_shared/    # Shared Elixir component library (path dep for all apps)
 │   ├── portal/            # OOSTKit Portal - Landing page and auth hub (Elixir/Phoenix)
 │   ├── workgroup_pulse/   # Workgroup Pulse - 6 Criteria workshop (Elixir/Phoenix)
 │   └── wrt/               # Workshop Referral Tool (Elixir/Phoenix)

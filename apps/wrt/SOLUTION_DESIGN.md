@@ -871,6 +871,7 @@ end
 # mix.exs
 defp deps do
   [
+    {:oostkit_shared, path: "../oostkit_shared"},
     {:phoenix, "~> 1.7"},
     {:phoenix_ecto, "~> 4.4"},
     {:ecto_sql, "~> 3.10"},
@@ -890,6 +891,8 @@ defp deps do
   ]
 end
 ```
+
+The `oostkit_shared` path dependency provides the shared `header_bar/1` component used in the app layout.
 
 ## Implementation Phases
 

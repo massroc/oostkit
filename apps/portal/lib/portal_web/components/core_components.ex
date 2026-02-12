@@ -88,25 +88,27 @@ defmodule PortalWeb.CoreComponents do
 
     ~H"""
     <div class={[
-      "flex flex-col rounded-xl border p-4 transition",
+      "flex flex-col rounded-xl border p-4 transition h-[140px]",
       @status == :live && "border-zinc-200 bg-surface-sheet shadow-sheet hover:shadow-sheet-lifted",
       @status == :coming_soon && "border-zinc-200 bg-surface-sheet-secondary opacity-75",
       @status == :maintenance && "border-zinc-200 bg-surface-sheet-secondary opacity-60"
     ]}>
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center justify-between">
         <h3 class="text-sm font-semibold text-text-dark">{@tool.name}</h3>
         <%= if @status == :live do %>
           <span class="inline-flex items-center rounded-full bg-ok-green-100 px-2 py-0.5 text-xs font-medium text-ok-green-800">
             Live
           </span>
-        <% else %>
-          <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2 py-0.5 text-xs font-medium text-ok-gold-800">
-            Coming soon
-          </span>
         <% end %>
       </div>
-      <p class="mt-1 flex-1 text-xs text-zinc-600">{@tool.tagline}</p>
-      <div class="mt-3 flex items-center gap-3">
+      <p class="mt-1 flex-1 text-xs text-zinc-600 line-clamp-2">{@tool.tagline}</p>
+      <div class="mt-auto flex items-center justify-between pt-2">
+        <.link
+          navigate={~p"/apps/#{@tool.id}"}
+          class="text-xs font-medium text-ok-purple-600 hover:text-ok-purple-800"
+        >
+          Learn more
+        </.link>
         <%= if @status == :live and @tool.url do %>
           <a
             href={@tool.url}
@@ -114,13 +116,11 @@ defmodule PortalWeb.CoreComponents do
           >
             Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1 h-3.5 w-3.5" />
           </a>
+        <% else %>
+          <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2 py-0.5 text-xs font-medium text-ok-gold-800">
+            Coming soon
+          </span>
         <% end %>
-        <.link
-          navigate={~p"/apps/#{@tool.id}"}
-          class="text-xs font-medium text-ok-purple-600 hover:text-ok-purple-800"
-        >
-          Learn more
-        </.link>
       </div>
     </div>
     """
@@ -376,6 +376,36 @@ defmodule PortalWeb.CoreComponents do
   def icon(%{name: "hero-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
+    """
+  end
+
+  @doc """
+  Renders the site-wide footer bar.
+
+  Left side: brand name + tagline. Right side: navigation links.
+  """
+  def footer_bar(assigns) do
+    ~H"""
+    <footer class="border-t border-zinc-200 bg-surface-sheet-secondary">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
+        <div class="flex items-center gap-2 text-sm">
+          <span class="font-semibold text-text-dark">OOSTKit</span>
+          <span class="text-zinc-300">&middot;</span>
+          <span class="text-zinc-500">Online OST Kit</span>
+        </div>
+        <nav class="flex items-center gap-6 text-sm">
+          <.link navigate={~p"/about"} class="text-zinc-500 hover:text-text-dark">
+            About Us
+          </.link>
+          <.link navigate={~p"/privacy"} class="text-zinc-500 hover:text-text-dark">
+            Privacy Policy
+          </.link>
+          <.link navigate={~p"/contact"} class="text-zinc-500 hover:text-text-dark">
+            Contact Us
+          </.link>
+        </nav>
+      </div>
+    </footer>
     """
   end
 

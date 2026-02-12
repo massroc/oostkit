@@ -81,6 +81,7 @@ defmodule PortalWeb do
       import Phoenix.HTML
       use PetalComponents
       import PortalWeb.CoreComponents, except: [button: 1, icon: 1, input: 1]
+      import OostkitShared.Components
       use Gettext, backend: PortalWeb.Gettext
 
       alias Phoenix.LiveView.JS

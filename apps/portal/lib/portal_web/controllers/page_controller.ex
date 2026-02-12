@@ -21,6 +21,28 @@ defmodule PortalWeb.PageController do
     end
   end
 
+  def about(conn, _params) do
+    render(conn, :about,
+      page_title: "About Us",
+      meta_description:
+        "Learn about OOSTKit — practical online tools built on Open Systems Theory."
+    )
+  end
+
+  def privacy(conn, _params) do
+    render(conn, :privacy,
+      page_title: "Privacy Policy",
+      meta_description: "How OOSTKit collects, uses, and protects your personal data."
+    )
+  end
+
+  def contact(conn, _params) do
+    render(conn, :contact,
+      page_title: "Contact Us",
+      meta_description: "Get in touch with the OOSTKit team."
+    )
+  end
+
   def home(conn, _params) do
     grouped_tools = Tools.list_tools_grouped()
 

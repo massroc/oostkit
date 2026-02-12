@@ -9,10 +9,11 @@
 ```
 /
 ├── apps/                          # Individual applications
+│   ├── oostkit_shared/            # Shared Elixir component library (path dep)
 │   ├── portal/                    # OOSTKit Portal (landing page & auth hub)
 │   ├── workgroup_pulse/           # Workgroup Pulse (6 Criteria workshop)
 │   └── wrt/                       # Workshop Referral Tool
-├── shared/                        # Shared assets across apps
+├── shared/                        # Shared frontend assets across apps
 │   └── tailwind.preset.js         # Design system tokens (colors, fonts, shadows)
 ├── docs/                          # Platform-wide documentation
 ├── .github/workflows/             # CI/CD pipelines (per-app)
@@ -25,6 +26,7 @@
 
 | Product Name | Directory | Description |
 |--------------|-----------|-------------|
+| OOSTKit Shared | `apps/oostkit_shared/` | Shared Elixir component library |
 | Portal | `apps/portal/` | Landing page & auth hub |
 | Workgroup Pulse | `apps/workgroup_pulse/` | 6 Criteria for Productive Work |
 | Workshop Referral Tool (WRT) | `apps/wrt/` | PDW participant selection |
@@ -86,15 +88,21 @@ Portal's database is expanding beyond user accounts to include:
 
 ## Shared Design System
 
-All apps share a unified visual identity defined in `shared/tailwind.preset.js`:
+All apps share a unified visual identity via two mechanisms:
 
+**Frontend tokens** — `shared/tailwind.preset.js`:
 - **Semantic color tokens**: `ok-purple`, `ok-green`, `ok-red`, `ok-gold`, `ok-blue` (branded), plus surface and text tokens (`bg-surface-wall`, `bg-surface-sheet`, `text-text-dark`)
 - **Typography**: DM Sans (UI chrome) loaded via Google Fonts, with `font-brand` utility
 - **Shadows**: `shadow-sheet` for card-like surfaces
-- **OOSTKit header**: Consistent dark purple header across all apps — three-zone layout with `relative` nav: "OOSTKit" brand link on the left (links to Portal via configurable `:portal_url`), absolutely centered app name or page title (`pointer-events-none absolute inset-x-0 text-center font-brand`), and auth/user content on the right (Sign Up + Log In for anonymous, user email + Settings for authenticated). All apps use identical button styling for Sign Up (`bg-white/10` frosted) and Log In (text link).
 - **Brand stripe**: Magenta-to-purple gradient bar below the header
 
-Each app imports the preset in its `assets/tailwind.config.js` and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
+**Shared Elixir components** — `apps/oostkit_shared/`:
+- A lightweight Elixir library (`OostkitShared.Components`) consumed by all apps as a path dependency (`{:oostkit_shared, path: "../oostkit_shared"}`)
+- Provides a `header_bar/1` Phoenix component implementing the consistent OOSTKit header: three-zone layout with `relative` nav — "OOSTKit" brand link on the left (configurable `:brand_url`), absolutely centered title (`pointer-events-none absolute inset-x-0 text-center font-brand`), and an `:actions` slot on the right for app-specific auth/user content
+- Each app imports the component (via its `*Web` module) and renders `<.header_bar>` in its root or app layout, passing app-specific title and actions
+- CI path filter: changes to `apps/oostkit_shared/**` trigger all three app workflows
+
+Each app imports the Tailwind preset in its `assets/tailwind.config.js` (with content paths including the shared lib for Tailwind class scanning) and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
 
 ## Shared Infrastructure
 
@@ -126,7 +134,9 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - `interest_signups` table for email capture from coming-soon pages and app detail pages
 - `user_tool_interests` table for tool interest data collected at registration
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
-- Three-zone header: OOSTKit brand link (left), absolutely centered page title (`pointer-events-none absolute inset-x-0 font-brand`), Sign Up (`bg-white/10` frosted) / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
+- Three-zone header via shared `<.header_bar>` component from `OostkitShared.Components`: OOSTKit brand link (left), absolutely centered page title, Sign Up (`bg-white/10` frosted) / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
+- Footer bar in root layout with links to About, Privacy, and Contact pages
+- Static pages: About (`/about`), Privacy Policy (`/privacy`), Contact (`/contact`)
 - Route restructure: `/` redirects logged-in users to `/home`
 - Login page with "Welcome back" heading, magic link primary, password secondary, "Forgot your password?" link
 - Password reset flow: forgot password page (`/users/forgot-password`) sends email with time-limited reset token, reset password page (`/users/reset-password/:token`) allows setting a new password

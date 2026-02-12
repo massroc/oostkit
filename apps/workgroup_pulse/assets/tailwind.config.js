@@ -15,7 +15,8 @@ module.exports = {
     "./js/**/*.js",
     "../lib/workgroup_pulse_web.ex",
     "../lib/workgroup_pulse_web/**/*.*ex",
-    "../deps/petal_components/**/*.*ex"
+    "../deps/petal_components/**/*.*ex",
+    "/oostkit_shared/lib/**/*.*ex"
   ],
   theme: {
     extend: {

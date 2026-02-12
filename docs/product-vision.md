@@ -8,12 +8,13 @@
 
 ### Tool Catalogue
 
-The platform hosts 11 tools (1 live, 10 coming soon). All tools follow the same model: facilitators log in to create/manage, participants join via links with no friction. The dashboard presents them as a flat list rather than grouping by audience.
+The platform hosts 12 tools (1 live, 11 coming soon). All tools follow the same model: facilitators log in to create/manage, participants join via links with no friction. The dashboard presents them in a three-column categorized grid (Learning, Workshop Management, Team Workshops).
 
 | Name | Description | Audience | Status |
 |------|-------------|----------|--------|
 | Workgroup Pulse | 6 Criteria for Productive Work | Teams | Live |
 | Workshop Referral Tool (WRT) | Participative selection for design workshops | Facilitators | Coming soon |
+| Introduction to Open Systems Thinking | Learn the foundations of democratic organisation design | Everyone | Coming soon |
 | Search Conference | Collaborative strategic planning | Facilitators | Coming soon |
 | Team Kick-off | TBD | Teams | Coming soon |
 | Team Design | TBD | Facilitators | Coming soon |

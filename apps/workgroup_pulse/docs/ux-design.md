@@ -229,6 +229,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.6 — Header standardized with absolutely centered title (`pointer-events-none absolute inset-x-0 font-brand`) and Sign Up + Log In buttons in right zone linking to Portal*
+*Document Version: 1.7 — Header extracted to shared `OostkitShared.Components.header_bar/1` component from `apps/oostkit_shared/`*
 *Created: 2026-02-07*
 *Updated: 2026-02-12*

@@ -90,11 +90,16 @@ Product page per tool. Shareable URL. Includes visual walkthrough, detailed desc
 
 Context-aware holding page with email capture. Serves as the soft gate for features not yet live (Sign Up, Log In, locked tools). Query parameters drive contextual messaging.
 
+### Static Pages
+
+- **About** (`/about`) — information about OOSTKit and the team
+- **Privacy Policy** (`/privacy`) — how OOSTKit collects, uses, and protects personal data
+- **Contact** (`/contact`) — how to get in touch with the OOSTKit team
+
 ### Future Pages
 
 - Learn about OST / methodology background
 - Pricing section (platform subscription model)
-- About / Contact
 
 ---
 
@@ -111,16 +116,17 @@ Rather than embedding apps in iframes, we use a hybrid model:
    - Admin tools
 
 2. **Shared design system** - consistent across all apps:
-   - Tailwind configuration
+   - Tailwind configuration (`shared/tailwind.preset.js`)
    - Color palette, typography, spacing
-   - Header component markup/styles
+   - Shared Elixir component library (`apps/oostkit_shared/`) providing `header_bar/1`
    - Logo and branding assets
 
-3. **Each app renders its own header** using shared styles:
-   - Consistent three-zone layout: OOSTKit brand link (left), app name (centre), user/auth content (right)
-   - OOSTKit link returns to Portal (configurable `:portal_url` per app)
+3. **Each app renders its header via the shared `header_bar/1` component** from `OostkitShared.Components`:
+   - Consistent three-zone layout: OOSTKit brand link (left), app name (centre), actions slot (right)
+   - OOSTKit link returns to Portal (configurable `:brand_url` per app)
    - Login state displayed in header (where applicable)
    - App name centered in header identifies which tool the user is in
+   - Portal additionally renders a `footer_bar` component with links to About, Privacy, and Contact pages
 
 4. **Subdomain structure:**
    - `oostkit.com` (or chosen domain) - Portal
@@ -233,20 +239,24 @@ When a user clicks on an app that requires authentication:
 
 ### Consistent Header
 
-Three-zone layout with absolutely centered title, consistent across the entire platform (Portal, Pulse, WRT):
+All apps use the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). Three-zone layout with absolutely centered title, consistent across the entire platform (Portal, Pulse, WRT):
 
 ```
-[Left: OOSTKit link]    [Centre: Title (absolute)]    [Right: Auth]
+[Left: OOSTKit link]    [Centre: Title (absolute)]    [Right: Auth (actions slot)]
 ```
 
 The centre title uses `pointer-events-none absolute inset-x-0 text-center font-brand` for true visual centering regardless of left/right zone widths.
 
-- **Left:** "OOSTKit" brand link. In Portal, links to `/`. In Pulse/WRT, links to Portal via configurable `:portal_url` (defaults to `https://oostkit.com`).
-- **Centre:** In Portal, displays the current page title (e.g., "Dashboard"). In Pulse/WRT, displays the app name ("Workgroup Pulse" / "Workshop Referral Tool") as static text.
-- **Right:** All apps use consistent button styling — Sign Up (`rounded-md bg-white/10` frosted button) + Log In (text link). Auth state varies by app:
+- **Left:** "OOSTKit" brand link (`:brand_url` attr). In Portal, links to `/`. In Pulse/WRT, links to Portal via configurable `:portal_url` (defaults to `https://oostkit.com`).
+- **Centre:** `:title` attr. In Portal, displays the current page title (e.g., "Dashboard"). In Pulse/WRT, displays the app name ("Workgroup Pulse" / "Workshop Referral Tool") as static text.
+- **Right:** `:actions` slot for app-specific content. All apps use consistent button styling — Sign Up (`rounded-md bg-white/10` frosted button) + Log In (text link). Auth state varies by app:
   - **Portal:** Sign Up + Log In (anonymous) / User email + Settings + Log Out (authenticated) / + Admin link (super admin). Dev mode adds an "Admin" button (gold text, POST to `/dev/admin-login`).
   - **Pulse:** Always shows Sign Up + Log In (no user context — Pulse has no authentication).
   - **WRT:** Shows Sign Up + Log In when no `portal_user`, or user email + Settings link when authenticated via Portal cookie.
+
+### Footer Bar
+
+Portal renders a `footer_bar` component in the root layout with links to About (`/about`), Privacy (`/privacy`), and Contact (`/contact`) pages. The footer replaces the inline footer sections that were previously part of the landing and home page templates.
 
 ---
 

@@ -88,7 +88,7 @@ Links to "Learn more about OST" (future dedicated page, or external resource for
 
 - Email capture: *"More tools coming soon. Leave your email to be notified."*
 - Sign Up and Log In buttons (linking to `/users/register` and `/users/log-in`)
-- Basic footer info (branding, links)
+- The root layout includes a persistent `footer_bar` component with links to About (`/about`), Privacy (`/privacy`), and Contact (`/contact`) pages. This replaces inline footer sections that were previously duplicated across landing and home page templates.
 
 **Future additions:**
 - Testimonials / case studies
@@ -375,13 +375,15 @@ visual identity element. Kept for now — may evolve as the overall design matur
 
 ### Implementation Notes
 
-- Each app renders its own header using the shared Tailwind preset and a consistent `relative` nav with `justify-between` layout
+- All apps use the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`), imported as a path dependency
+- The component provides `:brand_url`, `:title`, and `:actions` (slot) attrs, plus renders the brand stripe
 - The centre title is absolutely positioned within the `relative` nav container using `pointer-events-none absolute inset-x-0 text-center`, ensuring true visual centering regardless of left/right content width
-- Portal: centre zone shows `@page_title`, OOSTKit link goes to `/`
-- Pulse: centre zone shows "Workgroup Pulse", right zone always shows Sign Up + Log In linking to Portal
-- WRT: centre zone shows "Workshop Referral Tool", right zone shows Sign Up + Log In (anonymous) or email + Settings (authenticated)
+- Portal: `:brand_url="/"`, `:title={@page_title}`, actions slot renders auth links
+- Pulse: `:brand_url={@portal_url}`, `:title="Workgroup Pulse"`, actions slot always shows Sign Up + Log In linking to Portal
+- WRT: `:brand_url={@portal_url}`, `:title="Workshop Referral Tool"`, actions slot shows Sign Up + Log In (anonymous) or email + Settings (authenticated)
 - All apps: Sign Up button uses `rounded-md bg-white/10` frosted style, Log In uses text link style
 - Design system tokens: `bg-ok-purple-900` header, `font-brand` (DM Sans), brand stripe gradient
+- Portal additionally renders a `footer_bar` component in the root layout with links to About, Privacy, and Contact pages
 
 ---
 
@@ -690,6 +692,9 @@ so each category has its own independent ordering.
 |-------|------|---------------|-------------|
 | `/` | Marketing landing | No | Brochure/sales page. Redirects to `/home` if logged in. |
 | `/home` | Dashboard | No | Tool hub. Shows all tools, lock state varies by auth. |
+| `/about` | About | No | Information about OOSTKit and the team. |
+| `/privacy` | Privacy Policy | No | How OOSTKit collects, uses, and protects personal data. |
+| `/contact` | Contact | No | How to get in touch with the OOSTKit team. |
 | `/apps/:id` | App detail / product page | No | Visual walkthrough, full description, launch or inline email capture. Shareable URL. |
 | `POST /apps/:app_id/notify` | Email capture from detail page | No | Creates interest_signup with context `tool:{tool_id}`. Redirects back with `?subscribed=true`. |
 | `/users/log-in` | Login | No | "Welcome back" heading. Magic link (primary) + password (secondary). "Forgot your password?" link. |

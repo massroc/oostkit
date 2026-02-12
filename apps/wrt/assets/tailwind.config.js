@@ -15,7 +15,8 @@ module.exports = {
     "./js/**/*.js",
     "../lib/wrt_web.ex",
     "../lib/wrt_web/**/*.*ex",
-    "../deps/petal_components/**/*.*ex"
+    "../deps/petal_components/**/*.*ex",
+    "/oostkit_shared/lib/**/*.*ex"
   ],
   theme: {
     extend: {

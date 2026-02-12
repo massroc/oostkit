@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - 'apps/wrt/**'
+      - 'apps/oostkit_shared/**'
       - '.github/workflows/wrt.yml'
       - '.github/workflows/_elixir-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'apps/wrt/**'
+      - 'apps/oostkit_shared/**'
       - '.github/workflows/wrt.yml'
       - '.github/workflows/_elixir-ci.yml'
 

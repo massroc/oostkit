@@ -19,6 +19,54 @@ defmodule PortalWeb.PageControllerTest do
     end
   end
 
+  describe "GET /about" do
+    test "renders the about page", %{conn: conn} do
+      conn = get(conn, ~p"/about")
+      html = html_response(conn, 200)
+
+      assert html =~ "About OOSTKit"
+      assert html =~ "Open Systems Theory"
+      assert html =~ "The team"
+    end
+
+    test "sets the page title", %{conn: conn} do
+      conn = get(conn, ~p"/about")
+      assert html_response(conn, 200) =~ "About Us"
+    end
+  end
+
+  describe "GET /privacy" do
+    test "renders the privacy policy page", %{conn: conn} do
+      conn = get(conn, ~p"/privacy")
+      html = html_response(conn, 200)
+
+      assert html =~ "Privacy Policy"
+      assert html =~ "Data we collect"
+      assert html =~ "Your rights (GDPR)"
+      assert html =~ "privacy@oostkit.com"
+    end
+
+    test "sets the page title", %{conn: conn} do
+      conn = get(conn, ~p"/privacy")
+      assert html_response(conn, 200) =~ "Privacy Policy"
+    end
+  end
+
+  describe "GET /contact" do
+    test "renders the contact page", %{conn: conn} do
+      conn = get(conn, ~p"/contact")
+      html = html_response(conn, 200)
+
+      assert html =~ "Contact Us"
+      assert html =~ "hello@oostkit.com"
+    end
+
+    test "sets the page title", %{conn: conn} do
+      conn = get(conn, ~p"/contact")
+      assert html_response(conn, 200) =~ "Contact Us"
+    end
+  end
+
   describe "GET /home (dashboard)" do
     test "renders tool cards from database", %{conn: conn} do
       conn = get(conn, ~p"/home")

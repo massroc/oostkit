@@ -110,6 +110,7 @@ defmodule WorkgroupPulseWeb do
 
       alias PetalComponents.HeroiconsV1
       import WorkgroupPulseWeb.CoreComponents
+      import OostkitShared.Components
       use Gettext, backend: WorkgroupPulseWeb.Gettext
 
       alias Phoenix.LiveView.JS

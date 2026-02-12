@@ -87,6 +87,9 @@ defmodule Portal.MixProject do
       {:floki, "~> 0.38", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
 
+      # Shared components
+      {:oostkit_shared, path: "../oostkit_shared"},
+
       # Development
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},

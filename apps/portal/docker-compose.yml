@@ -50,6 +50,7 @@ services:
     volumes:
       - .:/app
       - ../../shared:/shared
+      - ../oostkit_shared:/oostkit_shared
       - portal_deps:/app/deps
       - portal_build:/app/_build
       - portal_node_modules:/app/assets/node_modules
@@ -78,6 +79,7 @@ services:
     volumes:
       - .:/app
       - ../../shared:/shared
+      - ../oostkit_shared:/oostkit_shared
       - portal_deps:/app/deps
       - portal_build:/app/_build
     depends_on:
@@ -98,6 +100,7 @@ services:
     volumes:
       - .:/app
       - ../../shared:/shared
+      - ../oostkit_shared:/oostkit_shared
       - portal_deps:/app/deps
       - portal_build:/app/_build
     depends_on:

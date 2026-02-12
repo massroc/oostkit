@@ -38,70 +38,56 @@
     </script>
   </head>
   <body class="bg-surface-wall font-brand antialiased">
-    <header class="bg-ok-purple-900">
-      <nav class="relative mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
-        <!-- Left: Brand -->
-        <a href="/" class="text-lg font-semibold text-white">
-          OOSTKit
-        </a>
-        <!-- Centre: Page title (absolutely centered) -->
-        <span class="pointer-events-none absolute inset-x-0 hidden text-center font-brand text-sm font-medium text-ok-purple-200 sm:block">
-          {assigns[:page_title] || "Dashboard"}
-        </span>
-        <!-- Right: Auth -->
-        <div class="flex items-center gap-4">
-          <%= if @current_scope && @current_scope.user do %>
-            <span class="hidden text-sm text-ok-purple-300 sm:inline">
-              {@current_scope.user.email}
-            </span>
-            <%= if @current_scope.user.role == "super_admin" do %>
-              <a
-                href="/admin"
-                class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200"
-              >
-                Admin
-              </a>
-            <% end %>
-            <a
-              href="/users/settings"
-              class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-            >
-              Settings
-            </a>
-            <.link
-              href={~p"/users/log-out"}
-              method="delete"
-              class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-            >
-              Log out
-            </.link>
-          <% else %>
-            <%= if @dev_mode do %>
-              <.link
-                href="/dev/admin-login"
-                method="post"
-                class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200"
-              >
-                Admin
-              </.link>
-            <% end %>
-            <a
-              href="/users/register"
-              class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"
-            >
-              Sign Up
-            </a>
-            <a
-              href="/users/log-in"
-              class="text-sm font-semibold text-ok-purple-200 hover:text-white"
-            >
-              Log In
+    <.header_bar title={assigns[:page_title] || "Dashboard"}>
+      <:actions>
+        <%= if @current_scope && @current_scope.user do %>
+          <span class="hidden text-sm text-ok-purple-300 sm:inline">
+            {@current_scope.user.email}
+          </span>
+          <%= if @current_scope.user.role == "super_admin" do %>
+            <a href="/admin" class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200">
+              Admin
             </a>
           <% end %>
-        </div>
-      </nav>
-    </header>
-    <div class="brand-stripe"></div>
+          <a
+            href="/users/settings"
+            class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+          >
+            Settings
+          </a>
+          <.link
+            href={~p"/users/log-out"}
+            method="delete"
+            class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+          >
+            Log out
+          </.link>
+        <% else %>
+          <%= if @dev_mode do %>
+            <.link
+              href="/dev/admin-login"
+              method="post"
+              class="text-sm font-semibold text-ok-gold-300 hover:text-ok-gold-200"
+            >
+              Admin
+            </.link>
+          <% end %>
+          <a
+            href="/users/register"
+            class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/20"
+          >
+            Sign Up
+          </a>
+          <a
+            href="/users/log-in"
+            class="text-sm font-semibold text-ok-purple-200 hover:text-white"
+          >
+            Log In
+          </a>
+        <% end %>
+      </:actions>
+    </.header_bar>
     {@inner_content}
+    <.footer_bar />
   </body>
 </html>

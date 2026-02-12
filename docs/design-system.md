@@ -95,17 +95,23 @@ Sheets lift on hover with transition to `shadow-sheet-lifted`.
 
 ### OOSTKit Header
 
-All apps share a consistent header pattern with a three-zone `justify-between` layout:
+All apps share a consistent header via the `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This is an Elixir path dependency consumed by all three apps, ensuring a single source of truth for the header markup.
 
+**Component API:**
+- **`:brand_url`** (string) — URL for the OOSTKit brand link. Defaults to `"/"`.
+- **`:title`** (string) — Optional page/app title displayed in the centre (absolutely centered).
+- **`:actions`** (slot) — Content for the right side of the header (auth links, user info, etc.).
+
+**Rendered output:**
 - **Background**: Dark purple (`bg-ok-purple-900`)
-- **Left**: "OOSTKit" brand link (white, links to Portal via configurable `:portal_url`, defaults to `https://oostkit.com`)
-- **Centre**: App name displayed as static text (e.g., "Workgroup Pulse", "Workshop Referral Tool"). In Portal, the centre shows the current page title (e.g., "Dashboard").
-- **Right**: App-specific content (e.g., user email, auth links). In apps without user context (e.g., Pulse), a placeholder `<div>` maintains the three-zone spacing.
-- **Below**: Magenta-to-purple gradient brand stripe (`.brand-stripe`, 3px)
+- **Left**: "OOSTKit" brand link (white, links to Portal via `:brand_url`)
+- **Centre**: Absolutely centered title text (`pointer-events-none absolute inset-x-0 text-center font-brand text-sm font-medium text-ok-purple-200`). In Portal, shows the current page title (e.g., "Dashboard"). In Pulse/WRT, shows the app name.
+- **Right**: `:actions` slot for app-specific content (e.g., Sign Up + Log In buttons, user email, Settings link)
+- **Below**: Magenta-to-purple gradient brand stripe (`.brand-stripe`, 3px), rendered by the component
 
-The `:portal_url` is configured per-app in `config/dev.exs` (hardcoded to `http://localhost:4002`) and `config/runtime.exs` (from `PORTAL_URL` env var), defaulting to `https://oostkit.com` if unset.
+The `:brand_url` is set per-app: Portal passes `"/"`, Pulse/WRT pass the configurable `:portal_url` (configured in `config/dev.exs` as `http://localhost:4002` and `config/runtime.exs` from `PORTAL_URL` env var, defaulting to `https://oostkit.com`).
 
-This header is implemented in each app's layout files (`app.html.heex`, `admin.html.heex`) or via a shared component (e.g., Pulse's `<.app_header>`).
+Each app's Tailwind config includes the shared library path in its content list so that Tailwind scans the shared component templates for class names.
 
 ### Layout Hierarchy
 
@@ -389,6 +395,10 @@ The design system is implemented as a shared Tailwind preset that all apps impor
 /shared/
   tailwind.preset.js     ← Design system tokens (colors, spacing, fonts, shadows)
 
+/apps/oostkit_shared/
+  lib/oostkit_shared/
+    components.ex        ← Shared Phoenix components (header_bar/1)
+
 /apps/workgroup_pulse/assets/
   tailwind.config.js     ← imports preset + app-specific overrides
 
@@ -398,6 +408,8 @@ The design system is implemented as a shared Tailwind preset that all apps impor
 /apps/portal/assets/
   tailwind.config.js     ← imports preset + app-specific overrides
 ```
+
+Each app's `tailwind.config.js` includes `../deps/oostkit_shared/**/*.ex` in its content paths so Tailwind scans the shared component templates for class names.
 
 ### Available Classes
 
@@ -569,6 +581,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-12 | Header extracted to shared Elixir component library (`apps/oostkit_shared/`). All apps now use `<.header_bar>` from `OostkitShared.Components` instead of inline header markup. Portal adds footer bar. |
 | 2026-02-12 | Header consistency update: three-zone layout (OOSTKit link / centered app name / right content), configurable `:portal_url` in Pulse and WRT, Portal centre zone shows page title |
 | 2026-02-12 | Consistent OOSTKit header across all apps (Portal, Pulse, WRT): dark purple bg, "OOSTKit" brand link, brand stripe below |
 | 2026-02-10 | Design system applied to Portal (semantic tokens, DM Sans, brand stripe, surface/text classes, branded nav header) |
