@@ -7,6 +7,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
   use Phoenix.Component
 
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
+  import OostkitShared.Components, only: [icon: 1]
 
   import WorkgroupPulseWeb.SessionLive.ScoreHelpers,
     only: [text_color_class: 1, card_color_class: 1]
@@ -78,14 +79,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
             class="cursor-help"
             title="Each person's score is graded (green=2, amber=1, red=0), then averaged and scaled to 0-10. 10 = everyone scored well, 0 = everyone scored poorly."
           >
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <.icon name="hero-information-circle" class="w-3 h-3" />
           </span>
         </div>
       </div>
@@ -168,7 +162,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.CompletedComponent do
                   phx-value-id={action.id}
                   class="text-ink-blue/30 hover:text-traffic-red transition-colors opacity-0 group-hover:opacity-100 shrink-0"
                 >
-                  ✕
+                  <.icon name="hero-x-mark" class="w-3.5 h-3.5" />
                 </button>
               </li>
             <% end %>

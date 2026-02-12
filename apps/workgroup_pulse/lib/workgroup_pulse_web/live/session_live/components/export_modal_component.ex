@@ -5,6 +5,8 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
   """
   use Phoenix.Component
 
+  import OostkitShared.Components, only: [icon: 1]
+
   attr :show_export_modal, :boolean, required: true
   attr :export_report_type, :string, required: true
 
@@ -18,14 +20,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
           phx-click="toggle_export_modal"
           class="w-full btn-workshop btn-workshop-primary py-2.5 flex items-center justify-center gap-2"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
+          <.icon name="hero-arrow-down-tray" class="w-4 h-4" />
           <span>Export Results</span>
         </button>
       </div>
@@ -44,14 +39,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
                 phx-click="close_export_modal"
                 class="text-ink-blue/30 hover:text-ink-blue/60 transition-colors"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <.icon name="hero-x-mark" class="w-5 h-5" />
               </button>
             </div>
 
