@@ -24,4 +24,5 @@ jobs:
       app_path: apps/portal
       database_name: portal_test
       deploy_enabled: true
+      app_url: 'https://oostkit.com'
     secrets: inherit

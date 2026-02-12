@@ -809,6 +809,13 @@ primary_region = "lhr"
   internal_port = 8080
   force_https = true
 
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
 [[services]]
   internal_port = 8080
   protocol = "tcp"
@@ -825,6 +832,17 @@ primary_region = "lhr"
   port = 9091
   path = "/metrics"
 ```
+
+### Health Check Endpoints
+
+All apps expose standardised health check endpoints (no authentication required):
+
+| Endpoint | Purpose | Response |
+|----------|---------|----------|
+| `GET /health` | Liveness check | `200 {"status": "ok", "timestamp": "..."}` |
+| `GET /health/ready` | Readiness check (includes DB connectivity) | `200 {"status": "ready", "checks": {"database": {"status": "ok"}}}` or `503` if unhealthy |
+
+Fly.io's HTTP service health checks use `/health` to determine machine health. The CI pipeline also runs a post-deploy smoke test that curls `/health` with retries after each deployment.
 
 ### Environment Variables
 

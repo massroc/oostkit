@@ -1269,6 +1269,13 @@ primary_region = "syd"  # Sydney for AU-based teams
     hard_limit = 1000
     soft_limit = 800
 
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
 [[services]]
   protocol = "tcp"
   internal_port = 8080
@@ -1289,6 +1296,17 @@ primary_region = "syd"  # Sydney for AU-based teams
 [deploy]
   release_command = "/app/bin/migrate"
 ```
+
+### Health Check Endpoints
+
+All apps expose standardised health check endpoints (no authentication required):
+
+| Endpoint | Purpose | Response |
+|----------|---------|----------|
+| `GET /health` | Liveness check | `200 {"status": "ok", "timestamp": "..."}` |
+| `GET /health/ready` | Readiness check (includes DB connectivity) | `200 {"status": "ready", "checks": {"database": {"status": "ok"}}}` or `503` if unhealthy |
+
+Fly.io's HTTP service health checks use `/health` to determine machine health. The CI pipeline also runs a post-deploy smoke test that curls `/health` with retries after each deployment.
 
 ### Environment Variables
 

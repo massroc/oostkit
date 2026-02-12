@@ -186,10 +186,24 @@ GitHub Actions with path filtering:
 - Changes to `apps/workgroup_pulse/**` trigger only that app's CI
 - Each app has own workflow file
 - Deploys to Fly.io on merge to main
+- Post-deploy smoke test curls the app's `/health` endpoint with retries to verify successful deployment
 - Portal: CI/CD enabled with `.dockerignore` to optimize build context
   - Portal's `Dockerfile` uses monorepo root as build context (not app directory)
   - Allows access to `shared/tailwind.preset.js` during asset compilation
   - Deploy command: `fly deploy --config apps/portal/fly.toml --dockerfile apps/portal/Dockerfile`
+
+### Health Checks
+
+All apps expose standardised health check endpoints (no authentication required):
+
+| Endpoint | Purpose | Response |
+|----------|---------|----------|
+| `GET /health` | Liveness check | `200 {"status": "ok", "timestamp": "..."}` |
+| `GET /health/ready` | Readiness check (DB connectivity) | `200 {"status": "ready", ...}` or `503` |
+
+Used by:
+- **Fly.io** HTTP service health checks (`fly.toml` → `path = "/health"`) to determine machine health
+- **CI pipeline** post-deploy smoke test to verify each deployment succeeded
 
 ### Environment Configuration
 

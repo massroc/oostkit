@@ -33,6 +33,11 @@ on:
         required: false
         type: string
         default: '27.2'
+      app_url:
+        description: 'Production URL for post-deploy smoke test (e.g. https://oostkit.com)'
+        required: false
+        type: string
+        default: ''
 
 env:
   MIX_ENV: test
@@ -185,3 +190,22 @@ jobs:
         working-directory: .
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Post-deploy smoke test
+        if: inputs.app_url != ''
+        run: |
+          echo "Waiting 15s for deploy to stabilize..."
+          sleep 15
+          echo "Checking ${{ inputs.app_url }}/health..."
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ inputs.app_url }}/health" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed (attempt $i)"
+              curl -s "${{ inputs.app_url }}/health" | jq .
+              exit 0
+            fi
+            echo "Attempt $i: got HTTP $STATUS, retrying in 10s..."
+            sleep 10
+          done
+          echo "FAILED: Health check did not return 200 after 5 attempts"
+          exit 1

@@ -85,15 +85,15 @@ The project is configured for Test-Driven Development:
 GitHub Actions runs on every push and pull request:
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Test      │     │  Dialyzer   │     │   Deploy    │
-│             │     │             │     │  (main only)│
-│ • Format    │     │ • Type      │     │             │
-│ • Credo     │────▶│   checking  │────▶│ • Fly.io    │
-│ • Sobelow   │     │             │     │   deploy    │
-│ • Tests     │     │             │     │             │
-│ • Coverage  │     │             │     │             │
-└─────────────┘     └─────────────┘     └─────────────┘
+┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
+│   Test      │     │  Dialyzer   │     │      Deploy         │
+│             │     │             │     │    (main only)      │
+│ • Format    │     │ • Type      │     │                     │
+│ • Credo     │────▶│   checking  │────▶│ • Fly.io deploy     │
+│ • Sobelow   │     │             │     │ • Smoke test        │
+│ • Tests     │     │             │     │   (curl /health)    │
+│ • Coverage  │     │             │     │                     │
+└─────────────┘     └─────────────┘     └─────────────────────┘
 ```
 
 ### Pipeline Stages
@@ -111,6 +111,7 @@ GitHub Actions runs on every push and pull request:
 
 3. **Deploy Job** (main branch only)
    - Automatic deployment to Fly.io
+   - Post-deploy smoke test: curls `/health` endpoint with retries to verify successful deployment
 
 ## Production Deployment
 
@@ -188,6 +189,8 @@ Set via Fly.io secrets:
 │       │   │   ├── operation_helpers.ex    # Standardised error handling
 │       │   │   └── score_helpers.ex        # Score color/formatting
 │       │   └── timer_handler.ex            # Facilitator timer logic
+│       ├── controllers/
+│       │   └── health_controller.ex       # Health check endpoints (/health, /health/ready)
 │       ├── endpoint.ex
 │       ├── router.ex
 │       └── telemetry.ex

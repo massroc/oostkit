@@ -14,6 +14,14 @@ defmodule WorkgroupPulseWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # Health check routes (no auth required)
+  scope "/health", WorkgroupPulseWeb do
+    pipe_through :api
+
+    get "/", HealthController, :index
+    get "/ready", HealthController, :ready
+  end
+
   scope "/", WorkgroupPulseWeb do
     pipe_through :browser
 
