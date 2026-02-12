@@ -6,6 +6,7 @@ primary_region = "syd"  # Sydney, AU (matches other apps)
 
 [build]
   dockerfile = "Dockerfile"
+  ignorefile = ".dockerignore"
 
 [env]
   PHX_HOST = "oostkit.com"

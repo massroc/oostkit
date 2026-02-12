@@ -1,5 +1,5 @@
 # Production Dockerfile for Fly.io deployment
-# Build context: monorepo root (not app directory)
+# Build context: monorepo root (umbrella project)
 #
 # https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
 # https://hub.docker.com/_/ubuntu?tab=tags
@@ -27,40 +27,41 @@ RUN mix local.hex --force && \
 # Set build ENV
 ENV MIX_ENV="prod"
 
-# Install mix dependencies
-COPY apps/workgroup_pulse/mix.exs apps/workgroup_pulse/mix.lock ./
+# Copy umbrella root and child mix.exs files
+COPY mix.exs ./
+COPY apps/workgroup_pulse/mix.exs apps/workgroup_pulse/
+COPY apps/oostkit_shared/mix.exs apps/oostkit_shared/
+
 RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
 
-# Copy shared component library (path dependency)
-COPY apps/oostkit_shared /oostkit_shared
+# Copy root config (compile-time config)
+COPY config/config.exs config/${MIX_ENV}.exs config/
 
-# Copy compile-time config files before we compile dependencies
-# to ensure any relevant config change will trigger the dependencies
-# to be re-compiled.
-COPY apps/workgroup_pulse/config/config.exs apps/workgroup_pulse/config/${MIX_ENV}.exs config/
+# Copy shared component library source
+COPY apps/oostkit_shared/lib apps/oostkit_shared/lib
+
 RUN mix deps.compile
 
-COPY apps/workgroup_pulse/priv priv
+COPY apps/workgroup_pulse/priv apps/workgroup_pulse/priv
 
-COPY apps/workgroup_pulse/lib lib
+COPY apps/workgroup_pulse/lib apps/workgroup_pulse/lib
 
 # Copy shared design system preset (used by tailwind.config.js)
 COPY shared /shared
 
-COPY apps/workgroup_pulse/assets assets
+COPY apps/workgroup_pulse/assets apps/workgroup_pulse/assets
 
 # Compile assets
-RUN mix assets.deploy
+RUN cd apps/workgroup_pulse && mix assets.deploy
 
 # Compile the release
 RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
-COPY apps/workgroup_pulse/config/runtime.exs config/
+COPY config/runtime.exs config/
 
-COPY apps/workgroup_pulse/rel rel
-RUN mix release
+COPY apps/workgroup_pulse/rel apps/workgroup_pulse/rel
+RUN mix release workgroup_pulse
 
 # Start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
@@ -90,11 +91,5 @@ COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/workgroup_pul
 RUN chmod +x /app/bin/*
 
 USER nobody
-
-# If using an environment that doesn't automatically reap zombie processes, it is
-# advised to add an init process such as tini via `apt-get install tini` inside the
-# temporary builder stage, and adding an entrypoint.
-#
-# ENTRYPOINT ["/tini", "--"]
 
 CMD ["/app/bin/workgroup_pulse", "start"]

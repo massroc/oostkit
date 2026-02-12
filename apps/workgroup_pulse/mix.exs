@@ -5,12 +5,15 @@ defmodule WorkgroupPulse.MixProject do
     [
       app: :workgroup_pulse,
       version: "0.1.0",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
       elixir: "~> 1.17 or ~> 1.18 or ~> 1.19",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      releases: releases(),
       test_coverage: [tool: ExCoveralls],
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
@@ -27,7 +30,6 @@ defmodule WorkgroupPulse.MixProject do
     ]
   end
 
-  # Configuration for the OTP application.
   def application do
     [
       mod: {WorkgroupPulse.Application, []},
@@ -35,21 +37,9 @@ defmodule WorkgroupPulse.MixProject do
     ]
   end
 
-  # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Release configuration
-  defp releases do
-    [
-      workgroup_pulse: [
-        include_executables_for: [:unix],
-        overlays: ["rel/overlays"]
-      ]
-    ]
-  end
-
-  # Specifies your project dependencies.
   defp deps do
     [
       # Phoenix core
@@ -91,7 +81,7 @@ defmodule WorkgroupPulse.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
 
       # Shared components
-      {:oostkit_shared, path: "../oostkit_shared"},
+      {:oostkit_shared, in_umbrella: true},
 
       # Development
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
@@ -100,7 +90,6 @@ defmodule WorkgroupPulse.MixProject do
     ]
   end
 
-  # Aliases are shortcuts or tasks specific to the current project.
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],

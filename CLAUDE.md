@@ -4,24 +4,35 @@ This file contains instructions for AI assistants working on this monorepo.
 
 ## Monorepo Structure
 
-This is a monorepo containing multiple applications:
+This is an **Elixir umbrella project** containing multiple applications:
 
 ```
 /
+├── mix.exs                # Umbrella root (apps_path: "apps")
+├── config/                # Consolidated config (all apps)
+│   ├── config.exs         # Compile-time config (shared + per-app)
+│   ├── dev.exs / test.exs / prod.exs
+│   └── runtime.exs        # Runtime config (guarded per-release)
 ├── apps/
-│   ├── oostkit_shared/    # Shared Elixir component library (path dep for all apps)
-│   ├── portal/            # OOSTKit Portal - Landing page and auth hub (Elixir/Phoenix)
-│   ├── workgroup_pulse/   # Workgroup Pulse - 6 Criteria workshop (Elixir/Phoenix)
-│   └── wrt/               # Workshop Referral Tool (Elixir/Phoenix)
+│   ├── oostkit_shared/    # Shared Elixir component library (in_umbrella dep)
+│   ├── portal/            # OOSTKit Portal - Landing page and auth hub
+│   ├── workgroup_pulse/   # Workgroup Pulse - 6 Criteria workshop
+│   └── wrt/               # Workshop Referral Tool
+├── deps/                  # Shared dependencies (gitignored)
+├── _build/                # Shared build artifacts (gitignored)
 ├── .github/workflows/     # CI/CD pipelines (per-app with path filtering)
 ├── docker-compose.yml     # Root orchestration (includes all apps)
 └── Makefile               # Convenience commands
 ```
 
-Each app is self-contained with its own:
+The umbrella structure gives shared `_build` and `deps` directories. Changes to
+`oostkit_shared` automatically recompile in all apps — no more stale `_build` issues.
+
+Each app has its own:
 - `docker-compose.yml` - App-specific services
 - `Dockerfile` / `Dockerfile.dev` - Container definitions
 - `fly.toml` - Deployment configuration
+- `mix.exs` - App deps (with `in_umbrella: true` for shared lib)
 - README, tests, etc.
 
 ## Development Environment
@@ -84,9 +95,9 @@ docker compose logs -f wp_app
 # the un-digested copies. The repo tracks un-digested dev builds.
 docker compose exec wp_app mix tailwind workgroup_pulse   # Build CSS
 docker compose exec wp_app mix esbuild workgroup_pulse    # Build JS
-# Then copy from container to host:
-docker compose cp wp_app:/app/priv/static/assets/app.css priv/static/assets/app.css
-docker compose cp wp_app:/app/priv/static/assets/app.js priv/static/assets/app.js
+# Then copy from container to host (note: umbrella path inside container):
+docker compose cp wp_app:/app/apps/workgroup_pulse/priv/static/assets/app.css priv/static/assets/app.css
+docker compose cp wp_app:/app/apps/workgroup_pulse/priv/static/assets/app.js priv/static/assets/app.js
 ```
 
 ### Service Names (Workgroup Pulse)
@@ -285,8 +296,11 @@ Each app maintains its own documentation:
 Platform-wide documentation lives in `docs/`:
 - [Product Vision](docs/product-vision.md)
 - [Architecture](docs/architecture.md)
-- [Portal Requirements](docs/portal-requirements.md)
-- [WRT Requirements](docs/wrt-requirements.md)
+
+App-specific requirements:
+- [Portal Requirements](apps/portal/REQUIREMENTS.md)
+- [WRT Requirements](apps/wrt/REQUIREMENTS.md)
+- [Workgroup Pulse Requirements](apps/workgroup_pulse/REQUIREMENTS.md)
 
 ### Documentation-First Shipping
 

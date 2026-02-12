@@ -1,7 +1,7 @@
 # Workgroup Pulse - Solution Design
 
 ## Document Info
-- **Version:** 4.2
+- **Version:** 4.7
 - **Last Updated:** 2026-02-11
 - **Status:** Draft
 
@@ -1319,34 +1319,32 @@ Fly.io's HTTP service health checks use `/health` to determine machine health. T
 
 ### Release Configuration
 
+This app is part of an Elixir umbrella project. Configuration lives in the root `config/` directory (not per-app). Runtime config uses release-name guards so each app only reads its own env vars in production:
+
 ```elixir
-# config/runtime.exs
+# config/runtime.exs (workgroup_pulse section)
 import Config
 
 if config_env() == :prod do
-  database_url =
-    System.get_env("DATABASE_URL") ||
-      raise "DATABASE_URL not set"
+  # Guarded by release name — only runs when building/running the workgroup_pulse release
+  database_url = System.get_env("DATABASE_URL") || raise "DATABASE_URL not set"
 
   config :workgroup_pulse, WorkgroupPulse.Repo,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     ssl: true
 
-  secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise "SECRET_KEY_BASE not set"
-
-  host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  secret_key_base = System.get_env("SECRET_KEY_BASE") || raise "SECRET_KEY_BASE not set"
 
   config :workgroup_pulse, WorkgroupPulseWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
-    http: [port: port],
+    url: [host: System.get_env("PHX_HOST") || "example.com", port: 443, scheme: "https"],
+    http: [port: String.to_integer(System.get_env("PORT") || "4000")],
     secret_key_base: secret_key_base,
     server: true
 end
 ```
+
+Production builds use the umbrella's named release system (`mix release workgroup_pulse`), defined in the root `mix.exs`.
 
 ### Database Backups
 

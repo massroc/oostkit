@@ -5,12 +5,15 @@ defmodule Portal.MixProject do
     [
       app: :portal,
       version: "0.1.0",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
       elixir: "~> 1.17 or ~> 1.18 or ~> 1.19",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      releases: releases(),
       test_coverage: [tool: ExCoveralls],
       listeners: [Phoenix.CodeReloader],
       preferred_cli_env: [
@@ -36,15 +39,6 @@ defmodule Portal.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
-
-  defp releases do
-    [
-      portal: [
-        include_executables_for: [:unix],
-        overlays: ["rel/overlays"]
-      ]
-    ]
-  end
 
   defp deps do
     [
@@ -91,7 +85,7 @@ defmodule Portal.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
 
       # Shared components
-      {:oostkit_shared, path: "../oostkit_shared"},
+      {:oostkit_shared, in_umbrella: true},
 
       # Development
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
