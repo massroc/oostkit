@@ -1,79 +1,77 @@
-<div class="max-w-3xl mx-auto">
-  <.header>
-    Workshop Referral Tool
-    <:subtitle>
-      A structured process for identifying the right people through peer referral
-    </:subtitle>
-  </.header>
+<.header>
+  Workshop Referral Tool
+  <:subtitle>
+    A structured process for identifying the right people through peer referral
+  </:subtitle>
+</.header>
 
-  <div class="mt-8 space-y-6">
-    <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-text-dark mb-4">How the Referral Process Works</h2>
+<div class="mt-8 space-y-6">
+  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-text-dark mb-4">How the Referral Process Works</h2>
 
-      <div class="space-y-4">
-        <div class="flex gap-4">
-          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
-            1
-          </div>
-          <div>
-            <h3 class="font-medium text-text-dark">Seed List</h3>
-            <p class="text-sm text-gray-600 mt-1">
-              Start with an initial list of people who know the work and the organisation.
-              These are your first-round participants.
-            </p>
-          </div>
+    <div class="space-y-4">
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
+          1
         </div>
-
-        <div class="flex gap-4">
-          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
-            2
-          </div>
-          <div>
-            <h3 class="font-medium text-text-dark">Nomination Rounds</h3>
-            <p class="text-sm text-gray-600 mt-1">
-              Each participant is invited to nominate others they believe should be involved.
-              Rounds run for a set period with email reminders.
-            </p>
-          </div>
+        <div>
+          <h3 class="font-medium text-text-dark">Seed List</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            Start with an initial list of people who know the work and the organisation.
+            These are your first-round participants.
+          </p>
         </div>
+      </div>
 
-        <div class="flex gap-4">
-          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
-            3
-          </div>
-          <div>
-            <h3 class="font-medium text-text-dark">Convergence</h3>
-            <p class="text-sm text-gray-600 mt-1">
-              After each round, new nominees are added to the next round's participant list.
-              The process converges when few or no new names appear.
-            </p>
-          </div>
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
+          2
         </div>
+        <div>
+          <h3 class="font-medium text-text-dark">Nomination Rounds</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            Each participant is invited to nominate others they believe should be involved.
+            Rounds run for a set period with email reminders.
+          </p>
+        </div>
+      </div>
 
-        <div class="flex gap-4">
-          <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
-            4
-          </div>
-          <div>
-            <h3 class="font-medium text-text-dark">Results</h3>
-            <p class="text-sm text-gray-600 mt-1">
-              View the final list of people identified by the process, ranked by nomination count.
-              Export the results as CSV or PDF.
-            </p>
-          </div>
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
+          3
+        </div>
+        <div>
+          <h3 class="font-medium text-text-dark">Convergence</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            After each round, new nominees are added to the next round's participant list.
+            The process converges when few or no new names appear.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-ok-purple-100 text-ok-purple-700 flex items-center justify-center font-bold text-sm">
+          4
+        </div>
+        <div>
+          <h3 class="font-medium text-text-dark">Results</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            View the final list of people identified by the process, ranked by nomination count.
+            Export the results as CSV or PDF.
+          </p>
         </div>
       </div>
     </div>
-
-    <form action={~p"/dismiss-landing"} method="post" class="flex items-center justify-between">
-      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-        <input type="checkbox" name="skip" value="true" class="rounded border-gray-300" />
-        Don't show this page again
-      </label>
-      <.button type="submit">
-        Get Started
-      </.button>
-    </form>
   </div>
+
+  <form action={~p"/dismiss-landing"} method="post" class="flex items-center justify-between">
+    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+    <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+      <input type="checkbox" name="skip" value="true" class="rounded border-gray-300" />
+      Don't show this page again
+    </label>
+    <.button type="submit">
+      Get Started
+    </.button>
+  </form>
 </div>
