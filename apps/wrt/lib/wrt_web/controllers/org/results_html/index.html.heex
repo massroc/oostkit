@@ -17,24 +17,20 @@
 </.header>
 
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Rounds Completed</h3>
-    <p class="mt-2 text-3xl font-semibold text-text-dark">
-      {Enum.count(@rounds, fn r -> r.status == "closed" end)}
-    </p>
-  </div>
-
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">People Nominated</h3>
-    <p class="mt-2 text-3xl font-semibold text-ok-purple-600">{length(@nominees)}</p>
-  </div>
-
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Total Nominations</h3>
-    <p class="mt-2 text-3xl font-semibold text-ok-green-600">
-      {Enum.sum(Enum.map(@nominees, & &1.nomination_count))}
-    </p>
-  </div>
+  <.stat_card
+    label="Rounds Completed"
+    value={to_string(Enum.count(@rounds, fn r -> r.status == "closed" end))}
+  />
+  <.stat_card
+    label="People Nominated"
+    value={to_string(length(@nominees))}
+    value_color="text-ok-purple-600"
+  />
+  <.stat_card
+    label="Total Nominations"
+    value={to_string(Enum.sum(Enum.map(@nominees, & &1.nomination_count)))}
+    value_color="text-ok-green-600"
+  />
 </div>
 
 <div class="mt-8">
@@ -44,7 +40,7 @@
   </p>
 
   <%= if Enum.empty?(@nominees) do %>
-    <p class="text-gray-500 mt-4">No nominations have been submitted yet.</p>
+    <.empty_state message="No nominations have been submitted yet." />
   <% else %>
     <.table id="nominees" rows={@nominees}>
       <:col :let={person} label="Rank">
@@ -53,9 +49,7 @@
       <:col :let={person} label="Name">{person.name}</:col>
       <:col :let={person} label="Email">{person.email}</:col>
       <:col :let={person} label="Source">
-        <span class={"px-2 py-1 text-xs rounded-full #{source_class(person.source)}"}>
-          {person.source}
-        </span>
+        <.status_badge kind={:source} status={person.source} />
       </:col>
       <:col :let={person} label="Nominations">
         <span class="font-semibold text-ok-purple-600">{person.nomination_count}</span>

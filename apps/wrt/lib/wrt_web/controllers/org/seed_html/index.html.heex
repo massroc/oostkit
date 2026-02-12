@@ -69,9 +69,7 @@
   <h2 class="text-lg font-semibold text-text-dark">Seed Group ({length(@seed_people)} people)</h2>
 
   <%= if Enum.empty?(@seed_people) do %>
-    <p class="text-gray-500 mt-4">
-      No people in the seed group yet. Upload a CSV or add people manually.
-    </p>
+    <.empty_state message="No people in the seed group yet. Upload a CSV or add people manually." />
   <% else %>
     <.table id="seed-people" rows={@seed_people}>
       <:col :let={person} label="Name">{person.name}</:col>

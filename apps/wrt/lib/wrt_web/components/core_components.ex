@@ -533,10 +533,13 @@ defmodule WrtWeb.CoreComponents do
   attr :kind, :atom, values: [:campaign, :round, :source, :contact], required: true
 
   def status_badge(assigns) do
-    assigns = assign(assigns, :color, badge_color(assigns.kind, assigns.status))
+    assigns =
+      assigns
+      |> assign(:color, badge_color(assigns.kind, assigns.status))
+      |> assign(:label, String.capitalize(assigns.status))
 
     ~H"""
-    <.badge color={@color} label={@status} size="sm" />
+    <.badge color={@color} label={@label} size="sm" />
     """
   end
 

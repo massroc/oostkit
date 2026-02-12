@@ -36,8 +36,8 @@
     </form>
   </div>
 <% else %>
-  <div class="mt-8 bg-ok-gold-50 border border-ok-gold-200 rounded-lg p-6">
-    <p class="text-ok-gold-800">
+  <.callout kind={:warning} class="mt-8">
+    <p>
       Round {@active_round.round_number} is currently active.
       <.link
         href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@active_round}"}
@@ -47,21 +47,19 @@
       </.link>
       or close it to start a new round.
     </p>
-  </div>
+  </.callout>
 <% end %>
 
 <div class="mt-8">
   <h2 class="text-lg font-semibold text-text-dark">All Rounds</h2>
 
   <%= if Enum.empty?(@rounds) do %>
-    <p class="text-gray-500 mt-4">No rounds yet. Start your first round above.</p>
+    <.empty_state message="No rounds yet. Start your first round above." />
   <% else %>
     <.table id="rounds" rows={@rounds}>
       <:col :let={round} label="Round">{round.round_number}</:col>
       <:col :let={round} label="Status">
-        <span class={"px-2 py-1 text-xs rounded-full #{round_status_class(round.status)}"}>
-          {round.status}
-        </span>
+        <.status_badge kind={:round} status={round.status} />
       </:col>
       <:col :let={round} label="Started">
         {if round.started_at, do: Calendar.strftime(round.started_at, "%B %d, %Y"), else: "-"}

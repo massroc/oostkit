@@ -1,9 +1,7 @@
 <.header>
   Round {@round.round_number}
   <:subtitle>
-    <span class={"px-2 py-1 text-xs rounded-full #{round_status_class(@round.status)}"}>
-      {@round.status}
-    </span>
+    <.status_badge kind={:round} status={@round.status} />
     {@campaign.name}
   </:subtitle>
   <:actions>
@@ -14,36 +12,31 @@
 </.header>
 
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Contacts</h3>
-    <p class="mt-2 text-3xl font-semibold text-text-dark">{@contact_stats.total}</p>
-  </div>
-
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Responded</h3>
-    <p class="mt-2 text-3xl font-semibold text-ok-green-600">{@contact_stats.responded}</p>
-    <p class="mt-1 text-sm text-gray-500">
-      <%= if @contact_stats.total > 0 do %>
-        {Float.round(@contact_stats.responded / @contact_stats.total * 100, 1)}% response rate
-      <% else %>
-        -
-      <% end %>
-    </p>
-  </div>
-
-  <div class="bg-surface-sheet shadow-sheet rounded-lg p-6">
-    <h3 class="text-sm font-medium text-gray-500">Nominations</h3>
-    <p class="mt-2 text-3xl font-semibold text-ok-purple-600">{length(@nominations)}</p>
-  </div>
+  <.stat_card
+    label="Contacts"
+    value={to_string(@contact_stats.total)}
+  />
+  <.stat_card
+    label="Responded"
+    value={to_string(@contact_stats.responded)}
+    detail={if @contact_stats.total > 0,
+      do: "#{Float.round(@contact_stats.responded / @contact_stats.total * 100, 1)}% response rate",
+      else: "-"}
+    value_color="text-ok-green-600"
+  />
+  <.stat_card
+    label="Nominations"
+    value={to_string(length(@nominations))}
+    value_color="text-ok-purple-600"
+  />
 </div>
 
 <%= if @round.status == "active" do %>
-  <div class="mt-8 bg-ok-green-50 border border-ok-green-200 rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-ok-green-800">Round Active</h2>
-    <p class="text-ok-green-700 mt-1">
+  <.callout kind={:success} heading="Round Active" class="mt-8">
+    <p>
       Deadline: {Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p")}
     </p>
-    <div class="mt-4 flex gap-4">
+    <:actions>
       <form
         action={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds/#{@round}/extend"}
         method="post"
@@ -73,15 +66,15 @@
         <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
         <.button type="submit" class="bg-ok-red-600 hover:bg-ok-red-700">Close Round</.button>
       </form>
-    </div>
-  </div>
+    </:actions>
+  </.callout>
 <% end %>
 
 <div class="mt-8">
   <h2 class="text-lg font-semibold text-text-dark">Contacts</h2>
 
   <%= if Enum.empty?(@contacts) do %>
-    <p class="text-gray-500 mt-4">No contacts in this round.</p>
+    <.empty_state message="No contacts in this round." />
   <% else %>
     <.table id="contacts" rows={@contacts}>
       <:col :let={contact} label="Name">{contact.person.name}</:col>
@@ -89,23 +82,15 @@
       <:col :let={contact} label="Status">
         <%= cond do %>
           <% contact.responded_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-ok-green-100 text-ok-green-800">
-              Responded
-            </span>
+            <.status_badge kind={:contact} status="responded" />
           <% contact.clicked_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-ok-blue-100 text-ok-blue-800">
-              Clicked
-            </span>
+            <.status_badge kind={:contact} status="clicked" />
           <% contact.opened_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-ok-gold-100 text-ok-gold-800">
-              Opened
-            </span>
+            <.status_badge kind={:contact} status="opened" />
           <% contact.delivered_at -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-              Delivered
-            </span>
+            <.status_badge kind={:contact} status="delivered" />
           <% true -> %>
-            <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Pending</span>
+            <.status_badge kind={:contact} status="pending" />
         <% end %>
       </:col>
     </.table>

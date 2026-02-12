@@ -11282,6 +11282,10 @@ input::-webkit-datetime-edit {
   max-width: 36rem;
 }
 
+.max-w-4xl {
+  max-width: 56rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -11690,6 +11694,14 @@ input::-webkit-datetime-edit {
   fill: #881337;
 }
 
+.fill-ok-green-900 {
+  fill: #21481e;
+}
+
+.fill-ok-red-900 {
+  fill: #511515;
+}
+
 .p-0 {
   padding: 0px;
 }
@@ -11835,6 +11847,10 @@ input::-webkit-datetime-edit {
 
 .uppercase {
   text-transform: uppercase;
+}
+
+.capitalize {
+  text-transform: capitalize;
 }
 
 .leading-5 {
@@ -12023,6 +12039,11 @@ input::-webkit-datetime-edit {
   color: rgb(24 24 27 / var(--tw-text-opacity, 1));
 }
 
+.text-ok-red-900 {
+  --tw-text-opacity: 1;
+  color: rgb(81 21 21 / var(--tw-text-opacity, 1));
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -12094,6 +12115,16 @@ input::-webkit-datetime-edit {
 .ring-rose-500 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(244 63 94 / var(--tw-ring-opacity, 1));
+}
+
+.ring-ok-green-500 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(66 210 53 / var(--tw-ring-opacity, 1));
+}
+
+.ring-ok-red-500 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(244 69 69 / var(--tw-ring-opacity, 1));
 }
 
 .filter {
