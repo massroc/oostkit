@@ -1,3 +1,12 @@
+<.breadcrumbs
+  separator="chevron"
+  links={[
+    %{label: "Process Manager", to: ~p"/org/#{@org.slug}/manage"},
+    %{label: @campaign.name, to: ~p"/org/#{@org.slug}/campaigns/#{@campaign}"},
+    %{label: "Results", to: "#"}
+  ]}
+/>
+
 <.header>
   Results
   <:subtitle>{@campaign.name}</:subtitle>
@@ -8,9 +17,6 @@
       </.link>
       <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/export/pdf"}>
         <.button>Export PDF</.button>
-      </.link>
-      <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
-        &larr; Back to Campaign
       </.link>
     </div>
   </:actions>

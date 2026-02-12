@@ -1,3 +1,11 @@
+<.breadcrumbs
+  separator="chevron"
+  links={[
+    %{label: "Process Manager", to: ~p"/org/#{@org.slug}/manage"},
+    %{label: @campaign.name, to: "#"}
+  ]}
+/>
+
 <.header>
   {@campaign.name}
   <:subtitle>

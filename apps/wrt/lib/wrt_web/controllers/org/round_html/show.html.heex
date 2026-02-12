@@ -1,14 +1,19 @@
+<.breadcrumbs
+  separator="chevron"
+  links={[
+    %{label: "Process Manager", to: ~p"/org/#{@org.slug}/manage"},
+    %{label: @campaign.name, to: ~p"/org/#{@org.slug}/campaigns/#{@campaign}"},
+    %{label: "Rounds", to: ~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"},
+    %{label: "Round #{@round.round_number}", to: "#"}
+  ]}
+/>
+
 <.header>
   Round {@round.round_number}
   <:subtitle>
     <.status_badge kind={:round} status={@round.status} />
     {@campaign.name}
   </:subtitle>
-  <:actions>
-    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}/rounds"}>
-      &larr; Back to Rounds
-    </.link>
-  </:actions>
 </.header>
 
 <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">

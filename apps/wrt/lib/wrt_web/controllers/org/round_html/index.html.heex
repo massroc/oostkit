@@ -1,11 +1,15 @@
+<.breadcrumbs
+  separator="chevron"
+  links={[
+    %{label: "Process Manager", to: ~p"/org/#{@org.slug}/manage"},
+    %{label: @campaign.name, to: ~p"/org/#{@org.slug}/campaigns/#{@campaign}"},
+    %{label: "Rounds", to: "#"}
+  ]}
+/>
+
 <.header>
   Rounds
   <:subtitle>{@campaign.name}</:subtitle>
-  <:actions>
-    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
-      &larr; Back to Campaign
-    </.link>
-  </:actions>
 </.header>
 
 <%= if @can_start_round do %>

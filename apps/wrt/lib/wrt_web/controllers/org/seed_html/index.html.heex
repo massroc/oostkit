@@ -1,13 +1,17 @@
+<.breadcrumbs
+  separator="chevron"
+  links={[
+    %{label: "Process Manager", to: ~p"/org/#{@org.slug}/manage"},
+    %{label: @campaign.name, to: ~p"/org/#{@org.slug}/campaigns/#{@campaign}"},
+    %{label: "Seed Group", to: "#"}
+  ]}
+/>
+
 <.header>
   Seed Group
   <:subtitle>
     Manage the initial group of people for {@campaign.name}
   </:subtitle>
-  <:actions>
-    <.link href={~p"/org/#{@org.slug}/campaigns/#{@campaign}"}>
-      &larr; Back to Campaign
-    </.link>
-  </:actions>
 </.header>
 
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
