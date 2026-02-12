@@ -16,6 +16,7 @@ defmodule WorkgroupPulse.MixProject do
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
         plt_add_apps: [:mix, :ex_unit, :wallaby]
       ],
+      listeners: [Phoenix.CodeReloader],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
