@@ -74,6 +74,26 @@ defmodule Portal.Accounts.UserNotifier do
     Application.get_env(:portal, :mail_from, [])[:address] || "noreply@oostkit.com"
   end
 
+  @doc """
+  Deliver password reset instructions to the given user.
+  """
+  def deliver_password_reset_instructions(user, url) do
+    deliver(user.email, "Reset password instructions", """
+
+    ==============================
+
+    Hi #{user.email},
+
+    You can reset your password by visiting the URL below:
+
+    #{url}
+
+    If you didn't request this change, please ignore this.
+
+    ==============================
+    """)
+  end
+
   defp deliver_confirmation_instructions(user, url) do
     deliver(user.email, "Confirmation instructions", """
 

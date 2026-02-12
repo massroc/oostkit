@@ -417,13 +417,18 @@ Speak directly to facilitators:
 #### Password (Secondary)
 
 - Email + password fields
-- "Log in" button
-- "Forgot password?" link
-- Shown below magic link section, visually secondary
+- "Log in with password" button (soft primary style)
+- Shown below magic link section, separated by "or use a password" divider
+- Starts at reduced opacity, full opacity on focus (visual hierarchy cue)
+
+#### "Forgot your password?" Link
+
+Below the password section (hidden when re-authenticating). Links to `/users/forgot-password`.
 
 #### Messaging
 
-- Heading: "Welcome back"
+- Heading: "Welcome back" (or "Re-authenticate" if already logged in and performing a sensitive action)
+- Subtitle adapts: re-auth context explains why, normal context links to registration
 - Link to registration for new users
 
 ### Email Confirmation (`/users/log-in/:token`)
@@ -433,15 +438,69 @@ Auto-logs in the user and redirects to dashboard.
 
 ### Settings (`/users/settings`)
 
-Requires authentication. Where facilitators manage their account:
+Requires authentication. Where facilitators manage their account. The page loads
+without requiring sudo mode — sudo checks are performed in event handlers for
+sensitive actions (email change, password change, account deletion). If not in
+sudo mode, the user is redirected to the login page with a message to re-authenticate.
 
-- **Change email** — sends confirmation to new address
+**Sections (top to bottom):**
+
+- **Profile** — name and organisation (optional). Referral source is collected at
+  registration only and is not shown on the settings page.
+- **Change email** — sends confirmation to new address (requires sudo mode)
 - **Set/change password** — optional, for facilitators who prefer password login
   over magic links. If no password is set yet, framed as "Add a password" rather
-  than "Change password"
-- **Edit name** — update display name
-- **Profile info** — organisation, how they heard about OOSTKit (same fields as
-  registration, editable here)
+  than "Change password" (requires sudo mode)
+- **Danger zone** — delete account section with a red "Delete Account" button and
+  confirmation prompt. Permanently deletes the user account and logs them out
+  (requires sudo mode)
+
+### Forgot Password (`/users/forgot-password`)
+
+**Status:** Live. Linked from login page "Forgot your password?" link.
+
+#### Page Layout
+
+- Heading: "Forgot your password?"
+- Subtitle: "We'll send a password reset link to your email address."
+- Email field
+- "Send reset link" button
+- "Back to log in" link below
+
+#### Flow
+
+```
+User clicks "Forgot your password?" on login page
+  → Enters email address
+  → Submits → always shows success message (prevents user enumeration)
+  → "If your email is in our system, you will receive password reset instructions shortly."
+  → Redirected back to login page
+  → Clicks link in email → arrives at reset password page
+```
+
+### Reset Password (`/users/reset-password/:token`)
+
+**Status:** Live. Accessed via the link in the password reset email.
+
+#### Page Layout
+
+- Heading: "Reset your password"
+- Subtitle: "Enter a new password below."
+- New password field (with live validation)
+- Confirm new password field
+- "Reset password" button
+- "Back to log in" link below
+
+#### Flow
+
+```
+User clicks reset link in email
+  → Token is validated (if invalid/expired, redirect to login with error flash)
+  → Enters new password + confirmation
+  → Submits → password updated, all existing sessions invalidated
+  → Flash: "Password reset successfully. Please log in."
+  → Redirected to login page
+```
 
 ### Data Model Implications
 
@@ -603,9 +662,12 @@ so each category has its own independent ordering.
 | `/home` | Dashboard | No | Tool hub. Shows all tools, lock state varies by auth. |
 | `/apps/:id` | App detail / product page | No | Visual walkthrough, full description, launch or inline email capture. Shareable URL. |
 | `POST /apps/:app_id/notify` | Email capture from detail page | No | Creates interest_signup with context `tool:{tool_id}`. Redirects back with `?subscribed=true`. |
-| `/users/log-in` | Login | No | "Welcome back" heading. Magic link (primary) + password (secondary). |
+| `/users/log-in` | Login | No | "Welcome back" heading. Magic link (primary) + password (secondary). "Forgot your password?" link. |
 | `/users/register` | Registration | No | Name + email + optional org, referral source, tool interests. Magic link confirmation. Facilitator-focused messaging. Users are fully onboarded at registration. |
-| `/users/settings` | Account settings | Yes | Profile (name, org, referral source), email change, password (add/change). |
+| `/users/forgot-password` | Forgot password | No | Email field, sends password reset link. Always shows success message (prevents user enumeration). |
+| `/users/reset-password/:token` | Reset password | No | New password + confirmation. Token validated on mount, redirects to login on success. |
+| `/users/settings` | Account settings | Yes | Profile (name, org), email change, password (add/change), account deletion. Sudo checks in handlers, not on page load. |
+| `DELETE /users/delete-account` | Delete account | Yes | Deletes user account and logs out. Triggered from settings page. |
 | `/admin` | Admin dashboard | Super Admin | Stats overview: signup counts, user counts, tool status. |
 | `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View registration data (org, referral source, tool interests). |
 | `/admin/signups` | Email signups | Super Admin | View/export coming-soon email capture list. |

@@ -114,7 +114,7 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-design.md) for the comprehensive UX vision.
 
 **Current state:**
-- User authentication (password + magic link)
+- User authentication (password + magic link + password reset)
 - Self-service registration (name + email + optional org, referral source, tool interests; magic link confirmation; users fully onboarded at registration)
 - Role system (Super Admin, Session Manager)
 - Cross-app auth: subdomain cookie + internal validation API
@@ -128,8 +128,10 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - Coming-soon page (`/coming-soon`) with context-aware messaging and email capture form
 - Three-zone header: OOSTKit brand link (left), current page title (centre), Sign Up / Log In buttons (right) pointing to real auth pages (`/users/register`, `/users/log-in`)
 - Route restructure: `/` redirects logged-in users to `/home`
-- Login page with "Welcome back" heading, magic link primary, password secondary
-- Settings page with profile editing (name, org, referral source) and dynamic password label
+- Login page with "Welcome back" heading, magic link primary, password secondary, "Forgot your password?" link
+- Password reset flow: forgot password page (`/users/forgot-password`) sends email with time-limited reset token, reset password page (`/users/reset-password/:token`) allows setting a new password
+- Settings page with profile editing (name, org), email change, password (add/change), and account deletion ("Danger zone" section). Loads without requiring sudo mode; sudo checks in handlers for sensitive actions (email change, password change, account deletion) with graceful redirect to login if not in sudo mode. Referral source removed from settings (collected at registration only).
+- Account deletion: users can delete their own account from settings, which deletes the user record and logs them out
 - Admin dashboard (`/admin`) with stats cards and quick links
 - Email signups admin (`/admin/signups`) with table listing, live search, delete, CSV export
 - Tool management admin (`/admin/tools`) with status display and admin_enabled kill switch toggle
@@ -142,7 +144,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 
 **Data model:**
 - `users` table -- email, name, role, organisation, referral_source, onboarding_completed (set true at registration), enabled
-- `users_tokens` table -- session/magic link tokens (from phx.gen.auth)
+- `users_tokens` table -- session/magic link/reset password tokens (from phx.gen.auth, extended with `reset_password` context)
 - `tools` table -- 12 tools with name, tagline, status, URL, audience, category, sort_order (per category), admin kill switch
 - `interest_signups` table -- email captures from coming-soon and app detail pages
 - `user_tool_interests` table -- registration tool interest (user_id + tool_id join table)
