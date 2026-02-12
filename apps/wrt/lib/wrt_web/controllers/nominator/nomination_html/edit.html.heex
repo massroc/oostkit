@@ -6,40 +6,53 @@
     </:subtitle>
   </.header>
 
-  <div class="mt-4 bg-ok-blue-50 border border-ok-blue-200 rounded-lg p-4">
-    <p class="text-sm text-ok-blue-800">
+  <.callout kind={:info} class="mt-4">
+    <p class="text-sm">
       <strong>Round {@round.round_number}</strong>
       is open until <strong><%= Calendar.strftime(@round.deadline, "%B %d, %Y at %I:%M %p") %></strong>.
       You can edit your nominations until the round closes.
     </p>
-  </div>
+  </.callout>
 
   <%= if length(@existing_nominations) > 0 do %>
-    <div class="mt-4 bg-ok-green-50 border border-ok-green-200 rounded-lg p-4">
-      <p class="text-sm text-ok-green-800">
+    <.callout kind={:success} class="mt-4">
+      <p class="text-sm">
         You have already submitted {length(@existing_nominations)} nomination(s).
         Submitting again will replace your previous nominations.
       </p>
-    </div>
+    </.callout>
   <% end %>
 
-  <form
+  <.simple_form
+    for={%{}}
     action={~p"/org/#{@org.slug}/nominate/submit"}
-    method="post"
     class="mt-8"
     id="nomination-form"
   >
-    <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
-
     <div id="nominations-container" class="space-y-6">
-      <%= for i <- 0..2 do %>
+      <% entry_count = max(length(@existing_nominations) + 1, 3) %>
+      <%= for i <- 0..(entry_count - 1) do %>
         <% existing = Enum.at(@existing_nominations, i) %>
         <div class="nomination-entry bg-surface-sheet shadow-sheet rounded-lg p-6" data-index={i}>
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Nomination {i + 1}</h3>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="nomination-heading text-lg font-medium text-gray-900">
+              Nomination {i + 1}
+            </h3>
+            <button
+              type="button"
+              class="remove-nomination text-gray-400 hover:text-ok-red-600"
+              aria-label="Remove nomination"
+            >
+              <.icon name="hero-x-mark" class="h-5 w-5" />
+            </button>
+          </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label for={"nominations_#{i}_name"} class="block text-sm font-medium text-gray-700">
+              <label
+                for={"nominations_#{i}_name"}
+                class="block text-sm font-medium text-gray-700"
+              >
                 Full Name
               </label>
               <input
@@ -71,7 +84,10 @@
           </div>
 
           <div class="mt-4">
-            <label for={"nominations_#{i}_reason"} class="block text-sm font-medium text-gray-700">
+            <label
+              for={"nominations_#{i}_reason"}
+              class="block text-sm font-medium text-gray-700"
+            >
               Why are you nominating this person? (Optional)
             </label>
             <textarea
@@ -86,12 +102,11 @@
       <% end %>
     </div>
 
-    <div class="mt-6 flex items-center justify-between">
+    <:actions>
       <button
         type="button"
         id="add-nomination"
         class="text-sm text-ok-purple-600 hover:text-ok-purple-500"
-        onclick="addNomination()"
       >
         + Add another nomination
       </button>
@@ -99,8 +114,69 @@
       <.button type="submit">
         Submit Nominations
       </.button>
+    </:actions>
+  </.simple_form>
+
+  <template id="nomination-template">
+    <div
+      class="nomination-entry bg-surface-sheet shadow-sheet rounded-lg p-6"
+      data-index="__INDEX__"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="nomination-heading text-lg font-medium text-gray-900">
+          Nomination __DISPLAY__
+        </h3>
+        <button
+          type="button"
+          class="remove-nomination text-gray-400 hover:text-ok-red-600"
+          aria-label="Remove nomination"
+        >
+          <span class="hero-x-mark h-5 w-5"></span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="nominations___INDEX___name" class="block text-sm font-medium text-gray-700">
+            Full Name
+          </label>
+          <input
+            type="text"
+            name="nominations[__INDEX__][name]"
+            id="nominations___INDEX___name"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
+            placeholder="Jane Smith"
+          />
+        </div>
+
+        <div>
+          <label for="nominations___INDEX___email" class="block text-sm font-medium text-gray-700">
+            Email Address
+          </label>
+          <input
+            type="email"
+            name="nominations[__INDEX__][email]"
+            id="nominations___INDEX___email"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
+            placeholder="jane@example.com"
+          />
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label for="nominations___INDEX___reason" class="block text-sm font-medium text-gray-700">
+          Why are you nominating this person? (Optional)
+        </label>
+        <textarea
+          name="nominations[__INDEX__][reason]"
+          id="nominations___INDEX___reason"
+          rows="2"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
+          placeholder="Their experience, skills, or perspective that would be valuable..."
+        ></textarea>
+      </div>
     </div>
-  </form>
+  </template>
 
   <div class="mt-8 text-sm text-gray-500">
     <p>
@@ -109,62 +185,3 @@
     </p>
   </div>
 </div>
-
-<script>
-  let nominationCount = 3;
-
-  function addNomination() {
-    const container = document.getElementById('nominations-container');
-    const newIndex = nominationCount;
-    nominationCount++;
-
-    const html = `
-      <div class="nomination-entry bg-surface-sheet shadow-sheet rounded-lg p-6" data-index="${newIndex}">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Nomination ${newIndex + 1}</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="nominations_${newIndex}_name" class="block text-sm font-medium text-gray-700">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="nominations[${newIndex}][name]"
-              id="nominations_${newIndex}_name"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
-              placeholder="Jane Smith"
-            />
-          </div>
-
-          <div>
-            <label for="nominations_${newIndex}_email" class="block text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="nominations[${newIndex}][email]"
-              id="nominations_${newIndex}_email"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
-              placeholder="jane@example.com"
-            />
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <label for="nominations_${newIndex}_reason" class="block text-sm font-medium text-gray-700">
-            Why are you nominating this person? (Optional)
-          </label>
-          <textarea
-            name="nominations[${newIndex}][reason]"
-            id="nominations_${newIndex}_reason"
-            rows="2"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500 sm:text-sm"
-            placeholder="Their experience, skills, or perspective that would be valuable..."
-          ></textarea>
-        </div>
-      </div>
-    `;
-
-    container.insertAdjacentHTML('beforeend', html);
-  }
-</script>
