@@ -124,6 +124,15 @@ defmodule Wrt.Platform do
   end
 
   @doc """
+  Gets an organisation by admin email (case-insensitive).
+  """
+  def get_organisation_by_admin_email(email) when is_binary(email) do
+    Organisation
+    |> where([o], o.admin_email == ^String.downcase(email))
+    |> Repo.one()
+  end
+
+  @doc """
   Registers a new organisation (creates in pending status).
   """
   def register_organisation(attrs) do

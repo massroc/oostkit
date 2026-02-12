@@ -183,6 +183,22 @@ defmodule Wrt.PlatformTest do
     end
   end
 
+  describe "get_organisation_by_admin_email/1" do
+    test "returns organisation by admin email" do
+      org = Repo.insert!(build(:organisation, admin_email: "admin@findme.com"))
+      assert Platform.get_organisation_by_admin_email("admin@findme.com").id == org.id
+    end
+
+    test "is case-insensitive" do
+      org = Repo.insert!(build(:organisation, admin_email: "admin@case.com"))
+      assert Platform.get_organisation_by_admin_email("ADMIN@CASE.COM").id == org.id
+    end
+
+    test "returns nil for non-existent email" do
+      assert is_nil(Platform.get_organisation_by_admin_email("nope@example.com"))
+    end
+  end
+
   describe "get_organisation_by_slug/1" do
     test "returns organisation by slug" do
       org = Repo.insert!(build(:organisation, slug: "my-org"))

@@ -30,7 +30,7 @@ defmodule WrtWeb.Org.CampaignControllerTest do
         |> log_in_portal_user(admin)
         |> get("/org/#{org.slug}/campaigns/new")
 
-      assert redirected_to(conn) == "/org/#{org.slug}/dashboard"
+      assert redirected_to(conn) == "/org/#{org.slug}/manage"
     end
 
     test "redirects to login when not authenticated", %{conn: conn, org: org} do
