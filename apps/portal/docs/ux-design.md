@@ -101,27 +101,35 @@ Links to "Learn more about OST" (future dedicated page, or external resource for
 **Audience:** Everyone — both anonymous visitors and logged-in users.
 
 This is the functional hub where tools live. Tone is warm and collegial — no selling,
-just "here are your tools, let's go."
+just "here are your tools, let's go." Page title is "Dashboard".
 
 #### Layout
 
-Vertical stack of rich, full-width tool cards. Each tool gets its own row with generous
-space for content. Reads like a curated catalogue, top to bottom. Three cards initially —
-not sparse, shows a real platform with a roadmap.
+Three-column categorized grid. Tools are grouped into three categories displayed as
+columns on desktop (stacked on mobile):
 
-No grouping by audience (facilitator vs team) — the split is awkward with few tools
-and the boundaries are fluid. Just a flat list.
+| Column | Category Key | Label |
+|--------|-------------|-------|
+| 1 | `learning` | Learning |
+| 2 | `workshop_management` | Workshop Management |
+| 3 | `team_workshops` | Team Workshops |
+
+Each column has a category heading and a vertical stack of compact tool cards beneath it.
+The layout uses `md:grid-cols-3` with `gap-8` between columns. This replaced the
+earlier flat full-width card list — the categorized grid better organises the growing
+tool catalogue (12 tools) and gives each category its own visual lane.
 
 #### Tool Cards
 
-Each card contains:
-- **Name** — tool name
+Cards are compact to fit narrower columns. Each card contains:
+- **Name** — tool name (smaller text than previous full-width cards)
 - **Tagline** — one-line summary
-- **Description** — 2-3 sentences explaining what it does and when you'd use it
-- **Visual** — icon, illustration, or screenshot thumbnail
 - **Status badge** — "Live" / "Coming soon"
-- **Audience tag** — "For facilitators", "For teams", etc.
 - **Action button** — depends on card state (see below)
+
+Cards no longer display description text or audience badges — these were removed to
+keep the cards compact in the narrower three-column layout. The tool name and tagline
+provide enough context, and the category column provides implicit audience grouping.
 
 #### Card States
 
@@ -133,25 +141,35 @@ Cards have three possible states:
 | **Coming soon** | WRT, Search Conference now | No action button, "Coming soon" badge (gold: `bg-ok-gold-100 text-ok-gold-800`) | Muted/greyed, still readable |
 | **Live & locked** | WRT later (when auth is live) | "Log in to access" (anon) / "Launch" (logged in) | Full colour, lock icon for anon |
 
-#### Initial Cards
+#### Tool Catalogue (12 tools, by category)
 
+**Learning:**
 | Tool | Tagline | Status |
 |------|---------|--------|
-| **Workgroup Pulse** | 6 Criteria for Productive Work | Live & open |
-| **Workshop Referral Tool** | Participative selection for design workshops | Coming soon |
-| **Search Conference** | Collaborative strategic planning | Coming soon |
-| **Team Kick-off** | TBD | Coming soon |
-| **Team Design** | TBD | Coming soon |
-| **Org Design** | TBD | Coming soon |
-| **Skill Matrix** | TBD | Coming soon |
+| **Introduction to Open Systems Thinking** | Learn the foundations of democratic organisation design | Coming soon |
 | **DP1 Briefing** | TBD | Coming soon |
 | **DP2 Briefing** | TBD | Coming soon |
+
+**Workshop Management:**
+| Tool | Tagline | Status |
+|------|---------|--------|
+| **Search Conference** | Collaborative strategic planning | Coming soon |
+| **Workshop Referral Tool** | Participative selection for design workshops | Coming soon |
+| **Skill Matrix** | TBD | Coming soon |
+| **Org Design** | TBD | Coming soon |
 | **Collaboration Designer** | TBD | Coming soon |
 | **Org Cadence** | TBD | Coming soon |
 
-Note: 11 tools total. Layout and organisation (grouping, ordering, card size) will be
-revisited as the list matures. With this many coming-soon cards the vertical full-width
-stack may shift to a grid layout — to be decided when we tackle implementation.
+**Team Workshops:**
+| Tool | Tagline | Status |
+|------|---------|--------|
+| **Team Design** | TBD | Coming soon |
+| **Team Kick-off** | TBD | Coming soon |
+| **Workgroup Pulse** | 6 Criteria for Productive Work | Live & open |
+
+Note: 12 tools total. The three-column categorized grid keeps the growing catalogue
+organised. Each tool has a `category` field in the database that determines which
+column it appears in.
 
 Note: Pulse and WRT are both components of the Participative Design Workshop (PDW)
 process, but the dashboard presents them as standalone tools. The relationship between
@@ -546,6 +564,7 @@ View and control tool status across the platform.
 
 Table or card layout showing each tool:
 - Tool name
+- Category (Learning, Workshop Management, Team Workshops)
 - Default status (from config/code: live, coming soon)
 - **Admin override toggle** — can disable any tool instantly
 - Current effective status (the combination of config + override)
@@ -580,11 +599,14 @@ tools (new table, or could be config-seeded)
 - url (text) — external app URL
 - audience (text) — "facilitator" or "team"
 - default_status (text) — "live" or "coming_soon" (from config)
+- category (text) — "learning", "workshop_management", or "team_workshops"
 - admin_enabled (boolean, default true) — admin override toggle
-- sort_order (integer) — display order on dashboard
+- sort_order (integer) — display order within category (unique per category)
 ```
 
 This replaces the current hardcoded app config and gives the admin full control.
+The `sort_order` is scoped per category (unique constraint on `[category, sort_order]`),
+so each category has its own independent ordering.
 
 ---
 

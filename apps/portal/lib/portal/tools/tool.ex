@@ -12,6 +12,7 @@ defmodule Portal.Tools.Tool do
     field :url, :string
     field :audience, :string
     field :default_status, :string, default: "coming_soon"
+    field :category, :string, default: "workshop_management"
     field :admin_enabled, :boolean, default: true
     field :sort_order, :integer
 
@@ -28,13 +29,15 @@ defmodule Portal.Tools.Tool do
       :url,
       :audience,
       :default_status,
+      :category,
       :admin_enabled,
       :sort_order
     ])
     |> validate_required([:id, :name, :tagline, :audience, :default_status, :sort_order])
     |> validate_inclusion(:audience, ~w(facilitator team))
     |> validate_inclusion(:default_status, ~w(live coming_soon))
-    |> unique_constraint(:sort_order)
+    |> validate_inclusion(:category, ~w(learning workshop_management team_workshops))
+    |> unique_constraint([:category, :sort_order])
   end
 
   @doc """

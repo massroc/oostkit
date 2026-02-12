@@ -10,20 +10,61 @@ defmodule Portal.ToolsTest do
     tagline: "A test tool",
     audience: "team",
     default_status: "live",
+    category: "team_workshops",
     sort_order: 99
   }
 
   describe "list_tools/0" do
-    test "returns tools ordered by sort_order" do
+    test "returns tools ordered by category then sort_order" do
       tools = Tools.list_tools()
-      sort_orders = Enum.map(tools, & &1.sort_order)
-      assert sort_orders == Enum.sort(sort_orders)
+      keys = Enum.map(tools, &{&1.category, &1.sort_order})
+      assert keys == Enum.sort(keys)
     end
 
     test "includes seeded tools" do
       tools = Tools.list_tools()
       ids = Enum.map(tools, & &1.id)
       assert "workgroup_pulse" in ids
+    end
+  end
+
+  describe "list_tools_grouped/0" do
+    test "returns tools grouped by category" do
+      grouped = Tools.list_tools_grouped()
+      assert is_map(grouped)
+      assert Map.has_key?(grouped, "learning")
+      assert Map.has_key?(grouped, "workshop_management")
+      assert Map.has_key?(grouped, "team_workshops")
+    end
+
+    test "each category contains the expected tools" do
+      grouped = Tools.list_tools_grouped()
+      learning_ids = Enum.map(grouped["learning"], & &1.id)
+      assert "intro_ost" in learning_ids
+      assert "dp1_briefing" in learning_ids
+      assert "dp2_briefing" in learning_ids
+
+      wm_ids = Enum.map(grouped["workshop_management"], & &1.id)
+      assert "wrt" in wm_ids
+      assert "search_conference" in wm_ids
+
+      tw_ids = Enum.map(grouped["team_workshops"], & &1.id)
+      assert "workgroup_pulse" in tw_ids
+      assert "team_design" in tw_ids
+    end
+  end
+
+  describe "categories_ordered/0" do
+    test "returns categories in display order" do
+      assert Tools.categories_ordered() == ~w(learning workshop_management team_workshops)
+    end
+  end
+
+  describe "category_label/1" do
+    test "returns human-readable labels" do
+      assert Tools.category_label("learning") == "Learning"
+      assert Tools.category_label("workshop_management") == "Workshop Management"
+      assert Tools.category_label("team_workshops") == "Team Workshops"
     end
   end
 
