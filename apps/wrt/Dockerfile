@@ -40,6 +40,9 @@ COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
+# Copy shared component library (path dependency)
+COPY apps/oostkit_shared /oostkit_shared
+
 # Copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
@@ -49,6 +52,9 @@ RUN mix deps.compile
 COPY priv priv
 
 COPY lib lib
+
+# Copy shared design system preset (used by tailwind.config.js)
+COPY shared /shared
 
 COPY assets assets
 
