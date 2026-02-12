@@ -24,7 +24,8 @@ defmodule PortalWeb.PageController do
   def about(conn, _params) do
     render(conn, :about,
       page_title: "About Us",
-      meta_description: "Learn about OOSTKit — practical online tools built on Open Systems Theory."
+      meta_description:
+        "Learn about OOSTKit — practical online tools built on Open Systems Theory."
     )
   end
 
