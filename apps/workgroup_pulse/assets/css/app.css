@@ -295,8 +295,8 @@ th.active-col-header {
 .sheet-stack {
   width: 100%;
   height: 100%;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   position: relative;
   display: flex;
   justify-content: center;
@@ -334,7 +334,7 @@ th.active-col-header {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 3rem;
+  padding-bottom: 0;
   /* Firefox thin scrollbar */
   scrollbar-width: thin;
   scrollbar-color: rgba(26, 58, 107, 0.15) transparent;

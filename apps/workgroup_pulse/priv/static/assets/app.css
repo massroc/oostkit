@@ -11009,6 +11009,10 @@ input::-webkit-datetime-edit {
   top: 52px;
 }
 
+.bottom-6 {
+  bottom: 1.5rem;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -11330,6 +11334,10 @@ input::-webkit-datetime-edit {
   width: 100%;
 }
 
+.w-\[72px\] {
+  width: 72px;
+}
+
 .min-w-0 {
   min-width: 0px;
 }
@@ -11570,6 +11578,12 @@ input::-webkit-datetime-edit {
   --tw-space-y-reverse: 0;
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
+}
+
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
 }
 
 .self-start {
@@ -11994,6 +12008,16 @@ input::-webkit-datetime-edit {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .pb-3 {
@@ -12839,8 +12863,8 @@ th.active-col-header {
 .sheet-stack {
   width: 100%;
   height: 100%;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   position: relative;
   display: flex;
   justify-content: center;
@@ -12882,7 +12906,7 @@ th.active-col-header {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 3rem;
+  padding-bottom: 0;
   /* Firefox thin scrollbar */
   scrollbar-width: thin;
   scrollbar-color: rgba(26, 58, 107, 0.15) transparent;

@@ -58,7 +58,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
       |> Phoenix.Component.assign(:forward_index, forward_index)
 
     ~H"""
-    <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[960px] px-6 pointer-events-none">
+    <div class="fixed bottom-6 z-50 left-1/2 -translate-x-1/2 w-[960px] px-6 pointer-events-none">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-2">
           <%= if @back_index do %>
@@ -91,7 +91,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
 
   defp render_intro_buttons(assigns) do
     ~H"""
-    <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[960px] px-6 pointer-events-none">
+    <div class="fixed bottom-6 z-50 left-1/2 -translate-x-1/2 w-[960px] px-6 pointer-events-none">
       <div class="flex justify-between items-center">
         <%!-- Left: Back button --%>
         <div class="flex items-center gap-3">
@@ -148,7 +148,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
   defp render_scoring_buttons(assigns) do
     ~H"""
     <%= if not @show_mid_transition do %>
-      <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[960px] px-5 pointer-events-none">
+      <div class="fixed bottom-6 z-50 left-1/2 -translate-x-1/2 w-[960px] px-5 pointer-events-none">
         <div class="flex justify-end items-center gap-2">
           <!-- Ready count (facilitator only, after scores revealed) -->
           <%= if @participant.is_facilitator and @scores_revealed do %>
@@ -224,7 +224,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.FloatingButtonsComponent do
 
   defp render_summary_active_buttons(assigns) do
     ~H"""
-    <div class="fixed bottom-10 z-50 left-1/2 -translate-x-1/2 w-[960px] px-6 pointer-events-none">
+    <div class="fixed bottom-6 z-50 left-1/2 -translate-x-1/2 w-[960px] px-6 pointer-events-none">
       <div class="flex justify-between items-center">
         <div class="flex items-center gap-2">
           <button
