@@ -11,6 +11,7 @@ defmodule PortalWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug :store_external_return_to
     plug :maybe_dev_auto_login
     plug :assign_dev_mode
   end

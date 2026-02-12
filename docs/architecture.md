@@ -239,6 +239,22 @@ WRT (or other app)                        Portal
 6. Set :portal_user assign on conn
 ```
 
+**Cross-app login redirect:** When an unauthenticated user hits a tool app (e.g., WRT), the app redirects to Portal's login page with a `return_to` query param containing the user's current URL:
+
+```
+Tool app (WRT)                            Portal
+──────────                                ──────
+1. User hits /org/acme/manage
+2. RequirePortalUser: no portal_user
+3. Redirect to Portal login ──────────►  4. store_external_return_to plug reads return_to param
+   ?return_to=http://wrt:4001/org/acme     5. Validates URL origin against :tool_urls config
+                                           6. Stores in session as :user_return_to
+                                           7. User logs in
+                                           8. redirect(external: stored_url) ──► back to tool
+```
+
+Portal validates `return_to` URLs by comparing scheme + host + port against its configured `:tool_urls` map. Only URLs matching a known tool origin are accepted, preventing open redirects. Invalid URLs are silently ignored and Portal falls back to its default post-login path (`/home`).
+
 **Secrets required:**
 - Portal: `INTERNAL_API_KEY`, `COOKIE_DOMAIN` (e.g., `.oostkit.com`)
 - WRT: `PORTAL_API_KEY` (same value as Portal's `INTERNAL_API_KEY`), `PORTAL_API_URL`

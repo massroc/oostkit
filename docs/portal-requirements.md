@@ -234,8 +234,11 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 
 When a user clicks on an app that requires authentication:
 1. If logged in → App launches
-2. If not logged in → Redirect to portal login (or `/coming-soon` pre-launch)
-3. After login → Redirect back to requested app
+2. If not logged in → App redirects to Portal login with a `return_to` query param containing the user's current URL (e.g., `/users/log-in?return_to=http://localhost:4001/org/acme/manage`)
+3. Portal validates the `return_to` URL against configured `tool_urls` origins (scheme + host + port must match a known tool) to prevent open redirects
+4. If valid, Portal stores the URL in the session as `:user_return_to`
+5. After login → Portal redirects to the stored external URL instead of defaulting to `/home`
+6. If the `return_to` URL is missing or invalid, Portal falls back to `/home`
 
 ### Consistent Header
 
@@ -332,6 +335,7 @@ Uses Phoenix built-in auth (`phx.gen.auth`) with cross-app extensions:
 - **Session cookies**: Standard Phoenix session auth for Portal UI
 - **Cross-app token cookie** (`_oostkit_token`): Written on login, deleted on logout. Scoped to the shared domain via `COOKIE_DOMAIN` env var (e.g., `.oostkit.com`).
 - **Internal validation API**: `POST /api/internal/auth/validate` -- accepts the token in the request body, returns user `{id, email, role}`. Protected by `ApiAuth` plug requiring `Authorization: Bearer <INTERNAL_API_KEY>` header.
+- **Cross-app return redirect**: The `store_external_return_to` plug (in the browser pipeline) reads a `return_to` query param from incoming requests, validates the URL against `:tool_urls` origins (scheme + host + port must match a known tool), and stores it in the session as `:user_return_to`. After login, `log_in_user/3` redirects to the stored URL — using `redirect(external: url)` for absolute tool URLs, or `redirect(to: path)` for internal paths. Invalid or missing `return_to` values fall back to `/home`. This prevents open redirects while enabling seamless cross-app login flows.
 - **Password reset tokens**: Hashed tokens stored in `users_tokens` table with a `reset_password` context and configurable expiry. Sent via email when a user requests a password reset from `/users/forgot-password`.
 - **Configurable email from-address**: `mail_from` config supports Postmark sender signatures in production (env: `MAIL_FROM`).
 - **Dev auto-login**: In development, `DevAutoLogin` plug auto-logs in as `admin@oostkit.local` on first visit and sets the `_oostkit_token` cookie. A `_portal_dev_visited` cookie prevents re-login after deliberate logout. A dev-only `POST /dev/admin-login` route allows manual re-login via a gold "Admin" button in the header.

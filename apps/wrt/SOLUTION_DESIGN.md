@@ -156,6 +156,7 @@ lib/
 │   │   ├── require_portal_user.ex   # Portal user auth plug ✓
 │   │   │                            # - Requires any valid Portal user (enabled)
 │   │   │                            # - Redirects to Portal login if not authenticated
+│   │   │                            # - Appends return_to query param with current WRT URL
 │   │   │
 │   │   ├── tenant_plug.ex           # Tenant resolution from URL ✓
 │   │   │                            # - Extracts org slug from /org/:slug routes
@@ -389,6 +390,9 @@ The authentication pipeline consists of two plugs applied at the router level:
 
 2. **`RequirePortalUser`** — For all authenticated routes (`/` and `/org/:slug/*`). Checks
    that any valid `portal_user` exists and is enabled. Redirects to Portal login if not.
+   Appends a `return_to` query param containing the user's current WRT URL so that Portal
+   can redirect back after successful login (e.g., `?return_to=http://localhost:4001/org/acme/manage`).
+   Portal validates the URL origin against its `:tool_urls` config before accepting it.
 
 ```elixir
 # Router pipeline
@@ -398,7 +402,7 @@ pipeline :require_portal_user do
 end
 ```
 
-Unauthenticated users are redirected to `portal_login_url` (configured per environment).
+Unauthenticated users are redirected to `portal_login_url` (configured per environment) with the `return_to` param.
 
 ### Entry Flow (Landing Page)
 
