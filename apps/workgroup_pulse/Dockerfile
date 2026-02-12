@@ -32,6 +32,9 @@ COPY apps/workgroup_pulse/mix.exs apps/workgroup_pulse/mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
 
+# Copy shared component library (path dependency)
+COPY apps/oostkit_shared /oostkit_shared
+
 # Copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies
 # to be re-compiled.
