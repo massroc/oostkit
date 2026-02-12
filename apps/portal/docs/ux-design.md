@@ -14,7 +14,9 @@ This is the shopfront — a bright, attractive introduction to the platform. Bol
 energetic tone, but rendered in the warm Pulse aesthetic (paper textures, OOSTKit
 palette) rather than a cold tech-startup look.
 
-**Behaviour for logged-in users:** Auto-redirect to `/home` (dashboard).
+**Behaviour for logged-in users:** No redirect. Logged-in users see the same marketing
+page as anonymous visitors. The header bar shows "Dashboard" as a clickable link to
+`/home`, providing easy navigation without forcing a redirect.
 
 **Design principle (Merrelyn Emery):** "Tell them what it does." Headlines and copy
 should be concrete — but wrapped in aspiration. Tell them what it does *and why it matters*.
@@ -101,7 +103,9 @@ Links to "Learn more about OST" (future dedicated page, or external resource for
 **Audience:** Everyone — both anonymous visitors and logged-in users.
 
 This is the functional hub where tools live. Tone is warm and collegial — no selling,
-just "here are your tools, let's go." Page title is "Dashboard".
+just "here are your tools, let's go." Page title is "Dashboard". The on-page heading
+is "Your tools" at `text-2xl` with an inline subtitle " — Let's go." for a compact,
+friendly introduction. Reduced vertical padding (`pt-3 pb-12`) keeps the layout tight.
 
 #### Layout
 
@@ -223,7 +227,8 @@ Lands on oostkit.com (/)
 
 ```
 Hits oostkit.com (/)
-  → Auto-redirected to /home (dashboard)
+  → Sees marketing page (same as anonymous visitors)
+  → Header shows clickable "Dashboard" link → clicks through to /home
   → Launches their tool directly
 ```
 
@@ -337,7 +342,7 @@ is applied to the title text.
 
 ### Left Zone — Brand
 
-- **OOSTKit** wordmark/logo (always links to `/`, which redirects to `/home` if logged in)
+- **OOSTKit** wordmark/logo (always links to `/` — the front page)
 - When inside an app (Pulse/WRT): links to Portal via configurable `:portal_url`
 - No breadcrumb separator — the centre zone identifies the current app/page
 
@@ -347,7 +352,14 @@ Absolutely positioned (`pointer-events-none absolute inset-x-0`) to achieve true
 independent of left/right zone content. Displays `font-brand text-sm font-medium text-ok-purple-200`.
 Hidden on small screens (`sm:block`).
 
-- **Portal:** Displays the current page title (e.g., "Dashboard", "Settings", "Admin")
+When `title_url` is set, the title renders as a clickable `<a>` link with `pointer-events-auto`
+to override the `pointer-events-none` on the container (avoids a full-width clickable overlay).
+When no `title_url` is set, it renders as a static `<span>`.
+
+- **Portal:** For logged-in users, displays "Dashboard" as a clickable link to `/home`.
+  Hidden on the landing page via the `hide_header_title` assign, so logged-in users on `/`
+  see OOSTKit branding without a redundant title. On other pages (settings, admin), the
+  page title displays as static text (no `title_url`).
 - **Pulse/WRT:** Displays the app name ("Workgroup Pulse", "Workshop Referral Tool") as static text
 
 ### Right Zone — User & Auth
@@ -376,9 +388,9 @@ visual identity element. Kept for now — may evolve as the overall design matur
 ### Implementation Notes
 
 - All apps use the shared `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`), imported as a path dependency
-- The component provides `:brand_url`, `:title`, and `:actions` (slot) attrs, plus renders the brand stripe
-- The centre title is absolutely positioned within the `relative` nav container using `pointer-events-none absolute inset-x-0 text-center`, ensuring true visual centering regardless of left/right content width
-- Portal: `:brand_url="/"`, `:title={@page_title}`, actions slot renders auth links
+- The component provides `:brand_url`, `:title`, `:title_url`, and `:actions` (slot) attrs, plus renders the brand stripe
+- The centre title is absolutely positioned within the `relative` nav container using `pointer-events-none absolute inset-x-0 text-center`, ensuring true visual centering regardless of left/right content width. When `title_url` is set, the title renders as a clickable `<a>` with `pointer-events-auto`; otherwise it renders as a static `<span>`.
+- Portal: `:brand_url="/"`, `:title` is conditionally set to `"Dashboard"` for logged-in users (hidden on landing page via `hide_header_title`), `:title_url="/home"` when title is shown, actions slot renders auth links
 - Pulse: `:brand_url={@portal_url}`, `:title="Workgroup Pulse"`, actions slot always shows Sign Up + Log In linking to Portal
 - WRT: `:brand_url={@portal_url}`, `:title="Workshop Referral Tool"`, actions slot shows Sign Up + Log In (anonymous) or email + Settings (authenticated)
 - All apps: Sign Up button uses `rounded-md bg-white/10` frosted style, Log In uses text link style
@@ -467,27 +479,24 @@ sudo mode, the user is redirected to the login page with a message to re-authent
 at the top. The main content uses a responsive two-column grid
 (`grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10`) that stacks to single column
 on mobile. Text input fields are constrained to `max-w-xs` for comfortable reading
-width. Each section has a bold `text-base font-semibold` heading and a
-`text-sm text-zinc-500` description.
+width. Each section uses the `<.header>` component with a bold `text-2xl font-bold`
+heading. Section subtitle descriptions have been removed for a cleaner, more compact
+layout.
 
 **Grid sections (2x2 on desktop, stacked on mobile):**
 
-- **Profile** (top-left) — heading "Profile", description "Your name and organisation."
-  Name and organisation fields (optional) wrapped in `max-w-xs`. Referral source is
-  collected at registration only and is not shown on the settings page.
-- **Contact Preferences** (top-right) — heading "Contact Preferences", description
-  "Choose what communications you receive." A single `product_updates` checkbox
-  labelled "Product updates" controls whether the user receives product update emails.
-  Saved via a dedicated "Save Preferences" button.
-- **Email** (bottom-left) — heading "Email", description "Update your email address."
-  Email field wrapped in `max-w-xs`. Sends confirmation to new address (requires
-  sudo mode).
-- **Password** (bottom-right) — heading "Password", description adapts based on
-  whether a password exists ("Set a password for your account." / "Update your
-  account password."). Password fields wrapped in `max-w-xs`. Optional, for
-  facilitators who prefer password login over magic links. If no password is set
-  yet, the button label reads "Add a password" rather than "Change password"
-  (requires sudo mode).
+- **Profile** (top-left) — heading "Profile". Name and organisation fields (optional)
+  wrapped in `max-w-xs`. Referral source is collected at registration only and is not
+  shown on the settings page.
+- **Contact Preferences** (top-right) — heading "Contact Preferences". A single
+  `product_updates` checkbox labelled "Product updates" controls whether the user
+  receives product update emails. Saved via a dedicated "Save Preferences" button.
+- **Email** (bottom-left) — heading "Email". Email field wrapped in `max-w-xs`. Sends
+  confirmation to new address (requires sudo mode).
+- **Password** (bottom-right) — heading "Password". Password fields wrapped in
+  `max-w-xs`. Optional, for facilitators who prefer password login over magic links.
+  If no password is set yet, the button label reads "Add a password" rather than
+  "Change password" (requires sudo mode).
 
 **Below the grid (full-width):**
 
@@ -581,18 +590,20 @@ link in the header (visible only to super admins).
 At-a-glance health check for the platform. Simple counts for now, charts/trends later
 when there's enough data.
 
+#### Quick Links
+
+Displayed first, at the top of the dashboard for immediate navigation:
+
+- "Manage users" → `/admin/users`
+- "View signups" → `/admin/signups`
+- "Tool status" → `/admin/tools`
+
 #### Stats Cards
 
 - **Email signups** — total coming-soon email captures
 - **Registered users** — total facilitator accounts
 - **Active users** — users who've logged in recently (last 30 days)
 - **Tool interest** — breakdown of which tools people selected during registration
-
-#### Quick Links
-
-- "Manage users" → `/admin/users`
-- "View signups" → `/admin/signups`
-- "Tool status" → `/admin/tools`
 
 ### User Management (`/admin/users`)
 
@@ -700,7 +711,7 @@ so each category has its own independent ordering.
 
 | Route | Page | Auth Required | Description |
 |-------|------|---------------|-------------|
-| `/` | Marketing landing | No | Brochure/sales page. Redirects to `/home` if logged in. |
+| `/` | Marketing landing | No | Brochure/sales page. Same for all visitors (no redirect for logged-in users). Header shows clickable "Dashboard" link for logged-in users. |
 | `/home` | Dashboard | No | Tool hub. Shows all tools, lock state varies by auth. |
 | `/about` | About | No | Information about OOSTKit and the team. |
 | `/privacy` | Privacy Policy | No | How OOSTKit collects, uses, and protects personal data. |
@@ -878,6 +889,8 @@ Resolved during design discussions (February 2026):
 
 | Question | Decision | Notes |
 |----------|----------|-------|
+| Landing page redirect | Removed | Logged-in users no longer auto-redirect to `/home`. The header "Dashboard" link provides navigation instead. Lets logged-in users share the marketing URL without being redirected away. |
+| Page title consistency | `<.header>` component | All page titles (admin pages, settings sections) use the shared `<.header>` component at `text-2xl font-bold` instead of inline `<h1>` elements. |
 | "Coming soon" page | Email capture | Collects emails for launch notification. Simple form. |
 | App detail pages | Keep | Useful as shareable links and for SEO. Already built. |
 | Mobile vs desktop | Desktop-first | Responsive but not mobile-obsessed. Marketing page should look decent on mobile for sharing. |

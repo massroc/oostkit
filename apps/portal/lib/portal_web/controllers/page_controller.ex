@@ -5,20 +5,17 @@ defmodule PortalWeb.PageController do
   alias Portal.Tools.Tool
 
   def landing(conn, _params) do
-    if conn.assigns[:current_scope] && conn.assigns.current_scope.user do
-      redirect(conn, to: ~p"/home")
-    else
-      tools = Tools.list_tools()
-      live_tools = Enum.filter(tools, &(Tool.effective_status(&1) == :live))
+    tools = Tools.list_tools()
+    live_tools = Enum.filter(tools, &(Tool.effective_status(&1) == :live))
 
-      render(conn, :landing,
-        page_title: "Tools for building democratic workplaces",
-        meta_description:
-          "Practical online tools built on Open Systems Theory — design organisations where people manage their own work.",
-        tools: tools,
-        live_tools: live_tools
-      )
-    end
+    render(conn, :landing,
+      page_title: "Tools for building democratic workplaces",
+      meta_description:
+        "Practical online tools built on Open Systems Theory — design organisations where people manage their own work.",
+      tools: tools,
+      live_tools: live_tools,
+      hide_header_title: true
+    )
   end
 
   def about(conn, _params) do
