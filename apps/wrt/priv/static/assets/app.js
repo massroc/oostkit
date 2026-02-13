@@ -170,7 +170,7 @@
     }
   });
 
-  // ../deps/phoenix_html/priv/static/phoenix_html.js
+  // ../../../deps/phoenix_html/priv/static/phoenix_html.js
   (function() {
     var PolyfillEvent = eventConstructor();
     function eventConstructor() {
