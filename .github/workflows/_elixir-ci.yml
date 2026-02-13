@@ -155,6 +155,11 @@ jobs:
         run: |
           mkdir -p priv/plts
           mix dialyzer --plt
+          # In umbrella mode, dialyxir only builds core PLTs (in _build/)
+          # and skips the project PLT. Copy the deps PLT to the expected path.
+          if [ ! -f priv/plts/dialyzer.plt ]; then
+            cp ../../_build/test/dialyxir_*_deps-test.plt priv/plts/dialyzer.plt
+          fi
         working-directory: ${{ inputs.app_path }}
         timeout-minutes: 20
 

@@ -134,8 +134,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                   )
                 ]}
               >
-                <.icon name="hero-cog-6-tooth" class="w-4 h-4" />
-                Participating
+                <.icon name="hero-cog-6-tooth" class="w-4 h-4" /> Participating
               </button>
               <button
                 type="button"
@@ -148,8 +147,7 @@ defmodule WorkgroupPulseWeb.SessionLive.New do
                   )
                 ]}
               >
-                <.icon name="hero-eye" class="w-4 h-4" />
-                Observer
+                <.icon name="hero-eye" class="w-4 h-4" /> Observer
               </button>
             </div>
             <p

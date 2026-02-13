@@ -53,8 +53,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Join do
             navigate={~p"/"}
             class="text-ink-blue/50 hover:text-ink-blue inline-flex items-center text-sm font-brand mb-4"
           >
-            <.icon name="hero-arrow-left" class="w-4 h-4 mr-1" />
-            Back
+            <.icon name="hero-arrow-left" class="w-4 h-4 mr-1" /> Back
           </.link>
 
           <h1 class="font-workshop text-2xl font-bold text-ink-blue mb-1">

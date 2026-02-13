@@ -330,5 +330,4 @@ defmodule WrtWeb.CoreComponents do
   defp callout_text(:danger), do: "text-ok-red-700"
   defp callout_text(:info), do: "text-ok-blue-700"
   defp callout_text(:neutral), do: "text-gray-600"
-
 end
