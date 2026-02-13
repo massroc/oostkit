@@ -17,11 +17,11 @@ defmodule PortalWeb.UserLive.ForgotPassword do
 
         <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
           <.form for={@form} id="reset_password_form" phx-submit="send_email">
-          <.field field={@form[:email]} type="email" label="Email" autocomplete="email" required />
-          <.button class="btn btn-primary w-full">
-            Send reset link <span aria-hidden="true">&rarr;</span>
-          </.button>
-        </.form>
+            <.field field={@form[:email]} type="email" label="Email" autocomplete="email" required />
+            <.button class="btn btn-primary w-full">
+              Send reset link <span aria-hidden="true">&rarr;</span>
+            </.button>
+          </.form>
         </div>
 
         <p class="text-center text-sm">

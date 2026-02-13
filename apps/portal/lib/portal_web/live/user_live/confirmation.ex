@@ -15,55 +15,55 @@ defmodule PortalWeb.UserLive.Confirmation do
         <div class="mt-6 bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
           <.form
             :if={!@user.confirmed_at}
-          for={@form}
-          id="confirmation_form"
-          phx-mounted={JS.focus_first()}
-          phx-submit="submit"
-          action={~p"/users/log-in?_action=confirmed"}
-          phx-trigger-action={@trigger_submit}
-        >
-          <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
-          <.button
-            name={@form[:remember_me].name}
-            value="true"
-            phx-disable-with="Confirming..."
-            class="btn btn-primary w-full"
+            for={@form}
+            id="confirmation_form"
+            phx-mounted={JS.focus_first()}
+            phx-submit="submit"
+            action={~p"/users/log-in?_action=confirmed"}
+            phx-trigger-action={@trigger_submit}
           >
-            Confirm and stay logged in
-          </.button>
-          <.button phx-disable-with="Confirming..." class="btn btn-primary btn-soft w-full mt-2">
-            Confirm and log in only this time
-          </.button>
-        </.form>
-
-        <.form
-          :if={@user.confirmed_at}
-          for={@form}
-          id="login_form"
-          phx-submit="submit"
-          phx-mounted={JS.focus_first()}
-          action={~p"/users/log-in"}
-          phx-trigger-action={@trigger_submit}
-        >
-          <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
-          <%= if @current_scope do %>
-            <.button phx-disable-with="Logging in..." class="btn btn-primary w-full">
-              Log in
-            </.button>
-          <% else %>
+            <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
             <.button
               name={@form[:remember_me].name}
               value="true"
-              phx-disable-with="Logging in..."
+              phx-disable-with="Confirming..."
               class="btn btn-primary w-full"
             >
-              Keep me logged in on this device
+              Confirm and stay logged in
             </.button>
-            <.button phx-disable-with="Logging in..." class="btn btn-primary btn-soft w-full mt-2">
-              Log me in only this time
+            <.button phx-disable-with="Confirming..." class="btn btn-primary btn-soft w-full mt-2">
+              Confirm and log in only this time
             </.button>
-          <% end %>
-        </.form>
+          </.form>
+
+          <.form
+            :if={@user.confirmed_at}
+            for={@form}
+            id="login_form"
+            phx-submit="submit"
+            phx-mounted={JS.focus_first()}
+            action={~p"/users/log-in"}
+            phx-trigger-action={@trigger_submit}
+          >
+            <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
+            <%= if @current_scope do %>
+              <.button phx-disable-with="Logging in..." class="btn btn-primary w-full">
+                Log in
+              </.button>
+            <% else %>
+              <.button
+                name={@form[:remember_me].name}
+                value="true"
+                phx-disable-with="Logging in..."
+                class="btn btn-primary w-full"
+              >
+                Keep me logged in on this device
+              </.button>
+              <.button phx-disable-with="Logging in..." class="btn btn-primary btn-soft w-full mt-2">
+                Log me in only this time
+              </.button>
+            <% end %>
+          </.form>
         </div>
 
         <p :if={!@user.confirmed_at} class="alert alert-outline mt-8">

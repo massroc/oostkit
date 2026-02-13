@@ -27,69 +27,69 @@ defmodule PortalWeb.UserLive.Login do
 
         <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6 space-y-4">
           <div :if={local_mail_adapter?()} class="alert alert-info">
-          <.icon name="hero-information-circle" class="size-6 shrink-0" />
-          <div>
-            <p>You are running the local mail adapter.</p>
-            <p>
-              To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
-            </p>
+            <.icon name="hero-information-circle" class="size-6 shrink-0" />
+            <div>
+              <p>You are running the local mail adapter.</p>
+              <p>
+                To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <.form
-          :let={f}
-          for={@form}
-          id="login_form_magic"
-          action={~p"/users/log-in"}
-          phx-submit="submit_magic"
-        >
-          <.field
-            readonly={!!@current_scope}
-            field={f[:email]}
-            type="email"
-            label="Email"
-            autocomplete="email"
-            required
-            phx-mounted={JS.focus()}
-          />
-          <.button class="btn btn-primary w-full">
-            Send me a login link <span aria-hidden="true">&rarr;</span>
-          </.button>
-        </.form>
-
-        <div class="divider text-zinc-400">or use a password</div>
-
-        <.form
-          :let={f}
-          for={@form}
-          id="login_form_password"
-          action={~p"/users/log-in"}
-          phx-submit="submit_password"
-          phx-trigger-action={@trigger_submit}
-          class="opacity-75 focus-within:opacity-100 transition-opacity"
-        >
-          <.field
-            readonly={!!@current_scope}
-            field={f[:email]}
-            type="email"
-            label="Email"
-            autocomplete="email"
-            required
-          />
-          <.field
-            field={@form[:password]}
-            type="password"
-            label="Password"
-            autocomplete="current-password"
-          />
-          <.button
-            class="btn btn-primary btn-soft w-full"
-            name={@form[:remember_me].name}
-            value="true"
+          <.form
+            :let={f}
+            for={@form}
+            id="login_form_magic"
+            action={~p"/users/log-in"}
+            phx-submit="submit_magic"
           >
-            Log in with password <span aria-hidden="true">&rarr;</span>
-          </.button>
-        </.form>
+            <.field
+              readonly={!!@current_scope}
+              field={f[:email]}
+              type="email"
+              label="Email"
+              autocomplete="email"
+              required
+              phx-mounted={JS.focus()}
+            />
+            <.button class="btn btn-primary w-full">
+              Send me a login link <span aria-hidden="true">&rarr;</span>
+            </.button>
+          </.form>
+
+          <div class="divider text-zinc-400">or use a password</div>
+
+          <.form
+            :let={f}
+            for={@form}
+            id="login_form_password"
+            action={~p"/users/log-in"}
+            phx-submit="submit_password"
+            phx-trigger-action={@trigger_submit}
+            class="opacity-75 focus-within:opacity-100 transition-opacity"
+          >
+            <.field
+              readonly={!!@current_scope}
+              field={f[:email]}
+              type="email"
+              label="Email"
+              autocomplete="email"
+              required
+            />
+            <.field
+              field={@form[:password]}
+              type="password"
+              label="Password"
+              autocomplete="current-password"
+            />
+            <.button
+              class="btn btn-primary btn-soft w-full"
+              name={@form[:remember_me].name}
+              value="true"
+            >
+              Log in with password <span aria-hidden="true">&rarr;</span>
+            </.button>
+          </.form>
         </div>
 
         <p :if={!@current_scope} class="text-center text-sm text-zinc-500">

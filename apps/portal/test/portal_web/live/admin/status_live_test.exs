@@ -62,19 +62,53 @@ defmodule PortalWeb.Admin.StatusLiveTest do
     test "updates on PubSub broadcast", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/admin/status")
 
-      Phoenix.PubSub.broadcast(Portal.PubSub, "status_updates", {:status_update, %{
-        health: %{
-          "Portal" => %{healthy: true, status: 200, response_time_ms: 42, checked_at: DateTime.utc_now()},
-          "Pulse" => %{healthy: true, status: 200, response_time_ms: 55, checked_at: DateTime.utc_now()},
-          "WRT" => %{healthy: false, status: nil, error: "timeout", checked_at: DateTime.utc_now()}
-        },
-        ci: %{
-          "Portal" => [%{conclusion: "success", status: "completed", created_at: "2026-02-13T12:00:00Z", html_url: "https://github.com/rossm/oostkit/actions/runs/1", head_sha: "abc1234"}],
-          "Pulse" => [],
-          "WRT" => [%{conclusion: "failure", status: "completed", created_at: "2026-02-13T11:00:00Z", html_url: "https://github.com/rossm/oostkit/actions/runs/2", head_sha: "def5678"}]
-        },
-        last_polled: DateTime.utc_now()
-      }})
+      Phoenix.PubSub.broadcast(Portal.PubSub, "status_updates", {
+        :status_update,
+        %{
+          health: %{
+            "Portal" => %{
+              healthy: true,
+              status: 200,
+              response_time_ms: 42,
+              checked_at: DateTime.utc_now()
+            },
+            "Pulse" => %{
+              healthy: true,
+              status: 200,
+              response_time_ms: 55,
+              checked_at: DateTime.utc_now()
+            },
+            "WRT" => %{
+              healthy: false,
+              status: nil,
+              error: "timeout",
+              checked_at: DateTime.utc_now()
+            }
+          },
+          ci: %{
+            "Portal" => [
+              %{
+                conclusion: "success",
+                status: "completed",
+                created_at: "2026-02-13T12:00:00Z",
+                html_url: "https://github.com/rossm/oostkit/actions/runs/1",
+                head_sha: "abc1234"
+              }
+            ],
+            "Pulse" => [],
+            "WRT" => [
+              %{
+                conclusion: "failure",
+                status: "completed",
+                created_at: "2026-02-13T11:00:00Z",
+                html_url: "https://github.com/rossm/oostkit/actions/runs/2",
+                head_sha: "def5678"
+              }
+            ]
+          },
+          last_polled: DateTime.utc_now()
+        }
+      })
 
       html = render(lv)
       assert html =~ "42ms"

@@ -25,58 +25,58 @@ defmodule PortalWeb.UserLive.Registration do
 
         <div class="mt-6 bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
           <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
-          <.field
-            field={@form[:name]}
-            type="text"
-            label="Your name"
-            autocomplete="name"
-            required
-            phx-mounted={JS.focus()}
-          />
+            <.field
+              field={@form[:name]}
+              type="text"
+              label="Your name"
+              autocomplete="name"
+              required
+              phx-mounted={JS.focus()}
+            />
 
-          <.field
-            field={@form[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
-            required
-          />
+            <.field
+              field={@form[:email]}
+              type="email"
+              label="Email"
+              autocomplete="username"
+              required
+            />
 
-          <.field
-            field={@form[:organisation]}
-            type="text"
-            label="Organisation"
-            placeholder="Where do you work? (optional)"
-          />
+            <.field
+              field={@form[:organisation]}
+              type="text"
+              label="Organisation"
+              placeholder="Where do you work? (optional)"
+            />
 
-          <.field
-            field={@form[:referral_source]}
-            type="text"
-            label="How did you hear about OOSTKit?"
-            placeholder="e.g. colleague, conference, search (optional)"
-          />
+            <.field
+              field={@form[:referral_source]}
+              type="text"
+              label="How did you hear about OOSTKit?"
+              placeholder="e.g. colleague, conference, search (optional)"
+            />
 
-          <fieldset class="mt-4">
-            <legend class="block text-sm font-medium text-zinc-700 mb-2">
-              Which tools are you interested in?
-            </legend>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <label :for={tool <- @tools} class="flex items-center gap-2 text-sm text-zinc-700">
-                <input
-                  type="checkbox"
-                  name="tool_ids[]"
-                  value={tool.id}
-                  class="rounded border-zinc-300 text-ok-purple-600 focus:ring-ok-purple-400"
-                />
-                {tool.name}
-              </label>
-            </div>
-          </fieldset>
+            <fieldset class="mt-4">
+              <legend class="block text-sm font-medium text-zinc-700 mb-2">
+                Which tools are you interested in?
+              </legend>
+              <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label :for={tool <- @tools} class="flex items-center gap-2 text-sm text-zinc-700">
+                  <input
+                    type="checkbox"
+                    name="tool_ids[]"
+                    value={tool.id}
+                    class="rounded border-zinc-300 text-ok-purple-600 focus:ring-ok-purple-400"
+                  />
+                  {tool.name}
+                </label>
+              </div>
+            </fieldset>
 
-          <.button phx-disable-with="Creating account..." class="btn btn-primary w-full mt-6">
-            Get started
-          </.button>
-        </.form>
+            <.button phx-disable-with="Creating account..." class="btn btn-primary w-full mt-6">
+              Get started
+            </.button>
+          </.form>
         </div>
       </div>
     </div>
