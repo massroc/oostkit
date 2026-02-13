@@ -22,10 +22,9 @@ OOSTKit is a monorepo with three Elixir/Phoenix applications, all deployed to Fl
 
 - Marketing landing page (`/`) with hero, tool highlights, OST context, footer CTA
 - Dashboard (`/home`) with DB-backed tool cards (12 tools, three states)
-- Self-service registration (name + email, magic link confirmation)
+- Self-service registration (name + email + optional org, referral source, tool interests; magic link confirmation; users fully onboarded at registration)
 - Login with magic link (primary) and password (secondary)
-- First-visit onboarding card (org, referral source, tool interests)
-- Settings page with profile editing and dynamic password label
+- Settings page with stacked section cards (profile, contact preferences, email, password, danger zone)
 - Admin dashboard (`/admin`) with stats cards and quick links
 - Admin email signups (`/admin/signups`) with search, delete, CSV export
 - Admin tool management (`/admin/tools`) with kill switch toggle
@@ -183,7 +182,7 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 
 ### WRT Enhancements
 
-- Full Portal auth integration (remove transitional dual-auth)
+- Public launch (currently dev/test only)
 
 ### Portal Enhancements
 
@@ -205,7 +204,7 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 - **CI/CD**: Path-filtered GitHub Actions workflows (changes to `apps/oostkit_shared/**` trigger all app workflows)
 - **Deployment**: Fly.io, Sydney region, auto-scaling machines
 - **Design system**: `docs/design-system.md` + `shared/tailwind.preset.js`
-- **Shared component library**: `apps/oostkit_shared/` — Elixir path dependency providing `header_bar/1` component used by all apps
+- **Shared component library**: `apps/oostkit_shared/` — in-umbrella dependency providing shared Phoenix components (`header_bar/1`, `header/1`, `icon/1`, `flash/1`, etc.) used by all apps
 
 ### Testing Standards
 

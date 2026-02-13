@@ -53,16 +53,6 @@ docker compose exec wp_app mix ecto.reset
 docker compose exec wp_app mix quality
 ```
 
-Alternatively, use the helper script:
-
-```bash
-chmod +x scripts/dev.sh
-./scripts/dev.sh start   # Start dev server
-./scripts/dev.sh tdd     # TDD mode
-./scripts/dev.sh test    # Run tests
-./scripts/dev.sh shell   # IEx shell
-```
-
 ## Testing (TDD)
 
 The project is configured for Test-Driven Development:
@@ -163,7 +153,7 @@ Set via Fly.io secrets:
 │   │   └── repo.ex
 │   └── workgroup_pulse_web/          # Web layer
 │       ├── components/
-│       │   ├── core_components.ex    # Shared: app_header, sheet_strip, timer, etc.
+│       │   ├── core_components.ex    # App-specific: sheet, facilitator_timer, score_indicator, etc.
 │       │   └── layouts.ex
 │       ├── live/session_live/
 │       │   ├── show.ex               # Root LiveView (thin dispatcher)
