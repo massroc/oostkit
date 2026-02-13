@@ -182,9 +182,9 @@ defmodule WrtWeb.CoreComponents do
   def stat_card(assigns) do
     ~H"""
     <div class="bg-surface-sheet shadow-sheet rounded-xl p-6">
-      <h3 class="text-sm font-medium text-gray-500">{@label}</h3>
+      <h3 class="text-sm font-medium text-zinc-500">{@label}</h3>
       <p class={["mt-2 text-3xl font-semibold", @value_color]}>{@value}</p>
-      <p :if={@detail} class="mt-1 text-sm text-gray-500">{@detail}</p>
+      <p :if={@detail} class="mt-1 text-sm text-zinc-500">{@detail}</p>
       <.link
         :if={@link_text}
         href={@link_href}
@@ -217,8 +217,8 @@ defmodule WrtWeb.CoreComponents do
   def empty_state(assigns) do
     ~H"""
     <div class="py-8 text-center">
-      <.icon :if={@icon} name={@icon} class="mx-auto h-12 w-12 text-gray-300" />
-      <p class={["text-gray-500", @icon && "mt-2"]}>{@message}</p>
+      <.icon :if={@icon} name={@icon} class="mx-auto h-12 w-12 text-zinc-300" />
+      <p class={["text-zinc-500", @icon && "mt-2"]}>{@message}</p>
       <div :if={@action_text} class="mt-4">
         <.link href={@action_href}>
           <.button>{@action_text}</.button>
@@ -317,17 +317,17 @@ defmodule WrtWeb.CoreComponents do
   defp callout_bg(:warning), do: "bg-ok-gold-50 border-ok-gold-200"
   defp callout_bg(:danger), do: "bg-ok-red-50 border-ok-red-200"
   defp callout_bg(:info), do: "bg-ok-blue-50 border-ok-blue-200"
-  defp callout_bg(:neutral), do: "bg-gray-50 border-gray-200"
+  defp callout_bg(:neutral), do: "bg-zinc-50 border-zinc-200"
 
   defp callout_heading(:success), do: "text-ok-green-800"
   defp callout_heading(:warning), do: "text-ok-gold-800"
   defp callout_heading(:danger), do: "text-ok-red-800"
   defp callout_heading(:info), do: "text-ok-blue-800"
-  defp callout_heading(:neutral), do: "text-gray-800"
+  defp callout_heading(:neutral), do: "text-zinc-800"
 
   defp callout_text(:success), do: "text-ok-green-700"
   defp callout_text(:warning), do: "text-ok-gold-700"
   defp callout_text(:danger), do: "text-ok-red-700"
   defp callout_text(:info), do: "text-ok-blue-700"
-  defp callout_text(:neutral), do: "text-gray-600"
+  defp callout_text(:neutral), do: "text-zinc-600"
 end

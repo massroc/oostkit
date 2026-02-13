@@ -19,15 +19,15 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.NotesPanelComponent do
   def render(assigns) do
     ~H"""
     <%= if @notes_revealed do %>
-      <div class="fixed top-[52px] left-0 right-0 bottom-0 z-10" phx-click="hide_notes"></div>
-      <div class="fixed top-[52px] right-0 bottom-0 w-[480px] z-20 py-6 pr-4">
+      <div class="fixed top-[52px] left-0 right-0 bottom-0 z-sheet-side" phx-click="hide_notes"></div>
+      <div class="fixed top-[52px] right-0 bottom-0 w-[480px] z-floating py-6 pr-4">
         {render_notes_content(assigns)}
       </div>
     <% else %>
       <%= if @carousel_index in 4..6 do %>
         <button
           phx-click="reveal_notes"
-          class="fixed top-[52px] right-0 bottom-0 w-[70px] z-20 py-6 cursor-pointer group text-left"
+          class="fixed top-[52px] right-0 bottom-0 w-[70px] z-floating py-6 cursor-pointer group text-left"
         >
           <.sheet
             variant={:secondary}

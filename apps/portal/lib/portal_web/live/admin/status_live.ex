@@ -147,7 +147,7 @@ defmodule PortalWeb.Admin.StatusLive do
 
   defp ci_dot_class(%{conclusion: "success"}), do: "bg-ok-green-500"
   defp ci_dot_class(%{conclusion: "failure"}), do: "bg-ok-red-500"
-  defp ci_dot_class(%{status: "in_progress"}), do: "bg-yellow-500"
+  defp ci_dot_class(%{status: "in_progress"}), do: "bg-ok-gold-500"
   defp ci_dot_class(_), do: "bg-zinc-300"
 
   defp ci_label(%{conclusion: "success"}), do: "Passed"

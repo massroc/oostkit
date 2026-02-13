@@ -315,7 +315,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Show do
     ~H"""
     <div id="session-analytics" phx-hook="PostHogTracker" class="flex flex-col h-full">
       {render_facilitator_timer(assigns)}
-      <div class="flex-shrink-0 z-10">
+      <div class="flex-shrink-0 z-sheet-current">
         <.header_bar
           brand_url={Application.get_env(:workgroup_pulse, :portal_url, "https://oostkit.com")}
           title="Workgroup Pulse"

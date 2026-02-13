@@ -28,7 +28,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ExportModalComponent do
       <%!-- Export Modal --%>
       <%= if @show_export_modal do %>
         <div
-          class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+          class="fixed inset-0 bg-black/40 flex items-center justify-center z-modal"
           phx-click-away="close_export_modal"
         >
           <div class="bg-surface-sheet rounded-sheet shadow-sheet-lifted p-sheet-padding max-w-sm w-full mx-4">

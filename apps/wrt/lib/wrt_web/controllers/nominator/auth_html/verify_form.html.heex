@@ -6,7 +6,7 @@
     </:subtitle>
   </.header>
 
-  <div class="mt-8 bg-surface-sheet shadow-sheet rounded-lg p-6">
+  <div class="mt-8 bg-surface-sheet shadow-sheet rounded-xl p-6">
     <.callout :if={assigns[:error]} kind={:danger} class="mb-4">
       {@error}
     </.callout>
@@ -15,7 +15,7 @@
       <input type="hidden" name="magic_link_id" value={@magic_link_id} />
 
       <div>
-        <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
+        <label for="code" class="block text-sm font-medium text-zinc-700 mb-2">
           Verification Code
         </label>
         <input
@@ -27,7 +27,7 @@
           maxlength="6"
           required
           autofocus
-          class="block w-full text-center text-2xl tracking-widest rounded-md border-gray-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500"
+          class="block w-full text-center text-2xl tracking-widest rounded-md border-zinc-300 shadow-sm focus:border-ok-purple-500 focus:ring-ok-purple-500"
           placeholder="000000"
         />
       </div>
@@ -39,7 +39,7 @@
       </:actions>
     </.simple_form>
 
-    <p class="mt-4 text-sm text-gray-500 text-center">
+    <p class="mt-4 text-sm text-zinc-500 text-center">
       Didn't receive the code? Check your spam folder or request a new link.
     </p>
   </div>
