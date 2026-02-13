@@ -141,24 +141,7 @@ lib/
 │   │
 │   ├── endpoint.ex                 # ✓ (with rate limiter)
 │   │
-│   ├── portal_auth_client.ex        # Finch HTTP client for Portal token validation ✓
-│   │                                # - Calls POST /api/internal/auth/validate
-│   │                                # - ETS cache with 5-minute TTL
-│   │                                # - Configured via portal_api_url, portal_api_key
-│   │
 │   ├── plugs/
-│   │   ├── portal_auth.ex           # Portal cross-app auth plug ✓
-│   │   │                            # - Reads _oostkit_token cookie
-│   │   │                            # - Validates via PortalAuthClient
-│   │   │                            # - Sets :portal_user assign on conn
-│   │   │                            # - Dev bypass: assigns fake dev admin when no cookie
-│   │   │                            #   or when validation fails (e.g., Portal unreachable)
-│   │   │
-│   │   ├── require_portal_user.ex   # Portal user auth plug ✓
-│   │   │                            # - Requires any valid Portal user (enabled)
-│   │   │                            # - Redirects to Portal login if not authenticated
-│   │   │                            # - Appends return_to query param with current WRT URL
-│   │   │
 │   │   ├── tenant_plug.ex           # Tenant resolution from URL ✓
 │   │   │                            # - Extracts org slug from /org/:slug routes
 │   │   │                            # - Sets :current_org and :tenant assigns
@@ -191,6 +174,7 @@ lib/
 │   │   │                             # edit.html.heex uses <template> + JS for dynamic entries
 │   │   │
 │   │   ├── health_controller.ex    # Health check endpoints ✓
+│   │   │                           # - Delegates to OostkitShared.HealthChecks
 │   │   │                           # - /health (liveness)
 │   │   │                           # - /health/ready (readiness)
 │   │   │
@@ -516,31 +500,31 @@ All admin authentication is delegated to Portal. WRT has no login pages, registr
 forms, password-based auth, or super admin web layer. Users access WRT through the Portal
 dashboard, arriving already authenticated via Portal's `_oostkit_token` cookie.
 
-The authentication pipeline consists of two plugs applied at the router level:
+The authentication pipeline consists of two shared plugs from `oostkit_shared` applied at the router level:
 
-1. **`PortalAuth`** — Reads the `_oostkit_token` cookie and validates it against Portal's
-   internal API via `PortalAuthClient`. Sets `:portal_user` assign on conn with the user's
+1. **`OostkitShared.Plugs.PortalAuth`** — Reads the `_oostkit_token` cookie and validates it against Portal's
+   internal API via `OostkitShared.PortalAuthClient`. Sets `:portal_user` assign on conn with the user's
    `id`, `email`, `role`, and `enabled` status. Results are cached in ETS with 5-minute TTL.
    In dev mode, if no cookie is present **or if validation fails** (e.g., Portal is unreachable
    from Docker), assigns a fake dev admin user (`dev@oostkit.local`, `super_admin` role) so
    WRT routes work without requiring Portal to be running. In prod, validation failure sets
    `:portal_user` to `nil` (same as no cookie).
 
-2. **`RequirePortalUser`** — For all authenticated routes (`/` and `/org/:slug/*`). Checks
+2. **`OostkitShared.Plugs.RequirePortalUser`** — For all authenticated routes (`/` and `/org/:slug/*`). Checks
    that any valid `portal_user` exists and is enabled. Redirects to Portal login if not.
    Appends a `return_to` query param containing the user's current WRT URL so that Portal
    can redirect back after successful login (e.g., `?return_to=http://localhost:4001/org/acme/manage`).
    Portal validates the URL origin against its `:tool_urls` config before accepting it.
 
 ```elixir
-# Router pipeline
+# Router pipeline (uses shared plugs from oostkit_shared)
 pipeline :require_portal_user do
-  plug WrtWeb.Plugs.PortalAuth
-  plug WrtWeb.Plugs.RequirePortalUser
+  plug OostkitShared.Plugs.PortalAuth
+  plug OostkitShared.Plugs.RequirePortalUser, endpoint: WrtWeb.Endpoint
 end
 ```
 
-Unauthenticated users are redirected to `portal_login_url` (configured per environment) with the `return_to` param.
+Unauthenticated users are redirected to `portal_login_url` (configured per environment via `:oostkit_shared, :portal_auth` config) with the `return_to` param.
 
 ### Entry Flow (Landing Page)
 
@@ -977,7 +961,7 @@ primary_region = "syd"
 
 ### Health Check Endpoints
 
-All apps expose standardised health check endpoints (no authentication required):
+All apps expose standardised health check endpoints (no authentication required). Health check logic is shared via `OostkitShared.HealthChecks` — each app's `HealthController` is a thin wrapper that delegates to the shared module with app-specific checks (e.g., repo module for database connectivity, Oban process for background jobs).
 
 | Endpoint | Purpose | Response |
 |----------|---------|----------|
@@ -993,9 +977,9 @@ DATABASE_URL=postgres://...
 SECRET_KEY_BASE=...                       # Must match Portal's SECRET_KEY_BASE for cookie sharing
 PHX_HOST=wrt.example.com
 POSTMARK_API_KEY=...
-PORTAL_API_URL=https://oostkit.com        # Portal base URL for auth validation
-PORTAL_API_KEY=...                        # Same value as Portal's INTERNAL_API_KEY
-PORTAL_LOGIN_URL=https://oostkit.com/users/log-in  # Redirect URL for unauthenticated users
+PORTAL_API_URL=https://oostkit.com        # Portal base URL for auth validation (config :oostkit_shared)
+PORTAL_API_KEY=...                        # Same value as Portal's INTERNAL_API_KEY (config :oostkit_shared)
+PORTAL_LOGIN_URL=https://oostkit.com/users/log-in  # Redirect URL for unauthenticated users (config :oostkit_shared)
 ```
 
 ### Release Configuration
@@ -1020,10 +1004,12 @@ if config_env() == :prod do
   config :wrt, Wrt.Mailer,
     api_key: System.fetch_env!("POSTMARK_API_KEY")
 
-  # Portal cross-app auth
-  config :wrt, :portal_api_url, System.fetch_env!("PORTAL_API_URL")
-  config :wrt, :portal_api_key, System.fetch_env!("PORTAL_API_KEY")
-  config :wrt, :portal_login_url, System.fetch_env!("PORTAL_LOGIN_URL")
+  # Portal cross-app auth (shared config — used by OostkitShared.PortalAuthClient and plugs)
+  config :oostkit_shared, :portal_auth,
+    api_url: System.fetch_env!("PORTAL_API_URL"),
+    api_key: System.fetch_env!("PORTAL_API_KEY"),
+    login_url: System.fetch_env!("PORTAL_LOGIN_URL"),
+    finch: Wrt.Finch
 end
 ```
 
@@ -1056,7 +1042,10 @@ defp deps do
 end
 ```
 
-The `oostkit_shared` in-umbrella dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), and `show/2`/`hide/2` (JS transition helpers).
+The `oostkit_shared` in-umbrella dependency provides:
+- **Phoenix components** used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), and `show/2`/`hide/2` (JS transition helpers)
+- **Portal auth plugs and client**: `OostkitShared.Plugs.PortalAuth`, `OostkitShared.Plugs.RequirePortalUser`, and `OostkitShared.PortalAuthClient` — cross-app authentication via Portal's `_oostkit_token` cookie with ETS-cached token validation
+- **Health check helpers**: `OostkitShared.HealthChecks` — shared liveness/readiness logic used by all app health controllers
 
 ## Implementation Phases
 

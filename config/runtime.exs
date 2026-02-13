@@ -236,12 +236,14 @@ if config_env() == :prod do
       campaign_retention_months: 24,
       warning_days_before_deletion: 30
 
-    # Portal cross-app auth
-    config :wrt,
-      portal_url: System.get_env("PORTAL_URL", "https://oostkit.com"),
-      portal_api_url: System.get_env("PORTAL_API_URL", "http://oostkit-portal.flycast"),
-      portal_api_key: System.get_env("PORTAL_API_KEY"),
-      portal_login_url: System.get_env("PORTAL_LOGIN_URL", "https://oostkit.com/users/log-in")
+    # Portal cross-app auth (shared config)
+    config :wrt, :portal_url, System.get_env("PORTAL_URL", "https://oostkit.com")
+
+    config :oostkit_shared, :portal_auth,
+      api_url: System.get_env("PORTAL_API_URL", "http://oostkit-portal.flycast"),
+      api_key: System.get_env("PORTAL_API_KEY"),
+      login_url: System.get_env("PORTAL_LOGIN_URL", "https://oostkit.com/users/log-in"),
+      finch: Wrt.Finch
 
     # Rate limiter configuration
     rate_limiter_enabled = System.get_env("RATE_LIMITER_ENABLED", "true") == "true"

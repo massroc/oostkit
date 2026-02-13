@@ -1300,7 +1300,7 @@ primary_region = "syd"  # Sydney for AU-based teams
 
 ### Health Check Endpoints
 
-All apps expose standardised health check endpoints (no authentication required):
+All apps expose standardised health check endpoints (no authentication required). Health check logic is shared via `OostkitShared.HealthChecks` — each app's `HealthController` is a thin wrapper that delegates to the shared module with app-specific checks (e.g., repo module for database connectivity).
 
 | Endpoint | Purpose | Response |
 |----------|---------|----------|

@@ -30,6 +30,8 @@ config :portal, :tool_urls, %{
 
 config :portal, :start_status_poller, false
 
+config :portal, PortalWeb.Plugs.RateLimiter, enabled: false
+
 config :portal, :github_repo, "rossm/oostkit"
 
 # =============================================================================
@@ -90,9 +92,11 @@ config :wrt, Oban, testing: :inline
 
 config :wrt, WrtWeb.Plugs.RateLimiter, enabled: false
 
-config :wrt, :portal_api_url, "http://localhost:4002"
-config :wrt, :portal_api_key, "test_internal_api_key"
-config :wrt, :portal_login_url, "http://localhost:4002/users/log-in"
+config :oostkit_shared, :portal_auth,
+  api_url: "http://localhost:4002",
+  api_key: "test_internal_api_key",
+  login_url: "http://localhost:4002/users/log-in",
+  finch: Wrt.Finch
 
 # =============================================================================
 # Shared test settings

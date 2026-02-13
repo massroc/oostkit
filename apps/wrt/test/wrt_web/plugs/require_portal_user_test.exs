@@ -1,7 +1,9 @@
-defmodule WrtWeb.Plugs.RequirePortalUserTest do
+defmodule OostkitShared.Plugs.RequirePortalUserTest do
   use WrtWeb.ConnCase, async: true
 
-  alias WrtWeb.Plugs.RequirePortalUser
+  alias OostkitShared.Plugs.RequirePortalUser
+
+  @opts [endpoint: WrtWeb.Endpoint]
 
   describe "call/2" do
     test "passes through when user is authenticated", %{conn: conn} do
@@ -10,7 +12,7 @@ defmodule WrtWeb.Plugs.RequirePortalUserTest do
         |> init_test_session(%{})
         |> fetch_flash()
         |> assign(:portal_user, %{"id" => 1, "email" => "user@example.com", "enabled" => true})
-        |> RequirePortalUser.call([])
+        |> RequirePortalUser.call(@opts)
 
       refute conn.halted
     end
@@ -22,7 +24,7 @@ defmodule WrtWeb.Plugs.RequirePortalUserTest do
         |> Map.put(:query_string, "")
         |> init_test_session(%{})
         |> fetch_flash()
-        |> RequirePortalUser.call([])
+        |> RequirePortalUser.call(@opts)
 
       assert conn.halted
       location = redirected_to(conn)
@@ -38,7 +40,7 @@ defmodule WrtWeb.Plugs.RequirePortalUserTest do
         |> Map.put(:query_string, "page=2&sort=name")
         |> init_test_session(%{})
         |> fetch_flash()
-        |> RequirePortalUser.call([])
+        |> RequirePortalUser.call(@opts)
 
       assert conn.halted
       location = redirected_to(conn)
@@ -55,7 +57,7 @@ defmodule WrtWeb.Plugs.RequirePortalUserTest do
         |> init_test_session(%{})
         |> fetch_flash()
         |> assign(:portal_user, nil)
-        |> RequirePortalUser.call([])
+        |> RequirePortalUser.call(@opts)
 
       assert conn.halted
       assert redirected_to(conn) =~ "http://localhost:4002/users/log-in"
@@ -69,7 +71,7 @@ defmodule WrtWeb.Plugs.RequirePortalUserTest do
         |> init_test_session(%{})
         |> fetch_flash()
         |> assign(:portal_user, %{"id" => 1, "email" => "user@example.com", "enabled" => false})
-        |> RequirePortalUser.call([])
+        |> RequirePortalUser.call(@opts)
 
       assert conn.halted
       assert redirected_to(conn) =~ "http://localhost:4002/users/log-in"

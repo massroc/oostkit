@@ -1,7 +1,7 @@
-defmodule WrtWeb.Plugs.PortalAuthTest do
+defmodule OostkitShared.Plugs.PortalAuthTest do
   use WrtWeb.ConnCase, async: true
 
-  alias WrtWeb.Plugs.PortalAuth
+  alias OostkitShared.Plugs.PortalAuth
 
   describe "call/2 when portal_user already assigned" do
     test "skips validation", %{conn: conn} do
@@ -39,9 +39,6 @@ defmodule WrtWeb.Plugs.PortalAuthTest do
         |> PortalAuth.call([])
 
       # Token validation fails (no Portal running in test).
-      # With the fix, this falls through to maybe_dev_bypass/1
-      # rather than directly assigning nil — in dev env this
-      # gives the fake admin (breaking the auth loop).
       # In test/prod env, maybe_dev_bypass assigns nil.
       assert conn.assigns.portal_user == nil
     end

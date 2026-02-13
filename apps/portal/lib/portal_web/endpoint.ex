@@ -44,6 +44,7 @@ defmodule PortalWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
+  plug PortalWeb.Plugs.RateLimiter
   plug :put_session_with_domain
   plug PortalWeb.Router
 

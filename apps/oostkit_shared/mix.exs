@@ -15,6 +15,10 @@ defmodule OostkitShared.MixProject do
   end
 
   defp deps do
-    [{:phoenix_live_view, "~> 1.0"}]
+    [
+      {:phoenix_live_view, "~> 1.0"},
+      {:finch, "~> 0.19"},
+      {:jason, "~> 1.4"}
+    ]
   end
 end

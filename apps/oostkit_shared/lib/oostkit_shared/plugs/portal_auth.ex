@@ -1,10 +1,13 @@
-defmodule WrtWeb.Plugs.PortalAuth do
+defmodule OostkitShared.Plugs.PortalAuth do
   @moduledoc """
   Plug that reads the `_oostkit_token` cookie set by Portal and validates
   it via Portal's internal API.
 
   Sets `:portal_user` in assigns (map with id, email, name, role, enabled)
   or `nil` if no valid token is found.
+
+  In dev environment, assigns a fake admin user when no valid token is found,
+  allowing development without running Portal.
   """
 
   import Plug.Conn
@@ -26,7 +29,7 @@ defmodule WrtWeb.Plugs.PortalAuth do
         maybe_dev_bypass(conn)
 
       encoded_token ->
-        case WrtWeb.PortalAuthClient.validate_token(encoded_token) do
+        case OostkitShared.PortalAuthClient.validate_token(encoded_token) do
           {:ok, user} -> assign(conn, :portal_user, user)
           {:error, _} -> maybe_dev_bypass(conn)
         end

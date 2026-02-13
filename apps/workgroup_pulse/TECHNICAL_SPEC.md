@@ -97,14 +97,13 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 
 **File:** `lib/workgroup_pulse_web/live/session_live/components/scoring_component.ex`
 
-**Purpose:** Renders the scoring grid table. Pure functional component — all events bubble to the parent LiveView. Score overlays, floating buttons, and the notes panel are separate components.
+**Purpose:** Renders the scoring grid table. Pure functional component — all events bubble to the parent LiveView. Score overlays, floating buttons, and the notes panel are separate components. Uses `GridHelpers.scoring_grid/1` for the shared grid table structure, providing a `:cell` slot for scoring-specific cell rendering.
 
 **Attrs (10):** `session`, `participant`, `participants`, `current_question`, `has_submitted`, `is_my_turn`, `current_turn_participant_id`, `my_turn_locked`, `all_questions`, `all_questions_scores`
 
 **Key Render Functions:**
-- `render_full_scoring_grid/1` — Builds the complete 8-question x N-participant grid
-- `render_question_row/2` — Renders a single question row with per-participant score cells
-- `render_score_cell_value/3` — Pattern-matched function for cell display states (future `—`, past `?`, current `...`, scored value)
+- Uses `GridHelpers.scoring_grid/1` with a `:cell` slot for per-cell rendering
+- Cell rendering handles display states: future `—`, past `?` (skipped), current `...` (active turn), scored value with traffic-light color
 
 ### ScoreOverlayComponent
 
@@ -145,7 +144,7 @@ Actions are managed during the scoring phase via the notes/actions side panel (b
 ### Other Phase Components
 
 All follow the same pure functional pattern:
-- **SummaryComponent** — Read-only scoring grid table with traffic-light coloured cells (same grid layout as scoring phase, grouped by scale type)
+- **SummaryComponent** — Read-only scoring grid table via `GridHelpers.scoring_grid/1` with traffic-light coloured cells (same grid layout as scoring phase, grouped by scale type)
 - **CompletedComponent** — Wrap-up page with "Cumulative Team Score" overview, strengths/concerns, inline action items input, export, and "Finish Workshop" button (facilitator only)
 - **LobbyComponent** — Waiting room with participant list and start button
 - **IntroComponent** — 4-screen introduction with navigation
@@ -246,9 +245,12 @@ show_score_overlay: turn_state.is_my_turn and my_score == nil
 
 **File:** `lib/workgroup_pulse_web/live/session_live/helpers/grid_helpers.ex`
 
-**Purpose:** Shared helpers for scoring grid rendering, used by `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent`. Eliminates duplicated grid logic across these three components.
+**Purpose:** Shared helpers and a `scoring_grid/1` function component for scoring grid rendering, used by `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent`. Eliminates duplicated grid table structure and logic across these three components.
 
-**Key Functions:**
+**Function Component:**
+- `scoring_grid/1` — Renders the full scoring grid table (scale section labels, criterion headers with paired-group rows, participant column headers, and score cells). Each consumer provides cell rendering via a required `:cell` slot that receives `%{question: question, participant: participant, score_data: data}`. Attrs: `:all_questions`, `:participants`, `:scores` (map of `%{question_index => [score_maps]}`), and optional `:active_participant_id`, `:active_question_index`, `:criterion_click_event`.
+
+**Helper Functions:**
 - `prepare_grid_assigns/1` — Prepares common grid assigns: filters active participants, splits questions by scale type (balance/maximal), calculates empty column slots and total columns. Fixed at 10 participant column slots for consistent grid width.
 - `sub_label/1` — Returns "a" or "b" suffix for paired criteria questions, nil otherwise
 - `first_of_pair?/1` — Returns true if a question starts a paired criterion group (e.g., "2a", "5a")
@@ -378,7 +380,7 @@ end
 - Event handlers are split by domain: `NavigationHandlers` (flow/navigation), `ScoringHandlers` (scores/turns/readiness), `ContentHandlers` (notes/actions/export/UI toggles). Events in `show.ex` delegate to the appropriate module via one-liner clauses grouped by section.
 - DataLoaders hydrate socket assigns in bulk, avoiding piecemeal loading
 - Template caching (`get_or_load_template/2`) avoids repeated DB queries
-- Shared grid rendering logic (column slots, question grouping, score formatting) is centralised in `GridHelpers`, consumed by `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent`
+- Shared grid rendering logic is centralised in `GridHelpers`, which provides both helper functions and a `scoring_grid/1` function component with a `:cell` slot. This eliminates duplicate grid table markup across `ScoringComponent`, `SummaryComponent`, and `ExportPrintComponent` — each provides only its cell rendering logic
 - Floating action buttons, notes panel, and score overlays are separate extracted components called from `show.ex`'s `render/1`
 
 ---

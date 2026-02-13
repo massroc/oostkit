@@ -5,6 +5,7 @@ defmodule PortalWeb.Admin.UsersLive do
   use PortalWeb, :live_view
 
   alias Portal.Accounts
+  alias Portal.Audit
 
   @impl true
   def mount(_params, _session, socket) do
@@ -228,7 +229,13 @@ defmodule PortalWeb.Admin.UsersLive do
       end
 
     case result do
-      {:ok, _user} ->
+      {:ok, updated_user} ->
+        action = if user.enabled, do: "user.disable", else: "user.enable"
+
+        Audit.log(socket.assigns.current_scope.user, action, "user", user.id,
+          changes: %{enabled: updated_user.enabled}
+        )
+
         {:noreply,
          socket
          |> put_flash(:info, "User updated successfully.")
@@ -241,7 +248,11 @@ defmodule PortalWeb.Admin.UsersLive do
 
   defp create_user(socket, params) do
     case Accounts.create_session_manager(params) do
-      {:ok, _user} ->
+      {:ok, new_user} ->
+        Audit.log(socket.assigns.current_scope.user, "user.create", "user", new_user.id,
+          changes: %{email: new_user.email, role: new_user.role}
+        )
+
         {:noreply,
          socket
          |> put_flash(:info, "User created successfully. They can log in with the magic link.")
@@ -261,7 +272,11 @@ defmodule PortalWeb.Admin.UsersLive do
     attrs = %{name: params["name"], role: params["role"]}
 
     case Accounts.update_user(user, attrs) do
-      {:ok, _user} ->
+      {:ok, updated_user} ->
+        Audit.log(socket.assigns.current_scope.user, "user.update", "user", user.id,
+          changes: %{name: updated_user.name, role: updated_user.role}
+        )
+
         {:noreply,
          socket
          |> put_flash(:info, "User updated successfully.")
