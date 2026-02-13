@@ -1,4 +1,4 @@
-# Productive Work Groups
+# Workgroup Pulse
 
 ## Requirements Document
 

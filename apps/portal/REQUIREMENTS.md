@@ -15,7 +15,7 @@ It also provides:
 - Coming-soon pages with email capture as soft feature gates
 - A consistent design language across the platform
 
-See also: [Portal UX Design](../apps/portal/docs/ux-design.md) for detailed design specifications.
+See also: [Portal UX Design](docs/ux-design.md) for detailed design specifications.
 
 ## Goals
 
@@ -38,7 +38,7 @@ See also: [Portal UX Design](../apps/portal/docs/ux-design.md) for detailed desi
 
 ### Marketing Landing Page (`/`)
 
-A bold, aspirational page for new visitors. Redirects logged-in users to `/home`.
+A bold, aspirational page for new visitors. No redirect for logged-in users — they see the same marketing page, with the header bar providing a "Dashboard" link to `/home`.
 
 **Sections:**
 1. **Hero** -- Bold headline ("Tools for building democratic workplaces"), subheadline grounding in OST, primary CTA to Pulse, secondary CTA to dashboard
@@ -189,7 +189,7 @@ This pattern is consistent across every tool: facilitator logs in to create/mana
 ### Account Management
 
 **Self-service (facilitators):**
-- **Settings** (`/users/settings`) -- responsive two-column grid layout (`md:grid-cols-2`, stacks on mobile) with text fields constrained to `max-w-xs`. Five sections with bold headings and descriptive subtitles arranged in a 2x2 grid plus a full-width section below: Profile (name, org — top-left), Contact Preferences (product_updates checkbox — top-right), Email (change address — bottom-left), Password (add/change — bottom-right), and Danger zone (delete account, full-width below, heading in `text-ok-red-600`). Referral source is collected at registration only and not editable in settings. The settings page loads without requiring sudo mode; sudo checks are performed in handlers for sensitive actions (email change, password change, account deletion) with a graceful redirect to login if not in sudo mode.
+- **Settings** (`/users/settings`) -- stacked sections with cards layout (Tailwind UI style). An "Account Settings" title with subtitle at the top. Sections separated by `divide-y` dividers, each using a responsive 1/3 + 2/3 grid (`md:grid-cols-3`): left column has the section heading and subtitle, right column has a card (`bg-surface-sheet shadow-sheet rounded-xl`) with form fields and a footer with save button. Five sections stacked vertically: Profile (name, org), Contact Preferences (product_updates checkbox), Email (change address), Password (add/change), and Danger zone (delete account, heading in `text-ok-red-600`). Referral source is collected at registration only and not editable in settings. The settings page loads without requiring sudo mode; sudo checks are performed in handlers for sensitive actions (email change, password change, account deletion) with a graceful redirect to login if not in sudo mode.
 - **Password reset** -- "Forgot your password?" link on login page sends a reset email with a time-limited token. User sets a new password via `/users/reset-password/:token`.
 - **Account deletion** -- "Danger zone" section on settings page with confirmation prompt. Deletes the user account and logs them out.
 
@@ -231,7 +231,7 @@ All admin routes (`/admin/*`) are protected by a `require_super_admin` router pi
                  └── "Forgot your password?" → [/users/forgot-password]
                           └── Email with reset link → [/users/reset-password/:token]
 
-[Logged-in user hits /] → auto-redirect to [/home]
+[Logged-in user hits /] → sees marketing page (header shows Dashboard link to /home)
 ```
 
 ### Login-Required Apps
@@ -396,8 +396,8 @@ The landing page uses a `pulse_url/1` helper (in `PageHTML`) that reads the URL 
 
 ## Related Documents
 
-- [Portal UX Design](../apps/portal/docs/ux-design.md)
-- [Product Vision](product-vision.md)
-- [Architecture](architecture.md)
-- [WRT Requirements](../apps/wrt/REQUIREMENTS.md)
-- [Workgroup Pulse Requirements](../apps/workgroup_pulse/REQUIREMENTS.md)
+- [Portal UX Design](docs/ux-design.md)
+- [Product Vision](../../docs/product-vision.md)
+- [Architecture](../../docs/architecture.md)
+- [WRT Requirements](../wrt/REQUIREMENTS.md)
+- [Workgroup Pulse Requirements](../workgroup_pulse/REQUIREMENTS.md)

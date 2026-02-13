@@ -229,5 +229,5 @@ All apps follow TDD:
 - [Product Vision](./product-vision.md) - Strategic overview
 - [Architecture](./architecture.md) - Technical architecture
 - [Design System](./design-system.md) - Visual design specification
-- [Portal Requirements](./portal-requirements.md) - Portal feature spec
+- [Portal Requirements](../apps/portal/REQUIREMENTS.md) - Portal feature spec
 - App-specific docs in `apps/*/REQUIREMENTS.md` and `apps/*/SOLUTION_DESIGN.md`
