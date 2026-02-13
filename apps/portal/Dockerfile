@@ -47,7 +47,7 @@ COPY apps/portal/priv apps/portal/priv
 COPY apps/portal/lib apps/portal/lib
 
 # Copy shared design system preset (used by tailwind.config.js)
-COPY shared /shared
+COPY shared/ shared/
 
 COPY apps/portal/assets apps/portal/assets
 

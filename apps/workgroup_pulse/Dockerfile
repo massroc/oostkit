@@ -47,7 +47,7 @@ COPY apps/workgroup_pulse/priv apps/workgroup_pulse/priv
 COPY apps/workgroup_pulse/lib apps/workgroup_pulse/lib
 
 # Copy shared design system preset (used by tailwind.config.js)
-COPY shared /shared
+COPY shared/ shared/
 
 COPY apps/workgroup_pulse/assets apps/workgroup_pulse/assets
 

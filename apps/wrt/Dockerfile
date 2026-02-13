@@ -47,7 +47,7 @@ COPY apps/wrt/priv apps/wrt/priv
 COPY apps/wrt/lib apps/wrt/lib
 
 # Copy shared design system preset (used by tailwind.config.js)
-COPY shared /shared
+COPY shared/ shared/
 
 COPY apps/wrt/assets apps/wrt/assets
 
