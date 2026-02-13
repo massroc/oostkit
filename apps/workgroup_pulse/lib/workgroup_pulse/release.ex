@@ -24,15 +24,15 @@ defmodule WorkgroupPulse.Release do
     load_app()
 
     for repo <- repos() do
-      {:ok, _, _} =
-        Ecto.Migrator.with_repo(repo, fn _repo ->
-          # Run the seeds file
-          seed_script = Application.app_dir(@app, "priv/repo/seeds.exs")
+      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &run_seeds/1)
+    end
+  end
 
-          if File.exists?(seed_script) do
-            Code.eval_file(seed_script)
-          end
-        end)
+  defp run_seeds(_repo) do
+    seed_script = Application.app_dir(@app, "priv/repo/seeds.exs")
+
+    if File.exists?(seed_script) do
+      Code.eval_file(seed_script)
     end
   end
 

@@ -155,6 +155,25 @@ jobs:
         run: |
           mkdir -p priv/plts
           mix dialyzer --plt
+          # In umbrella mode, dialyxir only builds core PLTs (in _build/)
+          # and skips the project PLT. Copy the deps PLT, then add
+          # plt_add_apps (:mix, :ex_unit) that the deps PLT doesn't include.
+          if [ ! -f priv/plts/dialyzer.plt ]; then
+            cp ../../_build/test/dialyxir_*_deps-test.plt priv/plts/dialyzer.plt
+            mix run --no-start -e '
+              apps = Mix.Project.config()[:dialyzer][:plt_add_apps] || []
+              paths = Enum.flat_map(apps, fn app ->
+                case :code.lib_dir(app, :ebin) do
+                  {:error, _} -> []
+                  dir -> [dir]
+                end
+              end)
+              if paths != [] do
+                IO.puts("Adding #{inspect(apps)} to project PLT...")
+                :dialyzer.run(analysis_type: :plt_add, init_plt: ~c"priv/plts/dialyzer.plt", files_rec: paths)
+              end
+            '
+          fi
         working-directory: ${{ inputs.app_path }}
         timeout-minutes: 20
 

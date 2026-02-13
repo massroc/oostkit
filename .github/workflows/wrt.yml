@@ -31,3 +31,6 @@ jobs:
       database_name: wrt_test
       deploy_enabled: false  # Enable when Fly.io is configured for WRT
     secrets: inherit
+    permissions:
+      contents: read
+      issues: write

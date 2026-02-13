@@ -16,22 +16,27 @@ defmodule PortalWeb.UserLive.ResetPassword do
         </div>
 
         <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl p-6">
-          <.form for={@form} id="reset_password_form" phx-submit="reset_password" phx-change="validate">
-          <.field
-            field={@form[:password]}
-            type="password"
-            label="New password"
-            autocomplete="new-password"
-            required
-          />
-          <.field
-            field={@form[:password_confirmation]}
-            type="password"
-            label="Confirm new password"
-            autocomplete="new-password"
-          />
-          <.button class="btn btn-primary w-full">Reset password</.button>
-        </.form>
+          <.form
+            for={@form}
+            id="reset_password_form"
+            phx-submit="reset_password"
+            phx-change="validate"
+          >
+            <.field
+              field={@form[:password]}
+              type="password"
+              label="New password"
+              autocomplete="new-password"
+              required
+            />
+            <.field
+              field={@form[:password_confirmation]}
+              type="password"
+              label="Confirm new password"
+              autocomplete="new-password"
+            />
+            <.button class="btn btn-primary w-full">Reset password</.button>
+          </.form>
         </div>
 
         <p class="text-center text-sm">

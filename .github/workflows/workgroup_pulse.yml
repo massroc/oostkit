@@ -32,3 +32,6 @@ jobs:
       deploy_enabled: true
       app_url: 'https://pulse.oostkit.com'
     secrets: inherit
+    permissions:
+      contents: read
+      issues: write

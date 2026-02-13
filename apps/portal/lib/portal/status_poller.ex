@@ -74,7 +74,11 @@ defmodule Portal.StatusPoller do
 
     new_state = %{state | health: health, ci: ci, last_polled: now}
 
-    Phoenix.PubSub.broadcast(Portal.PubSub, @pubsub_topic, {:status_update, Map.take(new_state, [:health, :ci, :last_polled])})
+    Phoenix.PubSub.broadcast(
+      Portal.PubSub,
+      @pubsub_topic,
+      {:status_update, Map.take(new_state, [:health, :ci, :last_polled])}
+    )
 
     Process.send_after(self(), :poll, state.poll_interval)
 
@@ -102,7 +106,10 @@ defmodule Portal.StatusPoller do
     url = "#{base_url}/health"
     start_time = System.monotonic_time(:millisecond)
 
-    case Req.get(url, receive_timeout: @health_timeout, connect_options: [timeout: @health_timeout]) do
+    case Req.get(url,
+           receive_timeout: @health_timeout,
+           connect_options: [timeout: @health_timeout]
+         ) do
       {:ok, %Req.Response{status: status, body: body}} ->
         response_time = System.monotonic_time(:millisecond) - start_time
 
@@ -152,7 +159,11 @@ defmodule Portal.StatusPoller do
       [{"accept", "application/vnd.github+json"}, {"user-agent", "Portal-StatusPoller"}]
       |> maybe_add_auth(token)
 
-    case Req.get(url, headers: headers, params: %{branch: "main", per_page: 5}, receive_timeout: @health_timeout) do
+    case Req.get(url,
+           headers: headers,
+           params: %{branch: "main", per_page: 5},
+           receive_timeout: @health_timeout
+         ) do
       {:ok, %Req.Response{status: 200, body: %{"workflow_runs" => runs}}} ->
         runs
         |> Enum.take(5)
