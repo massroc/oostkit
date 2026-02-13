@@ -657,7 +657,8 @@ defmodule WorkgroupPulse.Repo.Migrations.CreateScores do
       add :participant_id, references(:participants, type: :binary_id, on_delete: :delete_all), null: false
       add :question_id, references(:questions, type: :binary_id), null: false
       add :value, :integer, null: false
-      add :locked, :boolean, default: false
+      add :turn_locked, :boolean, default: false
+      add :row_locked, :boolean, default: false
       add :submitted_at, :utc_datetime
 
       timestamps()
@@ -1399,25 +1400,21 @@ end
 ### Time Allocation Defaults
 
 ```elixir
-defmodule WorkgroupPulse.Facilitation.TimeAllocations do
-  # Note: actual implementation uses 10-segment approach (see Facilitation context)
-  # 8 segments for questions, 1 for summary+actions, 1 flex buffer
-  @default_percentages %{
-    questions_1_4: 0.40,
-    questions_5_8: 0.40,
-    summary: 0.10,
-    buffer: 0.10
-  }
+defmodule WorkgroupPulse.Facilitation do
+  @doc """
+  Calculates the base segment duration for a session's timer.
 
-  def calculate(total_minutes) do
-    for {section, pct} <- @default_percentages, into: %{} do
-      {section, round(total_minutes * pct)}
-    end
-  end
+  Total session time is divided into 10 equal segments:
+  - 8 segments for 8 questions (Q1 gets 2 segments, Q2-Q8 get 1 each)
+  - 1 segment for Summary + Actions (combined)
+  - 1 segment unallocated as flex/buffer
 
-  def per_question_minutes(total_minutes) do
-    question_time = total_minutes * 0.35  # Each question block
-    round(question_time / 4)  # 4 questions per block
+  Returns duration in seconds, or nil if session has no planned duration.
+  """
+  def calculate_segment_duration(%Session{planned_duration_minutes: nil}), do: nil
+
+  def calculate_segment_duration(%Session{planned_duration_minutes: minutes}) do
+    div(minutes * 60, 10)
   end
 end
 ```

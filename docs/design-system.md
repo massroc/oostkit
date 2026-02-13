@@ -1,4 +1,4 @@
-# Desirable Futures Workshop Design System
+# OOSTKit Design System
 
 This document defines the shared design language across all workshop applications. It serves as the source of truth for visual design decisions.
 
@@ -74,28 +74,27 @@ Use these terms consistently across all apps and documentation:
 
 **Reference Product**: Post-it Easel Pad (635mm W × 775mm H)
 
-**Aspect Ratio**: `0.819` (width ÷ height) — portrait orientation
+**Orientation**: Landscape (960px wide)
 
-All sheets derive from this single ratio:
+All sheets use a consistent width:
 
-| Element | Height | Width | Notes |
-|---------|--------|-------|-------|
-| Main sheet | 580px | 720px (fixed) | Fixed width, always centred — does not resize with content |
-| Side sheet (Notes) | 480px | ~393px | True 0.819 ratio |
-| Strip thumbnails | 34px | ~28px | True 0.819 ratio |
+| Element | Width | Height | Notes |
+|---------|-------|--------|-------|
+| Main sheet | 960px (fixed) | 100% of container (min 786px) | Fixed width, always centred — fills available height |
+| Side sheet (Notes) | 480px | 100% | Fixed-position right panel |
 
 ### Sheet Treatments
 
 | Sheet Type     | Size      | Shadow           | z-index | Rotation | Purpose |
 |----------------|-----------|------------------|---------|----------|---------|
-| Current Sheet  | 580px H, 720px W (fixed) | `shadow-sheet`   | 2       | -0.2deg  | Active work area, always centred |
-| Side-sheet     | 480px H   | `shadow-sheet`   | 1       | +1.2deg  | Notes, behind main |
+| Current Sheet  | 960px W, 100% H (min 786px) | `shadow-sheet`   | 2       | -0.2deg  | Active work area, always centred |
+| Side-sheet     | 480px W   | `shadow-sheet`   | 1       | +1.2deg  | Notes, beside main |
 
 Sheets lift on hover with transition to `shadow-sheet-lifted`.
 
 ### OOSTKit Header
 
-All apps share a consistent header via the `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This is an Elixir path dependency consumed by all three apps, ensuring a single source of truth for the header markup.
+All apps share a consistent header via the `<.header_bar>` component from `OostkitShared.Components` (`apps/oostkit_shared/`). This is an in-umbrella dependency consumed by all three apps, ensuring a single source of truth for the header markup.
 
 **Component API:**
 - **`:brand_url`** (string) — URL for the OOSTKit brand link. Defaults to `"/"`.
@@ -286,10 +285,10 @@ Scores (0-10) are central to workshop apps. Display them consistently:
 
 - **Large scores** (current, focused): 32-48px, handwritten font
 - **Grid scores** (in matrix): 20-24px, handwritten font
-- **Color coding** (applied to submitted scores, not input buttons):
-  - 0-3: Red (`#F44545`)
-  - 4-6: Default (black)
-  - 7-10: Gold (`#F4B945`)
+- **Color coding** (traffic light system, applied to submitted scores, not input buttons):
+  - **Balance scale** (-5 to +5): Green near 0 (optimal), Amber moderate, Red at extremes
+  - **Maximal scale** (0 to 10): Green high, Amber mid, Red low
+  - Traffic light colors: green (`#22c55e`), amber (`#f59e0b`), red (`#ef4444`)
 
 **Important**: Score input buttons should be neutral (no color hints) to avoid leading participants. Only the selected button highlights. Traffic light colors appear after scores are submitted and revealed.
 
