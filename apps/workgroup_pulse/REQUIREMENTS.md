@@ -475,11 +475,13 @@ The **Combined Team Value** is a score out of 10 that represents team performanc
 - [x] Observer mode for facilitator
 - [ ] Feedback button
 
+### Shipped (Originally Deferred)
+- [x] Export (CSV, PDF) — Full Workshop Report and Team Report types
+
 ### Deferred to Later Phases
 - [ ] User accounts and authentication
 - [ ] Persistent teams
 - [ ] Historical comparison
-- [x] Export (CSV, PDF) — Full Workshop Report and Team Report types
 - [ ] Previous score comparison
 - [ ] Advanced visualizations
 - [ ] Usage analytics (aggregated, anonymized)

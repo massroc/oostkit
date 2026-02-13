@@ -81,5 +81,5 @@ Solo facilitator accounts only for now. Organisation/team accounts are a future 
 ### Related Documents
 
 - [Portal UX Design](../apps/portal/docs/ux-design.md) -- comprehensive UX vision and rollout plan
-- [Portal Requirements](portal-requirements.md)
+- [Portal Requirements](../apps/portal/REQUIREMENTS.md)
 - [Architecture](architecture.md)
