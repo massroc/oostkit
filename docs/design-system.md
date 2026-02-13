@@ -51,22 +51,26 @@ Use these terms consistently across all apps and documentation:
 | **Virtual Wall**   | The overall container - the metaphorical wall where all sheets live |
 | **Sheet**          | A single working surface (like butcher paper) - the primary unit of work |
 | **Current Sheet**  | The active sheet in focus, full size, where work happens |
-| **Previous Sheet** | Visible alongside current, smaller with drop shadow, provides context |
-| **Side-sheet**     | Drawer/toggle panel for auxiliary content (notes, questions, actions) |
+| **Inactive Sheet** | Hidden (`display: none`); navigable via server-driven carousel |
+| **Side-sheet**     | Fixed-position drawer panel for auxiliary content (notes, actions) |
 | **Sheet Component** | Reusable `<.sheet>` component that renders paper-textured surfaces |
 
 ### Visual Hierarchy
 
+Only the active sheet is visible at any time. Inactive slides are hidden (`display: none`) via the `SheetStack` JS hook — there is no visible "previous sheet" peek. The side-sheet (notes panel) is a fixed-position drawer, not a carousel slide.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  VIRTUAL WALL                                                       │
-│   ┌─────────────┐   ┌───────────────────────────┐   ┌──────────┐   │
-│   │  Previous   │   │                           │   │  Side-   │   │
-│   │   Sheet     │   │      Current Sheet        │   │  sheet   │   │
-│   │  (smaller,  │   │      (full focus)         │   │ (drawer) │   │
-│   │  shadow)    │   │                           │   │          │   │
-│   └─────────────┘   └───────────────────────────┘   └──────────┘   │
 │                                                                     │
+│        ┌───────────────────────────────────┐   ┌──────────┐        │
+│        │                                   │   │  Side-   │        │
+│        │      Active Sheet (960px)         │   │  sheet   │        │
+│        │      (centred, full focus)        │   │ (drawer) │        │
+│        │                                   │   │  480px   │        │
+│        └───────────────────────────────────┘   └──────────┘        │
+│                                                                     │
+│                          [Floating action buttons]                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -87,8 +91,8 @@ All sheets use a consistent width:
 
 | Sheet Type     | Size      | Shadow           | z-index | Rotation | Purpose |
 |----------------|-----------|------------------|---------|----------|---------|
-| Current Sheet  | 960px W, 100% H (min 786px) | `shadow-sheet`   | 2       | -0.2deg  | Active work area, always centred |
-| Side-sheet     | 480px W   | `shadow-sheet`   | 1       | +1.2deg  | Notes, beside main |
+| Current Sheet  | 960px W, 100% H (min 786px) | `shadow-sheet`   | `z-sheet-current` (5) | -0.2deg  | Active work area, always centred |
+| Side-sheet     | 480px W   | `shadow-sheet`   | `z-sheet-side` (2) | +1.2deg  | Notes, beside main |
 
 Sheets lift on hover with transition to `shadow-sheet-lifted`.
 
@@ -129,7 +133,7 @@ full-height layouts without per-page `min-h-screen` wrappers.
 │  Pulse: VIRTUAL WALL (bg: #E8E4DF)                                  │
 │   ┌─────────────────────────────────┐  ┌───────────────────┐        │
 │   │                                 │  │                   │        │
-│   │      Current Sheet (z: 2)       │  │  Side-sheet (z:1) │        │
+│   │      Current Sheet (z: 5)       │  │  Side-sheet (z:2) │        │
 │   │      (centred, in front)        │  │  (behind, right)  │        │
 │   │                                 │  │                   │        │
 │   └─────────────────────────────────┘  └───────────────────┘        │
@@ -252,9 +256,9 @@ Use multiples of 4px (or 0.25rem if using rem units):
 
 1. **Sheets have padding** - Content doesn't touch the edges. Use `lg` (24px) minimum padding inside sheets.
 
-2. **The Current Sheet dominates** - It should take 60-70% of available width when Previous Sheet is visible.
+2. **The Current Sheet dominates** - It is always centred at 960px, with full focus. Inactive slides are hidden, not shown as smaller peeks.
 
-3. **Side-sheet is a drawer** - ~30% width, slides in from the right. Has its own internal padding.
+3. **Side-sheet is a drawer** - 480px wide, fixed-position on the right edge. Has its own internal padding.
 
 4. **All phase screens use the `<.sheet>` component** - This formalizes the paper-textured surface as the core UI primitive.
 
@@ -292,25 +296,19 @@ Scores (0-10) are central to workshop apps. Display them consistently:
 
 **Important**: Score input buttons should be neutral (no color hints) to avoid leading participants. Only the selected button highlights. Traffic light colors appear after scores are submitted and revealed.
 
-### Participant Indicators
+### Participant List
 
-- **Avatar/Initial circle**: 32-40px, with participant's first initial or photo
-- **Name tag**: Clean, readable, shows current participant status
-- **Turn indicator**: Subtle highlight (purple border or background tint)
+- **Name display**: Clean, readable text showing participant name and status
+- **Turn indicator**: Subtle highlight (purple border or `...` animation) for the active scorer
+- **Facilitator badge**: Identifies the session facilitator
+- **Ready indicator**: Checkmark when participant has marked ready
 
-### Sheet Thumbnail (for Sheet Strip)
+### Notes/Actions Side Panel
 
-- Fixed aspect ratio matching full sheet
-- Shows miniature version of content
-- Current sheet has purple border
-- Clickable for navigation
-
-### Side-sheet Toggle
-
-- Icon-based (e.g., notepad icon, or chevron)
-- Fixed position at edge of viewport
-- Clear open/close state
-- Badge for unread notes/actions (if applicable)
+- **Peek tab**: 70px wide, fixed-position on right edge of viewport, read-only content preview
+- **Expanded panel**: 480px wide, editable, uses `<.sheet variant={:secondary}>`
+- **Reveal**: Click peek tab to expand; click outside (backdrop) to dismiss
+- **Visible on**: Scoring, summary, and wrap-up slides only
 
 ---
 
@@ -383,8 +381,8 @@ Design for everyone. These are minimum requirements.
 
 | Element         | Mobile                        | Desktop                      |
 |-----------------|-------------------------------|------------------------------|
-| Virtual Wall    | Single sheet view, no Previous | Full layout with Previous    |
-| Side-sheet      | Full-screen overlay           | Slide-in drawer              |
+| Virtual Wall    | Full-width single sheet       | Centred 960px sheet          |
+| Side-sheet      | Full-screen overlay           | Fixed-position 480px drawer  |
 | Scoring grid    | Scroll horizontal or stack    | Full grid visible            |
 
 ### Mobile-First Content
@@ -417,7 +415,7 @@ The design system is implemented as a shared Tailwind preset that all apps impor
   tailwind.config.js     ← imports preset + app-specific overrides
 ```
 
-Each app's `tailwind.config.js` includes `../deps/oostkit_shared/**/*.ex` in its content paths so Tailwind scans the shared component templates for class names.
+Each app's `tailwind.config.js` includes the `oostkit_shared` library path in its content list so Tailwind scans the shared component templates for class names. In the umbrella structure this is typically `../../apps/oostkit_shared/**/*.ex` (relative to each app's `assets/` directory).
 
 ### Available Classes
 
@@ -425,9 +423,9 @@ Each app's `tailwind.config.js` includes `../deps/oostkit_shared/**/*.ex` in its
 
 ```html
 <!-- Backgrounds -->
-<div class="bg-surface-wall">        <!-- #FAFAFA - Virtual Wall -->
-<div class="bg-surface-sheet">       <!-- #FFFFFF - Current Sheet -->
-<div class="bg-surface-sheet-alt">   <!-- #FEFDFB - Paper tint -->
+<div class="bg-surface-wall">             <!-- #E8E4DF - Virtual Wall (warm taupe) -->
+<div class="bg-surface-sheet">            <!-- #FEFDFB - Primary sheet (cream/paper) -->
+<div class="bg-surface-sheet-secondary">  <!-- #F5F3F0 - Receded sheets, table headers -->
 
 <!-- Text -->
 <p class="text-text-dark">           <!-- #151515 - Primary text -->
@@ -484,10 +482,10 @@ Each app's `tailwind.config.js` includes `../deps/oostkit_shared/**/*.ex` in its
 
 ```html
 <div class="z-wall">                 <!-- 0 -->
-<div class="z-sheet-previous">       <!-- 10 -->
-<div class="z-sheet-current">        <!-- 20 -->
-<div class="z-sheet-strip">          <!-- 30 -->
-<div class="z-side-sheet">           <!-- 40 -->
+<div class="z-sheet-previous">       <!-- 1 -->
+<div class="z-sheet-side">           <!-- 2 -->
+<div class="z-sheet-current">        <!-- 5 -->
+<div class="z-floating">             <!-- 20 -->
 <div class="z-modal">                <!-- 50 -->
 ```
 
@@ -495,20 +493,17 @@ Each app's `tailwind.config.js` includes `../deps/oostkit_shared/**/*.ex` in its
 
 ```html
 <!-- Virtual Wall container -->
-<div class="bg-surface-wall min-h-screen p-section-gap">
+<div class="bg-surface-wall min-h-screen">
 
-  <!-- Main area -->
-  <div class="flex gap-section-gap mt-section-gap">
+  <!-- Sheet stack (server-driven show/hide via SheetStack JS hook) -->
+  <div id="workshop-carousel" phx-hook="SheetStack" data-index={@carousel_index}>
 
-    <!-- Previous Sheet -->
-    <div class="w-1/4 bg-surface-sheet rounded-sheet shadow-sheet-receded p-sheet-padding z-sheet-previous">
-      <h2 class="font-brand text-text-dark">Previous</h2>
-    </div>
-
-    <!-- Current Sheet -->
-    <div class="flex-1 bg-surface-sheet rounded-sheet shadow-sheet p-sheet-padding z-sheet-current">
-      <h2 class="font-brand text-text-dark text-2xl">Current Sheet</h2>
-      <span class="font-workshop text-score-lg text-score-high">8</span>
+    <!-- Each slide (only the active one is visible) -->
+    <div class="sheet-stack-slide">
+      <.sheet class="shadow-sheet p-6 w-[960px] h-full">
+        <h2 class="font-brand text-text-dark text-2xl">Sheet Title</h2>
+        <span class="font-workshop text-score-lg text-score-high">8</span>
+      </.sheet>
     </div>
 
   </div>
@@ -589,6 +584,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-13 | Doc consistency pass: fixed Available Classes hex values and class names to match `tailwind.preset.js`; corrected z-index scale throughout (was showing old values); updated Sheet Dimensions to 960px landscape; replaced stale "Previous Sheet" references with current show/hide carousel model; updated Components section (Participant List, Notes Panel) to match Pulse implementation; fixed Tailwind config path for umbrella structure. |
 | 2026-02-12 | Consolidated `header/1` component into shared library (`OostkitShared.Components`). Header bar centre title bumped from `text-sm font-medium` to `text-2xl font-semibold` for better visual hierarchy. |
 | 2026-02-12 | Sticky footer layout pattern applied to Portal and WRT root layouts (`flex min-h-screen flex-col` on body, `flex-1` on main). Portal auth pages use flex centering; settings and admin pages use consistent `px-6 sm:px-8` padding. |
 | 2026-02-12 | Header extracted to shared Elixir component library (`apps/oostkit_shared/`). All apps now use `<.header_bar>` from `OostkitShared.Components` instead of inline header markup. Portal adds footer bar. |

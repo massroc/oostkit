@@ -933,15 +933,15 @@ The wrap-up page displays all captured action items inline (beneath strengths/co
 
 **Unified carousel navigation:**
 
-All workshop phases (except lobby) share a single unified carousel (`workshop-carousel`) powered by [Embla Carousel](https://www.embla-carousel.com/) v8.6.0 (vendored ESM). Embla handles slide positioning, centering (`align: 'center'`), and smooth scroll animation. Drag/swipe is disabled (`watchDrag: false`) — navigation is click-only. Slides are progressively appended as the workshop advances. FABs drive backend state changes (synced via PubSub); clicking carousel slides is local-only navigation for reference.
+All workshop phases (except lobby) share a single unified carousel (`workshop-carousel`) powered by a minimal `SheetStack` JS hook. The server (LiveView) is the sole authority on stack position via `data-index`. The hook reads it on every `updated()` call and toggles `stack-active` / `stack-inactive` classes — only the active slide is visible (`display: flex`), all others are hidden (`display: none`). No scroll, swipe, or transforms. Navigation is server-driven via FABs and PubSub. See [docs/ux-implementation.md](docs/ux-implementation.md) for hook details.
 
 **Back Button Availability (FABs, facilitator only):**
 | Screen | Carousel Index | Facilitator | Participants |
 |--------|---------------|-------------|--------------|
 | Scoring (Q1) | 4 | Hidden (can't go further back) | Hidden |
 | Scoring (Q2+) | 4 | Back to previous question | Hidden |
-| Summary | 6 | Back to last question | Hidden |
-| Wrap-up | 7 | Back to summary | Hidden |
+| Summary | 5 | Back to last question | Hidden |
+| Wrap-up | 6 | Back to summary | Hidden |
 
 **Navigation Constraints:**
 - Back button cannot navigate earlier than Q1 (no return to intro from scoring)

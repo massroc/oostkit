@@ -125,6 +125,8 @@ This is CSS-driven — no JS intervention needed. The sheet is the scroll contai
 
 Viewport-fixed bar (`fixed bottom-6 z-50`) that is 960px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
 
+> **Note:** The design system defines `z-floating: 20` for FABs and `z-modal: 50` for modals. The current implementation uses `z-50` for both FABs and modals — FABs should ideally use `z-floating` so modals overlay them correctly.
+
 The container uses `pointer-events-none` with `pointer-events-auto` on the inner button wrapper, so clicks pass through to the sheet except where buttons are.
 
 ### Rendering
