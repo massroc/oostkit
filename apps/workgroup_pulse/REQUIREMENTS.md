@@ -223,7 +223,7 @@ This simplified approach ensures equal time per question and provides built-in f
 - Teams are free to spend more time where conversations are rich
 - The flex buffer provides breathing room
 
-### Future Enhancements (Not in MVP)
+### Future Timer Enhancements
 - Pause timer (e.g., for breaks)
 - Adjust remaining time mid-session
 - Overall workshop time remaining display

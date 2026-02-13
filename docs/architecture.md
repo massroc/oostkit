@@ -114,18 +114,25 @@ All apps share a unified visual identity via two mechanisms:
 - **Shadows**: `shadow-sheet` for card-like surfaces
 - **Brand stripe**: Magenta-to-purple gradient bar below the header
 
-**Shared Elixir components** — `apps/oostkit_shared/`:
-- A lightweight Elixir library (`OostkitShared.Components`) consumed by all apps as an in-umbrella dependency (`{:oostkit_shared, in_umbrella: true}`)
-- Provides shared Phoenix components consumed by all apps:
+**Shared Elixir library** — `apps/oostkit_shared/`:
+- A shared Elixir library consumed by all apps as an in-umbrella dependency (`{:oostkit_shared, in_umbrella: true}`)
+- **Phoenix components** (`OostkitShared.Components`) consumed by all apps:
   - `header_bar/1` — the consistent OOSTKit header: three-zone layout with `relative` nav — "OOSTKit" brand link on the left (configurable `:brand_url`), absolutely centered title (`pointer-events-none absolute inset-x-0 text-center font-brand text-2xl font-semibold`), and an `:actions` slot on the right for app-specific auth/user content
   - `header/1` — a page-level section header (`text-2xl font-bold`) with `:subtitle` and `:actions` slots, used for page titles across Portal and WRT
   - `icon/1` — Heroicon renderer (`<span class={[@name, @class]} />`)
   - `flash/1` — flash notice component with `:info` and `:error` variants
   - `flash_group/1` — standard flash group with client/server reconnection flashes
   - `show/2` and `hide/2` — JS command helpers for animated show/hide transitions
+- **Portal auth** — cross-app authentication modules used by WRT (and future apps):
+  - `OostkitShared.PortalAuthClient` — Finch HTTP client for validating Portal session tokens via `POST /api/internal/auth/validate`, with ETS cache (5-minute TTL)
+  - `OostkitShared.Plugs.PortalAuth` — reads `_oostkit_token` cookie, validates via `PortalAuthClient`, sets `:portal_user` assign. Dev bypass assigns fake admin when Portal is unreachable.
+  - `OostkitShared.Plugs.RequirePortalUser` — enforces authenticated Portal user, redirects to Portal login with `return_to` URL for unauthenticated requests
+  - Configured via `config :oostkit_shared, :portal_auth` with `api_url`, `api_key`, `login_url`, and `finch` keys
+- **Health checks** — `OostkitShared.HealthChecks` provides shared liveness/readiness logic. Each app's `HealthController` is a thin wrapper that delegates to the shared module with app-specific checks (repo, Oban, etc.)
 - Each app's `CoreComponents` module contains only app-specific components (e.g., Pulse's `sheet`, `facilitator_timer`; WRT's `stat_card`, `callout`; Portal's `tool_card`, `footer_bar`). Common UI primitives that were duplicated across apps have been consolidated into the shared lib.
 - `translate_error/1` remains per-app because each app's Petal Components config references its own `CoreComponents` module for error translation
 - Import chain in each app's `*Web` module: selective Petal Components imports (excluding `PetalComponents.Icon` since shared `icon/1` replaces it) -> app `CoreComponents` -> `OostkitShared.Components`
+- Dependencies: `phoenix_live_view`, `finch`, `jason`
 - CI path filter: changes to `apps/oostkit_shared/**` trigger all three app workflows
 
 Each app imports the Tailwind preset in its `assets/tailwind.config.js` (with content paths including the shared lib for Tailwind class scanning) and can extend with app-specific tokens. All three apps (Pulse, WRT, and Portal) now have the design system fully applied. See `docs/design-system.md` for the full specification.
@@ -138,7 +145,7 @@ Implemented via Portal app (`apps/portal/`). Portal owns platform-wide authentic
 
 - **Portal login** sets a subdomain-scoped `_oostkit_token` cookie (domain configurable via `COOKIE_DOMAIN` env var, e.g., `.oostkit.com`)
 - **Internal validation API** at `POST /api/internal/auth/validate` allows other apps to verify tokens. Protected by `INTERNAL_API_KEY` (shared secret via `ApiAuth` plug).
-- **Consumer apps** (e.g., WRT) read the `_oostkit_token` cookie and call the Portal API to resolve the user. Results are cached in ETS with a 5-minute TTL. WRT delegates all authentication to Portal — it has no login pages or password-based auth of its own.
+- **Consumer apps** (e.g., WRT) use the shared `OostkitShared.Plugs.PortalAuth` and `OostkitShared.Plugs.RequirePortalUser` plugs from `oostkit_shared` to read the `_oostkit_token` cookie and validate it via `OostkitShared.PortalAuthClient`. Results are cached in ETS with a 5-minute TTL. WRT delegates all authentication to Portal — it has no login pages or password-based auth of its own.
 - **Shared `SECRET_KEY_BASE`** across Portal and all consuming apps ensures cookie signing compatibility.
 - **Mail delivery** uses a configurable `mail_from` address (supports Postmark sender signatures in production).
 - **Dev auto-login**: In development, Portal's `DevAutoLogin` plug auto-logs in as a dev super admin (`admin@oostkit.local`) on first visit and sets the `_oostkit_token` cookie, making all cross-app routes (WRT, Pulse) accessible without manual login. WRT's `PortalAuth` plug has a complementary dev bypass: when no cross-app cookie is present in dev mode, it assigns a fake dev admin user so WRT routes work even without Portal running.
@@ -178,6 +185,8 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
 - Dev auto-login flow: auto-logs in as dev super admin on first visit, sets cross-app cookie, dev-only "Admin" button in header for manual re-login (`POST /dev/admin-login`)
 - System status page (`/admin/status`) with a `Portal.StatusPoller` GenServer that polls app health endpoints (`/health`) and GitHub Actions CI status every 5 minutes. Results are broadcast via PubSub to a LiveView (`PortalWeb.Admin.StatusLive`) that updates connected admin sessions in real time. Shows health status (response time, up/down) and recent CI workflow runs for Portal, Pulse, and WRT. Uses the Req HTTP client. The poller is conditionally started in the supervision tree (disabled in test via `:start_status_poller` config).
+- Rate limiting via PlugAttack (ETS-backed): login 5/min, magic link 3/min, password reset 3/min, registration 5/min, internal API 60/min, general 120/min per IP. Returns 429 with JSON error. Configurable enable/disable.
+- Audit logging: append-only `audit_logs` table tracking admin actions (tool toggles, user CRUD, signup exports) with actor, action, entity, changes map, and IP address. `Portal.Audit` context provides `log/5`, `list_recent/1`, `list_for_entity/3`.
 
 **Deferred:** Admin dashboard trends/charts.
 
@@ -187,6 +196,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - `tools` table -- 12 tools with name, tagline, status, URL, audience, category, sort_order (per category), admin kill switch
 - `interest_signups` table -- email captures from coming-soon and app detail pages
 - `user_tool_interests` table -- registration tool interest (user_id + tool_id join table)
+- `audit_logs` table -- append-only admin action log (actor_id, actor_email, action, entity_type, entity_id, changes map, ip_address)
 
 **Environment variables:**
 - `DATABASE_URL` -- PostgreSQL connection
@@ -226,7 +236,7 @@ GitHub Actions with path filtering. CI runs from the umbrella root, compiling an
 
 ### Health Checks
 
-All apps expose standardised health check endpoints (no authentication required):
+All apps expose standardised health check endpoints (no authentication required). Health check logic is shared via `OostkitShared.HealthChecks` (`apps/oostkit_shared/`) — each app's `HealthController` is a thin wrapper that delegates to the shared module with app-specific checks (e.g., `check_database(Repo)`, `check_process(Oban)`).
 
 | Endpoint | Purpose | Response |
 |----------|---------|----------|
@@ -290,10 +300,10 @@ Portal validates `return_to` URLs by comparing scheme + host + port against its 
 
 **Secrets required:**
 - Portal: `INTERNAL_API_KEY`, `COOKIE_DOMAIN` (e.g., `.oostkit.com`)
-- WRT: `PORTAL_API_KEY` (same value as Portal's `INTERNAL_API_KEY`), `PORTAL_API_URL`
+- Consumer apps (WRT): `PORTAL_API_KEY` (same value as Portal's `INTERNAL_API_KEY`), `PORTAL_API_URL`, `PORTAL_LOGIN_URL` — configured under `config :oostkit_shared, :portal_auth` in runtime.exs
 - Both: must share the same `SECRET_KEY_BASE`
 
-**Dev mode bypass:** In development, Portal auto-sets the `_oostkit_token` cookie via `DevAutoLogin`. If WRT is running without Portal (or the cookie is absent), WRT's `PortalAuth` plug assigns a fake dev super admin so all routes work without requiring Portal to be running.
+**Dev mode bypass:** In development, Portal auto-sets the `_oostkit_token` cookie via `DevAutoLogin`. If a consumer app (e.g., WRT) is running without Portal (or the cookie is absent), the shared `OostkitShared.Plugs.PortalAuth` plug assigns a fake dev super admin so all routes work without requiring Portal to be running.
 
 ### Future Options
 

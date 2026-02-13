@@ -4,6 +4,7 @@ defmodule PortalWeb.Admin.ToolsLive do
   """
   use PortalWeb, :live_view
 
+  alias Portal.Audit
   alias Portal.Tools
   alias Portal.Tools.Tool
 
@@ -119,8 +120,12 @@ defmodule PortalWeb.Admin.ToolsLive do
     tool = Tools.get_tool!(id)
 
     case Tools.toggle_admin_enabled(tool) do
-      {:ok, _tool} ->
+      {:ok, updated_tool} ->
         action = if tool.admin_enabled, do: "disabled", else: "enabled"
+
+        Audit.log(socket.assigns.current_scope.user, "tool.toggle", "tool", tool.id,
+          changes: %{admin_enabled: updated_tool.admin_enabled}
+        )
 
         {:noreply,
          socket

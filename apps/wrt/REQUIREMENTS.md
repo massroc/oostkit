@@ -230,10 +230,10 @@ or password-based auth of its own. Users access WRT through the Portal dashboard
 arriving already authenticated via Portal's `_oostkit_token` cookie.
 
 #### F8.1: Portal Integration
-- `PortalAuthClient` calls Portal's `POST /api/internal/auth/validate` endpoint
+- `OostkitShared.PortalAuthClient` (from shared lib) calls Portal's `POST /api/internal/auth/validate` endpoint
 - Results cached in ETS with 5-minute TTL (avoids per-request HTTP calls)
-- `PortalAuth` plug reads `_oostkit_token` cookie and sets `:portal_user` assign on conn
-- Config: `portal_api_url`, `portal_api_key`, `portal_login_url`
+- `OostkitShared.Plugs.PortalAuth` reads `_oostkit_token` cookie and sets `:portal_user` assign on conn
+- Config: `config :oostkit_shared, :portal_auth` with `api_url`, `api_key`, `login_url`, `finch` keys
 
 #### F8.2: Entry Flow (Landing Page)
 - `GET /` resolves the user's organisation by matching Portal email to `admin_email`
@@ -245,7 +245,7 @@ arriving already authenticated via Portal's `_oostkit_token` cookie.
 - `POST /dismiss-landing` handles the "don't show again" action and redirects to manage
 
 #### F8.3: Org Admin Access
-- `RequirePortalUser` plug checks any valid Portal user is authenticated and enabled
+- `OostkitShared.Plugs.RequirePortalUser` plug checks any valid Portal user is authenticated and enabled
 - All routes (root `/` and org-scoped `/org/:slug/*`) require Portal authentication
 - Organisation/campaign admin role enforcement is handled within the tenant context
 - When redirecting unauthenticated users to Portal login, the plug appends a `return_to` query param with the user's current WRT URL (e.g., `?return_to=http://localhost:4001/org/acme/manage`), so Portal can redirect back after login

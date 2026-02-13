@@ -15,8 +15,8 @@ defmodule WrtWeb.Router do
   end
 
   pipeline :require_portal_user do
-    plug WrtWeb.Plugs.PortalAuth
-    plug WrtWeb.Plugs.RequirePortalUser
+    plug OostkitShared.Plugs.PortalAuth
+    plug OostkitShared.Plugs.RequirePortalUser, endpoint: WrtWeb.Endpoint
   end
 
   # Health check routes (no auth required)

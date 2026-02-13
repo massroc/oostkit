@@ -23,7 +23,7 @@ defmodule Wrt.Application do
       # Start the Finch HTTP client for Swoosh
       {Finch, name: Wrt.Finch},
       # Start Portal auth ETS cache
-      WrtWeb.PortalAuthClient,
+      OostkitShared.PortalAuthClient,
       # Start ETS storage for rate limiting
       {PlugAttack.Storage.Ets, name: WrtWeb.Plugs.RateLimiter.Storage, clean_period: 60_000},
       # Start the Endpoint (http/https)

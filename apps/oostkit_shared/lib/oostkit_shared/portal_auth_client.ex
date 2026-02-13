@@ -1,9 +1,17 @@
-defmodule WrtWeb.PortalAuthClient do
+defmodule OostkitShared.PortalAuthClient do
   @moduledoc """
   HTTP client for validating Portal session tokens.
 
   Calls Portal's `/api/internal/auth/validate` endpoint and caches
   results in ETS with a 5-minute TTL to minimize API calls.
+
+  ## Configuration
+
+      config :oostkit_shared, :portal_auth,
+        api_url: "http://localhost:4002",
+        api_key: "dev_internal_api_key",
+        finch: MyApp.Finch
+
   """
 
   require Logger
@@ -66,8 +74,10 @@ defmodule WrtWeb.PortalAuthClient do
   end
 
   defp do_validate(encoded_token) do
-    url = portal_api_url() <> "/api/internal/auth/validate"
-    api_key = Application.get_env(:wrt, :portal_api_key) || ""
+    config = portal_auth_config()
+    url = config[:api_url] <> "/api/internal/auth/validate"
+    api_key = config[:api_key] || ""
+    finch_name = config[:finch]
 
     body = Jason.encode!(%{token: encoded_token})
 
@@ -78,7 +88,7 @@ defmodule WrtWeb.PortalAuthClient do
 
     request = Finch.build(:post, url, headers, body)
 
-    case Finch.request(request, Wrt.Finch) do
+    case Finch.request(request, finch_name) do
       {:ok, %Finch.Response{status: 200, body: resp_body}} ->
         case Jason.decode(resp_body) do
           {:ok, %{"valid" => true, "user" => user}} -> {:ok, user}
@@ -93,7 +103,7 @@ defmodule WrtWeb.PortalAuthClient do
     end
   end
 
-  defp portal_api_url do
-    Application.get_env(:wrt, :portal_api_url, "http://localhost:4002")
+  defp portal_auth_config do
+    Application.get_env(:oostkit_shared, :portal_auth, [])
   end
 end

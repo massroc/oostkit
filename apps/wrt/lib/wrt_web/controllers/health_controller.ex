@@ -1,70 +1,21 @@
 defmodule WrtWeb.HealthController do
   @moduledoc """
   Health check endpoints for load balancers and monitoring.
-
-  Provides:
-  - /health - Basic liveness check
-  - /health/ready - Readiness check including database connectivity
   """
   use WrtWeb, :controller
 
-  alias Wrt.Repo
+  alias OostkitShared.HealthChecks
 
-  @doc """
-  Basic liveness check.
-  Returns 200 if the application is running.
-  """
   def index(conn, _params) do
-    json(conn, %{
-      status: "ok",
-      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-    })
+    HealthChecks.liveness(conn)
   end
 
-  @doc """
-  Readiness check.
-  Verifies database connectivity and other dependencies.
-  """
   def ready(conn, _params) do
     checks = %{
-      database: check_database(),
-      oban: check_oban()
+      database: HealthChecks.check_database(Wrt.Repo),
+      oban: HealthChecks.check_process(Oban)
     }
 
-    all_ok = Enum.all?(checks, fn {_name, status} -> status == :ok end)
-
-    status_code = if all_ok, do: 200, else: 503
-
-    conn
-    |> put_status(status_code)
-    |> json(%{
-      status: if(all_ok, do: "ready", else: "not_ready"),
-      timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
-      checks: format_checks(checks)
-    })
+    HealthChecks.readiness(conn, checks)
   end
-
-  defp check_database do
-    Repo.query!("SELECT 1")
-    :ok
-  rescue
-    _ -> :error
-  end
-
-  defp check_oban do
-    if Process.whereis(Oban) do
-      :ok
-    else
-      :error
-    end
-  end
-
-  defp format_checks(checks) do
-    Map.new(checks, fn {name, status} ->
-      {name, %{status: status_string(status)}}
-    end)
-  end
-
-  defp status_string(:ok), do: "ok"
-  defp status_string(:error), do: "error"
 end

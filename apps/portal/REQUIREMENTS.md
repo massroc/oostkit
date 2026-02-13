@@ -326,6 +326,7 @@ The admin toggle is an operational kill switch -- if something goes wrong with a
 - Tailwind CSS for styling
 - PostgreSQL for account data
 - Req HTTP client (used by StatusPoller for health checks and GitHub API calls)
+- PlugAttack for rate limiting
 
 ### Deployment
 
@@ -350,6 +351,35 @@ Key requirements (all met):
 - Session management
 - Cross-subdomain cookie support via configurable `COOKIE_DOMAIN`
 - Internal API for token validation by other apps
+
+### Rate Limiting
+
+Portal uses PlugAttack for per-IP rate limiting, plugged in the endpoint. Rate limits are enforced per IP address with a 1-minute sliding window. Blocked requests receive HTTP 429 with a JSON error body and are logged as security events.
+
+| Route | Limit | Purpose |
+|-------|-------|---------|
+| `POST /users/log-in` | 5/min | Prevent brute-force login |
+| `POST /users/log-in/magic-link/*` | 3/min | Prevent magic link abuse |
+| `POST /users/reset-password` | 3/min | Prevent password reset abuse |
+| `POST /users/register` | 5/min | Prevent registration spam |
+| `POST /api/internal/*` | 60/min | Internal API (used by WRT/other apps) |
+| All other requests | 120/min | General flood protection |
+
+Responses include `x-ratelimit-limit`, `x-ratelimit-remaining`, and `x-ratelimit-reset` headers. Rate limiting can be disabled via config (`config :portal, PortalWeb.Plugs.RateLimiter, enabled: false`) for testing.
+
+### Audit Logging
+
+Admin actions are logged to an append-only `audit_logs` table for accountability and debugging. Each entry records the actor (user ID + email), the action performed, the entity affected, a changes map, and optional IP address.
+
+**Audited actions:**
+- Tool management: toggling admin_enabled on/off (`tool.toggle`)
+- User management: creating, updating, and disabling users (`user.create`, `user.update`, `user.disable`)
+- Signup exports: CSV downloads (`signup_export.download`)
+
+**Audit context API (`Portal.Audit`):**
+- `log/5` — records an audit event
+- `list_recent/1` — retrieves recent entries (most recent first)
+- `list_for_entity/3` — retrieves entries for a specific entity
 
 ### Tool URL and Status Resolution
 

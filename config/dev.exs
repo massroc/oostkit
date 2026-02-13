@@ -123,9 +123,12 @@ config :wrt, WrtWeb.Endpoint,
 config :wrt, dev_routes: true
 
 config :wrt, :portal_url, "http://localhost:4002"
-config :wrt, :portal_api_url, "http://localhost:4002"
-config :wrt, :portal_api_key, "dev_internal_api_key"
-config :wrt, :portal_login_url, "http://localhost:4002/users/log-in"
+
+config :oostkit_shared, :portal_auth,
+  api_url: "http://localhost:4002",
+  api_key: "dev_internal_api_key",
+  login_url: "http://localhost:4002/users/log-in",
+  finch: Wrt.Finch
 
 # =============================================================================
 # Shared dev settings

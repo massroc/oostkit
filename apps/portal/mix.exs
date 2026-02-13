@@ -72,6 +72,9 @@ defmodule Portal.MixProject do
       # HTTP client
       {:req, "~> 0.5"},
 
+      # Rate limiting
+      {:plug_attack, "~> 0.4"},
+
       # UI Components
       {:petal_components, "~> 2.0"},
       {:phoenix_html_helpers, "~> 1.0"},

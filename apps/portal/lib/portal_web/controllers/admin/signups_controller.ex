@@ -4,11 +4,17 @@ defmodule PortalWeb.Admin.SignupsController do
   """
   use PortalWeb, :controller
 
+  alias Portal.Audit
   alias Portal.Marketing
 
   def export(conn, _params) do
     signups = Marketing.list_interest_signups()
     csv = build_csv(signups)
+
+    Audit.log(conn.assigns.current_scope.user, "signups.export", "signup_export", nil,
+      changes: %{count: length(signups)},
+      ip_address: to_string(:inet.ntoa(conn.remote_ip))
+    )
 
     conn
     |> put_resp_content_type("text/csv")
