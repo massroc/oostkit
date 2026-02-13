@@ -21,8 +21,7 @@ defmodule Portal.Application do
         # Start the Finch HTTP client for Swoosh
         {Finch, name: Portal.Finch},
         # Start the ETS storage for rate limiting
-        {PlugAttack.Storage.Ets,
-         name: PortalWeb.Plugs.RateLimiter.Storage, clean_period: 60_000},
+        {PlugAttack.Storage.Ets, name: PortalWeb.Plugs.RateLimiter.Storage, clean_period: 60_000},
         # Start the Endpoint (http/https)
         PortalWeb.Endpoint
       ] ++ maybe_status_poller()

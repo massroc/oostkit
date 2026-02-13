@@ -131,7 +131,9 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoringComponent do
 
   defp render_score_value(%{is_future: true}), do: "—"
 
-  defp render_score_value(%{is_past: true, score_data: %{has_score: true, value: value}} = assigns) do
+  defp render_score_value(
+         %{is_past: true, score_data: %{has_score: true, value: value}} = assigns
+       ) do
     GridHelpers.format_score_value(assigns.question.scale_type, value)
   end
 
