@@ -76,11 +76,11 @@ def handle_carousel_navigate(socket, _carousel, _index)           # no-op fallba
 
 ### Notes/Actions Side Panel
 
-The notes/actions panel is **not** a carousel slide. It is a fixed-position panel on the right edge of the viewport (z-20), outside the carousel DOM.
+The notes/actions panel is **not** a carousel slide. It is a fixed-position panel on the right edge of the viewport (z-floating), outside the carousel DOM.
 
 - **Peek tab** (70px wide, read-only preview showing notes/actions headings and content) is visible on slides 4-6 (scoring, summary, wrap-up)
 - **Reveal:** Clicking the peek tab fires `reveal_notes`, setting `notes_revealed: true` and showing the full 480px editable panel
-- **Dismiss:** Clicking outside the panel (transparent backdrop at z-10) fires `hide_notes`, setting `notes_revealed: false`
+- **Dismiss:** Clicking outside the panel (transparent backdrop at z-sheet-side) fires `hide_notes`, setting `notes_revealed: false`
 - `handle_focus_sheet(:notes)` sets `notes_revealed: true` instead of changing the carousel index
 
 ### Intro Slides in Later Phases
@@ -123,9 +123,9 @@ This is CSS-driven — no JS intervention needed. The sheet is the scroll contai
 
 ### Positioning
 
-Viewport-fixed bar (`fixed bottom-6 z-50`) that is 960px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
+Viewport-fixed bar (`fixed bottom-6 z-floating`) that is 960px wide, horizontally centred (`left-1/2 -translate-x-1/2`), with padding matching the sheet.
 
-> **Note:** The design system defines `z-floating: 20` for FABs and `z-modal: 50` for modals. The current implementation uses `z-50` for both FABs and modals — FABs should ideally use `z-floating` so modals overlay them correctly.
+Score overlays and export modals use `z-modal` (50) to appear above floating action buttons, ensuring modals are always in front during interaction.
 
 The container uses `pointer-events-none` with `pointer-events-auto` on the inner button wrapper, so clicks pass through to the sheet except where buttons are.
 

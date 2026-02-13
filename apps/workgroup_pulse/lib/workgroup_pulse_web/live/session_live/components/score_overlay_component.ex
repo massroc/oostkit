@@ -47,7 +47,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
 
   defp render_score_overlay(assigns) do
     ~H"""
-    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter">
+    <div class="fixed inset-0 z-modal flex items-center justify-center score-overlay-enter">
       <!-- Backdrop -->
       <div class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm" phx-click="close_score_overlay">
       </div>
@@ -215,7 +215,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.ScoreOverlayComponent do
     assigns = assign(assigns, :popup_question, popup_question)
 
     ~H"""
-    <div class="fixed inset-0 z-50 flex items-center justify-center score-overlay-enter">
+    <div class="fixed inset-0 z-modal flex items-center justify-center score-overlay-enter">
       <!-- Backdrop -->
       <div
         class="absolute inset-0 bg-ink-blue/30 backdrop-blur-sm"

@@ -9,17 +9,17 @@
   <div class="mt-8">
     <%= cond do %>
       <% Wrt.Platform.Organisation.pending?(@org) -> %>
-        <p class="text-gray-600 mb-6">
+        <p class="text-zinc-600 mb-6">
           Your organisation's registration is pending approval.
           You'll be able to access the tool once it has been approved.
         </p>
       <% Wrt.Platform.Organisation.suspended?(@org) -> %>
-        <p class="text-gray-600 mb-6">
+        <p class="text-zinc-600 mb-6">
           Your organisation has been suspended.
           Please contact support for more information.
         </p>
       <% true -> %>
-        <p class="text-gray-600 mb-6">
+        <p class="text-zinc-600 mb-6">
           Your organisation is not currently active.
           Please contact support for more information.
         </p>
