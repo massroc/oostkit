@@ -65,6 +65,8 @@ The functional tool hub. Accessible to everyone (anonymous and logged-in). Page 
 
 Cards are compact (name, tagline, status badge, action button) -- no description text or audience badges to fit the narrower columns.
 
+**Visual emphasis:** "Coming soon" badges should be visually secondary (muted background + darker gold text via `accent-gold-text` for contrast) so the live tool (Pulse) remains the clear primary action. As the catalogue grows, consider `line-clamp-2` for taglines and a `md:grid-cols-2` breakpoint so columns don't feel cramped at mid-width.
+
 **Tool catalogue (12 tools, by category):**
 
 | Category | Tool | Status |

@@ -292,9 +292,10 @@ Three Tailwind token classes provide accent colours across all phase components.
 
 ### Mobile Considerations
 
-- Grid may need horizontal scroll or condensed view
-- Score overlay is full-width on mobile (mx-4 margin)
-- Side panels may stack or become drawers
+- **< 640px (phones):** Scoring grid uses `overflow-x: auto` with a visible scroll cue (gradient fade on right edge or scroll indicator). FABs use a thin bottom bar to avoid covering grid content. Notes panel is a full-screen overlay (not a side drawer).
+- Score overlay is full-width on mobile (`mx-4` margin)
+- Intro slides and summary content stack vertically in single column
+- Touch targets: minimum 44x44px for all interactive elements
 
 ### Stack Navigation
 

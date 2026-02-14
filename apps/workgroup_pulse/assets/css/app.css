@@ -13,22 +13,15 @@
 
 /* Traffic light colors for score visualization */
 :root {
+  /* Traffic light colors for score visualization */
   --color-green: #22c55e;
   --color-amber: #f59e0b;
   --color-red: #ef4444;
-
-  /* Brand colors from Desirable Futures Group */
-  --color-primary: #3b82f6;
-  --color-primary-dark: #2563eb;
-  --color-background: #111827;
-  --color-surface: #1f2937;
-  --color-text: #f9fafb;
-  --color-text-muted: #9ca3af;
 }
 
-/* Accessibility - focus states */
+/* Accessibility - focus states (design system: purple outline) */
 *:focus-visible {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900;
+  @apply outline-none ring-2 ring-accent-purple ring-offset-2 ring-offset-surface-sheet;
 }
 
 
