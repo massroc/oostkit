@@ -7,6 +7,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.NotesPanelComponent do
   use Phoenix.Component
 
   import WorkgroupPulseWeb.CoreComponents, only: [sheet: 1]
+  import OostkitShared.Components, only: [icon: 1]
 
   attr :notes_revealed, :boolean, required: true
   attr :carousel_index, :integer, required: true
@@ -27,6 +28,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.NotesPanelComponent do
       <%= if @carousel_index in 4..6 do %>
         <button
           phx-click="reveal_notes"
+          aria-label="Open notes and actions panel"
           class="fixed top-[52px] right-0 bottom-0 w-[70px] z-floating py-6 cursor-pointer group text-left"
         >
           <.sheet
@@ -38,6 +40,7 @@ defmodule WorkgroupPulseWeb.SessionLive.Components.NotesPanelComponent do
             <div class="mb-6">
               <div class="mb-2">
                 <div class="font-workshop text-lg font-bold text-ink-blue underline underline-offset-[3px] decoration-[1.5px] decoration-ink-blue/20 opacity-85">
+                  <.icon name="hero-pencil-square" class="inline h-4 w-4 mr-0.5 align-text-bottom" />
                   Notes
                   <%= if length(@question_notes) > 0 do %>
                     <span class="text-sm font-normal text-ink-blue/50 ml-1">

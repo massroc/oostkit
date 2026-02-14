@@ -322,6 +322,42 @@ defmodule OostkitShared.Components do
     """
   end
 
+  @doc """
+  Renders an inline loading spinner for buttons and background operations.
+
+  ## Examples
+
+      <.loading_spinner />
+      <.loading_spinner class="h-6 w-6" label="Saving" />
+  """
+  attr :class, :string, default: "h-4 w-4"
+  attr :label, :string, default: "Loading"
+
+  def loading_spinner(assigns) do
+    ~H"""
+    <span class="inline-flex items-center gap-1.5" role="status" aria-label={@label}>
+      <.icon name="hero-arrow-path" class={"animate-spin #{@class}"} />
+      <span class="sr-only">{@label}</span>
+    </span>
+    """
+  end
+
+  @doc """
+  Renders a skeleton placeholder block matching content shape.
+
+  ## Examples
+
+      <.skeleton />
+      <.skeleton class="h-8 w-24" />
+  """
+  attr :class, :string, default: "h-4 w-full"
+
+  def skeleton(assigns) do
+    ~H"""
+    <div aria-hidden="true" class={["animate-pulse rounded bg-zinc-200", @class]} />
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

@@ -62,7 +62,7 @@ defmodule PortalWeb.CoreComponents do
             Launch <.icon name="hero-arrow-top-right-on-square" class="ml-1 h-3.5 w-3.5" />
           </a>
         <% else %>
-          <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2 py-0.5 text-xs font-medium text-ok-gold-800">
+          <span class="inline-flex items-center rounded-full bg-ok-gold-100 px-2 py-0.5 text-xs font-medium text-accent-gold-text">
             Coming soon
           </span>
         <% end %>

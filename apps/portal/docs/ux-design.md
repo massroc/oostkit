@@ -119,10 +119,12 @@ columns on desktop (stacked on mobile):
 | 3 | `team_workshops` | Team Workshops |
 
 Each column has a category heading and a vertical stack of compact tool cards beneath it.
-The layout uses `md:grid-cols-3` with `gap-8` between columns. Within each category,
-cards are arranged using `grid gap-4` to ensure equal spacing. This replaced the
-earlier flat full-width card list — the categorized grid better organises the growing
-tool catalogue (12 tools) and gives each category its own visual lane.
+The layout uses a responsive grid: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` with
+`gap-8` between columns. This provides single-column on mobile, two-column on tablets,
+and three-column on desktop. Within each category, cards are arranged using `grid gap-4`
+to ensure equal spacing. This replaced the earlier flat full-width card list — the
+categorized grid better organises the growing tool catalogue (12 tools) and gives each
+category its own visual lane.
 
 **Sorting:** Within each category, live tools are sorted to the top. This ensures
 active tools are immediately visible without scrolling past coming-soon placeholders.
@@ -148,7 +150,7 @@ Cards have three possible states:
 | State | When | Button | Visual Treatment |
 |-------|------|--------|-----------------|
 | **Live & open** | Pulse now | "Launch" → direct link | Full colour, active |
-| **Coming soon** | WRT, Search Conference now | No action button, "Coming soon" badge (gold: `bg-ok-gold-100 text-ok-gold-800`) | Muted/greyed, still readable |
+| **Coming soon** | WRT, Search Conference now | No action button, "Coming soon" badge (gold: `bg-ok-gold-100 text-accent-gold-text`) | Muted/greyed, still readable |
 | **Live & locked** | WRT later (when auth is live) | "Log in to access" (anon) / "Launch" (logged in) | Full colour, lock icon for anon |
 
 #### Tool Catalogue (12 tools, by category)
@@ -768,8 +770,10 @@ demand. The last polled timestamp is displayed at the bottom of the page.
 - Uses the standard admin layout (`max-w-4xl mx-auto px-6 sm:px-8`)
 - Section cards use `bg-surface-sheet shadow-sheet rounded-xl border border-zinc-200`
 - Section headings at `text-lg font-semibold text-text-dark`
-- Waiting state: "Waiting for first health check..." / "Waiting for first CI status check..."
-  displayed in muted text when no data has been polled yet
+- Waiting state: skeleton placeholder cards (matching the shape of health/CI cards) are
+  displayed while waiting for the first poll. Each skeleton card shows animated pulse
+  placeholders for the status dot, title, and detail lines. This uses the shared
+  `<.skeleton>` component from `OostkitShared.Components`.
 
 ---
 
@@ -946,7 +950,13 @@ Gold (`ok-gold`) is used prominently across the portal for warmth and visual con
 
 | Element | Classes | Context |
 |---------|---------|---------|
-| "Coming soon" badges | `bg-ok-gold-100 text-ok-gold-800` | Landing page, dashboard tool cards, app detail pages, admin tools page |
+| "Coming soon" badges | `bg-ok-gold-100 text-accent-gold-text` | Landing page, dashboard tool cards, app detail pages, admin tools page |
+
+**Accessibility note:** The badge text uses `text-accent-gold-text` (`#A67C00`) instead
+of `text-ok-gold-800` to meet WCAG AA contrast requirements (4.5:1 ratio against the
+`bg-ok-gold-100` background). The `accent-gold-text` token is defined in the shared
+Tailwind preset specifically for cases where gold text needs sufficient contrast on
+light backgrounds.
 
 ---
 
