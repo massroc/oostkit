@@ -11,7 +11,7 @@
 </div>
 <!-- Tool Categories Grid -->
 <div class="mx-auto max-w-6xl px-6 pb-16 sm:px-8 lg:px-12">
-  <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+  <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
     <div :for={category <- @categories}>
       <h2 class="mb-4 text-lg font-semibold text-text-dark">
         {Portal.Tools.category_label(category)}

@@ -45,11 +45,11 @@ defmodule PortalWeb.Admin.StatusLiveTest do
       assert html =~ "Auto-refreshes every 5 minutes"
     end
 
-    test "shows waiting message when no data yet", %{conn: conn} do
+    test "shows skeleton placeholders when no data yet", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/admin/status")
 
-      assert html =~ "Waiting for first health check"
-      assert html =~ "Waiting for first CI status check"
+      assert html =~ "animate-pulse"
+      refute html =~ "Waiting for first"
     end
 
     test "refresh button triggers new poll", %{conn: conn} do

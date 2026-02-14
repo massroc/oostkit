@@ -57,6 +57,8 @@ SessionLive.Show (root LiveView)
 │   ├── .header               # Page-level section header (text-2xl font-bold, subtitle + actions slots)
 │   ├── .icon                 # Heroicon renderer
 │   ├── .flash / .flash_group # Flash notices with client/server reconnection
+│   ├── .loading_spinner       # Animated spinner with screen-reader label
+│   ├── .skeleton              # Animated pulse placeholder for skeleton loading
 │   ├── show/2, hide/2        # JS command helpers for animated transitions
 │
 ├── App-Specific (in CoreComponents)
@@ -133,11 +135,11 @@ The `SheetStack` JS hook sends `carousel_navigate` events with `{ index, carouse
 
 **File:** `lib/workgroup_pulse_web/live/session_live/components/notes_panel_component.ex`
 
-**Purpose:** Renders the notes/actions side panel fixed to the right edge of the viewport. Includes a 70px read-only peek (showing notes/actions headings and content preview) and a 480px expanded editable panel.
+**Purpose:** Renders the notes/actions side panel fixed to the right edge of the viewport. Includes a 70px read-only peek (showing notes/actions headings and content preview, with `hero-pencil-square` icon and `aria-label` for accessibility) and a 480px expanded editable panel.
 
 **Attrs (7):** `notes_revealed`, `carousel_index`, `question_notes`, `note_input`, `all_actions`, `action_count`, `action_input`
 
-**Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20). A 70px read-only peek is visible on slides 4-6 (scoring, summary, wrap-up). Clicking the peek sets `notes_revealed: true`, revealing a 480px editable panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
+**Notes/Actions Panel** — Fixed-position panel on the right edge of the viewport (z-20). A 70px read-only peek is visible on slides 4-6 (scoring, summary, wrap-up). The peek tab includes a `hero-pencil-square` icon and `aria-label="Open notes and actions panel"` for discoverability and screen-reader accessibility. Clicking the peek sets `notes_revealed: true`, revealing a 480px editable panel. Clicking outside (transparent backdrop at z-10) fires `hide_notes` to dismiss. Not a carousel slide.
 
 **Actions in Scoring Phase:**
 Actions are managed during the scoring phase via the notes/actions side panel (below notes). The completed/wrap-up page displays all captured action items in a dedicated section (beneath strengths/concerns) and includes the action count for export purposes.
@@ -555,5 +557,5 @@ The `load_scores/3` function uses participant data from socket assigns rather th
 
 ---
 
-*Document Version: 1.11 — Removed app_header from CoreComponents (session view now uses shared header_bar directly); trimmed unused Petal imports to Button/Field/Form/Input/Link*
-*Last Updated: 2026-02-13*
+*Document Version: 1.12 — Notes panel peek tab: documented `hero-pencil-square` icon and `aria-label` accessibility attributes*
+*Last Updated: 2026-02-14*

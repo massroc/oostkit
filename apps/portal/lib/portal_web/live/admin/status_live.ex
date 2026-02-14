@@ -59,26 +59,41 @@ defmodule PortalWeb.Admin.StatusLive do
       <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
         <h2 class="text-lg font-semibold text-text-dark mb-4">App Health</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <.health_card :for={{name, data} <- @health} name={name} data={data} />
-          <div
-            :if={@health == %{}}
-            class="col-span-3 text-center text-sm text-zinc-400 py-4"
-          >
-            Waiting for first health check...
-          </div>
+          <%= if @health == %{} do %>
+            <div :for={_ <- 1..3} class="rounded-lg border border-zinc-200 p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <.skeleton class="h-2.5 w-2.5 rounded-full" />
+                <.skeleton class="h-4 w-24" />
+              </div>
+              <div class="space-y-1">
+                <.skeleton class="h-3 w-20" />
+                <.skeleton class="h-3 w-32" />
+              </div>
+            </div>
+          <% else %>
+            <.health_card :for={{name, data} <- @health} name={name} data={data} />
+          <% end %>
         </div>
       </div>
 
       <div class="rounded-xl border border-zinc-200 bg-surface-sheet p-6 shadow-sheet mb-8">
         <h2 class="text-lg font-semibold text-text-dark mb-4">CI Status</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <.ci_card :for={{name, runs} <- @ci} name={name} runs={runs} />
-          <div
-            :if={@ci == %{}}
-            class="col-span-3 text-center text-sm text-zinc-400 py-4"
-          >
-            Waiting for first CI status check...
-          </div>
+          <%= if @ci == %{} do %>
+            <div :for={_ <- 1..3} class="rounded-lg border border-zinc-200 p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <.skeleton class="h-2.5 w-2.5 rounded-full" />
+                <.skeleton class="h-4 w-20" />
+              </div>
+              <div class="space-y-1">
+                <.skeleton class="h-3 w-28" />
+                <.skeleton class="h-3 w-24" />
+                <.skeleton class="h-3 w-16" />
+              </div>
+            </div>
+          <% else %>
+            <.ci_card :for={{name, runs} <- @ci} name={name} runs={runs} />
+          <% end %>
         </div>
       </div>
 

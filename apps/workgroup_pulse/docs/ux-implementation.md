@@ -78,7 +78,7 @@ def handle_carousel_navigate(socket, _carousel, _index)           # no-op fallba
 
 The notes/actions panel is **not** a carousel slide. It is a fixed-position panel on the right edge of the viewport (z-floating), outside the carousel DOM.
 
-- **Peek tab** (70px wide, read-only preview showing notes/actions headings and content) is visible on slides 4-6 (scoring, summary, wrap-up)
+- **Peek tab** (70px wide, read-only preview showing notes/actions headings and content) is visible on slides 4-6 (scoring, summary, wrap-up). Includes a `hero-pencil-square` icon next to the "Notes" heading and `aria-label="Open notes and actions panel"` for accessibility.
 - **Reveal:** Clicking the peek tab fires `reveal_notes`, setting `notes_revealed: true` and showing the full 480px editable panel
 - **Dismiss:** Clicking outside the panel (transparent backdrop at z-sheet-side) fires `hide_notes`, setting `notes_revealed: false`
 - `handle_focus_sheet(:notes)` sets `notes_revealed: true` instead of changing the carousel index
@@ -193,6 +193,8 @@ Components are split between `OostkitShared.Components` (`apps/oostkit_shared/`)
 | `<.icon>` | Heroicon renderer (`<span class={[@name, @class]} />`) |
 | `<.flash>` | Flash notice with `:info` / `:error` variants, dismiss-on-click |
 | `<.flash_group>` | Standard flash group with client/server reconnection flashes |
+| `<.loading_spinner>` | Animated spinner with screen-reader label (`role="status"`, `aria-label`). Attrs: `class`, `label` |
+| `<.skeleton>` | Animated pulse placeholder for skeleton loading screens. Attr: `class` |
 | `show/2`, `hide/2` | JS command helpers for animated show/hide transitions |
 
 ### Layouts
@@ -328,6 +330,6 @@ Hidden off-screen (`overflow:hidden; height:0; width:0`) until the JS hook revea
 
 ---
 
-*Document Version: 1.14 — Removed app_header section (session view now uses shared header_bar directly); removed redundant Heroicons CSS (Tailwind plugin handles it)*
+*Document Version: 1.15 — Notes panel peek tab: documented `hero-pencil-square` icon and `aria-label` for accessibility*
 *Created: 2026-02-07*
-*Updated: 2026-02-13*
+*Updated: 2026-02-14*

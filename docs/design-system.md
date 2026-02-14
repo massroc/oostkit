@@ -305,7 +305,7 @@ Scores (0-10) are central to workshop apps. Display them consistently:
 
 ### Notes/Actions Side Panel
 
-- **Peek tab**: 70px wide, fixed-position on right edge of viewport, read-only content preview
+- **Peek tab**: 70px wide, fixed-position on right edge of viewport, read-only content preview. Includes `hero-pencil-square` icon and `aria-label` for accessibility.
 - **Expanded panel**: 480px wide, editable, uses `<.sheet variant={:secondary}>`
 - **Reveal**: Click peek tab to expand; click outside (backdrop) to dismiss
 - **Visible on**: Scoring, summary, and wrap-up slides only
@@ -337,6 +337,15 @@ Use one pattern per context — do not mix styles within the same app:
 - Never block the entire screen if only part is loading
 - Skeletons match the shape of the content they replace (not generic rectangles)
 - Pulse animation uses `animate-pulse` (Tailwind default), not custom spinners
+
+**Shared loading components** (from `OostkitShared.Components`):
+
+| Component | Purpose | Usage |
+|-----------|---------|-------|
+| `<.loading_spinner>` | Animated spinner with screen-reader label | Inline loading indicators. Attrs: `class` (default `"h-4 w-4"`), `label` (default `"Loading"`) |
+| `<.skeleton>` | Animated pulse placeholder matching content shape | Skeleton screens while data loads. Attr: `class` (default `"h-4 w-full"`) |
+
+Both components are available in all apps via the shared `OostkitShared.Components` library. Use `<.skeleton>` for initial page loads where the content shape is known (e.g., card grids, status pages). Use `<.loading_spinner>` for inline operations where a spinner is more appropriate (e.g., export generation).
 
 ### Error States
 
@@ -613,6 +622,7 @@ Multi-layer shadows create depth without darkness:
 
 | Date       | Change                                    |
 |------------|-------------------------------------------|
+| 2026-02-14 | Added shared loading components (`loading_spinner/1`, `skeleton/1`) to Loading States section. Updated Notes Panel peek tab with accessibility attributes (icon, aria-label). |
 | 2026-02-13 | Doc consistency pass: fixed Available Classes hex values and class names to match `tailwind.preset.js`; corrected z-index scale throughout (was showing old values); updated Sheet Dimensions to 960px landscape; replaced stale "Previous Sheet" references with current show/hide carousel model; updated Components section (Participant List, Notes Panel) to match Pulse implementation; fixed Tailwind config path for umbrella structure. |
 | 2026-02-12 | Consolidated `header/1` component into shared library (`OostkitShared.Components`). Header bar centre title bumped from `text-sm font-medium` to `text-2xl font-semibold` for better visual hierarchy. |
 | 2026-02-12 | Sticky footer layout pattern applied to Portal and WRT root layouts (`flex min-h-screen flex-col` on body, `flex-1` on main). Portal auth pages use flex centering; settings and admin pages use consistent `px-6 sm:px-8` padding. |

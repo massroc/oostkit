@@ -28,7 +28,7 @@
 ### Progressive Disclosure
 - Show only what's needed at each moment
 - Facilitator tips hidden behind expandable "More tips" button
-- Notes panel peeks as a 70px read-only preview from the right edge (visible on scoring, summary, and wrap-up screens); clicking reveals the full 480px editable panel. The peek tab should include a visible label or icon (e.g., "Notes") and an `aria-label` so its purpose is clear to sighted and screen-reader users.
+- Notes panel peeks as a 70px read-only preview from the right edge (visible on scoring, summary, and wrap-up screens); clicking reveals the full 480px editable panel. The peek tab includes a `hero-pencil-square` icon next to the "Notes" label and an `aria-label="Open notes and actions panel"` attribute so its purpose is clear to both sighted and screen-reader users.
 - Score overlay opens when participant clicks their cell in the scoring grid. Since the overlay no longer auto-opens, the "your turn" state must be highly visible — gold "Your turn to score" prompt, plus a subtle pulse or border on the participant's column/cell. First-time users should see a one-off hint ("Click your cell to add your score") if onboarding is implemented.
 - "Discuss your score" popup appears after submitting; "Discuss the scores as a team" appears when all turns complete
 
@@ -232,6 +232,6 @@ For the **implementation** of these design decisions (CSS classes, JS hooks, she
 
 ---
 
-*Document Version: 1.8 — Standardized page title (H1) sizing to `text-2xl font-bold` across all pre-scoring phases, matching Portal standard*
+*Document Version: 1.9 — Notes panel peek tab: documented `hero-pencil-square` icon and `aria-label` for accessibility*
 *Created: 2026-02-07*
-*Updated: 2026-02-12*
+*Updated: 2026-02-14*
