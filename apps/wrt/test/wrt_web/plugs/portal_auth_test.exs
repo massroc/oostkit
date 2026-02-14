@@ -32,6 +32,11 @@ defmodule WrtWeb.Plugs.PortalAuthTest do
 
   describe "call/2 when cookie present but validation fails" do
     test "falls back to dev bypass instead of hard-coding nil", %{conn: conn} do
+      # Pre-seed the auth cache so validate_token returns instantly
+      # without making a real HTTP call to Portal (which isn't running).
+      expires_at = System.monotonic_time(:second) + 60
+      :ets.insert(:portal_auth_cache, {"invalid-token-value", {:error, :invalid}, expires_at})
+
       conn =
         conn
         |> init_test_session(%{})

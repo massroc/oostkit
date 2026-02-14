@@ -242,11 +242,11 @@ test/
 ## Reusable UI Components
 
 `WrtWeb.CoreComponents` provides app-specific Phoenix function components for building
-consistent UI. Standard Phoenix scaffolding components (icon, flash, flash_group, show/hide) are
-provided by `OostkitShared.Components` (shared across all apps), while form-related components
-(button, input, field, form) come from Petal Components. WRT's CoreComponents contains only
-app-specific components: `simple_form`, `back`, `table`, `stat_card`, `empty_state`,
-`status_badge`, `callout`, and `translate_error`.
+consistent UI. Common UI primitives (icon, flash, flash_group, show/hide, callout, stat_card,
+empty_state) are provided by `OostkitShared.Components` (shared across all apps), while
+form-related components (button, input, field, form) come from Petal Components. WRT's
+CoreComponents contains only app-specific components: `simple_form`, `back`, `table`,
+`status_badge`, and `translate_error`.
 
 All admin templates use these components exclusively — there is no inline/copy-pasted HTML for
 stat cards, badges, callouts, or empty states. The templates that consume them are:
@@ -259,10 +259,10 @@ stat cards, badges, callouts, or empty states. The templates that consume them a
 - `seed_html/index.html.heex` — empty state
 - `nomination_html/edit.html.heex` — simple_form, callouts (round info, existing nominations), button, icon (remove entry)
 
-### stat_card/1
+### stat_card/1 (OostkitShared.Components)
 
 Renders a metric card with label, value, optional detail text, and optional link. Used on
-dashboards and summary views to display KPIs.
+dashboards and summary views to display KPIs. Provided by the shared component library.
 
 | Attribute | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -273,10 +273,10 @@ dashboards and summary views to display KPIs.
 | `link_text` | string | no | nil | Link label shown below detail |
 | `link_href` | any | no | nil | Link destination |
 
-### empty_state/1
+### empty_state/1 (OostkitShared.Components)
 
 Renders a centered empty state message with optional Heroicon and call-to-action button. Used
-when a list or section has no data to display.
+when a list or section has no data to display. Provided by the shared component library.
 
 | Attribute | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -313,10 +313,11 @@ value. The label is automatically capitalised via `String.capitalize/1`.
 | `:contact` | `"opened"` | warning (yellow) |
 | `:contact` | other | gray |
 
-### callout/1
+### callout/1 (OostkitShared.Components)
 
 Renders a colored alert/callout box with optional heading, body content, and actions slot.
 Supports five variants for different contexts: info, success, warning, danger, and neutral.
+Provided by the shared component library.
 
 | Attribute | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -356,7 +357,7 @@ earlier inline `<script>` block.
 
 ### Form Structure
 
-The form uses `<.simple_form>` and `<.callout>` components from `CoreComponents`. Field names
+The form uses `<.simple_form>` from `CoreComponents` and `<.callout>` from `OostkitShared.Components`. Field names
 follow the pattern `nominations[{index}][name|email|reason]` so Phoenix parses them as a map of
 nomination entries keyed by index.
 
@@ -366,8 +367,8 @@ nomination entries keyed by index.
 |------|------|
 | `assets/js/app.js` | JS module for dynamic add/remove of nomination entries |
 | `controllers/nominator/nomination_html/edit.html.heex` | Nomination form template with `<template>` element |
-| `components/core_components.ex` | Provides `simple_form/1`, `callout/1` |
-| `OostkitShared.Components` | Provides `icon/1` (shared across all apps) |
+| `components/core_components.ex` | Provides `simple_form/1` |
+| `OostkitShared.Components` | Provides `icon/1`, `callout/1`, `stat_card/1`, `empty_state/1` (shared across all apps) |
 | `PetalComponents.Button` | Provides `button/1` (from Petal component library) |
 
 ## Multi-Tenancy Implementation
@@ -1056,7 +1057,7 @@ defp deps do
 end
 ```
 
-The `oostkit_shared` in-umbrella dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), and `show/2`/`hide/2` (JS transition helpers).
+The `oostkit_shared` in-umbrella dependency provides shared Phoenix components used across all apps: `header_bar/1` (OOSTKit brand header), `header/1` (page-level section header), `icon/1` (Heroicon renderer), `flash/1` and `flash_group/1` (flash notices with reconnection handling), `show/2`/`hide/2` (JS transition helpers), `callout/1` (alert/callout boxes), `stat_card/1` (metric cards), and `empty_state/1` (empty state placeholders). The shared library depends on `petal_components` for button rendering within these components.
 
 ## Implementation Phases
 

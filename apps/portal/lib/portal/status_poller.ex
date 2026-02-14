@@ -43,11 +43,16 @@ defmodule Portal.StatusPoller do
     poll_interval = Keyword.get(opts, :poll_interval, @poll_interval)
     poll_on_init = Keyword.get(opts, :poll_on_init, true)
 
+    health_check_fn = Keyword.get(opts, :health_check_fn, &poll_health_endpoints/0)
+    ci_check_fn = Keyword.get(opts, :ci_check_fn, &poll_ci_status/0)
+
     state = %{
       health: %{},
       ci: %{},
       last_polled: nil,
-      poll_interval: poll_interval
+      poll_interval: poll_interval,
+      health_check_fn: health_check_fn,
+      ci_check_fn: ci_check_fn
     }
 
     if poll_on_init, do: send(self(), :poll)
@@ -68,8 +73,8 @@ defmodule Portal.StatusPoller do
 
   @impl true
   def handle_info(:poll, state) do
-    health = poll_health_endpoints()
-    ci = poll_ci_status()
+    health = state.health_check_fn.()
+    ci = state.ci_check_fn.()
     now = DateTime.utc_now()
 
     new_state = %{state | health: health, ci: ci, last_polled: now}

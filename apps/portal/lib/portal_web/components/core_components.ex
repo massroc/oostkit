@@ -72,19 +72,6 @@ defmodule PortalWeb.CoreComponents do
   end
 
   @doc """
-  Renders an empty state message.
-  """
-  slot :inner_block, required: true
-
-  def empty_state(assigns) do
-    ~H"""
-    <div class="rounded-lg border border-dashed border-zinc-300 bg-surface-sheet-secondary p-6 text-center">
-      <p class="text-sm text-zinc-500">{render_slot(@inner_block)}</p>
-    </div>
-    """
-  end
-
-  @doc """
   Renders a simple form.
   """
   attr :for, :any, required: true, doc: "the data structure for the form"

@@ -12,7 +12,7 @@ config :portal, Portal.Repo,
   hostname: System.get_env("DB_HOST", "localhost"),
   database: "portal_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+  pool_size: max(System.schedulers_online() * 2, 24)
 
 config :portal, PortalWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4004],
@@ -42,7 +42,7 @@ config :workgroup_pulse, WorkgroupPulse.Repo,
   hostname: System.get_env("DB_HOST", "localhost"),
   database: "workgroup_pulse_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+  pool_size: max(System.schedulers_online() * 2, 24)
 
 # server: true needed for Wallaby E2E tests
 config :workgroup_pulse, WorkgroupPulseWeb.Endpoint,
@@ -77,7 +77,7 @@ config :wrt, Wrt.Repo,
   hostname: System.get_env("DB_HOST", "localhost"),
   database: "wrt_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: System.schedulers_online() * 2
+  pool_size: max(System.schedulers_online() * 2, 24)
 
 config :wrt, WrtWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4003],

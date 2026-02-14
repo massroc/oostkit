@@ -15,6 +15,9 @@ defmodule OostkitShared.MixProject do
   end
 
   defp deps do
-    [{:phoenix_live_view, "~> 1.0"}]
+    [
+      {:phoenix_live_view, "~> 1.0"},
+      {:petal_components, "~> 2.0"}
+    ]
   end
 end
