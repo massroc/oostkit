@@ -7,7 +7,7 @@ Built with Elixir/Phoenix LiveView and PostgreSQL, deployed on Fly.io.
 ## Tech Stack
 
 - **Backend**: Elixir 1.17 / Phoenix 1.7 with LiveView
-- **Shared Components**: `oostkit_shared` in-umbrella dependency (shared header bar component)
+- **Shared Components**: `oostkit_shared` in-umbrella dependency (shared UI components: header bar, callout, stat card, empty state, flash, icon)
 - **Database**: PostgreSQL 16
 - **Frontend**: Phoenix LiveView + Tailwind CSS
 - **Deployment**: Fly.io (Sydney region)

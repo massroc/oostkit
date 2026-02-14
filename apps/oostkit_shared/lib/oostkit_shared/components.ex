@@ -4,6 +4,8 @@ defmodule OostkitShared.Components do
   """
   use Phoenix.Component
 
+  import PetalComponents.Button, only: [button: 1]
+
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -188,6 +190,134 @@ defmodule OostkitShared.Components do
         Please wait while we reconnect
         <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
+    </div>
+    """
+  end
+
+  # =============================================================================
+  # Reusable UI Components
+  # =============================================================================
+
+  @doc """
+  Renders a callout box with colored background, border, optional heading, and actions.
+
+  Covers info, success, warning, danger, and neutral (gray) variants. Use for
+  status alerts, contextual messages, and action prompts.
+
+  ## Examples
+
+      <.callout kind={:success} heading="Active Campaign">
+        <p>Campaign is running with 12 contacts.</p>
+      </.callout>
+
+      <.callout kind={:warning} heading="Ready to Start">
+        <p>Your seed group has 8 people.</p>
+        <:actions>
+          <.link href="/rounds"><.button>Start Round 1</.button></.link>
+        </:actions>
+      </.callout>
+  """
+  attr :kind, :atom, values: [:info, :success, :warning, :danger, :neutral], required: true
+  attr :heading, :string, default: nil
+  attr :class, :string, default: nil
+
+  slot :inner_block
+  slot :actions
+
+  def callout(assigns) do
+    ~H"""
+    <div class={["border rounded-xl p-6", callout_bg(@kind), @class]}>
+      <h2 :if={@heading} class={["text-lg font-semibold", callout_heading(@kind)]}>
+        {@heading}
+      </h2>
+      <div :if={@inner_block != []} class={[callout_text(@kind), @heading && "mt-1"]}>
+        {render_slot(@inner_block)}
+      </div>
+      <div :if={@actions != []} class="mt-4 flex gap-4">
+        {render_slot(@actions)}
+      </div>
+    </div>
+    """
+  end
+
+  defp callout_bg(:success), do: "bg-ok-green-50 border-ok-green-200"
+  defp callout_bg(:warning), do: "bg-ok-gold-50 border-ok-gold-200"
+  defp callout_bg(:danger), do: "bg-ok-red-50 border-ok-red-200"
+  defp callout_bg(:info), do: "bg-ok-blue-50 border-ok-blue-200"
+  defp callout_bg(:neutral), do: "bg-zinc-50 border-zinc-200"
+
+  defp callout_heading(:success), do: "text-ok-green-800"
+  defp callout_heading(:warning), do: "text-ok-gold-800"
+  defp callout_heading(:danger), do: "text-ok-red-800"
+  defp callout_heading(:info), do: "text-ok-blue-800"
+  defp callout_heading(:neutral), do: "text-zinc-800"
+
+  defp callout_text(:success), do: "text-ok-green-700"
+  defp callout_text(:warning), do: "text-ok-gold-700"
+  defp callout_text(:danger), do: "text-ok-red-700"
+  defp callout_text(:info), do: "text-ok-blue-700"
+  defp callout_text(:neutral), do: "text-zinc-600"
+
+  @doc """
+  Renders a stat card with label, value, optional detail, and optional link.
+
+  ## Examples
+
+      <.stat_card label="Response Rate" value="85%" detail="17 / 20 responded" />
+      <.stat_card label="Seed Group" value="12" link_text="Manage Seed Group" link_href="/seed" />
+  """
+  attr :label, :string, required: true
+  attr :value, :string, required: true
+  attr :detail, :string, default: nil
+  attr :value_color, :string, default: "text-text-dark"
+  attr :link_text, :string, default: nil
+  attr :link_href, :any, default: nil
+
+  def stat_card(assigns) do
+    ~H"""
+    <div class="bg-surface-sheet shadow-sheet rounded-xl p-6">
+      <h3 class="text-sm font-medium text-zinc-500">{@label}</h3>
+      <p class={["mt-2 text-3xl font-semibold", @value_color]}>{@value}</p>
+      <p :if={@detail} class="mt-1 text-sm text-zinc-500">{@detail}</p>
+      <.link
+        :if={@link_text}
+        href={@link_href}
+        class="mt-2 inline-block text-sm text-ok-purple-600 hover:text-ok-purple-800"
+      >
+        {@link_text} →
+      </.link>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders an empty state message with optional icon and call-to-action.
+
+  ## Examples
+
+      <.empty_state message="No campaigns yet." />
+      <.empty_state
+        icon="hero-document-text"
+        message="No nominations submitted yet."
+        action_text="Start a Round"
+        action_href="/rounds"
+      />
+  """
+  attr :icon, :string, default: nil
+  attr :message, :string, required: true
+  attr :action_text, :string, default: nil
+  attr :action_href, :any, default: nil
+
+  def empty_state(assigns) do
+    ~H"""
+    <div class="py-8 text-center">
+      <.icon :if={@icon} name={@icon} class="mx-auto h-12 w-12 text-zinc-300" />
+      <p class={["text-zinc-500", @icon && "mt-2"]}>{@message}</p>
+      <div :if={@action_text} class="mt-4">
+        <.link href={@action_href}>
+          <.button>{@action_text}</.button>
+        </.link>
+      </div>
     </div>
     """
   end

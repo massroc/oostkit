@@ -115,7 +115,7 @@ All apps share a unified visual identity via two mechanisms:
 - **Brand stripe**: Magenta-to-purple gradient bar below the header
 
 **Shared Elixir components** — `apps/oostkit_shared/`:
-- A lightweight Elixir library (`OostkitShared.Components`) consumed by all apps as an in-umbrella dependency (`{:oostkit_shared, in_umbrella: true}`)
+- A lightweight Elixir library (`OostkitShared.Components`) consumed by all apps as an in-umbrella dependency (`{:oostkit_shared, in_umbrella: true}`). Depends on `petal_components` for button rendering within shared components.
 - Provides shared Phoenix components consumed by all apps:
   - `header_bar/1` — the consistent OOSTKit header: three-zone layout with `relative` nav — "OOSTKit" brand link on the left (configurable `:brand_url`), absolutely centered title (`pointer-events-none absolute inset-x-0 text-center font-brand text-2xl font-semibold`), and an `:actions` slot on the right for app-specific auth/user content
   - `header/1` — a page-level section header (`text-2xl font-bold`) with `:subtitle` and `:actions` slots, used for page titles across Portal and WRT
@@ -123,7 +123,10 @@ All apps share a unified visual identity via two mechanisms:
   - `flash/1` — flash notice component with `:info` and `:error` variants
   - `flash_group/1` — standard flash group with client/server reconnection flashes
   - `show/2` and `hide/2` — JS command helpers for animated show/hide transitions
-- Each app's `CoreComponents` module contains only app-specific components (e.g., Pulse's `sheet`, `facilitator_timer`; WRT's `stat_card`, `callout`; Portal's `tool_card`, `footer_bar`). Common UI primitives that were duplicated across apps have been consolidated into the shared lib.
+  - `callout/1` — colored alert/callout box with optional heading, body content, and actions slot (five variants: info, success, warning, danger, neutral)
+  - `stat_card/1` — metric card with label, value, optional detail text, and optional link for dashboards and summary views
+  - `empty_state/1` — centered empty state message with optional Heroicon and call-to-action button
+- Each app's `CoreComponents` module contains only app-specific components (e.g., Pulse's `sheet`, `facilitator_timer`; WRT's `status_badge`; Portal's `tool_card`, `footer_bar`). Common UI primitives that were duplicated across apps have been consolidated into the shared lib.
 - `translate_error/1` remains per-app because each app's Petal Components config references its own `CoreComponents` module for error translation
 - Import chain in each app's `*Web` module: selective Petal Components imports (excluding `PetalComponents.Icon` since shared `icon/1` replaces it) -> app `CoreComponents` -> `OostkitShared.Components`
 - CI path filter: changes to `apps/oostkit_shared/**` trigger all three app workflows
@@ -177,7 +180,7 @@ Implemented in `apps/portal/`. See [Portal UX Design](../apps/portal/docs/ux-des
 - App detail pages (`/apps/:id`) with richer layout, inline email capture for coming-soon tools (`POST /apps/:app_id/notify`)
 - SEO/Open Graph meta tags (og:title, og:description, og:type, og:site_name, meta description) in root layout with per-page overrides
 - Dev auto-login flow: auto-logs in as dev super admin on first visit, sets cross-app cookie, dev-only "Admin" button in header for manual re-login (`POST /dev/admin-login`)
-- System status page (`/admin/status`) with a `Portal.StatusPoller` GenServer that polls app health endpoints (`/health`) and GitHub Actions CI status every 5 minutes. Results are broadcast via PubSub to a LiveView (`PortalWeb.Admin.StatusLive`) that updates connected admin sessions in real time. Shows health status (response time, up/down) and recent CI workflow runs for Portal, Pulse, and WRT. Uses the Req HTTP client. The poller is conditionally started in the supervision tree (disabled in test via `:start_status_poller` config).
+- System status page (`/admin/status`) with a `Portal.StatusPoller` GenServer that polls app health endpoints (`/health`) and GitHub Actions CI status every 5 minutes. Results are broadcast via PubSub to a LiveView (`PortalWeb.Admin.StatusLive`) that updates connected admin sessions in real time. Shows health status (response time, up/down) and recent CI workflow runs for Portal, Pulse, and WRT. Uses the Req HTTP client. The poller is conditionally started in the supervision tree (disabled in test via `:start_status_poller` config). Health check and CI check functions are injectable via init options for testing without real HTTP calls.
 
 **Deferred:** Admin dashboard trends/charts.
 
