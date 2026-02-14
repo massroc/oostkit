@@ -2,6 +2,8 @@
 
 Use these prompts with Claude.ai's Canva integration to generate design concepts for the workshop apps. Each prompt is structured to map to the Canva tool parameters that Claude.ai uses when generating designs.
 
+**Current vs future:** The live app currently shows only the active sheet (no peeking slides, no sheet strip); navigation is server-driven via buttons. Adjacent sheet peeks and a sheet strip for click-to-navigate are **planned future enhancements**, not abandoned. These prompts describe the fuller vision so generated concepts remain useful when that behaviour is implemented.
+
 ## Canva Tool Parameters
 
 When Claude.ai creates a Canva design, it calls the `generate-design` tool with these parameters:

@@ -15,9 +15,9 @@
 ### Sheet Carousel Metaphor
 - The screen evokes sheets of butcher paper arranged on a table
 - Paper texture, subtle shadows, and slight rotation give a physical feel
-- Adjacent sheets peek from behind with a subtle coverflow effect — scaled down, slightly rotated, dimmed, and overlapping the active sheet
-- Clickable to navigate
-- See [ux-implementation.md](ux-implementation.md) for the technical implementation (CSS classes, JS hook, coverflow parameters, slide index map)
+- **Current implementation:** Only the active sheet is visible; inactive slides are hidden. Navigation is server-driven (phase transitions and buttons).
+- **Planned (future):** Adjacent sheets may peek from behind (scaled, slightly rotated, dimmed) and be clickable to navigate — not abandoned, lower priority for now.
+- See [ux-implementation.md](ux-implementation.md) for the technical implementation (CSS classes, JS hook, slide index map).
 
 ### Clear Visual Hierarchy
 - Use size, weight, and color to indicate importance
@@ -28,15 +28,15 @@
 ### Progressive Disclosure
 - Show only what's needed at each moment
 - Facilitator tips hidden behind expandable "More tips" button
-- Notes panel peeks as a 70px read-only preview from the right edge (visible on scoring, summary, and wrap-up screens); clicking reveals the full 480px editable panel
-- Score overlay opens when participant clicks their cell in the scoring grid
+- Notes panel peeks as a 70px read-only preview from the right edge (visible on scoring, summary, and wrap-up screens); clicking reveals the full 480px editable panel. The peek tab should include a visible label or icon (e.g., "Notes") and an `aria-label` so its purpose is clear to sighted and screen-reader users.
+- Score overlay opens when participant clicks their cell in the scoring grid. Since the overlay no longer auto-opens, the "your turn" state must be highly visible — gold "Your turn to score" prompt, plus a subtle pulse or border on the participant's column/cell. First-time users should see a one-off hint ("Click your cell to add your score") if onboarding is implemented.
 - "Discuss your score" popup appears after submitting; "Discuss the scores as a team" appears when all turns complete
 
 ---
 
 ## 2. Layout Architecture
 
-All phases use the same **sheet carousel** layout — a scroll-snap horizontal container centring the active slide with adjacent slides peeking:
+All phases use the same **sheet carousel** layout. Only the active slide is visible (inactive slides are `display: none`). Future enhancement: adjacent sheet peeks for click-to-navigate.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -44,11 +44,12 @@ All phases use the same **sheet carousel** layout — a scroll-snap horizontal c
 ├─────────────────────────────────────────────────────────────────┤
 │  SHEET CAROUSEL (bg: warm taupe #E8E4DF)                         │
 │                                                                   │
-│  ┌─────┐   ┌──────────────────────────────┐   ┌─────┐           │
-│  │dim  │   │                              │   │dim  │           │
-│  │prev │   │  Active Sheet (paper texture) │   │next │           │
-│  │slide│   │  (centred, full size)         │   │slide│           │
-│  └─────┘   └──────────────────────────────┘   └─────┘           │
+│              ┌──────────────────────────────┐                   │
+│              │                              │                   │
+│              │  Active Sheet (paper texture)  │                   │
+│              │  (centred, 960px, full focus)  │                   │
+│              │                              │                   │
+│              └──────────────────────────────┘                   │
 │                                                                   │
 │                     [Floating action buttons, bottom-right]       │
 └─────────────────────────────────────────────────────────────────┘
@@ -202,9 +203,9 @@ Traffic lights use semantic Tailwind classes (`text-traffic-green`, `text-traffi
 | Desktop (> 1024px) | Primary use case | Full grid with side panels |
 
 **Mobile Considerations:**
-- Grid may need horizontal scroll or condensed view
-- Score overlay is full-width on mobile (mx-4 margin)
-- Side panels may stack or become drawers
+- **< 640px (phones):** Scoring grid uses horizontal scroll with a visible scroll cue (e.g., fading edge or scroll indicator). FABs must not cover critical grid content — position below or use a thin bottom bar. Side panels become full-screen overlays.
+- Score overlay is full-width on mobile (`mx-4` margin)
+- Intro slides and summary content stack vertically in single column
 
 ---
 

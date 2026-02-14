@@ -155,6 +155,22 @@ Full and Team reports with CSV & PDF export (PR #105). Originally deferred to Ph
 - [ ] Feedback button
 - [ ] Participant dropout handling (greyed out visual)
 
+### UX Review Outcomes (from external audit)
+
+**Pulse — discoverability:**
+- [ ] "Your turn to score" — ensure gold prompt, subtle pulse/border on participant cell, first-time hint
+- [ ] Notes panel peek — add visible label/icon (e.g., "Notes") and `aria-label`
+- [ ] Mobile grid pattern — implement horizontal scroll with scroll cue for < 640px
+- [ ] Sheet peek navigation — adjacent sheet peeks with click-to-navigate (planned, lower priority than end-to-end flow)
+
+**Portal — dashboard:**
+- [ ] "Coming soon" badge contrast — use `accent-gold-text` for WCAG AA compliance
+- [ ] Dashboard responsive rules — `line-clamp` for taglines, 2-column breakpoint at mid-width
+
+**Platform-wide:**
+- [ ] Standardise loading/error state patterns per design system spec
+- [ ] Gold contrast — verify `#F4B945` on white/cream meets 4.5:1 for all text uses; use `accent-gold-text` where needed
+
 ---
 
 ## Future Roadmap

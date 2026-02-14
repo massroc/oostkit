@@ -57,7 +57,7 @@ Use these terms consistently across all apps and documentation:
 
 ### Visual Hierarchy
 
-Only the active sheet is visible at any time. Inactive slides are hidden (`display: none`) via the `SheetStack` JS hook — there is no visible "previous sheet" peek. The side-sheet (notes panel) is a fixed-position drawer, not a carousel slide.
+Only the active sheet is visible at any time. Inactive slides are hidden (`display: none`) via the `SheetStack` JS hook — there is no visible "previous sheet" peek. The side-sheet (notes panel) is a fixed-position drawer, not a carousel slide. **Planned future enhancement:** Adjacent sheet peeks (scaled, dimmed) with click-to-navigate may be added later; the current single-sheet view was prioritised first.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -326,9 +326,28 @@ Scores (0-10) are central to workshop apps. Display them consistently:
 
 ### Loading States
 
-- Use skeleton screens for content loading (gray placeholder shapes)
-- Subtle pulse animation (not spinning)
+Use one pattern per context — do not mix styles within the same app:
+
+| Context | Pattern | Example |
+|---------|---------|---------|
+| Sheet content loading | Skeleton screen (gray placeholder shapes matching content layout) | Scoring grid loading |
+| Inline data update | Subtle pulse animation on the updating element | Score submission |
+| Background operation | Small inline spinner next to the trigger | Export generation |
+
 - Never block the entire screen if only part is loading
+- Skeletons match the shape of the content they replace (not generic rectangles)
+- Pulse animation uses `animate-pulse` (Tailwind default), not custom spinners
+
+### Error States
+
+| Context | Pattern | Example |
+|---------|---------|---------|
+| Form validation | Red border + inline error text below field | Registration form |
+| Operation failure | Flash message (red) at top of content area | Save failed |
+| Connection loss | Reconnection banner (Phoenix default) | WebSocket disconnect |
+
+- Error messages are specific and actionable ("Could not save — try again" not "Error")
+- Never lose user input on error — preserve form state
 
 ### Feedback
 
@@ -346,7 +365,7 @@ Design for everyone. These are minimum requirements.
 
 - Text must meet WCAG AA standards (4.5:1 for normal text, 3:1 for large text)
 - Don't rely on color alone to convey meaning (add icons or text)
-- Test gold (`#F4B945`) on white - may need darkening for text use
+- **Gold (`#F4B945`) on white/cream:** Contrast may be below 4.5:1 for normal text. Use gold for badges, large type, and non-text elements; for small body text on light backgrounds use a darker gold (e.g. `accent-gold-text` from the preset) or ensure sufficient contrast before shipping.
 
 ### Touch Targets
 
@@ -388,6 +407,15 @@ Design for everyone. These are minimum requirements.
 ### Mobile-First Content
 
 The core workshop experience (scoring, seeing results) must work well on mobile. Facilitators may use desktop for the full view.
+
+### Cross-App Consistency
+
+All workshop apps (Pulse, WRT, future tools) should reuse the same sheet/paper pattern, accent color roles, and component vocabulary so the platform feels like one product. When building new app screens:
+
+1. Use `<.sheet>` as the primary content surface
+2. Follow the same accent color semantics (purple = interactive, gold = positive/warmth, red = concerns)
+3. Reuse the shared `<.header_bar>` component
+4. Apply the same typography pairing (DM Sans for UI, Caveat for workshop content where appropriate)
 
 ---
 
@@ -433,7 +461,8 @@ Each app's `tailwind.config.js` includes the `oostkit_shared` library path in it
 
 <!-- Accents -->
 <button class="bg-accent-purple">    <!-- #7245F4 - Primary interactive -->
-<span class="text-accent-gold">      <!-- #F4B945 - High scores -->
+<span class="text-accent-gold">      <!-- #F4B945 - High scores, badges (avoid small text on light bg) -->
+<span class="text-accent-gold-text"> <!-- #A67C00 - Gold text where contrast required (WCAG AA) -->
 <span class="text-accent-red">       <!-- #F44545 - Low scores -->
 
 <!-- Semantic shortcuts -->

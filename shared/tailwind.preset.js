@@ -61,7 +61,8 @@ module.exports = {
           'purple-light': 'rgba(114, 69, 244, 0.08)', // Subtle purple background
           'purple-border': 'rgba(114, 69, 244, 0.25)', // Purple borders
           'magenta': '#BC45F4',      // Secondary accent, highlights
-          'gold': '#F4B945',         // Attention, active states, high scores
+          'gold': '#F4B945',         // Attention, active states, high scores (avoid for small text on light bg)
+          'gold-text': '#A67C00',    // Darker gold for small text where contrast is required (WCAG AA)
           'red': '#F44545',          // Alerts, warnings, low scores
         },
 

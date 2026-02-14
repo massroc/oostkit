@@ -104,7 +104,7 @@ After the facilitator starts the session, all participants see intro slides (ski
 
 **Unified Workshop Carousel:**
 
-All phases (except lobby) share a single **unified carousel** — a click-only horizontal layout powered by Embla Carousel. The active sheet is centred and prominent; adjacent sheets peek from behind at the same fixed size but dimmed (30% opacity), clickable for reference. Sheets never change size. See [docs/ux-implementation.md](docs/ux-implementation.md) for the full technical specification.
+All phases (except lobby) share a single **unified carousel** — a server-driven sheet stack where only the active sheet is visible. Inactive sheets are hidden (`display: none`). Navigation is driven by phase transitions and floating action buttons. **Planned future enhancement:** Adjacent sheets may peek from behind (scaled, dimmed, clickable for reference) — this is not abandoned, just lower priority than end-to-end flow. See [docs/ux-implementation.md](docs/ux-implementation.md) for the full technical specification.
 
 The scoring screen displays all 8 questions as a grid with participants as columns and questions as rows. This mirrors butcher paper on a wall — the full picture is always visible, with the current question highlighted.
 
@@ -115,7 +115,7 @@ The scoring screen displays all 8 questions as a grid with participants as colum
 - **Slide 6: Wrap-up** — Action planning and export (rendered in completed)
 
 **Notes/Actions Side Panel:**
-Notes and actions are presented in a fixed-position panel that peeks from the right edge of the viewport (not a carousel slide). A 40px peek tab is visible when the scoring grid is active (carousel index 4). Clicking the tab reveals a 480px panel; clicking outside dismisses it. This keeps notes accessible without consuming a carousel slot.
+Notes and actions are presented in a fixed-position panel that peeks from the right edge of the viewport (not a carousel slide). A 70px peek tab is visible on scoring, summary, and wrap-up slides (carousel indices 4-6). Clicking the tab reveals a 480px panel; clicking outside dismisses it. This keeps notes accessible without consuming a carousel slot.
 
 Users can click any visible slide to view it for reference. This is local navigation only — no backend state change. FABs (floating action buttons) drive phase transitions and are shown only when the carousel index matches the current phase.
 
