@@ -6,180 +6,157 @@ defmodule PortalWeb.UserLive.Settings do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-2">
-      <.header>
-        Account Settings
-        <:subtitle>Manage your account details</:subtitle>
-      </.header>
+    <div class="mx-auto max-w-xl">
+      <h1 class="mb-3 text-lg font-bold text-text-dark">Account Settings</h1>
 
-      <div class="divide-y divide-zinc-200">
-        <%!-- Profile --%>
-        <div class="grid grid-cols-1 gap-x-8 gap-y-6 py-10 md:grid-cols-3">
-          <div>
-            <h2 class="text-base font-semibold text-text-dark">Profile</h2>
-            <p class="mt-1 text-sm text-zinc-500">Your name and organisation.</p>
-          </div>
-          <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl md:col-span-2">
-            <.form
-              for={@profile_form}
-              id="profile_form"
-              phx-submit="update_profile"
-              phx-change="validate_profile"
-            >
-              <div class="p-6 space-y-4">
-                <.field
-                  field={@profile_form[:name]}
-                  type="text"
-                  label="Name"
-                  autocomplete="name"
-                  required
-                />
-                <.field
-                  field={@profile_form[:organisation]}
-                  type="text"
-                  label="Organisation (optional)"
-                  autocomplete="organization"
-                />
-              </div>
-              <div class="flex justify-end border-t border-zinc-200 px-6 py-4">
-                <.button phx-disable-with="Saving...">Save Profile</.button>
-              </div>
-            </.form>
-          </div>
-        </div>
-
-        <%!-- Contact Preferences --%>
-        <div class="grid grid-cols-1 gap-x-8 gap-y-6 py-10 md:grid-cols-3">
-          <div>
-            <h2 class="text-base font-semibold text-text-dark">Contact Preferences</h2>
-            <p class="mt-1 text-sm text-zinc-500">How we communicate with you.</p>
-          </div>
-          <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl md:col-span-2">
-            <.form
-              for={@contact_prefs_form}
-              id="contact_prefs_form"
-              phx-submit="update_contact_prefs"
-              phx-change="validate_contact_prefs"
-            >
-              <div class="p-6">
-                <.field
-                  field={@contact_prefs_form[:product_updates]}
-                  type="checkbox"
-                  label="Product updates"
-                />
-              </div>
-              <div class="flex justify-end border-t border-zinc-200 px-6 py-4">
-                <.button phx-disable-with="Saving...">Save Preferences</.button>
-              </div>
-            </.form>
-          </div>
-        </div>
-
-        <%!-- Email --%>
-        <div class="grid grid-cols-1 gap-x-8 gap-y-6 py-10 md:grid-cols-3">
-          <div>
-            <h2 class="text-base font-semibold text-text-dark">Email</h2>
-            <p class="mt-1 text-sm text-zinc-500">
-              Change the email address associated with your account.
-            </p>
-          </div>
-          <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl md:col-span-2">
-            <.form
-              for={@email_form}
-              id="email_form"
-              phx-submit="update_email"
-              phx-change="validate_email"
-            >
-              <div class="p-6 space-y-4">
-                <.field
-                  field={@email_form[:email]}
-                  type="email"
-                  label="Email"
-                  autocomplete="username"
-                  required
-                />
-              </div>
-              <div class="flex justify-end border-t border-zinc-200 px-6 py-4">
-                <.button phx-disable-with="Changing...">Change Email</.button>
-              </div>
-            </.form>
-          </div>
-        </div>
-
-        <%!-- Password --%>
-        <div class="grid grid-cols-1 gap-x-8 gap-y-6 py-10 md:grid-cols-3">
-          <div>
-            <h2 class="text-base font-semibold text-text-dark">Password</h2>
-            <p class="mt-1 text-sm text-zinc-500">
-              Update your password to keep your account secure.
-            </p>
-          </div>
-          <div class="bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5 rounded-xl md:col-span-2">
-            <.form
-              for={@password_form}
-              id="password_form"
-              action={~p"/users/update-password"}
-              method="post"
-              phx-change="validate_password"
-              phx-submit="update_password"
-              phx-trigger-action={@trigger_submit}
-            >
-              <input
-                name={@password_form[:email].name}
-                type="hidden"
-                id="hidden_user_email"
-                autocomplete="username"
-                value={@current_email}
+      <%!-- General Information --%>
+      <div class="mb-3 rounded-xl bg-surface-sheet p-4 shadow-sheet ring-1 ring-zinc-950/5">
+        <h2 class="mb-2 text-sm font-semibold text-text-dark">General information</h2>
+        <.form
+          for={@profile_form}
+          id="profile_form"
+          phx-submit="update_profile"
+          phx-change="validate_profile"
+        >
+          <div class="grid grid-cols-6 gap-x-3 gap-y-2">
+            <div class="col-span-6 sm:col-span-3">
+              <.field
+                field={@profile_form[:name]}
+                type="text"
+                label="Name"
+                autocomplete="name"
+                required
+                no_margin
               />
-              <div class="p-6 space-y-4">
-                <.field
-                  field={@password_form[:password]}
-                  type="password"
-                  label={@password_label}
-                  autocomplete="new-password"
-                  required
-                />
-                <.field
-                  field={@password_form[:password_confirmation]}
-                  type="password"
-                  label="Confirm new password"
-                  autocomplete="new-password"
-                />
-              </div>
-              <div class="flex justify-end border-t border-zinc-200 px-6 py-4">
-                <.button phx-disable-with="Saving...">
-                  {@password_label}
-                </.button>
-              </div>
-            </.form>
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <.field
+                field={@profile_form[:organisation]}
+                type="text"
+                label="Organisation"
+                autocomplete="organization"
+                no_margin
+              />
+            </div>
+            <div class="col-span-6 mt-1">
+              <.button size="sm" phx-disable-with="Saving...">Save Profile</.button>
+            </div>
           </div>
-        </div>
+        </.form>
+      </div>
 
-        <%!-- Danger Zone --%>
-        <div class="grid grid-cols-1 gap-x-8 gap-y-6 py-10 md:grid-cols-3">
-          <div>
-            <h2 class="text-base font-semibold text-ok-red-600">Danger zone</h2>
-            <p class="mt-1 text-sm text-zinc-500">
-              Once you delete your account, there is no going back. Please be certain.
-            </p>
+      <%!-- Email & Preferences --%>
+      <div class="mb-3 rounded-xl bg-surface-sheet p-4 shadow-sheet ring-1 ring-zinc-950/5">
+        <h2 class="mb-2 text-sm font-semibold text-text-dark">Email address</h2>
+        <.form
+          for={@email_form}
+          id="email_form"
+          phx-submit="update_email"
+          phx-change="validate_email"
+        >
+          <div class="grid grid-cols-6 items-end gap-x-3 gap-y-2">
+            <div class="col-span-6 sm:col-span-3">
+              <.field
+                field={@email_form[:email]}
+                type="email"
+                label="Email"
+                label_class="sr-only"
+                autocomplete="username"
+                required
+                no_margin
+              />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <.button size="sm" phx-disable-with="Changing...">Change Email</.button>
+            </div>
           </div>
-          <div class="bg-surface-sheet shadow-sheet ring-1 ring-ok-red-200 rounded-xl md:col-span-2">
-            <.form
-              for={%{}}
-              id="delete_account_form"
-              action={~p"/users/delete-account"}
-              method="delete"
-              phx-submit="delete_account"
-              phx-trigger-action={@trigger_delete}
-              data-confirm="Are you sure you want to delete your account? This action cannot be undone."
-            >
-              <div class="flex justify-end px-6 py-4">
-                <.button class="btn btn-error btn-soft">Delete Account</.button>
-              </div>
-            </.form>
-          </div>
+        </.form>
+        <div class="mt-2 border-t border-zinc-100 pt-2">
+          <.form
+            for={@contact_prefs_form}
+            id="contact_prefs_form"
+            phx-change="auto_save_contact_prefs"
+          >
+            <.field
+              field={@contact_prefs_form[:product_updates]}
+              type="checkbox"
+              label="Email me product updates"
+              no_margin
+            />
+          </.form>
         </div>
       </div>
+
+      <%!-- Password --%>
+      <.form
+        for={@password_form}
+        id="password_form"
+        action={~p"/users/update-password"}
+        method="post"
+        phx-change="validate_password"
+        phx-submit="update_password"
+        phx-trigger-action={@trigger_submit}
+      >
+        <input
+          name={@password_form[:email].name}
+          type="hidden"
+          id="hidden_user_email"
+          autocomplete="username"
+          value={@current_email}
+        />
+        <div class="mb-3 rounded-xl bg-surface-sheet p-4 shadow-sheet ring-1 ring-zinc-950/5">
+          <h2 class="mb-2 text-sm font-semibold text-text-dark">{@password_label}</h2>
+          <div class="grid grid-cols-6 gap-x-3 gap-y-2">
+            <div class="col-span-6 sm:col-span-3">
+              <.field
+                field={@password_form[:password]}
+                type="password"
+                label="New password"
+                autocomplete="new-password"
+                required
+                no_margin
+              />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <.field
+                field={@password_form[:password_confirmation]}
+                type="password"
+                label="Confirm password"
+                autocomplete="new-password"
+                no_margin
+              />
+            </div>
+            <div class="col-span-6 mt-1">
+              <.button size="sm" phx-disable-with="Saving...">{@password_label}</.button>
+            </div>
+          </div>
+        </div>
+      </.form>
+
+      <%!-- Danger Zone --%>
+      <.form
+        for={%{}}
+        id="delete_account_form"
+        action={~p"/users/delete-account"}
+        method="delete"
+        phx-submit="delete_account"
+        phx-trigger-action={@trigger_delete}
+        data-confirm="Are you sure you want to delete your account? This action cannot be undone."
+      >
+        <div class="rounded-xl bg-surface-sheet p-4 shadow-sheet ring-1 ring-ok-red-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-semibold text-ok-red-600">Delete account</h2>
+              <p class="mt-1 text-xs text-zinc-500">
+                Permanently remove your account and all data.
+              </p>
+            </div>
+            <.button size="sm" color="danger" phx-disable-with="Deleting...">
+              Delete
+            </.button>
+          </div>
+        </div>
+      </.form>
     </div>
     """
   end
@@ -244,22 +221,17 @@ defmodule PortalWeb.UserLive.Settings do
     end
   end
 
-  def handle_event("validate_contact_prefs", %{"user" => user_params}, socket) do
-    contact_prefs_form =
-      socket.assigns.current_scope.user
-      |> Accounts.change_contact_prefs(user_params)
-      |> Map.put(:action, :validate)
-      |> to_form()
-
-    {:noreply, assign(socket, contact_prefs_form: contact_prefs_form)}
-  end
-
-  def handle_event("update_contact_prefs", %{"user" => user_params}, socket) do
+  def handle_event("auto_save_contact_prefs", %{"user" => user_params}, socket) do
     user = socket.assigns.current_scope.user
 
     case Accounts.update_contact_prefs(user, user_params) do
-      {:ok, _user} ->
-        {:noreply, put_flash(socket, :info, "Contact preferences updated successfully.")}
+      {:ok, updated_user} ->
+        changeset = Accounts.change_contact_prefs(updated_user, %{})
+
+        {:noreply,
+         socket
+         |> assign(:contact_prefs_form, to_form(changeset))
+         |> put_flash(:info, "Preferences saved.")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, contact_prefs_form: to_form(changeset, action: :insert))}

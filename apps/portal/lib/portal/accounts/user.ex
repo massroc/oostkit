@@ -17,7 +17,7 @@ defmodule Portal.Accounts.User do
     field :organisation, :string
     field :referral_source, :string
     field :onboarding_completed, :boolean, default: false
-    field :product_updates, :boolean, default: false
+    field :product_updates, :boolean, default: true
 
     timestamps(type: :utc_datetime)
   end

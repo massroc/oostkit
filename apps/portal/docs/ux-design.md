@@ -279,7 +279,7 @@ or "Get started as a facilitator" — not generic "create an account" language.
 - **Sign Up button**: Links to `/users/register` — self-service registration with name + email, magic link confirmation
 - **Log In button**: Links to `/users/log-in` — "Welcome back" page with magic link (primary) and password (secondary)
 - **Registration collects profile data**: Organisation (optional), referral source (optional), and tool interest checkboxes are part of the registration form. Users are fully onboarded from the moment they register.
-- **Settings**: Facilitators can edit profile (name, org), manage contact preferences (product updates opt-in), and manage email/password at `/users/settings`
+- **Settings**: Facilitators can edit profile (name, org), manage contact preferences (product updates auto-save, defaults to opted-in), and manage email/password at `/users/settings`
 - **Admin panel**: Super admin manages the platform at `/admin` (dashboard with links to users, signups, tools). Users table includes Organisation column.
 
 ### Next: Subscription
@@ -491,37 +491,35 @@ without requiring sudo mode — sudo checks are performed in event handlers for
 sensitive actions (email change, password change, account deletion). If not in
 sudo mode, the user is redirected to the login page with a message to re-authenticate.
 
-**Layout:** Uses the "stacked sections with cards" pattern (Tailwind UI style). An
-"Account Settings" title with subtitle sits at the top via the shared `<.header>` component.
-Below it, sections are separated by `divide-y divide-zinc-200` dividers. Each section
-uses a responsive 1/3 + 2/3 grid (`grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 py-10`):
+**Layout:** Compact single-column layout (`mx-auto max-w-xl`) inspired by Flowbite
+reference patterns. An "Account Settings" heading (`text-lg font-bold text-text-dark`)
+sits at the top. Below it, each section is a separate card (`rounded-xl bg-surface-sheet
+p-4 shadow-sheet ring-1 ring-zinc-950/5`) with `mb-3` spacing between cards. Each card
+contains its own `<.form>` — forms are sibling elements, never nested.
 
-- **Left column (1/3)** — section heading (`text-base font-semibold text-text-dark`) and
-  a subtitle paragraph (`text-sm text-zinc-500`) describing the section's purpose.
-- **Right column (2/3)** — a card (`bg-surface-sheet shadow-sheet ring-1 ring-zinc-950/5
-  rounded-xl md:col-span-2`) containing the form fields in a `p-6` content area, with a
-  card footer (`border-t border-zinc-200 px-6 py-4`) housing a right-aligned save button
-  (`flex justify-end`).
+Within cards, fields use compact 6-column grids (`grid grid-cols-6 gap-x-3 gap-y-2`)
+with Petal's `no_margin` attribute on `<.field>` components to eliminate default vertical
+spacing. Fields sit side-by-side on desktop (`col-span-3`) and stack on mobile (`col-span-6`).
+Section headings use `text-sm font-semibold text-text-dark` with `mb-2` spacing.
 
-**Sections (stacked vertically, separated by dividers):**
+**Sections (separate cards, stacked vertically):**
 
-- **Profile** — heading "Profile", subtitle "Your name and organisation." Name and
-  organisation fields. Referral source is collected at registration only and is not
-  shown on the settings page.
-- **Contact Preferences** — heading "Contact Preferences", subtitle "How we communicate
-  with you." A single `product_updates` checkbox labelled "Product updates" controls
-  whether the user receives product update emails. Saved via a dedicated "Save Preferences"
-  button.
-- **Email** — heading "Email", subtitle "Change the email address associated with your
-  account." Email field. Sends confirmation to new address (requires sudo mode).
-- **Password** — heading "Password", subtitle "Update your password to keep your account
-  secure." Password fields. Optional, for facilitators who prefer password login over
-  magic links. If no password is set yet, the button label reads "Add a password" rather
-  than "Change password" (requires sudo mode).
-- **Danger zone** — heading "Danger zone" in `text-ok-red-600`, subtitle warns that
-  deletion is irreversible. Card uses `ring-ok-red-200` instead of the default ring for
-  visual warning. Red "Delete Account" button with confirmation prompt. Permanently
-  deletes the user account and logs them out (requires sudo mode).
+- **General Information** — heading "General information". Name and organisation fields
+  side-by-side on desktop via `sm:col-span-3`. "Save Profile" button below. Referral
+  source is collected at registration only and is not shown on the settings page.
+- **Email & Preferences** — heading "Email address". Email field with inline "Change
+  Email" button on desktop. Below a `border-t border-zinc-100` divider within the same
+  card, a `product_updates` checkbox labelled "Email me product updates" auto-saves on
+  change via `phx-change="auto_save_contact_prefs"` — no submit button needed. Product
+  updates defaults to `true` for new users.
+- **Password** — heading dynamically shows "Add a password" or "Change password"
+  depending on whether the user has a password set. New password and confirmation
+  fields side-by-side on desktop. Requires sudo mode.
+- **Danger Zone** — compact inline layout with heading "Delete account" in
+  `text-ok-red-600` and description on the left, "Delete" button on the right
+  (`flex items-center justify-between`). Card uses `ring-ok-red-200` instead of the
+  default ring for visual warning. Confirmation prompt via `data-confirm`. Requires
+  sudo mode.
 
 ### Forgot Password (`/users/forgot-password`)
 
@@ -580,7 +578,7 @@ users (additions)
 - organisation (text, nullable) — collected at registration
 - referral_source (text, nullable) — how they heard about OOSTKit, collected at registration
 - onboarding_completed (boolean, default true) — set to true at registration
-- product_updates (boolean, default false) — opt-in to product update emails, managed via settings
+- product_updates (boolean, default true) — opt-in to product update emails, managed via settings (auto-saves on change)
 ```
 
 Tool interest captured separately (many-to-many or simple join table):
@@ -792,7 +790,7 @@ demand. The last polled timestamp is displayed at the bottom of the page.
 | `/users/register` | Registration | No | Name + email + optional org, referral source, tool interests. Magic link confirmation. Facilitator-focused messaging. Users are fully onboarded at registration. |
 | `/users/forgot-password` | Forgot password | No | Email field, sends password reset link. Always shows success message (prevents user enumeration). |
 | `/users/reset-password/:token` | Reset password | No | New password + confirmation. Token validated on mount, redirects to login on success. |
-| `/users/settings` | Account settings | Yes | Stacked sections with cards (Tailwind UI pattern): Profile (name, org), Contact Preferences (product updates opt-in), Email change, Password (add/change), Danger zone (account deletion). Each section has a 1/3 description + 2/3 form card layout. Sudo checks in handlers, not on page load. |
+| `/users/settings` | Account settings | Yes | Compact single-column card layout: General Information (name, org), Email & Preferences (email change, product updates auto-save checkbox), Password (add/change), Danger Zone (account deletion). Separate cards per section, sibling forms, compact field grids. Sudo checks in handlers, not on page load. |
 | `DELETE /users/delete-account` | Delete account | Yes | Deletes user account and logs out. Triggered from settings page. |
 | `/admin` | Admin dashboard | Super Admin | Stats overview: signup counts, user counts, tool status. |
 | `/admin/users` | User management | Super Admin | Create/edit/disable user accounts. View registration data (org, referral source, tool interests). |
@@ -967,7 +965,7 @@ Resolved during design discussions (February 2026):
 | Question | Decision | Notes |
 |----------|----------|-------|
 | Landing page redirect | Removed | Logged-in users no longer auto-redirect to `/home`. The header "Dashboard" link provides navigation instead. Lets logged-in users share the marketing URL without being redirected away. |
-| Page title consistency | `<.header>` component | Page titles (admin pages, settings page title) use the `<.header>` component from `OostkitShared.Components` at `text-2xl font-bold`. Settings section headings within the page use plain `<h2>` elements at `text-base font-semibold` as part of the stacked-sections card layout. |
+| Page title consistency | `<.header>` component | Page titles (admin pages) use the `<.header>` component from `OostkitShared.Components` at `text-2xl font-bold`. Settings uses a plain `<h1>` at `text-lg font-bold` and section headings use `<h2>` at `text-sm font-semibold` within separate card sections. |
 | "Coming soon" page | Email capture | Collects emails for launch notification. Simple form. |
 | App detail pages | Keep | Useful as shareable links and for SEO. Already built. |
 | Mobile vs desktop | Desktop-first | Responsive but not mobile-obsessed. Marketing page should look decent on mobile for sharing. |

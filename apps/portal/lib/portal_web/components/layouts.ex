@@ -20,7 +20,7 @@ defmodule PortalWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <main class="px-4 py-10 sm:px-6 lg:px-8">
+    <main class="px-4 py-6 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-4xl">
         <.flash_group flash={@flash} />
         <%= if assigns[:inner_content] do %>

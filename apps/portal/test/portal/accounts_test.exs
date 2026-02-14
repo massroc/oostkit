@@ -683,13 +683,13 @@ defmodule Portal.AccountsTest do
   describe "update_contact_prefs/2" do
     test "updates product_updates preference" do
       user = user_fixture()
-      refute user.product_updates
+      assert user.product_updates
 
-      {:ok, updated} = Accounts.update_contact_prefs(user, %{product_updates: true})
-      assert updated.product_updates
-
-      {:ok, updated} = Accounts.update_contact_prefs(updated, %{product_updates: false})
+      {:ok, updated} = Accounts.update_contact_prefs(user, %{product_updates: false})
       refute updated.product_updates
+
+      {:ok, updated} = Accounts.update_contact_prefs(updated, %{product_updates: true})
+      assert updated.product_updates
     end
   end
 
