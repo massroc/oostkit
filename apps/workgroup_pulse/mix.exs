@@ -71,7 +71,7 @@ defmodule WorkgroupPulse.MixProject do
       {:bandit, "~> 1.6"},
 
       # UI Components
-      {:petal_components, "~> 2.0"},
+      {:petal_components, "~> 3.0"},
       {:phoenix_html_helpers, "~> 1.0"},
 
       # Testing
