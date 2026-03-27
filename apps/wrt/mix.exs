@@ -69,7 +69,7 @@ defmodule Wrt.MixProject do
       {:bandit, "~> 1.6"},
 
       # UI Components
-      {:petal_components, "~> 2.0"},
+      {:petal_components, "~> 3.0"},
       {:phoenix_html_helpers, "~> 1.0"},
 
       # Multi-tenancy (using fork with deprecation fix until PR #95 is merged)
