@@ -112,7 +112,7 @@ jobs:
         working-directory: ${{ inputs.app_path }}
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: ${{ inputs.app_path }}/cover/excoveralls.json
           fail_ci_if_error: false
